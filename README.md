@@ -30,8 +30,9 @@ $ source venv/bin/activate
 Install all required packages:
 
 ```
-None for now
+$ pip3 install -r requirements.txt
 ```
+
 
 ## Sources
 *Declare are other sources here, and remove this line*
