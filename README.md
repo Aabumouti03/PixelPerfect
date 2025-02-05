@@ -1,4 +1,4 @@
-# Team *enter team name here* Large Group project
+# Team *Pixel Perfect* Large Group project
 
 ## Team members
 The members of the team are:
@@ -14,7 +14,7 @@ The members of the team are:
 - Salma Al Yousif
 
 ## Project structure
-The project is called `rework`.  It currently consists of three apps `users`, 'client', 'content'
+The project is called `rework`.  It currently consists of three apps `users`, 'client'
 
 ## Deployed version of the application
 The deployed version of the application can be found at ( )
@@ -30,8 +30,9 @@ $ source venv/bin/activate
 Install all required packages:
 
 ```
-None for now
+$ pip3 install -r requirements.txt
 ```
+
 
 ## Sources
 *Declare are other sources here, and remove this line*
