@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program 
+from client.models import Program, Module
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -48,6 +48,6 @@ class Admin(models.Model):
 class EndUser(models.Model):
     user =  models.OneToOneField(User, on_delete=models.CASCADE, related_name='User_profile')
     program = models.OneToOneField(Program, on_delete=models.CASCADE,related_name="User_program" )
-    module = models.ForeignKey('module', on_delete=models.CASCADE, related_name="User_modules")
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="User_modules")
     
 
