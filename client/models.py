@@ -1,3 +1,10 @@
 from django.db import models
 
-# Create your models here.
+class Program(models.Model):
+    modules = models.ManyToManyField('Module', related_name= "programs")
+
+class Module(models.Model):
+    title = models.TextField(blank=False)
+    #category = models.TextChoices
+
+
