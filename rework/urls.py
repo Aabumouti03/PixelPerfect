@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from client import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('module-overview/', views.module_overview, name='module_overview'),
 ]
