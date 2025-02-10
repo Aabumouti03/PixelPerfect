@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+
+<!-- Temprorary for testing puposes -->
+
+<html lang="en">
+<head>
+    <title>My Website</title>
+    <link rel="stylesheet" href="{% static 'css/profile_style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Website</h1>
+    </header>
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

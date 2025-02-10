@@ -16,7 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from users import views as usersViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('log_out/', usersViews.log_out, name='log_out'),
+
+    #profile page add-ons
+    path('profile/', usersViews.profile, name='show_profile'),  
+    path('profile/edit/', usersViews.update_profile, name='update_profile'),  
+    path('profile/delete/', usersViews.delete_account, name='delete_account'),    
+
 ]

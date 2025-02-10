@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/profile_style.css' %}">
+
+<div class="container">
+    <h2>Edit Profile</h2>
+
+    <form method="POST" action="{% url 'update_profile' %}">
+        {% csrf_token %}
+
+        <!-- Profile Picture -->
+        <img class="profile-image" src="{{ user.gravatar }}" alt="Profile Picture">
+
+        <br>
+
+        <!-- Form Fields -->
+        <label><strong>First Name:</strong></label>
+        {{ form.first_name }}
+
+        <label><strong>Last Name:</strong></label>
+        {{ form.last_name }}
+
+        <label><strong>Username:</strong></label>
+        {{ form.username }}
+
+        <label><strong>Email Address:</strong></label>
+        {{ form.email }}
+
+        <br>
+
+        <!-- Buttons -->
+        <button type="submit" class="save-btn">Save Changes</button>
+        <a href="{% url 'show_profile' %}" class="cancel-btn">Cancel</a>
+    </form>
+</div>
+
+{% endblock %}

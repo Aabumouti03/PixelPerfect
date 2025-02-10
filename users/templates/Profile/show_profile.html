@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>User Profile</title>
+    <link rel="stylesheet" href="{% static 'css/profile_style.css' %}">
+</head>
+<body>
+    <div class="profile-container">
+        <!-- SECTION 1: Profile Picture + Full Name -->
+        <div class="profile-header">
+            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+            <h2 class="user-name">{{ user.first_name }} {{ user.last_name }}</h2>
+        </div>
+
+        <!-- Partition Line -->
+        <hr class="partition-line">
+
+        <!-- SECTION 2: Other User Details -->
+        <div class="profile-details">
+            <p><strong>First Name:</strong> {{ user.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email Address:</strong> {{ user.email }}</p>
+        </div>
+    </div>
+
+    <!-- Buttons Section -->
+    <div class="profile-buttons">
+        <div class="left-buttons">
+            <a href="{% url 'update_profile' %}" class="btn">Edit</a>
+            <a href="{% url 'log_out' %}" class="btn">Log Out</a>
+        </div>
+        <div class="right-button">
+            <a href="{% url 'delete_account' %}" class="btn btn-danger">Delete Account</a>
+        </div>
+    </div>
+</body>
+</html>
