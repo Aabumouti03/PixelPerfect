@@ -1,0 +1,35 @@
+{% load static %}
+<div class="sidebar">
+    <div class="logo">
+        <img src="{% static 'img/logo.svg' %}" alt="Logo" class="logoIcon">
+        <span class="brand">ReWork</span>
+    </div>
+    <ul class="nav-links">
+        <li>
+            <a href="{% url 'dashboard' %}">
+                <img src="{% static 'img/dashboard.svg' %}" alt="Dashboard" class="icon">
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'modules' %}">
+                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
+                <span>Modules</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'profile' %}">
+                <img src="{% static 'img/profile.svg' %}" alt="Profile" class="icon">
+                <span>Profile</span>
+            </a>
+        </li>
+        <div class="toggle">
+            <img src="{% static 'img/toggle.svg' %}" alt="Logo" class="toggleIcon">
+        </div>
+        <div class="logout">
+            <a href="{% url 'logout' %}"></a>
+            <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
+            <span>Logout</span>
+        </div>
+    </ul>
+</div>
