@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment ,UserResponse
+from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment ,ExerciseResponse
 from client.models import Program, Module
 
 @admin.register(User)
@@ -69,8 +69,8 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'user__user__email', 'module__title')
     ordering = ('user__user__last_name', 'user__user__first_name')
 
-@admin.register(UserResponse)
-class UserResponseAdmin(admin.ModelAdmin):
+@admin.register(ExerciseResponse)
+class ExerciseResponseAdmin(admin.ModelAdmin):
     """Admin panel for managing User Responses."""
     list_display = ('user', 'question', 'response_text')
     list_filter = ('user',)

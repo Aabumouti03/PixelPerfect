@@ -157,7 +157,8 @@ class UserModuleProgress(models.Model):
     def __str__(self):
         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
-class UserResponse(models.Model):
+
+class ExerciseResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
     question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
