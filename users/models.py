@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module
+from client.models import Program, Module, ExerciseQuestion
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -102,4 +102,14 @@ class EndUser(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="User_modules")
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, blank=False, null = True)  # Required
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional
+
+
+class UserResponse(models.Model):
+    """Stores user answers for exercises."""
+    user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
+    question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
+    response_text = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Response by {self.user.user.username} for {self.question}"
 

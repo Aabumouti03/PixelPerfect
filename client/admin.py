@@ -1,39 +1,44 @@
 from django.contrib import admin
-from .models import Program, Module, Section, Exercise, ExerciseQuestion, UserResponse
+from .models import Program, Module, Section, Exercise, ExerciseQuestion
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
+    """Admin panel for managing Programs."""
     list_display = ('title', 'description')
-    filter_horizontal = ('modules',)  
+    search_fields = ('title', 'description')
+    ordering = ('title',)
+
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
+    """Admin panel for managing Modules."""
     list_display = ('title', 'description')
-    filter_horizontal = ('sections',)
+    search_fields = ('title', 'description')
+    ordering = ('title',)
+
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
+    """Admin panel for managing Sections."""
     list_display = ('title', 'description')
-    filter_horizontal = ('exercises',)
+    search_fields = ('title', 'description')
+    ordering = ('title',)
 
 
 @admin.register(Exercise)
 class ExerciseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'get_sections', 'exercise_type')  
-    list_filter = ('exercise_type',)  
+    """Admin panel for managing Exercises."""
+    list_display = ('title', 'exercise_type')
+    list_filter = ('exercise_type',)
     search_fields = ('title',)
+    filter_horizontal = ('questions',)  
+    ordering = ('title',)
 
-    def get_sections(self, obj):
-        return ", ".join([section.title for section in obj.sections.all()])
-    get_sections.short_description = "Sections"  
 
 @admin.register(ExerciseQuestion)
 class ExerciseQuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'exercise', 'question_type')
+    """Admin panel for managing Exercise Questions."""
+    list_display = ('question_text', 'question_type')
     list_filter = ('question_type',)
-
-@admin.register(UserResponse)
-class UserResponseAdmin(admin.ModelAdmin):
-    list_display = ('user', 'question', 'response_text')
-    list_filter = ('user',)
-
+    search_fields = ('question_text',)
+    ordering = ('question_text',)
