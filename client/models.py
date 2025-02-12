@@ -62,13 +62,3 @@ class ExerciseQuestion(models.Model):
 
     def __str__(self):
         return f"{self.exercise.title} - {self.question_text}"
-
-
-class UserResponse(models.Model):
-    """Stores user answers for exercises."""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE)
-    response_text = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Response by {self.user.username} for {self.question}"

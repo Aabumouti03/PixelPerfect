@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Admin, EndUser
+from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment ,UserResponse
+from client.models import Program, Module
 
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
@@ -12,8 +13,8 @@ class CustomUserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal Information', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),  
+        ('Important Dates', {'fields': ('last_login', 'date_joined')}),  
     )
     add_fieldsets = (
         (None, {
@@ -35,3 +36,40 @@ class EndUserAdmin(admin.ModelAdmin):
     list_filter = ('gender', 'ethnicity', 'sector')
     search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'phone_number')
     ordering = ('user__last_name', 'user__first_name')
+
+@admin.register(UserProgramEnrollment)
+class UserProgramEnrollmentAdmin(admin.ModelAdmin):
+    """Admin panel for tracking user enrollments in programs."""
+    list_display = ('user', 'program', 'enrolled_on')
+    search_fields = ('user__user__username', 'program__title')
+    list_filter = ('program',)
+    ordering = ('-enrolled_on',)
+
+@admin.register(UserModuleEnrollment)
+class UserModuleEnrollmentAdmin(admin.ModelAdmin):
+    """Admin panel for tracking user enrollments in standalone modules."""
+    list_display = ('user', 'module', 'enrolled_on')
+    search_fields = ('user__user__username', 'module__title')
+    list_filter = ('module',)
+    ordering = ('-enrolled_on',)
+
+@admin.register(UserProgramProgress)
+class UserProgramProgressAdmin(admin.ModelAdmin):
+    """Admin panel for tracking program progress."""
+    list_display = ('user', 'program', 'completion_percentage', 'status', 'last_updated')
+    list_filter = ('status',)
+    search_fields = ('user__user__username', 'user__user__email', 'program__title')
+    ordering = ('user__user__last_name', 'user__user__first_name')
+
+@admin.register(UserModuleProgress)
+class UserModuleProgressAdmin(admin.ModelAdmin):
+    """Admin panel for tracking module progress."""
+    list_display = ('user', 'module', 'completion_percentage', 'status', 'last_updated')
+    list_filter = ('status',)
+    search_fields = ('user__user__username', 'user__user__email', 'module__title')
+    ordering = ('user__user__last_name', 'user__user__first_name')
+
+@admin.register(UserResponse)
+class UserResponseAdmin(admin.ModelAdmin):
+    list_display = ('user', 'question', 'response_text')
+    list_filter = ('user',)

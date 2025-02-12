@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Program, Module, Section, Exercise, ExerciseQuestion, UserResponse
+from .models import Program, Module, Section, Exercise, ExerciseQuestion
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
@@ -32,8 +32,8 @@ class ExerciseQuestionAdmin(admin.ModelAdmin):
     list_display = ('question_text', 'exercise', 'question_type')
     list_filter = ('question_type',)
 
-@admin.register(UserResponse)
-class UserResponseAdmin(admin.ModelAdmin):
-    list_display = ('user', 'question', 'response_text')
-    list_filter = ('user',)
+# @admin.register(UserResponse)
+# class UserResponseAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'question', 'response_text')
+#     list_filter = ('user',)
 
