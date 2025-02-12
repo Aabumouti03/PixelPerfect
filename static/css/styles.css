@@ -64,15 +64,36 @@ body {
     align-items: center;
     gap: 10px;
     white-space: nowrap;
+    padding: 15px 0px;
 }
 
+.nav-links a.active {
+    font-weight: bolder;
+    color: white;
+}
+
+
 .nav-links a:hover {
-    opacity: 0.8;
+    width: 225px;
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    opacity: 1;
+    padding: 15px 0px;
+    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
+    border-radius: 8px; /* Soft rounded corners */
 }
 
 .logout {
     list-style: none;
+    position: absolute;  /* Positions it relative to the sidebar */
+    bottom: 20px;
     padding: 0;
+    left: 15px; /* Aligns it properly */
     margin-top: 250px;
     padding-left: 0px;
     opacity: 0; /* Hide item */
@@ -91,6 +112,21 @@ body {
     align-items: center;
     gap: 10px;
     white-space: nowrap;
+}
+
+.logout a:hover {
+    width: 225px;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    opacity: 1;
+    padding: 15px 0px;
+    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
+    border-radius: 8px; /* Soft rounded corners */
 }
 
 .icon {
@@ -157,37 +193,27 @@ body {
 }
 
 .toggle {
-    width: 50px; 
-    height: 120px;
-    vertical-align: middle; /* Align the icon with the text */
-    opacity: 1;
-    margin-left: 200px; /* Add spacing between the icon and text */
-    margin-top: 50px;
+    position: absolute;
+    top: 50%;
+    right: 5px; /* Places it towards the right */
+    transform: translateY(-50%); /* Centers it vertically */
+    width: 20px; /* Adjust size */
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
     transition: opacity 0.3s ease-in-out;
 }
 
+/* Show toggle when sidebar is collapsed */
 .sidebar:hover .toggle {
-    opacity: 0; /* */
+    opacity: 0;
 }
 
-.toggle a {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
+/* Ensure toggle is visible when sidebar is hidden */
+.sidebar:not(:hover) .toggle {
+    opacity: 1;
 }
 
-.sidebar .toggleIcon {
-    width: 20px; /* Adjust the size as needed */
-    height: 20px;
-    vertical-align: middle; /* Align the icon with the text */
-    margin-right: 8px; /* Add spacing between the icon and text */
-}
-
-.toggleIcon {
-    font-size: 20px;
-}
 
