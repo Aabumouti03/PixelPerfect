@@ -3,6 +3,14 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
 from client.models import Program, Module, ExerciseQuestion
+from django.conf import settings
+
+#Choices used in more than one model
+STATUS_CHOICES = [
+        ('not_started','Not Started'),
+        ('in_progress', 'In_Progress'),
+        ('completed', 'Completed')
+]
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -97,12 +105,57 @@ class EndUser(models.Model):
     age = models.PositiveIntegerField(blank=False, null=True)  # Required
     gender = models.CharField(max_length=20, choices=GENDER_OPTIONS, blank=False, null = True)
     ethnicity = models.CharField(max_length=50, choices=ETHNICITY_CHOICES, blank=True, null=True)  # Optional
-    program = models.OneToOneField(Program, on_delete=models.CASCADE, related_name="User_program")
     last_time_to_Work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
-    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="User_modules")
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, blank=False, null = True)  # Required
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional
 
+    def __str__(self):
+        return f"User: {self.user.full_name()}"
+
+
+class UserProgramEnrollment(models.Model):
+    """Tracks when a user enrolls in a program."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='program_enrollments')
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='enrolled_users')
+    enrolled_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.user.username} enrolled in {self.program.title}"
+
+class UserModuleEnrollment(models.Model):
+    """Tracks when a user starts a standalone module."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
+    enrolled_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.user.username} started {self.module.title}"
+
+class UserProgramProgress (models.Model):
+
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='program_progress')
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='user_progress')
+    completion_percentage = models.FloatField(default=0.0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'program')
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.program.title} ({self.status})"
+    
+class UserModuleProgress(models.Model):
+
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='module_progress')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE,related_name='user_progress')
+    completion_percentage = models.FloatField(default=0.0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('user', 'module') 
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
 class UserResponse(models.Model):
     """Stores user answers for exercises."""
@@ -112,4 +165,6 @@ class UserResponse(models.Model):
 
     def __str__(self):
         return f"Response by {self.user.user.username} for {self.question}"
+
+
 
