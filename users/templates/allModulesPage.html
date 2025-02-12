@@ -192,16 +192,16 @@
 
             <div class="module-grid">
                 {% for module in all_modules %}
-                <div class="module-card">
-                    <h5>{{ module.title }}</h5>
-                    <p>{{ module.description }}</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: {{ module.progress }}%;"></div>
+                    <div class="module-card">
+                        <h5>{{ module.title }}</h5>
+                        <p>{{ module.description }}</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: {{ module.progress }}%;"></div>
+                        </div>
+                        <small>{{ module.progress }}% completed</small>
+                        <br>
+                        <a href="#" class="text-white">View →</a>
                     </div>
-                    <small>{{ module.progress }}% completed</small>
-                    <br>
-                    <a href="#" class="text-white">View →</a>
-                </div>
                 {% endfor %}
                 <!-- Add New Module -->
                 <div class="module-card add-module">

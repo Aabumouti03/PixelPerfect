@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('module-overview/', views.module_overview, name='module_overview'),
     path('user-modules/', views.user_modules, name='modules'),
+    path('all-modules/', views.all_modules, name='all_modules'),
 ]
