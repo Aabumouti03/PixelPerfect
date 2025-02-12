@@ -1,0 +1,78 @@
+<!-- index.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
+{% endblock %}
+
+
+<!-- Content block  -->
+{% block content %}
+    <div class="content">
+        <div class="top-bar">
+            <h1>Welcome, Client!</h1>
+        </div>
+        <div class="card-container">
+            <div class="card sales">
+                <h3>Weekly Sales</h3>
+                <p>$15,000</p>
+            </div>
+            <div class="card orders">
+                <h3>Weekly Orders</h3>
+                <p>45,633</p>
+            </div>
+            <div class="card visitors">
+                <h3>Visitors Online</h3>
+                <p>95,574</p>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="chart-box">
+                <h3>Visit And Sales Statistics</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>Traffic Sources</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Js Charts  -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        window.onload = function() {
+            var barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [30, 40, 50, 60, 70, 80, 90, 100],
+                        backgroundColor: '#ff4500'
+                    }]
+                },
+            });
+
+            var pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Search Engines', 'Social Media', 'Direct Traffic'],
+                    datasets: [{
+                        data: [30, 45, 25],
+                        backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+        };
+    </script>
+
+    {% endblock %}

@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from users import views
+from client import views as client_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +25,5 @@ urlpatterns = [
     path('modules/', views.modules, name='modules'),
     path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
+    path('client_dashboard/', client_views.client_dashboard, name='client_dashboard'),
 ]
