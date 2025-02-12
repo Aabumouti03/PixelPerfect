@@ -21,4 +21,5 @@ from client import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('module-overview/', views.module_overview, name='module_overview'),
+    path('user-modules/', views.user_modules, name='modules'),
 ]
