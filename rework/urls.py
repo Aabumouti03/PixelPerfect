@@ -21,5 +21,6 @@ from users import views as usersViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', usersViews.welcome_page, name="welcomePage"),
+    path('', usersViews.welcome_page, name="welcome_page"),
+    path('log_in/', usersViews.log_in, name="log_in"),
 ]
