@@ -1,65 +1,74 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+from django.conf import settings
+
 
 class Program(models.Model):
-    modules = models.ManyToManyField('Module', related_name= "programs")
+    """A program that consists of multiple modules (Reusable)."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    modules = models.ManyToManyField('Module', related_name="programs") 
+
+    def __str__(self):
+        return self.title
+
 
 class Module(models.Model):
-    title = models.TextField(blank=False)
-    #category = models.TextChoices
-    #videos 
-    #infosheets
-    #excercises
-    #tasks
+    """A module that contains multiple sections (Reusable)."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    sections = models.ManyToManyField('Section', related_name="modules")  
 
-class Questionnaire(models.Model):
-    title = models.TextField(blank=False)
-    questions = models.ManyToManyField('Question', related_name='questionnaires')
+    def __str__(self):
+        return self.title
 
-class Question(models.Model):
-    """Model representing a question in a questionnaire."""
-    QUESTION_TYPES = [
-        ('boolean', 'This or That'),
+
+class Section(models.Model):
+    """A section that can be used across multiple modules."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    exercises = models.ManyToManyField('Exercise', related_name="sections")  
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+class Exercise(models.Model):
+    """An exercise within a section (Reusable)."""
+    EXERCISE_TYPES = [
+        ('pdf', 'PDF Document'),
+        ('fill_blank', 'Fill in the Blanks'),
+        ('short_answer', 'Short Answer'),
         ('multiple_choice', 'Multiple Choice'),
-        ('rating', 'Rating Scale'),
     ]
+    
+    title = models.CharField(max_length=255)
+    exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
+    pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.title} ({self.exercise_type})"
+
+
+class ExerciseQuestion(models.Model):
+    """Stores different types of questions inside an exercise."""
+    QUESTION_TYPES = [
+        ('fill_blank', 'Fill in the Blanks'),
+        ('short_answer', 'Short Answer'),
+    ]
+    
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name="questions")
     question_text = models.TextField()
-    type = models.TextField(choices=QUESTION_TYPES)
-
-    # Add a related_name to avoid reverse accessor conflicts
-    option_set = models.OneToOneField(
-        'QuestionOption', on_delete=models.SET_NULL, null=True, blank=True, related_name='question_option'
-    )
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
 
     def __str__(self):
-        return self.question_text
-
-    def clean(self):
-        """Ensure only multiple-choice questions have options."""
-        if self.type != 'multiple_choice' and self.option_set:
-            raise ValidationError('Options can only be linked to multiple-choice questions.')
+        return f"{self.exercise.title} - {self.question_text}"
 
 
-class QuestionOption(models.Model):
-    """Container for options related to a question."""
-    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='options')
-    QuestionOptions = models.ForeignKey(
-        'Option', on_delete=models.CASCADE, related_name='question_options', null=True, blank=True
-    )
+class UserResponse(models.Model):
+    """Stores user answers for exercises."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE)
+    response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Options for: {self.question.question_text}"
-
-
-
-class Option(models.Model):
-    """Individual options related to a QuestionOption."""
-    question_option = models.ForeignKey(
-        'QuestionOption', on_delete=models.CASCADE, related_name='options', null=True, blank=True
-    )
-    option_text = models.TextField(blank=False)
-
-    def __str__(self):
-        return self.option_text
-
+        return f"Response by {self.user.username} for {self.question}"
