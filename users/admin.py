@@ -3,16 +3,22 @@
 # from .models import User, Admin, EndUser
 # from client.models import Program, Module
 
-# admin.site.register(Program) 
-# admin.site.register(Module) 
-
-
-# # Check if a model is already registered
+# # ✅ Check if model is already registered to avoid duplicate registration
 # def is_model_registered(model):
 #     return model in admin.site._registry
 
+# # ✅ Ensure Program & Module are registered before being used in `autocomplete_fields`
+# if not is_model_registered(Program):
+#     @admin.register(Program)
+#     class ProgramAdmin(admin.ModelAdmin):
+#         search_fields = ['title']  # Adjust based on your model fields
 
-# # Custom User admin
+# if not is_model_registered(Module):
+#     @admin.register(Module)
+#     class ModuleAdmin(admin.ModelAdmin):
+#         search_fields = ['title']  # Adjust based on your model fields
+
+# # ✅ Custom User Admin
 # if not is_model_registered(User):
 #     @admin.register(User)
 #     class UserAdmin(BaseUserAdmin):
@@ -39,7 +45,7 @@
 #         full_name.short_description = 'Full Name'
 
 
-# # Admin profile management
+# # ✅ Admin Profile Management
 # if not is_model_registered(Admin):
 #     @admin.register(Admin)
 #     class AdminProfileAdmin(admin.ModelAdmin):
@@ -51,11 +57,11 @@
 #         user_email.short_description = 'Email'
 
 
-# # End user management
+# # ✅ EndUser Management
 # if not is_model_registered(EndUser):
 #     @admin.register(EndUser)
 #     class EndUserAdmin(admin.ModelAdmin):
-#         list_display = ('id', 'user', 'program', 'module')
-#         list_filter = ('program', 'module')
-#         search_fields = ('user__username', 'user__email', 'program__id', 'module__title')
-#         autocomplete_fields = ['user', 'program', 'module']
+#         list_display = ('id', 'user', 'program', 'module', 'sector', 'age')
+#         list_filter = ('program', 'module', 'sector', 'gender')
+#         search_fields = ('user__username', 'user__email', 'program__title', 'module__title', 'sector')
+#         autocomplete_fields = ['user', 'program', 'module'] 

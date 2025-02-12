@@ -45,9 +45,61 @@ class User(AbstractUser):
 class Admin(models.Model):
     user =  models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
 
+    def __str__(self):
+        return f"Admin: {self.user.full_name()}"
+
 class EndUser(models.Model):
-    user =  models.OneToOneField(User, on_delete=models.CASCADE, related_name='User_profile')
-    program = models.OneToOneField(Program, on_delete=models.CASCADE,related_name="User_program" )
+    GENDER_OPTIONS = [
+        ('female', 'Female'),
+        ('male', 'Male'),
+        ('other', 'Other'),
+        ('N/A', 'Prefer not to say'),
+    ]
+
+    ETHNICITY_CHOICES = [
+        ('asian', 'Asian'),
+        ('black', 'Black or African Descent'),
+        ('hispanic', 'Hispanic or Latino'),
+        ('white', 'White or Caucasian'),
+        ('middle_eastern', 'Middle Eastern or North African'),
+        ('indigenous', 'Indigenous or Native'),
+        ('south_asian', 'South Asian'),
+        ('pacific_islander', 'Pacific Islander'),
+        ('mixed', 'Mixed or Multiracial'),
+        ('other', 'Other'),
+        ('N/A', 'Prefer not to say'),
+    ]
+
+    TIME_DURATION_CHOICES = [
+        ('1_month', 'In the last 1 month'),
+        ('3_months', 'In the last 3 months'),
+        ('6_months', 'In the last 6 months'),
+        ('1_year', 'In the last 1 year'),
+        ('2_years', 'In the last 2 years'),
+        ('3_plus_years', 'More than 3 years ago'),
+        ('never', 'Never worked before'),
+    ]
+
+    SECTOR_CHOICES = [
+        ('it', 'Information Technology'),
+        ('healthcare', 'Healthcare'),
+        ('education', 'Education'),
+        ('finance', 'Finance'),
+        ('engineering', 'Engineering'),
+        ('retail', 'Retail & E-commerce'),
+        ('hospitality', 'Hospitality & Tourism'),
+        ('marketing', 'Marketing & Advertising'),
+        ('government', 'Government & Public Service'),
+        ('other', 'Other'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='User_profile')
+    age = models.PositiveIntegerField(blank=False, null=True)  # Required
+    gender = models.CharField(max_length=20, choices=GENDER_OPTIONS, blank=False, null = True)
+    ethnicity = models.CharField(max_length=50, choices=ETHNICITY_CHOICES, blank=True, null=True)  # Optional
+    program = models.OneToOneField(Program, on_delete=models.CASCADE, related_name="User_program")
+    last_time_to_Work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="User_modules")
-    
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, blank=False, null = True)  # Required
+    phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional
 
