@@ -160,8 +160,8 @@ class UserModuleProgress(models.Model):
 
 class ExerciseResponse(models.Model):
     """Stores user answers for exercises."""
-    user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
-    question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
+    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
