@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Exercise Details{% endblock %}
+
+{% block content %}
+    <div class="exercise-details">
+        <h1>{{ exercise.title }}</h1>
+        <p>Type: {{ exercise.exercise_type }}</p>
+        
+        {% if exercise.pdf_file %}
+            <a href="{{ exercise.pdf_file.url }}" target="_blank">Download PDF</a>
+        {% endif %}
+
+        <h3>Questions</h3>
+        <ul>
+            {% for question in exercise.questions.all %}
+                <li>{{ question.question_text }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

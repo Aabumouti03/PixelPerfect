@@ -23,7 +23,7 @@ The deployed version of the application can be found at ( )
 To install the software and use it in your local development environment, you must first set up and activate a local development environment.  From the root of the project:
 
 ```
-$ virtualenv venv
+$ python3 -m venv ./venv
 $ source venv/bin/activate
 ```
 

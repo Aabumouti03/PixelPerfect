@@ -16,8 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from client import views as client_views
-from users import views as user_views
+from users.views import module_views as user_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +24,7 @@ urlpatterns = [
     path('modules/', user_views.modules, name='modules'),
     path('profile/', user_views.profile, name='profile'),
     path('logout/', user_views.logout_view, name='logout'),
-    path('moduleOverview/', client_views.module_overview, name='module_overview'),
+    path('module/<int:module_id>/', user_views.module_overview, name='module_overview'),
+    path('exercise/<int:exercise_id>/', user_views.exercise_detail, name='exercise_detail'),
+
 ]
