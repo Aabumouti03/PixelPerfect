@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Onboarding Questionnaire{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Progress Tracker -->
+    <div class="progress-container">
+        <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+            <div id="progress-bar" class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" 
+                style="width: 0%; padding-left: 10px;"> 0%
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Area -->
+    <div class="question-box">
+        <h2 id="question-text">Loading question...</h2>
+
+        <!-- Answer Choices -->
+        <div class="answer-options">
+            <button class="answer-btn" data-value="1">Strongly Agree</button>
+            <button class="answer-btn" data-value="2">Agree</button>
+            <button class="answer-btn" data-value="3">Neither Agree nor Disagree</button>
+            <button class="answer-btn" data-value="4">Disagree</button>
+            <button class="answer-btn" data-value="5">Strongly Disagree</button>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <button id="prev-btn" class="nav-btn left">⭠</button>
+            <button id="next-btn" class="nav-btn right">⭢</button>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Dynamic Behavior -->
+<script>
+    const questions = [
+        "I feel confident in my ability to solve problems.",
+        "I am comfortable working in a team setting.",
+        "I feel prepared to return to work.",
+        "I am open to learning new skills.",
+        "I have the resources I need for my job search."
+    ];
+
+    let currentQuestionIndex = 0;
+    let selectedAnswers = {};
+
+    function updateQuestion() {
+        // Update question text
+        document.getElementById("question-text").innerText = questions[currentQuestionIndex];
+
+        // Update progress bar
+        let progress = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById("progress-bar").style.width = progress + "%";
+        document.getElementById("progress-bar").innerText = Math.round(progress) + "%";
+
+        // Enable/disable navigation buttons
+        document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
+        document.getElementById("next-btn").disabled = !selectedAnswers[currentQuestionIndex];
+
+        // Update selected answer if it exists
+        document.querySelectorAll('.answer-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (selectedAnswers[currentQuestionIndex] === parseInt(btn.dataset.value)) {
+                btn.classList.add('selected');
+            }
+        });
+    }
+
+    // Event delegation for answer buttons
+    document.querySelector('.answer-options').addEventListener('click', (e) => {
+        if (e.target.classList.contains('answer-btn')) {
+            const value = parseInt(e.target.dataset.value);
+            selectedAnswers[currentQuestionIndex] = value;
+            
+            // Remove selected class from all buttons
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked button
+            e.target.classList.add('selected');
+            
+            // Enable next button
+            document.getElementById("next-btn").disabled = false;
+        }
+    });
+
+    // Navigation button event listeners
+    document.getElementById("next-btn").addEventListener('click', () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            updateQuestion();
+        }
+    });
+
+    document.getElementById("prev-btn").addEventListener('click', () => {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            updateQuestion();
+        }
+    });
+
+    // Initialize on page load
+    window.onload = updateQuestion;
+</script>
+{% endblock %}

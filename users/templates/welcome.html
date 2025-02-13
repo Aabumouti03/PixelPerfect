@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to ReWork{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Welcome to ReWork</h1>
+        </div>
+        <p class="description">
+            We’re glad to have you here. Our goal is to help you assess your readiness
+            to return to work and connect you with the most relevant support.
+        </p>
+        <p class="subtext">
+            Take a short questionnaire to get personalized mental well-being recommendations in minutes.
+        </p>
+        <div class="button-container">
+                    <!-- Start Questionnaire Button -->
+            <a href="{% url 'questionnaire' %}" class="btn">Start Questionnaire</a>
+
+            <!-- Skip Button (Redirect to another page, e.g., dashboard) -->
+            <a class="btn">Skip</a>
+        </div>
+    </div>
+{% endblock %}
