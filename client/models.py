@@ -1,65 +1,114 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+
+# Choices for Exercise Types
+EXERCISE_TYPES = [
+    ('fill_blank', 'Fill in the Blanks'),
+    ('short_answer', 'Short Answer'),
+    ('multiple_choice', 'Multiple Choice'),
+]
+
+# Choices for Question Placement Relative to Diagram
+QUESTION_POSITIONS = [
+    ('above', 'Above the Diagram'),
+    ('below', 'Below the Diagram'),
+    ('left', 'Left of the Diagram'),
+    ('right', 'Right of the Diagram'),
+]
 
 class Program(models.Model):
-    modules = models.ManyToManyField('Module', related_name= "programs")
+    """A program that consists of multiple modules (Reusable)."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    modules = models.ManyToManyField('Module', related_name="programs")  
+
+    def __str__(self):
+        return self.title
+
 
 class Module(models.Model):
-    title = models.TextField(blank=False)
-    #category = models.TextChoices
-    #videos 
-    #infosheets
-    #excercises
-    #tasks
-
-class Questionnaire(models.Model):
-    title = models.TextField(blank=False)
-    questions = models.ManyToManyField('Question', related_name='questionnaires')
-
-class Question(models.Model):
-    """Model representing a question in a questionnaire."""
-    QUESTION_TYPES = [
-        ('boolean', 'This or That'),
-        ('multiple_choice', 'Multiple Choice'),
-        ('rating', 'Rating Scale'),
-    ]
-
-    question_text = models.TextField()
-    type = models.TextField(choices=QUESTION_TYPES)
-
-    # Add a related_name to avoid reverse accessor conflicts
-    option_set = models.OneToOneField(
-        'QuestionOption', on_delete=models.SET_NULL, null=True, blank=True, related_name='question_option'
-    )
+    """A module that contains multiple sections (Reusable)."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    sections = models.ManyToManyField('Section', related_name="modules")  
 
     def __str__(self):
-        return self.question_text
+        return self.title
+
+
+class Section(models.Model):
+    """A section that can be used across multiple modules."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    exercises = models.ManyToManyField('Exercise', related_name="sections")  
+    diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
+    text_position_from_diagram = models.CharField(
+        max_length=10, choices=QUESTION_POSITIONS, default='below' 
+    )
+    
+    # ✅ Additional Resources for Sections
+    additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
+
+    def __str__(self):
+        return f"{self.title} (Diagram: {'Yes' if self.diagram else 'No'})"
+
+
+class AdditionalResource(models.Model):
+    """A model to store additional resources such as books, podcasts, and surveys."""
+    RESOURCE_TYPES = [
+        ('book', 'Book'),
+        ('podcast', 'Podcast'),
+        ('survey', 'Survey'),
+        ('pdf', 'PDF Document'),
+        ('link', 'External Link'),
+    ]
+    
+    resource_type = models.CharField(max_length=10, choices=RESOURCE_TYPES)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='resources/', blank=True, null=True)  # For PDFs
+    url = models.URLField(blank=True, null=True)  # For external links
+    
+    def __str__(self):
+        return f"{self.title} ({self.resource_type})"
+
+
+class Exercise(models.Model):
+    """An exercise within a section (Reusable)."""
+    title = models.CharField(max_length=255)
+    exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
+    pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
+    questions = models.ManyToManyField('ExerciseQuestion', related_name="exercises", blank=True)  
+
+    def save(self, *args, **kwargs):
+        """Auto-set exercise_type based on questions if not set."""
+        if not self.exercise_type and self.questions.exists():
+            first_question = self.questions.first()
+            if first_question.has_blank:
+                self.exercise_type = 'fill_blank'
+            else:
+                self.exercise_type = 'short_answer'  # Default if no blanks
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.title} ({self.exercise_type})"
+
+
+class ExerciseQuestion(models.Model):
+    """Each Exercise can have multiple Questions (0 to many)."""
+    question_text = models.TextField()
+    has_blank = models.BooleanField(default=False)  
+    text_before_blank = models.TextField(blank=True, null=True)  
+    text_after_blank = models.TextField(blank=True, null=True)  
 
     def clean(self):
-        """Ensure only multiple-choice questions have options."""
-        if self.type != 'multiple_choice' and self.option_set:
-            raise ValidationError('Options can only be linked to multiple-choice questions.')
-
-
-class QuestionOption(models.Model):
-    """Container for options related to a question."""
-    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='options')
-    QuestionOptions = models.ForeignKey(
-        'Option', on_delete=models.CASCADE, related_name='question_options', null=True, blank=True
-    )
+        """Ensure at least one of 'text_before_blank' or 'text_after_blank' is filled when 'has_blank' is True."""
+        if self.has_blank:
+            if not self.text_before_blank and not self.text_after_blank:
+                raise ValidationError(
+                    "At least one of 'text_before_blank' or 'text_after_blank' must be provided when 'has_blank' is True."
+                )
 
     def __str__(self):
-        return f"Options for: {self.question.question_text}"
-
-
-
-class Option(models.Model):
-    """Individual options related to a QuestionOption."""
-    question_option = models.ForeignKey(
-        'QuestionOption', on_delete=models.CASCADE, related_name='options', null=True, blank=True
-    )
-    option_text = models.TextField(blank=False)
-
-    def __str__(self):
-        return self.option_text
-
+        if self.has_blank:
+            return f"{self.text_before_blank} ____ {self.text_after_blank}"
+        return f"{self.question_text}"

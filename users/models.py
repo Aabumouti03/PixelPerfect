@@ -2,7 +2,15 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module
+from client.models import Program, Module, ExerciseQuestion
+from django.conf import settings
+
+#Choices used in more than one model
+STATUS_CHOICES = [
+        ('not_started','Not Started'),
+        ('in_progress', 'In_Progress'),
+        ('completed', 'Completed')
+]
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -45,9 +53,119 @@ class User(AbstractUser):
 class Admin(models.Model):
     user =  models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
 
+    def __str__(self):
+        return f"Admin: {self.user.full_name()}"
+
 class EndUser(models.Model):
-    user =  models.OneToOneField(User, on_delete=models.CASCADE, related_name='User_profile')
-    program = models.OneToOneField(Program, on_delete=models.CASCADE,related_name="User_program" )
-    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="User_modules")
+    GENDER_OPTIONS = [
+        ('female', 'Female'),
+        ('male', 'Male'),
+        ('other', 'Other'),
+        ('N/A', 'Prefer not to say'),
+    ]
+
+    ETHNICITY_CHOICES = [
+        ('asian', 'Asian'),
+        ('black', 'Black or African Descent'),
+        ('hispanic', 'Hispanic or Latino'),
+        ('white', 'White or Caucasian'),
+        ('middle_eastern', 'Middle Eastern or North African'),
+        ('indigenous', 'Indigenous or Native'),
+        ('south_asian', 'South Asian'),
+        ('pacific_islander', 'Pacific Islander'),
+        ('mixed', 'Mixed or Multiracial'),
+        ('other', 'Other'),
+        ('N/A', 'Prefer not to say'),
+    ]
+
+    TIME_DURATION_CHOICES = [
+        ('1_month', 'In the last 1 month'),
+        ('3_months', 'In the last 3 months'),
+        ('6_months', 'In the last 6 months'),
+        ('1_year', 'In the last 1 year'),
+        ('2_years', 'In the last 2 years'),
+        ('3_plus_years', 'More than 3 years ago'),
+        ('never', 'Never worked before'),
+    ]
+
+    SECTOR_CHOICES = [
+        ('it', 'Information Technology'),
+        ('healthcare', 'Healthcare'),
+        ('education', 'Education'),
+        ('finance', 'Finance'),
+        ('engineering', 'Engineering'),
+        ('retail', 'Retail & E-commerce'),
+        ('hospitality', 'Hospitality & Tourism'),
+        ('marketing', 'Marketing & Advertising'),
+        ('government', 'Government & Public Service'),
+        ('other', 'Other'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='User_profile')
+    age = models.PositiveIntegerField(blank=False, null=True)  # Required
+    gender = models.CharField(max_length=20, choices=GENDER_OPTIONS, blank=False, null = True)
+    ethnicity = models.CharField(max_length=50, choices=ETHNICITY_CHOICES, blank=True, null=True)  # Optional
+    last_time_to_Work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, blank=False, null = True)  # Required
+    phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional
+
+    def __str__(self):
+        return f"User: {self.user.full_name()}"
+
+
+class UserProgramEnrollment(models.Model):
+    """Tracks when a user enrolls in a program."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='program_enrollments')
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='enrolled_users')
+    enrolled_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.user.username} enrolled in {self.program.title}"
+
+class UserModuleEnrollment(models.Model):
+    """Tracks when a user starts a standalone module."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
+    enrolled_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.user.username} started {self.module.title}"
+
+class UserProgramProgress (models.Model):
+
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='program_progress')
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='user_progress')
+    completion_percentage = models.FloatField(default=0.0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'program')
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.program.title} ({self.status})"
     
+class UserModuleProgress(models.Model):
+
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='module_progress')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE,related_name='user_progress')
+    completion_percentage = models.FloatField(default=0.0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('user', 'module') 
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
+
+
+class ExerciseResponse(models.Model):
+    """Stores user answers for exercises."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
+    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
+    response_text = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Response by {self.user.user.username} for {self.question}"
+
+
 
