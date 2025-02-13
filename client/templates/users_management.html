@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users_management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="users-container">
+    <h2>👥 Manage Users</h2>
+
+    <!-- Search & Filter Section -->
+    <div class="table-controls">
+        <input type="text" id="searchInput" placeholder="🔍 Search users..." onkeyup="filterTable()">
+        <select id="genderFilter" onchange="filterTable()">
+            <option value="">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        <input type="number" id="ageFilter" placeholder="📅 Min Age" onkeyup="filterTable()">
+    </div>
+
+    <!-- Users Table -->
+    <table id="usersTable" class="rounded-table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">ID ⬍</th>
+                <th onclick="sortTable(1)">Name ⬍</th>
+                <th onclick="sortTable(2)">Email ⬍</th>
+                <th onclick="sortTable(3)">Age ⬍</th>
+                <th onclick="sortTable(4)">Gender ⬍</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.age }}</td>
+                <td>{{ user.gender }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+// ✅ Live Search and Filter
+function filterTable() {
+    let searchInput = document.getElementById("searchInput").value.toLowerCase();
+    let genderFilter = document.getElementById("genderFilter").value.toLowerCase();
+    let ageFilter = document.getElementById("ageFilter").value; // Numeric value
+    let table = document.getElementById("usersTable");
+    let rows = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < rows.length; i++) {
+        let cols = rows[i].getElementsByTagName("td");
+        let name = cols[1].textContent.toLowerCase();
+        let age = parseInt(cols[3].textContent, 10);
+        let gender = cols[4].textContent.toLowerCase();
+
+        let matchesSearch = name.includes(searchInput) || searchInput === "";
+        let matchesGender = gender.includes(genderFilter) || genderFilter === "";
+        let matchesAge = !ageFilter || age >= parseInt(ageFilter, 10);
+
+        if (matchesSearch && matchesGender && matchesAge) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+}
+
+// ✅ Sorting Function (Works for ID, Name, Email, Age, Gender)
+function sortTable(colIndex) {
+    let table = document.getElementById("usersTable");
+    let rows = Array.from(table.rows).slice(1);
+    let ascending = table.getAttribute("data-sort") !== "asc";
+
+    rows.sort((rowA, rowB) => {
+        let cellA = rowA.cells[colIndex].innerText.toLowerCase();
+        let cellB = rowB.cells[colIndex].innerText.toLowerCase();
+
+        // Convert age to number for proper sorting
+        if (colIndex === 3) { 
+            return ascending ? (parseInt(cellA) - parseInt(cellB)) : (parseInt(cellB) - parseInt(cellA));
+        } else {
+            return ascending ? (cellA > cellB ? 1 : -1) : (cellA < cellB ? 1 : -1);
+        }
+    });
+
+    rows.forEach(row => table.appendChild(row));
+    table.setAttribute("data-sort", ascending ? "asc" : "desc");
+}
+
+</script>
+{% endblock %}
+

@@ -33,11 +33,27 @@ body {
     padding: 20px;
     border-radius: 10px;
     color: white;
-    text-align: center;
+    margin-top: 50px;
+    text-align: justify;
     height: 180px;
     width: 200px;
 }
 
+.card h2 {
+    margin-left: 15px;
+}
+
+.count {
+    font-size: 30px;
+    color: #0048FF;
+    margin-bottom:px ;
+}
+
+.card img {
+    margin-top: 35px;
+    width: 40px; /* ✅ Adjust image size */
+    height: 40px;
+}
 
 
 .card.sales { background: #0048FF; }
@@ -82,4 +98,10 @@ body {
     height: 100% !important;
     max-width: 280px; /* ✅ Keeps it from getting too large */
     max-height: 280px;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }

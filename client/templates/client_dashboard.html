@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
 {% endblock %}
 
-
 <!-- Content block  -->
 {% block content %}
     <div class="content">
@@ -14,17 +13,17 @@
             <h1>Welcome, Client!</h1>
         </div>
         <div class="card-container">
-            <div class="card sales">
-                <h3>Weekly Sales</h3>
-                <p>$15,000</p>
+            <div class="card sales" data-url="{% url 'users_management' %}">
+                <img src="{% static 'img/profile.svg' %}" alt="Profile" class="icon">
+                <h2>Manage Users</h2>
             </div>
             <div class="card orders">
-                <h3>Weekly Orders</h3>
-                <p>45,633</p>
+                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
+                <h2>Manage Modules</h2>
             </div>
-            <div class="card visitors">
-                <h3>Visitors Online</h3>
-                <p>95,574</p>
+            <div class="card visitors" data-url="{% url 'users_management' %}">
+                <img src="{% static 'img/Icon-4.svg' %}" alt="User" class="icon user-icon">
+                <h2 class="count">95,574</h2>
             </div>
         </div>
         <div class="charts">
@@ -39,10 +38,26 @@
         </div>
     </div>
 
-    <!-- Js Charts  -->
 
+    <!-- Js Charts  -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+     <!-- JAVA SCRIPT -->
+
     <script>
+
+    // Clickable cards 
+
+            document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".card").forEach(card => {
+            card.addEventListener("click", function() {
+                window.location.href = this.getAttribute("data-url");
+            });
+        });
+    });
+
+    // Charts
+
         window.onload = function() {
             var barCtx = document.getElementById('barChart').getContext('2d');
             new Chart(barCtx, {
