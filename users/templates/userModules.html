@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Styling here */
+    </style>
+
+    <!-- Main Content -->
+    <main class="content">
+        <div class="header">
+            <div class="header-left">
+                <h1>User’s Modules</h1>
+            </div>
+            <div class="header-icons">
+                <ion-icon name="search-outline"></ion-icon>
+                <ion-icon name="notifications-outline"></ion-icon>
+            </div>
+        </div>
+
+        <!-- Content you want to render -->
+        <h1>{{ user.user.full_name }}'s Modules</h1>
+    
+        <div class="module-grid">
+            {% for item in module_data %}
+                <div class="module-card">
+                    <h5>{{ item.module.title }}</h5>
+                    <p>{{ item.module.description }}</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: {{ item.progress }}%;"></div>
+                    </div>
+                    <small>{{ item.status }} - {{ item.progress }}% completed</small>
+                    <br>
+                    <a href="{% url 'module_overview' item.module.id %}" class="text-white">View →</a>
+                </div>
+            {% endfor %}
+            <!-- Add New Module -->
+            <div class="module-card add-module">
+                <span>+</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let navbar = document.querySelector(".navbar"); 
+            let content = document.querySelector(".content");
+
+            function adjustLayout() {
+                if (navbar.classList.contains("expanded")) {
+                    content.classList.add("navbar-expanded");
+                } else {
+                    content.classList.remove("navbar-expanded");
+                }
+            }
+
+            // Add event listener for navbar toggle
+            document.querySelector(".navbar-toggle").addEventListener("click", function() {
+                navbar.classList.toggle("expanded");
+                adjustLayout();
+            });
+
+            // Initial check
+            adjustLayout();
+        });
+    </script>
+{% endblock %}
+
