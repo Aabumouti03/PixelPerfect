@@ -157,13 +157,15 @@ class UserModuleProgress(models.Model):
     def __str__(self):
         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
-class UserResponse(models.Model):
+
+class ExerciseResponse(models.Model):
     """Stores user answers for exercises."""
-    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, default=None)
-    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE)
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
+    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Response by {self.user.username} for {self.question}"
+        return f"Response by {self.user.user.username} for {self.question}"
+
 
 
