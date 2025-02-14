@@ -14,8 +14,10 @@
         <input type="text" id="searchInput" placeholder="🔍 Search users..." onkeyup="filterTable()">
         <select id="genderFilter" onchange="filterTable()">
             <option value="">All Genders</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+            <option value="N/A">Prefer not to say</option>
         </select>
         <input type="number" id="ageFilter" placeholder="📅 Min Age" onkeyup="filterTable()">
     </div>
@@ -29,16 +31,22 @@
                 <th onclick="sortTable(2)">Email ⬍</th>
                 <th onclick="sortTable(3)">Age ⬍</th>
                 <th onclick="sortTable(4)">Gender ⬍</th>
+                <th onclick="sortTable(5)">Sector ⬍</th>
+                <th onclick="sortTable(6)">Phone ⬍</th>
+                <th onclick="sortTable(7)">Last Work ⬍</th>
             </tr>
         </thead>
         <tbody>
             {% for user in users %}
             <tr>
                 <td>{{ user.id }}</td>
-                <td>{{ user.user.first_name }}</td>
-                <td>{{ user.user.email }}</td>
-                <td>{{ user.age }}</td>
-                <td>{{ user.gender }}</td>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.User_profile.age|default:"N/A" }}</td>
+                <td>{{ user.User_profile.gender|default:"N/A" }}</td>
+                <td>{{ user.User_profile.sector|default:"N/A" }}</td>
+                <td>{{ user.User_profile.phone_number|default:"N/A" }}</td>
+                <td>{{ user.User_profile.last_time_to_Work|default:"N/A" }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -46,10 +54,10 @@
 </div>
 
 <script>
-// ✅ Live Search and Filter
-function filterTable() {
+    // ✅ Live Search and Filter
+    function filterTable() {
     let searchInput = document.getElementById("searchInput").value.toLowerCase();
-    let genderFilter = document.getElementById("genderFilter").value.toLowerCase();
+    let genderFilter = document.getElementById("genderFilter").value;  // Keep original case
     let ageFilter = document.getElementById("ageFilter").value; // Numeric value
     let table = document.getElementById("usersTable");
     let rows = table.getElementsByTagName("tr");
@@ -58,10 +66,11 @@ function filterTable() {
         let cols = rows[i].getElementsByTagName("td");
         let name = cols[1].textContent.toLowerCase();
         let age = parseInt(cols[3].textContent, 10);
-        let gender = cols[4].textContent.toLowerCase();
+        let gender = cols[4].textContent.trim(); // Keep original case
 
+        // Ensure gender comparison matches database values
         let matchesSearch = name.includes(searchInput) || searchInput === "";
-        let matchesGender = gender.includes(genderFilter) || genderFilter === "";
+        let matchesGender = (genderFilter === "" || gender === genderFilter);
         let matchesAge = !ageFilter || age >= parseInt(ageFilter, 10);
 
         if (matchesSearch && matchesGender && matchesAge) {
@@ -72,28 +81,27 @@ function filterTable() {
     }
 }
 
-// ✅ Sorting Function (Works for ID, Name, Email, Age, Gender)
-function sortTable(colIndex) {
-    let table = document.getElementById("usersTable");
-    let rows = Array.from(table.rows).slice(1);
-    let ascending = table.getAttribute("data-sort") !== "asc";
+    // ✅ Sorting Function (Works for ID, Name, Email, Age, Gender, Sector, Phone, Last Work)
+    function sortTable(colIndex) {
+        let table = document.getElementById("usersTable");
+        let rows = Array.from(table.rows).slice(1);
+        let ascending = table.getAttribute("data-sort") !== "asc";
 
-    rows.sort((rowA, rowB) => {
-        let cellA = rowA.cells[colIndex].innerText.toLowerCase();
-        let cellB = rowB.cells[colIndex].innerText.toLowerCase();
+        rows.sort((rowA, rowB) => {
+            let cellA = rowA.cells[colIndex].innerText.toLowerCase();
+            let cellB = rowB.cells[colIndex].innerText.toLowerCase();
 
-        // Convert age to number for proper sorting
-        if (colIndex === 3) { 
-            return ascending ? (parseInt(cellA) - parseInt(cellB)) : (parseInt(cellB) - parseInt(cellA));
-        } else {
-            return ascending ? (cellA > cellB ? 1 : -1) : (cellA < cellB ? 1 : -1);
-        }
-    });
+            // Convert age to number for proper sorting
+            if (colIndex === 3) { 
+                return ascending ? (parseInt(cellA) - parseInt(cellB)) : (parseInt(cellB) - parseInt(cellA));
+            } else {
+                return ascending ? (cellA > cellB ? 1 : -1) : (cellA < cellB ? 1 : -1);
+            }
+        });
 
-    rows.forEach(row => table.appendChild(row));
-    table.setAttribute("data-sort", ascending ? "asc" : "desc");
-}
-
+        rows.forEach(row => table.appendChild(row));
+        table.setAttribute("data-sort", ascending ? "asc" : "desc");
+    }
 </script>
 {% endblock %}
 

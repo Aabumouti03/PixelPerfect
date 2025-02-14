@@ -10,14 +10,14 @@
 {% block content %}
     <div class="content">
         <div class="top-bar">
-            <h1>Welcome, Client!</h1>
+            <h1>Welcome, Admin!</h1>
         </div>
         <div class="card-container">
             <div class="card sales" data-url="{% url 'users_management' %}">
                 <img src="{% static 'img/profile.svg' %}" alt="Profile" class="icon">
                 <h2>Manage Users</h2>
             </div>
-            <div class="card orders">
+            <div class="card orders" data-url="{% url 'modules_management' %}">
                 <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
                 <h2>Manage Modules</h2>
             </div>
@@ -28,13 +28,14 @@
         </div>
         <div class="charts">
             <div class="chart-box">
-                <h3>Visit And Sales Statistics</h3>
+                <h3>User Gender Distribution</h3>
                 <canvas id="barChart"></canvas>
             </div>
-            <div class="chart-box">
-                <h3>Traffic Sources</h3>
+            <div class="chart-box pie-chart">
+                <h3>Module Enrollment</h3>
                 <canvas id="pieChart"></canvas>
             </div>
+            
         </div>
     </div>
 
@@ -63,10 +64,10 @@
             new Chart(barCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG'],
+                    labels: ['Female', 'Male', 'N/A'],
                     datasets: [{
-                        label: 'Sales',
-                        data: [30, 40, 50, 60, 70, 80, 90, 100],
+                        label: 'Gender',
+                        data: [30, 40, 50],
                         backgroundColor: '#ff4500'
                     }]
                 },
@@ -76,10 +77,10 @@
             new Chart(pieCtx, {
                 type: 'pie',
                 data: {
-                    labels: ['Search Engines', 'Social Media', 'Direct Traffic'],
+                    labels: ['Exploring your work identity', 'Knowing your values', 'Understanding your superpowers', 'Exploring opportunities', 'Planning what\'s ahead'],
                     datasets: [{
-                        data: [30, 45, 25],
-                        backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3']
+                        data: [30, 45, 25, 100, 50],
+                        backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402","#4076FF"]
                     }]
                 },
                 options: {

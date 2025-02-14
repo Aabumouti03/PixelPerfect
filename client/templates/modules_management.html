@@ -1,0 +1,72 @@
+<!-- index.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/modules_management.css' %}">
+{% endblock %}
+
+<!-- Content block  -->
+{% block content %}
+    <div class="content">
+
+        <div class="top-bar">
+            <h1>Manage Modules</h1>
+        </div>
+
+        <div class="card-container">
+
+         <!-- Static Cards -->
+        <div class="card sales">
+            <h2>M1</h2>
+        </div>
+
+        <div class="card sales">
+            <h2>M2 </h2>
+        </div> 
+        
+        <div class="card sales">
+            <h2>M3 </h2>
+        </div> 
+
+        <div class="card sales">
+            <h2>M4 </h2>
+        </div> 
+        
+        <!-- Dynamic Module Cards -->
+        {% for module in modules %}
+        <div class="card module-card" style="background-color: '{{ module.color }}';">
+            <h2> {{ module.name }} </h2>
+        </div>
+        {% endfor %}
+
+            <!-- <div class="card sales" data-url="{% url 'users_management' %}">
+                <h2>Manage Users</h2>
+            </div>
+
+            <div class="card orders">
+                <h2>Manage Modules</h2>
+            </div>
+
+            <div class="card visitors" data-url="{% url 'users_management' %}">
+                <h2 class="count">95,574</h2>
+            </div>
+
+            <div class="card m4" data-url="{% url 'users_management' %}">
+                <h2>m4</h2>
+            </div>
+
+            <div class="card m5" data-url="{% url 'users_management' %}">
+                <h2>m5</h2>
+            </div>
+
+            <div class="card m5" data-url="{% url 'users_management' %}">
+                <h2>m6</h2>
+            </div> -->
+
+
+        </div>
+    </div>
+
+
+{% endblock %}
