@@ -45,7 +45,7 @@ class Section(models.Model):
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )
     
-    # ✅ Additional Resources for Sections
+    # Additional Resources for Sections
     additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
 
     def __str__(self):
