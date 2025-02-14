@@ -29,6 +29,6 @@ urlpatterns = [
     path('modules/', views.modules, name='modules'),
     path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
-    path('module-overview/', views.module_overview, name='module_overview'),
+    path('module-overview/<int:id>/', views.module_overview, name='module_overview'),
     path('user-modules/', views.user_modules, name='modules'),
 ]
