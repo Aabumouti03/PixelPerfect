@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>User Responses</h2>
+    
+    {% for exercise, responses in responses_by_exercise.items %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4>{{ exercise.title }}</h4>
+            </div>
+            <div class="card-body">
+                {% for response in responses %}
+                    <p><strong>Q:</strong> {{ response.question.question_text }}</p>
+                    <p><strong>Your Answer:</strong> {{ response.response_text }}</p>
+                    <hr>
+                {% empty %}
+                    <p>No responses yet for this exercise.</p>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
