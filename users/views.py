@@ -1,6 +1,7 @@
-from django.shortcuts import redirect, render
 from django.http import HttpResponse
-from .forms import UserSignUpForm, EndUserProfileForm
+from django.shortcuts import redirect, render
+from django.contrib.auth import authenticate, login, logout
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
 
 # Create your views here.
 
@@ -13,16 +14,27 @@ def modules(request):
 def profile(request):
     return render(request, 'profile.html')
 
-def logout_view(request):
-    return render(request, 'logout.html')
-
-#A function for displaying a page that welcomes users
 def welcome_page(request):
     return render(request, 'welcome_page.html')
 
-#A function for displaying a log in page
 def log_in(request):
-    return render(request, 'log_in.html')
+    """Log in page view function"""
+    if request.method == "POST":
+        form = LogInForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+
+    else:
+        form = LogInForm()
+
+    return render(request, 'log_in.html', {'form': form})
+
 
 #A function for displaying a sign up page
 def sign_up(request):
@@ -43,6 +55,14 @@ def sign_up(request):
 
     return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
 
-#A function for redirecting the user to the welcome page after logging out
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
+
 def log_out(request):
-    pass
+    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
+    if request.method == "POST":
+        logout(request)
+        return redirect('welcome_page')
+
+    # if user cancels, stay on the same page
+    return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})

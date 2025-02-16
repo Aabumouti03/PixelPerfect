@@ -1,3 +1,43 @@
+from django.contrib.auth import get_user_model
+from users.models import EndUser
+
+User = get_user_model()
+
+def seed_users():
+    """Create test users with profiles if they don't exist."""
+    user_data = {
+        "username": "dandoe",
+        "first_name": "Dan",
+        "last_name": "Doe",
+        "email": "dandoe@example.org",
+        "password": "Testuser123", 
+    }
+
+    profile_data = {
+        "age": 20,
+        "gender": "male",
+        "ethnicity": "asian",
+        "sector": "healthcare",
+        "last_time_to_work": "1_month",
+        "phone_number": "11111111",
+    }
+
+    user, created = User.objects.get_or_create(
+        username=user_data["username"],
+        defaults={
+            "first_name": user_data["first_name"],
+            "last_name": user_data["last_name"],
+            "email": user_data["email"],
+        }
+    )
+
+    if created:
+        user.set_password(user_data["password"])
+        user.save()
+
+    EndUser.objects.get_or_create(user=user, defaults=profile_data)
+
+
 # import django
 # import os
 

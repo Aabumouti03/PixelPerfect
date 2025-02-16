@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User, EndUser
 
 
@@ -17,3 +17,15 @@ class EndUserProfileForm(forms.ModelForm):
     class Meta:
         model = EndUser
         fields = ['age', 'gender', 'sector', 'ethnicity', 'last_time_to_work', 'phone_number']
+
+
+class LogInForm(AuthenticationForm):
+    """Form for user log in."""
+    username = forms.CharField(
+        label="Username",
+        widget=forms.TextInput()
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput()
+    )
