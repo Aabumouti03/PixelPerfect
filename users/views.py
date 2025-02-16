@@ -4,6 +4,18 @@ from .forms import UserSignUpForm, EndUserProfileForm
 
 # Create your views here.
 
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+def modules(request):
+    return render(request, 'modules.html')
+
+def profile(request):
+    return render(request, 'profile.html')
+
+def logout_view(request):
+    return render(request, 'logout.html')
+
 #A function for displaying a page that welcomes users
 def welcome_page(request):
     return render(request, 'welcome_page.html')
