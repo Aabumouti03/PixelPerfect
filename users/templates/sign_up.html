@@ -1,0 +1,13 @@
+<h2>Sign Up</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    
+    <h3>Account Details</h3>
+    {{ user_form.as_p }}
+
+    <h3>Profile Information</h3>
+    {{ profile_form.as_p }}
+
+    <input type="submit" value="Sign Up">
+</form>
