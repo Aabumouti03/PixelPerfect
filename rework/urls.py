@@ -28,4 +28,5 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('modules/', usersViews.modules, name='modules'),
     path('profile/', usersViews.profile, name='profile'),
+    path('responses/', usersViews.user_responses_view, name='user_responses'),
 ]

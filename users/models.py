@@ -164,7 +164,9 @@ class UserResponse(models.Model):
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Response by {self.user.username} for {self.question}"
+        return f"Response by {self.user.user.username} for {self.question}"
+
+
 
 
 

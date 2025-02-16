@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment
+from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment,UserResponse
 from client.models import Program, Module
+from django import forms
 
 @admin.register(User)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -69,3 +70,14 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'user__user__email', 'module__title')
     ordering = ('user__user__last_name', 'user__user__first_name')
 
+
+@admin.register(UserResponse)
+class UserResponseAdmin(admin.ModelAdmin):
+    list_display = ("user", "question", "response_text")
+    search_fields = ("user__user__username", "question__question_text")
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  # Explicitly refresh queryset
+        return form
