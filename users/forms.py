@@ -10,10 +10,10 @@ class UserSignUpForm(UserCreationForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
-        
+
 class EndUserProfileForm(forms.ModelForm):
     """Form for additional user profile information."""
     
     class Meta:
         model = EndUser
-        fields = ['age', 'gender', 'sector', 'ethnicity', 'last_time_to_Work', 'phone_number']
+        fields = ['age', 'gender', 'sector', 'ethnicity', 'last_time_to_work', 'phone_number']
