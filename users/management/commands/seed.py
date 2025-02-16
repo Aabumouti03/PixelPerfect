@@ -1,46 +1,50 @@
+from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from users.models import EndUser
 
 User = get_user_model()
 
-def seed_users():
-    """Create test users with profiles if they don't exist."""
-    user_data = {
-        "username": "dandoe",
-        "first_name": "Dan",
-        "last_name": "Doe",
-        "email": "dandoe@example.org",
-        "password": "Testuser123", 
-    }
+class Command(BaseCommand):
+    help = "Seed database with test users"
 
-    profile_data = {
-        "age": 20,
-        "gender": "male",
-        "ethnicity": "asian",
-        "sector": "healthcare",
-        "last_time_to_work": "1_month",
-        "phone_number": "11111111",
-    }
-
-    user, created = User.objects.get_or_create(
-        username=user_data["username"],
-        defaults={
-            "first_name": user_data["first_name"],
-            "last_name": user_data["last_name"],
-            "email": user_data["email"],
+    def handle(self, *args, **kwargs):
+        user_data = {
+            "username": "dandoe",
+            "first_name": "Dan",
+            "last_name": "Doe",
+            "email": "dandoe@example.org",
+            "password": "Testuser123",
         }
-    )
 
-    if created:
-        user.set_password(user_data["password"])
-        user.save()
+        profile_data = {
+            "age": 20,
+            "gender": "male",
+            "ethnicity": "asian",
+            "sector": "healthcare",
+            "last_time_to_work": "1_month",
+            "phone_number": "11111111",
+        }
 
-    EndUser.objects.get_or_create(user=user, defaults=profile_data)
+        user, created = User.objects.get_or_create(
+            username=user_data["username"],
+            defaults={
+                "first_name": user_data["first_name"],
+                "last_name": user_data["last_name"],
+                "email": user_data["email"],
+            }
+        )
 
+        if created:
+            user.set_password(user_data["password"])
+            user.save()
+            self.stdout.write(self.style.SUCCESS(f"Created user: {user.username}"))
+        else:
+            self.stdout.write(self.style.WARNING(f"User {user.username} already exists."))
 
-# import django
-# import os
+        EndUser.objects.get_or_create(user=user, defaults=profile_data)
 
+#import django
+#import os
 # # ✅ Set up Django environment
 # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings")  # Update this if your project name is different
 # django.setup()

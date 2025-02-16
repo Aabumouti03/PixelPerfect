@@ -9,28 +9,9 @@
     <link rel="stylesheet" href="{% static 'css/user_authentication.css' %}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg shadow-sm p-3">
-        <div class="container">
-            <a class="logo navbar-brand fs-3" href="{% url 'welcome_page' %}">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" width="40" class="me-2">
-                ReWork
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link navbar-text fw-bold" href="#">Home</a></li>
-                    <li class="nav-item"><a class="nav-link navbar-text fw-bold" href="#">About</a></li>
-                    <li class="nav-item"><a class="nav-link navbar-text fw-bold" href="#">Contact Us</a></li>
-                </ul>
-                <a href="{% url 'log_in' %}" class=" yellow-button ms-3 rounded-pill px-4 py-2 fw-bold">Log in</a>
-                <a href="{% url 'sign_up' %}" class=" yellow-button ms-2 rounded-pill px-4 py-2 fw-bold">Get Started</a>
-            </div>
-        </div>
-    </nav>
-    <div class="main-content">
+    {% include 'welcome_page_navbar.html' %}
 
+    <div class="main-content">
         <header class="text-center mt-5">
             <h1 class="main-text fw-bold">Are you ready to return to work?</h1>
             <p class="mid-text w-75 mx-auto">
