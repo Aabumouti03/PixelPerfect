@@ -16,24 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-<<<<<<< HEAD
-=======
+
 from client import views as clientViews
->>>>>>> origin/userAuthentication
 from users import views as usersViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-<<<<<<< HEAD
-    path('log_out/', usersViews.log_out, name='log_out'),
-
-    #profile page add-ons
-    path('profile/', usersViews.profile, name='show_profile'),  
-    path('profile/edit/', usersViews.update_profile, name='update_profile'),  
-    path('profile/delete/', usersViews.delete_account, name='delete_account'),    
-
-]
-=======
+  
+    #userAuthentication page add-ons
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
@@ -41,5 +31,9 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('modules/', usersViews.modules, name='modules'),
     path('profile/', usersViews.profile, name='profile'),
+
+    #profile page add-ons
+    path('profile/', usersViews.profile, name='show_profile'),  
+    path('profile/edit/', usersViews.update_profile, name='update_profile'),  
+    path('profile/delete/', usersViews.delete_account, name='delete_account'),  
 ]
->>>>>>> origin/userAuthentication
