@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import (
     Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,  
-    Questionnaire, Question, Choice  
+    Questionnaire, Question, Choice, ProgramModule, Category 
 )
+
 
 @admin.register(Questionnaire)
 class QuestionnaireAdmin(admin.ModelAdmin):
@@ -14,7 +15,7 @@ class QuestionnaireAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('questionnaire','question_text', 'question_type', 'is_required')
+    list_display = ('questionnaire', 'question_text', 'question_type', 'is_required')
     search_fields = ('questionnaire__title',)
     list_filter = ('question_type', 'is_required')
     ordering = ('questionnaire',)
@@ -27,12 +28,21 @@ class ChoiceAdmin(admin.ModelAdmin):
     ordering = ('question',)
 
 
-# Your existing admin classes remain untouched
+### 🔹 NEW: Inline Admin for ProgramModule (to manage module order within a program)
+class ProgramModuleInline(admin.TabularInline):
+    model = ProgramModule
+    extra = 1  # Allows adding modules inline
+    ordering = ['order']  # Ensures modules appear in correct order
+    autocomplete_fields = ['module']  # Enables search for modules
+    fields = ('module', 'order')  # Display only relevant fields
+
+
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title', 'description')
     ordering = ('title',)
+    inlines = [ProgramModuleInline]  # 🔹 ADDED: Allows managing module order within a program
 
 
 @admin.register(Module)
@@ -40,6 +50,13 @@ class ModuleAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title', 'description')
     ordering = ('title',)
+
+
+@admin.register(Category)  # 🔹 ADDED: To manage categories in Django Admin
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+    ordering = ('name',)
 
 
 @admin.register(Section)
@@ -104,3 +121,10 @@ class ExerciseQuestionAdmin(admin.ModelAdmin):
         return obj.question_text
     
     question_preview.short_description = "Preview"
+
+
+@admin.register(ProgramModule)
+class ProgramModuleAdmin(admin.ModelAdmin):
+    list_display = ('program', 'module', 'order')
+    ordering = ('program', 'order')
+    autocomplete_fields = ('program', 'module')  # Enables search dropdown

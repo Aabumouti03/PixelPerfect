@@ -16,20 +16,39 @@ QUESTION_POSITIONS = [
     ('right', 'Right of the Diagram'),
 ]
 
+class Category(models.Model):
+    name = models.CharField(max_length=255)
+    def __str__(self):
+        return self.name
+    
+
 class Program(models.Model):
     """A program that consists of multiple modules (Reusable)."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    modules = models.ManyToManyField('Module', related_name="programs")  
+    # modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
 
     def __str__(self):
         return self.title
 
+class ProgramModule(models.Model):
+    """Intermediary table for ordering modules within a program."""
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="program_modules")  
+    module = models.ForeignKey('Module', on_delete=models.CASCADE, related_name="module_programs")  
+    order = models.PositiveIntegerField()  
+
+    class Meta:
+        unique_together = ('program', 'order')  #Prevents duplicate order numbers within a program
+        ordering = ['order']  # Always retrieve modules in correct sequence
+
+    def __str__(self):
+        return f"{self.program.title} - {self.module.title} (Order: {self.order})"
 
 class Module(models.Model):
     """A module that contains multiple sections (Reusable)."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    categories = models.ManyToManyField(Category, related_name="modules")
     sections = models.ManyToManyField('Section', related_name="modules")  
 
     def __str__(self):
