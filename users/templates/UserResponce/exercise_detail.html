@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">{{ exercise.title }}</h2>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/css/userresponse_style.css' %}">
+    <div class="row">
+        {% for item in questions_with_responses %}
+            <div class="col-md-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-question-circle"></i> {{ item.question.question_text }}</h5>
+                        
+                        <hr>
+
+                        <h6 class="text-muted">Your Previous Responses:</h6>
+                        {% for response in item.responses %}
+                            <div class="response-box">
+                                <p><i class="fas fa-pen"></i> {{ response.response_text }}</p>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted">No responses yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No questions found for this exercise.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

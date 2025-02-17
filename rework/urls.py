@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from client import views as clientViews
 from users import views as usersViews
+from users.views import user_responses_main,exercise_detail_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,5 +29,6 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('modules/', usersViews.modules, name='modules'),
     path('profile/', usersViews.profile, name='profile'),
-    path('responses/', usersViews.user_responses_view, name='user_responses'),
+    path('responses/', user_responses_main, name='user_responses_main'),
+    path('responses/exercise/<int:exercise_id>/', exercise_detail_view, name='exercise_detail'),
 ]

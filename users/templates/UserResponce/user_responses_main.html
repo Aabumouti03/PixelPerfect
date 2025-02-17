@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Your Exercises</h2>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/css/userresponse_style.css' %}">
+    <div class="row">
+        {% for exercise in exercises %}
+            <div class="col-md-4 mb-4">
+                <a href="{% url 'exercise_detail' exercise.id %}" class="card-link">
+                    <div class="card exercise-card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ exercise.title }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <p class="text-muted text-center">No exercises found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

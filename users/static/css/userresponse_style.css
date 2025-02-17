@@ -1,0 +1,44 @@
+.exercise-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.exercise-card {
+    border-radius: 10px;
+    background-color: #e3f2fd;
+    text-align: center;
+    padding: 20px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.exercise-card:hover {
+    background-color: #bbdefb;
+    transform: scale(1.05);
+}
+
+.card-link {
+    text-decoration: none;
+    color: black;
+}
+
+.card {
+    border-radius: 10px;
+    background-color: white;
+    padding: 15px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.response-box {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+}
