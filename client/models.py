@@ -34,13 +34,12 @@ class Module(models.Model):
     def __str__(self):
         return self.title
 
-
 class Section(models.Model):
     """A section that can be used across multiple modules."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     exercises = models.ManyToManyField('Exercise', related_name="sections")  
-    diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
+    #diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
     text_position_from_diagram = models.CharField(
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )

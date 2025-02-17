@@ -4,22 +4,22 @@
 {% block title %}Delete Account{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/profile_style.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile_style.css' %}?v={{ timestamp }}">
 
 <div class="confirm-box">
     <h2>Delete Account</h2>
 
-    <!-- confirmation text from views.py -->
+    <!-- Confirmation text from views.py -->
     <p>{{ confirmation_text }}</p>
 
-    <!-- Delete Account Form -->
-    <form method="POST" action="{% url 'delete_account' %}">
-        {% csrf_token %}
-        <button type="submit" class="delete-btn">Yes, Delete My Account</button>
-    </form>
-
-    <!-- Cancel Button -->
-    <a href="{% url 'show_profile' %}" class="cancel-btn">Cancel</a>
+    <!-- Button Group: Delete and Cancel Buttons -->
+    <div class="button-group">
+        <form method="POST" action="{% url 'delete_account' %}">
+            {% csrf_token %}
+            <button type="submit" class="delete-btn">Yes, Delete My Account</button>
+        </form>
+        <a href="{% url 'show_profile' %}" class="cancel-btn">Cancel</a>
+    </div>
 </div>
 
 {% endblock %}

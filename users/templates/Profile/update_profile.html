@@ -13,28 +13,68 @@
         {% csrf_token %}
 
         <!-- Profile Picture -->
-        <img class="profile-image" src="{{ user.gravatar }}" alt="Profile Picture">
+        <img class="profile-image" src="{{ request.user.gravatar }}" alt="Profile Picture">
 
         <br>
 
         <!-- Form Fields -->
-        <label><strong>First Name:</strong></label>
-        {{ form.first_name }}
+        <div class="form-group">
+            <label><strong>First Name:</strong></label>
+            {{ form.first_name }}
+        </div>
 
-        <label><strong>Last Name:</strong></label>
-        {{ form.last_name }}
+        <div class="form-group">
+            <label><strong>Last Name:</strong></label>
+            {{ form.last_name }}
+        </div>
 
-        <label><strong>Username:</strong></label>
-        {{ form.username }}
+        <div class="form-group">
+            <label><strong>Username:</strong></label>
+            {{ form.username }}
+        </div>
 
-        <label><strong>Email Address:</strong></label>
-        {{ form.email }}
+        <div class="form-group">
+            <label><strong>Email Address:</strong></label>
+            {{ form.email }}
+        </div>
+
+        <div class="form-group">
+            <label><strong>Phone Number:</strong></label>
+            {{ form.phone_number }}
+        </div>
+
+        <div class="form-group">
+            <label><strong>Age:</strong></label>
+            {{ form.age }}
+        </div>
+
+        <div class="form-group">
+            <label><strong>Gender:</strong></label>
+            {{ form.gender }}
+        </div>
+
+        <div class="form-group">
+            <label><strong>Ethnicity:</strong></label>
+            {{ form.ethnicity }}
+        </div>
+
+        <div class="form-group">
+            <label><strong>Last Time Worked:</strong></label>
+            {{ form.last_time_to_Work }}
+        </div>
+
+        <div class="form-group">
+            <label><strong>Sector:</strong></label>
+            {{ form.sector }}
+        </div>
 
         <br>
 
         <!-- Buttons -->
-        <button type="submit" class="save-btn">Save Changes</button>
-        <a href="{% url 'show_profile' %}" class="cancel-btn">Cancel</a>
+        <div class="button-group">
+            <button type="submit" class="save-btn">Save Changes</button>
+            <a href="{% url 'show_profile' %}" class="cancel-btn">Cancel</a>
+        </div>
     </form>
 </div>
 
