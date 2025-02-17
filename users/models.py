@@ -50,4 +50,3 @@ class EndUser(models.Model):
     program = models.OneToOneField(Program, on_delete=models.CASCADE,related_name="User_program" )
     module = models.ForeignKey('module', on_delete=models.CASCADE, related_name="User_modules")
     
-
