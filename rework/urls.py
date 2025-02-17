@@ -16,18 +16,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from client import views
 from users import views
 from client import views as client_views
 
 urlpatterns = [
+
+    # Users Views
     path('admin/', admin.site.urls),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('modules/', views.modules, name='modules'),
-    path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
+    path('profile/', views.profile, name='profile'),
+
+    # Client Views
+    path('programs/', client_views.programs, name='programs'), 
     path('client_dashboard/', client_views.client_dashboard, name='client_dashboard'),
     path('users_management/', client_views.users_management, name='users_management'),
     path('modules_management/', client_views.modules_management, name='modules_management'),
+    path('logout/', client_views.logout_view, name='logout'),
 
 
 ]
