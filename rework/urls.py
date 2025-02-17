@@ -31,4 +31,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('module-overview/<int:id>/', views.module_overview, name='module_overview'),
     path('user-modules/', views.user_modules, name='modules'),
+    path('all-modules/', views.all_modules, name='all_modules'),
 ]

@@ -1,6 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import SignUpForm
+from django.shortcuts import render, get_object_or_404
+from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login 
+from django.contrib.auth.models import User  
+import os
+from django.conf import settings
+import random
 
 # Create your views here.
 
@@ -8,9 +18,26 @@ from .forms import SignUpForm
 def welcome_page(request):
     return render(request, 'welcome_page.html')
 
-#A function for displaying a log in page
+# Login view for the user
 def log_in(request):
-    return render(request, 'log_in.html')
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user) 
+                return redirect('dashboard')  
+                messages.error(request, 'Invalid username or password')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'log_in.html', {'form': form})
 
 #A function for displaying a sign up page
 def sign_up(request):
@@ -30,15 +57,58 @@ def logout_view(request):
     return render(request, 'logout.html')
 
 def module_overview(request, id):
-    progress = 50  # This could come from your database or other source based on the `id`
-    return render(request, 'moduleOverview2.html', {'progress_value': progress})
+    module = get_object_or_404(Module, id=id)
+
+    try:
+        end_user = EndUser.objects.get(user=request.user)
+    except EndUser.DoesNotExist:
+        return HttpResponse("EndUser profile does not exist. Please contact support.")
+
+    progress = UserModuleProgress.objects.filter(module=module, user=end_user).first()
+    progress_value = progress.completion_percentage if progress else 0
+
+    return render(request, 'moduleOverview2.html', {'module': module, 'progress_value': progress_value})
 
 
+@login_required
 def user_modules(request):
-    modules = [
-        {"id": 1, "title": "Mindfulness for a Balanced Life", "description": "Explore meditation, breathing exercises, and mental relaxation techniques to improve overall well-being.", "progress": 25},
-        {"id": 2, "title": "Workplace Safety & Adaptation", "description": "Covers health protocols, ergonomic setups, and adjustments to the work environment.", "progress": 82},
-        {"id": 3, "title": "Effective Communication & Collaboration", "description": "Focuses on rebuilding teamwork, trust, and clear workplace communication.", "progress": 9},
-        {"id": 4, "title": "Time Management & Productivity", "description": "Provides strategies for balancing tasks, avoiding burnout, and staying efficient.", "progress": 47},
-    ]
-    return render(request, 'userModules.html', {"module_data": modules})
+    user = request.user
+
+    try:
+        end_user = EndUser.objects.get(user=user)
+    except EndUser.DoesNotExist:
+        end_user = EndUser.objects.create(user=user)
+
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
+
+    background_folder = os.path.join(settings.BASE_DIR, 'static/img/backgrounds')
+    
+    background_images = os.listdir(background_folder)
+    
+    module_data = []
+
+    for enrollment in enrolled_modules:
+        module = enrollment.module
+        progress = UserModuleProgress.objects.filter(user=end_user, module=module).first()
+
+        progress_percentage = progress.completion_percentage if progress else 0
+
+        background_image = random.choice(background_images)
+
+        module_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress": progress_percentage,
+            "background_image": f'img/backgrounds/{background_image}' 
+        })
+
+    return render(request, 'userModules.html', {"module_data": module_data})
+
+
+
+def all_modules(request):
+    modules = Module.objects.all()
+
+    return render(request, 'all_modules.html', {'modules': modules})
+

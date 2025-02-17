@@ -4,38 +4,92 @@
 {% block content %}
     <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Main container styling */
-        /* Module Grid */
+        body {
+            font-family: 'Nunito', sans-serif;
+        }
+
         .module-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 20px;
             margin-top: 20px;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .view-all-container {
+            align-self: flex-end; 
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .view-all-button {
+            font-size: 18px;
+            text-decoration: underline;
+            cursor: pointer;
+            color: #4da6ff;
+            transition: color 0.3s ease;
+            display: inline-block;
+            margin: 10px 20px;
+        }
+
+        .view-all-button:hover {
+            color: #3b8ab8;
+            text-decoration: none;
         }
 
         .module-card {
-            background-color: #4da6ff;
-            padding: 15px;
-            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            background-size: cover;
+            background-position: center;
+            padding: 20px;
+            border-radius: 8px;
             color: white;
             text-align: left;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            height: 350px;
+            width: 30%;
+            max-width: 350px;
+            box-sizing: border-box;
+            min-width: 100px;
+        }
+
+        .module-grid.one-item {
+            justify-items: left;
+            min-width: 1000px;
+            justify-content: flex-start;
+            display: flex; 
+        }
+
+        .module-card h5 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
         }
 
         .module-card p {
-            font-size: 14px;
-            margin-top: 5px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            flex-grow: 1;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
 
         .progress-bar-container {
             background: rgba(255, 255, 255, 0.3);
             height: 6px;
             border-radius: 5px;
-            margin-top: 5px;
-            position: relative;
+            margin-top: 10px;
             width: 100%;
         }
 
@@ -45,104 +99,114 @@
             border-radius: 5px;
         }
 
-        .add-module {
-            background-color: #4da6ff;
-            color: white;
-            font-size: 24px;
-            text-align: center;
+        .progress-container {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            cursor: pointer;
+            margin-top: 10px;
         }
 
+        .module-card small {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
 
-/* Hover effect for the add module card */
-.add-module:hover {
-    transform: translateY(-5px);
-}
+        .module-card a {
+            color: rgb(107, 120, 255);
+            font-size: 1rem;
+            text-decoration: underline;
+            cursor: pointer;
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
+        }
 
-/* Module title and text styling */
-.module-card h5 {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
+        .add-module {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 18px;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            color: #4da6ff;
+        }
 
-.module-card p {
-    font-size: 1rem;
-    margin-bottom: 15px;
-}
+        .add-module:hover {
+            transform: scale(1.05);
+            color: #3b8ab8;
+            text-decoration: none;
+        }
 
-.module-card small {
-    font-size: 0.9rem;
-    margin-top: 10px;
-}
+        .search-bar {
+            width: 250px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: width 0.4s ease;
+        }
 
-/* View link styling */
-.module-card a {
-    color: white;
-    font-size: 0.9rem;
-    text-decoration: underline;
-    cursor: pointer;
-}
+        .search-bar:focus {
+            width: 350px;
+            outline: none;
+            border-color: #4da6ff;
+        }
 
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
     </style>
 
-    <!-- Main Content -->
     <main class="content">
         <div class="header">
             <div class="header-left">
-                <h1>User’s Modules</h1>
+                <h1>{{ user.username }}'s Modules</h1>
             </div>
             <div class="header-icons">
-                <ion-icon name="search-outline"></ion-icon>
-                <ion-icon name="notifications-outline"></ion-icon>
+                <input type="text" class="search-bar" placeholder="Search..." onkeyup="searchModules(event)">
             </div>
         </div>
 
         <div class="module-grid">
             {% for item in module_data %}
-                <div class="module-card">
-                    <h5>{{ item.title }}</h5>
-                    <p>{{ item.description }}</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: {{ item.progress }}%;"></div>
-                    </div>
-                    <small>{{ item.progress }}% completed</small>
-                    <br>
-                    <a href="{% url 'module_overview' item.id %}" class="text-white">View →</a>
+            <div class="module-card" style="background-image: url('{% static item.background_image %}');">
+                <h5>{{ item.title }}</h5>
+                <p>{{ item.description }}</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ item.progress }}%;"></div>
                 </div>
+                <div class="progress-container">
+                    <small>{{ item.progress }}% completed</small>
+                    <a href="{% url 'module_overview' item.id %}">View →</a>
+                </div>
+            </div>
             {% endfor %}
-            <!-- Add New Module -->
-            <div class="module-card add-module">
-                <span>+</span>
+        
+            <div class="view-all-container">
+                <a href="{% url 'all_modules' %}" class="view-all-button">View all modules</a>
             </div>
         </div>
+              
     </main>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let navbar = document.querySelector(".navbar"); 
-            let content = document.querySelector(".content");
+        function searchModules(event) {
+            const query = event.target.value.toLowerCase();
+            const modules = document.querySelectorAll('.module-card');
+            let count = 0;
+            const moduleGrid = document.querySelector('.module-grid');
 
-            function adjustLayout() {
-                if (navbar.classList.contains("expanded")) {
-                    content.classList.add("navbar-expanded");
+            modules.forEach(module => {
+                const title = module.querySelector('h5')?.innerText.toLowerCase();
+                if (title.includes(query)) {
+                    module.style.display = '';
+                    count++;
                 } else {
-                    content.classList.remove("navbar-expanded");
+                    module.style.display = 'none';
                 }
-            }
-
-            // Add event listener for navbar toggle
-            document.querySelector(".navbar-toggle").addEventListener("click", function() {
-                navbar.classList.toggle("expanded");
-                adjustLayout();
             });
 
-            // Initial check
-            adjustLayout();
-        });
+            moduleGrid.classList.toggle('one-item', count === 1);
+        }
     </script>
 {% endblock %}

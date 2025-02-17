@@ -2,8 +2,8 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-# from client.models import Program, Module, ExerciseQuestion
-# from django.conf import settings
+from client.models import Program, Module, ExerciseQuestion
+from django.conf import settings
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -113,57 +113,57 @@ class EndUser(models.Model):
         return f"User: {self.user.full_name()}"
 
 
-# class UserProgramEnrollment(models.Model):
-#     """Tracks when a user enrolls in a program."""
-#     user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='program_enrollments')
-#     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='enrolled_users')
-#     enrolled_on = models.DateTimeField(auto_now_add=True)
+class UserProgramEnrollment(models.Model):
+    """Tracks when a user enrolls in a program."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='program_enrollments')
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='enrolled_users')
+    enrolled_on = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"{self.user.user.username} enrolled in {self.program.title}"
+    def __str__(self):
+        return f"{self.user.user.username} enrolled in {self.program.title}"
 
-# class UserModuleEnrollment(models.Model):
-#     """Tracks when a user starts a standalone module."""
-#     user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
-#     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
-#     enrolled_on = models.DateTimeField(auto_now_add=True)
+class UserModuleEnrollment(models.Model):
+    """Tracks when a user starts a standalone module."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
+    enrolled_on = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"{self.user.user.username} started {self.module.title}"
+    def __str__(self):
+        return f"{self.user.user.username} started {self.module.title}"
 
-# class UserProgramProgress (models.Model):
+class UserProgramProgress (models.Model):
 
-#     user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='program_progress')
-#     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='user_progress')
-#     completion_percentage = models.FloatField(default=0.0)
-#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
-#     last_updated = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='program_progress')
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='user_progress')
+    completion_percentage = models.FloatField(default=0.0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    last_updated = models.DateTimeField(auto_now=True)
 
-#     class Meta:
-#         unique_together = ('user', 'program')
-#     def __str__(self):
-#         return f"{self.user.full_name()} - {self.program.title} ({self.status})"
+    class Meta:
+        unique_together = ('user', 'program')
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.program.title} ({self.status})"
     
-# class UserModuleProgress(models.Model):
+class UserModuleProgress(models.Model):
 
-#     user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='module_progress')
-#     module = models.ForeignKey(Module, on_delete=models.CASCADE,related_name='user_progress')
-#     completion_percentage = models.FloatField(default=0.0)
-#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
-#     last_updated = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='module_progress')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE,related_name='user_progress')
+    completion_percentage = models.FloatField(default=0.0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    last_updated = models.DateTimeField(auto_now=True)
     
-#     class Meta:
-#         unique_together = ('user', 'module') 
-#     def __str__(self):
-#         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
+    class Meta:
+        unique_together = ('user', 'module') 
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
-# class UserResponse(models.Model):
-#     """Stores user answers for exercises."""
-#     user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
-#     question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
-#     response_text = models.TextField(blank=True, null=True)
+class UserResponse(models.Model):
+    """Stores user answers for exercises."""
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
+    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
+    response_text = models.TextField(blank=True, null=True)
 
-#     def __str__(self):
-#         return f"Response by {self.user.username} for {self.question}"
+    def __str__(self):
+        return f"Response by {self.user.username} for {self.question}"
 
 
