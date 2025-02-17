@@ -2,6 +2,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
+from django.contrib.auth import logout
+
 
 # Create your views here.
 
@@ -17,6 +19,12 @@ def profile(request):
 def welcome_page(request):
     return render(request, 'welcome_page.html')
 
+def about(request):
+    return render(request, 'about.html')
+
+def contact_us(request):
+    return render(request, 'contact_us.html')
+
 def log_in(request):
     """Log in page view function"""
     if request.method == "POST":
@@ -29,6 +37,7 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
+     
 
     else:
         form = LogInForm()
@@ -37,32 +46,52 @@ def log_in(request):
 
 
 #A function for displaying a sign up page
-def sign_up(request):
+def sign_up_step_1(request):
+    """Handles Step 1: User Account Details"""
     if request.method == "POST":
         user_form = UserSignUpForm(request.POST)
-        profile_form = EndUserProfileForm(request.POST)
+        if user_form.is_valid():
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
-            return redirect('log_in')
+            request.session['user_form_data'] = user_form.cleaned_data
+            return redirect('sign_up_step_2')
+    
+    else:
+        user_form_data = request.session.get('user_form_data', {})
+        user_form = UserSignUpForm(initial=user_form_data) 
+
+    return render(request, 'sign_up_step_1.html', {'user_form': user_form})
+
+def sign_up_step_2(request):
+    """Handles Step 2: Profile Details"""
+    if 'user_form_data' not in request.session:
+        return redirect('sign_up_step_1')
+
+    if request.method == "POST":
+        profile_form = EndUserProfileForm(request.POST)
+        if profile_form.is_valid():
+
+            user_data = request.session.pop('user_form_data')
+            user_form = UserSignUpForm(data=user_data)
+            if user_form.is_valid():
+                user = user_form.save()
+                
+
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.save()
+
+                return redirect('log_in')
 
     else:
-        user_form = UserSignUpForm()
         profile_form = EndUserProfileForm()
 
-    return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import logout
+    return render(request, 'sign_up_step_2.html', {'profile_form': profile_form})
 
 def log_out(request):
-    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
+    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
     if request.method == "POST":
         logout(request)
-        return redirect('welcome_page')
+        return redirect('log_in')
 
     # if user cancels, stay on the same page
     return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
