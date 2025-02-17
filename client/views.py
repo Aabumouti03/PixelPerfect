@@ -24,3 +24,18 @@ def modules_management(request):
 
     return render(request, "modules_management.html", {"modules": modules_list})
 
+
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+def modules(request):
+    return render(request, 'modules.html')
+
+def users(request):
+    return render(request, 'users.html')
+
+def programs(request):
+    return render(request, 'programs.html')
+
+def logout_view(request):
+    return render(request, 'logout.html')
