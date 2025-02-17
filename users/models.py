@@ -161,7 +161,7 @@ class UserModuleProgress(models.Model):
 class ExerciseResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
-    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
+    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE, related_name="responses")  
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -191,4 +191,5 @@ class QuestionResponse(models.Model):
             raise ValidationError('Multiple choice questions require a selected choice')
         elif self.question.question_type == 'RATING' and not self.rating_value:
             raise ValidationError('Rating questions require a rating value')
+
 
