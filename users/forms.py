@@ -1,6 +1,8 @@
 from django import forms
 from .models import User, EndUser
 from django.core.validators import RegexValidator
+from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class EndUserProfileForm(forms.ModelForm):
 
@@ -80,5 +82,28 @@ class EndUserProfileForm(forms.ModelForm):
         return end_user  
     
 
+class UserSignUpForm(UserCreationForm):
+    """Form for creating a new user account."""
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
 
+class EndUserProfileForm(forms.ModelForm):
+    """Form for additional user profile information."""
+    
+    class Meta:
+        model = EndUser
+        fields = ['age', 'gender', 'sector', 'ethnicity', 'last_time_to_work', 'phone_number']
+
+
+class LogInForm(AuthenticationForm):
+    """Form for user log in."""
+    username = forms.CharField(
+        label="Username",
+        widget=forms.TextInput()
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput()
+    )

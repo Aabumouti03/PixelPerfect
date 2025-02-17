@@ -105,7 +105,7 @@ class EndUser(models.Model):
     age = models.PositiveIntegerField(blank=False, null=True)  # Required
     gender = models.CharField(max_length=20, choices=GENDER_OPTIONS, blank=False, null = True)
     ethnicity = models.CharField(max_length=50, choices=ETHNICITY_CHOICES, blank=True, null=True)  # Optional
-    last_time_to_Work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
+    last_time_to_work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, blank=False, null = True)  # Required
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional
 
@@ -157,15 +157,13 @@ class UserModuleProgress(models.Model):
     def __str__(self):
         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
-
-class ExerciseResponse(models.Model):
+class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
     question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE) 
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Response by {self.user.user.username} for {self.question}"
-
+        return f"Response by {self.user.username} for {self.question}"
 
 
