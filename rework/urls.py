@@ -28,4 +28,7 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('modules/', usersViews.modules, name='modules'),
     path('profile/', usersViews.profile, name='profile'),
+    path('users_management/', clientViews.users_management, name='users_management'),
+    path('modules_management/', clientViews.modules_management, name='modules_management'),
+    path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
 ]

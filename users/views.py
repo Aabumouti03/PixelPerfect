@@ -55,8 +55,6 @@ def sign_up(request):
 
     return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import logout
 
 def log_out(request):
     """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
