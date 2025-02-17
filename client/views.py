@@ -11,12 +11,16 @@ def users_management(request):
     return render(request, 'users_management.html', {'users': users})
 
 def modules_management(request):
-    modules = Module.objects.all().values("title")  # Get module names
-    module_colors = ["#CEE7F2", "#44778d", "#a7d4e8", "#ff5733", "#3498DB", "#2ECC71"]  # Add more colors
-
+    modules = Module.objects.all().values("title")
+    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
+    
     modules_list = []
     for index, module in enumerate(modules):
-        module["color"] = module_colors[index % len(module_colors)]
-        modules_list.append(module)
+        module_data = {
+            "title": module["title"],
+            "color_class": module_colors[index % len(module_colors)]
+        }
+        modules_list.append(module_data)
 
     return render(request, "modules_management.html", {"modules": modules_list})
+
