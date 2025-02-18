@@ -1,8 +1,7 @@
 import django
 import os
 
-# ✅ Set up Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings")  # Update if your project name is different
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings") 
 django.setup()
 
 from client.models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
@@ -10,25 +9,23 @@ from users.models import User, Admin, EndUser, UserProgramEnrollment, UserModule
 from django.db import connection
 
 def unseed_data():
-    """Safely deletes all seeded data while avoiding missing tables."""
-    print("⚠️ Deleting all seeded data...")
+    print("⚠️ Deleting all seeded data except Admins and their users...")
 
-    # ✅ Disable foreign key constraints (SQLite fix)
     with connection.cursor() as cursor:
         cursor.execute("PRAGMA foreign_keys = OFF;")
 
     models_to_delete = [
-        ExerciseResponse,  # User responses to exercises
-        ExerciseQuestion,  # Exercise questions
-        Exercise,  # Exercises inside sections
-        Section,  # Sections inside modules
-        AdditionalResource,  # Additional resources linked to sections
-        Module,  # Modules inside programs
-        Program,  # Programs
-        UserProgramProgress,  # User progress tracking (program level)
-        UserModuleProgress,  # User progress tracking (module level)
-        UserProgramEnrollment,  # User enrollments in programs
-        UserModuleEnrollment,  # User enrollments in modules
+        ExerciseResponse,
+        ExerciseQuestion,
+        Exercise,
+        Section,
+        AdditionalResource,
+        Module,
+        Program,
+        UserProgramProgress,
+        UserModuleProgress,
+        UserProgramEnrollment,
+        UserModuleEnrollment,
         Module,
     ]
 
@@ -39,11 +36,20 @@ def unseed_data():
         except Exception as e:
             print(f"⚠️ Skipping {model.__name__}: {e}")
 
-    # ✅ Re-enable foreign key constraints
+    end_users = EndUser.objects.all()
+    deleted_endusers = end_users.count()
+
+    for enduser in end_users:
+        user = enduser.user
+        enduser.delete()
+        user.delete()
+
+    print(f"✅ Deleted {deleted_endusers} EndUsers and their User accounts.")
+
     with connection.cursor() as cursor:
         cursor.execute("PRAGMA foreign_keys = ON;")
 
-    print("✅ Unseeding complete!")
+    print("✅ Unseeding complete! Admins and their related users are preserved.")
 
 if __name__ == "__main__":
     unseed_data()
