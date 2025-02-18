@@ -28,7 +28,6 @@ class ChoiceAdmin(admin.ModelAdmin):
     ordering = ('question',)
 
 
-### 🔹 NEW: Inline Admin for ProgramModule (to manage module order within a program)
 class ProgramModuleInline(admin.TabularInline):
     model = ProgramModule
     extra = 1  # Allows adding modules inline
@@ -60,7 +59,6 @@ class SectionAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     ordering = ('title',)
     list_filter = ('text_position_from_diagram',)  
-    filter_horizontal = ('additional_resources',)  # ✅ Allow multiple resources
     readonly_fields = ('diagram_preview',)  
     def diagram_preview(self, obj):
         if obj.diagram:
