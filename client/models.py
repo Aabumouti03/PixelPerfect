@@ -30,7 +30,7 @@ class Module(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     sections = models.ManyToManyField('Section', related_name="modules")  
-
+    additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
     def __str__(self):
         return self.title
 
@@ -45,9 +45,6 @@ class Section(models.Model):
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )
     
-    # ✅ Additional Resources for Sections
-    additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
-
     def __str__(self):
         return f"{self.title} (Diagram: {'Yes' if self.diagram else 'No'})"
 

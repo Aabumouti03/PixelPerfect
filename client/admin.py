@@ -8,22 +8,13 @@ class ProgramAdmin(admin.ModelAdmin):
     ordering = ('title',)
 
 
-@admin.register(Module)
-class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
-    search_fields = ('title', 'description')
-    ordering = ('title',)
-
-
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'diagram_preview', 'text_position_from_diagram')
     search_fields = ('title', 'description')
     ordering = ('title',)
     list_filter = ('text_position_from_diagram',)  
-    filter_horizontal = ('additional_resources',)  # ✅ Allow multiple resources
     readonly_fields = ('diagram_preview',)  
-
     def diagram_preview(self, obj):
         """Show preview if a diagram is uploaded."""
         if obj.diagram:
@@ -31,6 +22,14 @@ class SectionAdmin(admin.ModelAdmin):
         return "❌ No Diagram"
     
     diagram_preview.short_description = "Diagram"
+
+
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description')
+    search_fields = ('title', 'description')
+    ordering = ('title',)
+    filter_horizontal = ('additional_resources',) 
 
 
 @admin.register(AdditionalResource)
