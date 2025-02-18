@@ -19,7 +19,7 @@
         <main class="content">
             <div class="header">
                 <div class="header-left">
-                    <h1 class="module-name">Module Name</h1>
+                    <h1 class="module-name">{{ module.title }}</h1>
                 </div>
                 <div class="header-icons">
                     <ion-icon name="search-outline"></ion-icon>
@@ -31,7 +31,7 @@
 
             <div class="module-info">
                 <div class="module-overview">
-                    <p>Module Overview</p>
+                    <p>{{ module.description }}</p> 
                 </div>
                 <div class="progress-container">
                     <canvas id="progressChart"></canvas>
@@ -68,17 +68,35 @@
                 </div>
             </div>
 
-            <div>
-                <button type="button" class="collapsible">E-books</button>
-                <div class="collapsible-content">
-                    <p>books</p>
-                </div>
-            </div>
 
             <div>
                 <button type="button" class="collapsible">Additional Resources</button>
-                <div class="collapsible-content">
-                    <p>additional readings and other resources</p>
+                <div class="collapsible-content">  
+                    {% if additional_resources %}
+                    <ul>
+                        {% for resource in additional_resources %}
+                            <li>
+                                <strong>{{ resource.title }}</strong> ({{ resource.get_resource_type_display }})
+                                
+                                {% if resource.file %}
+                                    - <a href="{{ resource.file.url }}" target="_blank">Download PDF</a>
+                                {% endif %}
+                                
+                                {% if resource.url %}
+                                    - <a href="{{ resource.url }}" target="_blank">Visit Resource</a>
+                                {% endif %}
+            
+                                {% if resource.description %}
+                                    <p>{{ resource.description }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                                    
+                {% else %}
+                    <p>No additional resources available for this module.</p>
+                {% endif %}
+                                
                 </div>
             </div>
             

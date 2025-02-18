@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, AdditionalResource
 
 # ✅ Data Structure for Seeding
 MODULES_AND_SECTIONS = {
@@ -189,6 +189,16 @@ MODULES_AND_SECTIONS = {
     }
 }
 
+ADDITIONAL_RESOURCES = {
+    "Exploring your work identity": [
+        {"resource_type": "podcast", "title": "The Tim Ferriss Show", "description": "Strategies and tools for success.", "file": None, "url": "https://tim.blog/podcast/"},
+        {"resource_type": "book", "title": "Designing Your Life", "description": "A guide to creating a meaningful career and life.", "file": None, "url": "https://designingyour.life/"}
+    ],
+    "Knowing your values": [
+        {"resource_type": "survey", "title": "Personal Values Assessment", "description": "A tool to identify your core values.", "file": None, "url": "https://www.valuescentre.com/tools-assessments/pva/"}
+    ]
+}
+
 
 class Command(BaseCommand):
     help = "Seeds the database with initial data"
@@ -228,4 +238,20 @@ class Command(BaseCommand):
             Module.objects.get(title="Planning what's next")
         ])
 
-        self.stdout.write(self.style.SUCCESS("✅ Database seeded successfully!"))
+        # ✅ Seed Additional Resources
+        for module_title, resources in ADDITIONAL_RESOURCES.items():
+            module = Module.objects.filter(title=module_title).first()
+            if module:
+                for resource_data in resources:
+                    resource, _ = AdditionalResource.objects.get_or_create(
+                        resource_type=resource_data["resource_type"],
+                        title=resource_data["title"],
+                        defaults={
+                            "description": resource_data["description"],
+                            "file": resource_data["file"],
+                            "url": resource_data["url"],
+                        }
+                    )
+                    section.additional_resources.add(resource)  # ✅ Now links resources to modules
+
+        self.stdout.write(self.style.SUCCESS("✅ Database seeded successfully with additional resources!"))
