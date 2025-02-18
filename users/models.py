@@ -168,7 +168,7 @@ class UserResponse(models.Model):
 
 # Questionnaire-related models
 class Questionnaire_UserResponse(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)

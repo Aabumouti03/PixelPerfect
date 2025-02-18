@@ -1,35 +1,35 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}  
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to ReWork</title>
-    <link rel="stylesheet" href="{% static 'css/onboarding.css' %}">
-    <!-- Add any navbar-specific CSS here if needed -->
+    <title>{% block title %}ReWork{% endblock %}</title>
+
+    <!-- Link to your CSS file -->
+    <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
 </head>
 <body>
-    <!-- Navbar section -->
-    <nav>
-        {% include 'welcome_page_navbar.html' %}
-    </nav>
-    
-    <!-- Main content -->
-    <div class="container">
-        <div class="header">
-            <h1 class="title">Welcome to ReWork</h1>
-        </div>
-        <p class="description">
-            We're glad to have you here. Our goal is to help you assess your readiness
-            to return to work and connect you with the most relevant support.
-        </p>
-        <p class="subtext">
-            Take a short questionnaire to get personalized mental well-being recommendations in minutes.
-        </p>
-        <div class="button-container">
-            <a href="{% url 'questionnaire' %}" class="btn">Start Questionnaire</a>
-            <a href="#" class="btn">Skip</a>
-        </div>
+
+    {% include 'partials/navbar.html' %}
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
     </div>
+
+<div id="logout-modal" class="modal">
+    <div class="modal-content">
+        <h2>Are you sure you want to log out?</h2>
+        <form method="POST" action="{% url 'log_out' %}">
+            {% csrf_token %}
+            <button type="submit">Yes, Log Out</button>
+            <a href="#"><button type="button">Cancel</button></a>
+        </form>
+    </div>
+</div>
+
+
 </body>
 </html>

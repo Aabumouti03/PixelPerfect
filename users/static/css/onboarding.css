@@ -172,7 +172,7 @@ body {
 .question-box {
     width: 70%;
     background: #FCEFEA;
-    padding: 20px;
+    padding: 10px;
     border-radius: 20px;
     text-align: center;
     display: flex;
@@ -205,16 +205,17 @@ body {
     background: white;
     padding: 15px;
     width: 80%;
-    border: 2px solid #f24505;
+    /* border: 2px solid #007bff; */
     border-radius: 30px;
     cursor: pointer;
     font-size: 18px;
     font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .answer-btn:hover,
 .answer-btn.selected {
-    background: #f24505;
+    background: #007bff;
     color: white;
 }
 
@@ -241,5 +242,34 @@ body {
 }
 
 .nav-btn:hover {
-    background: #ddd;
+    background: #007bff;
 }
+
+/*Rating Scaler*/
+        .rating-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-right: 10px;
+
+        }
+        .rating-btn {
+            background-color: #ddd;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+        .rating-btn:hover {
+            background-color: #007bff;
+            color: white;
+            transform: scale(1.1);
+        }
+        .rating-btn.selected {
+            background-color: #007bff;
+            color: white;
+        }
+   

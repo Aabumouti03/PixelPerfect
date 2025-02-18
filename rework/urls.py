@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('welcome/', usersViews.welcome_view, name='welcome'),
     path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
+    path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
