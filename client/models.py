@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -15,20 +16,39 @@ QUESTION_POSITIONS = [
     ('right', 'Right of the Diagram'),
 ]
 
+class Category(models.Model):
+    name = models.CharField(max_length=255)
+    def __str__(self):
+        return self.name
+    
+
 class Program(models.Model):
     """A program that consists of multiple modules (Reusable)."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    modules = models.ManyToManyField('Module', related_name="programs")  
+    # modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
 
     def __str__(self):
         return self.title
 
+class ProgramModule(models.Model):
+    """Intermediary table for ordering modules within a program."""
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="program_modules")  
+    module = models.ForeignKey('Module', on_delete=models.CASCADE, related_name="module_programs")  
+    order = models.PositiveIntegerField()  
+
+    class Meta:
+        unique_together = ('program', 'order')  #Prevents duplicate order numbers within a program
+        ordering = ['order']  # Always retrieve modules in correct sequence
+
+    def __str__(self):
+        return f"{self.program.title} - {self.module.title} (Order: {self.order})"
 
 class Module(models.Model):
     """A module that contains multiple sections (Reusable)."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    categories = models.ManyToManyField(Category, related_name="modules")
     sections = models.ManyToManyField('Section', related_name="modules")  
     additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
     def __str__(self):
@@ -109,3 +129,41 @@ class ExerciseQuestion(models.Model):
         if self.has_blank:
             return f"{self.text_before_blank} ____ {self.text_after_blank}"
         return f"{self.question_text}"
+
+# Questionnaire
+
+class Questionnaire (models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+
+class Question (models.Model):
+    QUESTION_TYPES = [
+        ('MULTIPLE_CHOICE', 'Multiple Choice'),
+        ('RATING', 'Rating Scale'),
+    ]
+    questionnaire = models.ForeignKey(Questionnaire, related_name='questions', on_delete=models.CASCADE)
+    question_text = models.TextField(blank=False)
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
+    is_required = models.BooleanField(default=True)
+
+    # For rating questions
+    min_rating = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
+    max_rating = models.IntegerField(null=True, blank=True, validators=[MaxValueValidator(10)])
+
+    def __str__(self):
+        return f"{self.questionnaire.title} - {self.question_text[:30]}"
+    
+class Choice(models.Model):
+    question = models.ForeignKey(Question, related_name='choices', on_delete=models.CASCADE)
+    text = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return self.text
+    
+

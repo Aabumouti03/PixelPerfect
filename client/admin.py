@@ -1,11 +1,57 @@
 from django.contrib import admin
-from .models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
+from .models import (
+    Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,  
+    Questionnaire, Question, Choice, ProgramModule, Category 
+)
+
+
+@admin.register(Questionnaire)
+class QuestionnaireAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'created_at')
+    search_fields = ('title', 'description')
+    list_filter = ('is_active',)
+    ordering = ('-created_at',)
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('questionnaire', 'question_text', 'question_type', 'is_required')
+    search_fields = ('questionnaire__title',)
+    list_filter = ('question_type', 'is_required')
+    ordering = ('questionnaire',)
+
+
+@admin.register(Choice)
+class ChoiceAdmin(admin.ModelAdmin):
+    list_display = ('question', 'text')
+    search_fields = ('question__questionnaire__title', 'text')
+    ordering = ('question',)
+
+
+### 🔹 NEW: Inline Admin for ProgramModule (to manage module order within a program)
+class ProgramModuleInline(admin.TabularInline):
+    model = ProgramModule
+    extra = 1  # Allows adding modules inline
+    ordering = ['order']  # Ensures modules appear in correct order
+    autocomplete_fields = ['module']  # Enables search for modules
+    fields = ('module', 'order')  # Display only relevant fields
+
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title', 'description')
     ordering = ('title',)
+    inlines = [ProgramModuleInline]  # 🔹 ADDED: Allows managing module order within a program
+
+
+
+
+@admin.register(Category)  # 🔹 ADDED: To manage categories in Django Admin
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+    ordering = ('name',)
 
 
 @admin.register(Section)
@@ -14,9 +60,9 @@ class SectionAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     ordering = ('title',)
     list_filter = ('text_position_from_diagram',)  
+    filter_horizontal = ('additional_resources',)  # ✅ Allow multiple resources
     readonly_fields = ('diagram_preview',)  
     def diagram_preview(self, obj):
-        """Show preview if a diagram is uploaded."""
         if obj.diagram:
             return f"✅ Diagram Uploaded"
         return "❌ No Diagram"
@@ -34,13 +80,11 @@ class ModuleAdmin(admin.ModelAdmin):
 
 @admin.register(AdditionalResource)
 class AdditionalResourceAdmin(admin.ModelAdmin):
-    """Admin panel for Additional Resources like books, podcasts, surveys, and PDFs."""
     list_display = ('title', 'resource_type', 'file_or_url')
     list_filter = ('resource_type',)
     search_fields = ('title', 'description')
 
     def file_or_url(self, obj):
-        """Show a file or link if available."""
         if obj.file:
             return f"📄 File Uploaded"
         if obj.url:
@@ -70,7 +114,7 @@ class ExerciseQuestionAdmin(admin.ModelAdmin):
     search_fields = ('question_text',)
     fieldsets = (
         (None, {'fields': ('question_text',)}),
-        ('Fill-in-the-Blanks', {'fields': ('has_blank', 'text_before_blank', 'text_after_blank')}),
+        ('Fill-in-the-Blanks', {'fields': ('has_blank', 'text_before_blank', 'text_after_blank')}),  
     )
 
     def question_preview(self, obj):
@@ -79,3 +123,10 @@ class ExerciseQuestionAdmin(admin.ModelAdmin):
         return obj.question_text
     
     question_preview.short_description = "Preview"
+
+
+@admin.register(ProgramModule)
+class ProgramModuleAdmin(admin.ModelAdmin):
+    list_display = ('program', 'module', 'order')
+    ordering = ('program', 'order')
+    autocomplete_fields = ('program', 'module')  # Enables search dropdown
