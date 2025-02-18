@@ -102,6 +102,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# User model for authentication and login purposes
+AUTH_USER_MODEL = 'users.User'
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -119,8 +123,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'users','static')]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Project-level static folder
+    BASE_DIR / "users/static",  # App-level static folder
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '' 
+LOGOUT_REDIRECT_URL = 'log_in'

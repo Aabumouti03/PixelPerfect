@@ -1,27 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ReWork{% endblock %}</title>
-<!-- 
-    {% load static %}
-    
+    <title>Welcome to ReWork</title>
     <link rel="stylesheet" href="{% static 'css/onboarding.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet"> -->
+    <!-- Add any navbar-specific CSS here if needed -->
 </head>
 <body>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 ReWork. All Rights Reserved.</p>
-    </footer>
-
+    <!-- Navbar section -->
+    <nav>
+        {% include 'welcome_page_navbar.html' %}
+    </nav>
+    
+    <!-- Main content -->
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Welcome to ReWork</h1>
+        </div>
+        <p class="description">
+            We're glad to have you here. Our goal is to help you assess your readiness
+            to return to work and connect you with the most relevant support.
+        </p>
+        <p class="subtext">
+            Take a short questionnaire to get personalized mental well-being recommendations in minutes.
+        </p>
+        <div class="button-container">
+            <a href="{% url 'questionnaire' %}" class="btn">Start Questionnaire</a>
+            <a href="#" class="btn">Skip</a>
+        </div>
+    </div>
 </body>
 </html>
