@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
-    UserProgramEnrollment, UserModuleEnrollment, ExerciseResponse, 
+    UserProgramEnrollment, UserModuleEnrollment, UserResponse, 
     Questionnaire_UserResponse, QuestionResponse  # ✅ Updated model name
 )
 from client.models import Program, Module
@@ -100,10 +100,13 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     ordering = ('user__user__last_name', 'user__user__first_name')
 
 
-@admin.register(ExerciseResponse)
-class ExerciseResponseAdmin(admin.ModelAdmin):
-    """Admin panel for managing User Responses."""
-    list_display = ('user', 'question', 'response_text')
-    list_filter = ('user',)
-    search_fields = ('user__user__username', 'question__question_text', 'response_text')
-    ordering = ('user',)
+@admin.register(UserResponse)
+class UserResponseAdmin(admin.ModelAdmin):
+    list_display = ("user", "question", "response_text")
+    search_fields = ("user__user__username", "question__question_text")
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  
+        return form
