@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import UserResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
-from .models import User, EndUser
+from .models import User, EndUser, Module
 from client.models import Exercise, ExerciseQuestion
 
 # Create your views here.
