@@ -1,38 +1,38 @@
 {% load static %}
 <div class="sidebar">
     <div class="logo">
-        <img src="{% static 'img/logo.svg' %}" alt="Logo" class="logoIcon">
+        <img src="{% static 'users/img/logo.svg' %}" alt="Logo" class="logoIcon">
         <span class="brand">ReWork</span>
     </div>
     <ul class="nav-links">
         <li>
             <a href="{% url 'dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
-                <img src="{% static 'img/dashboard.svg' %}" alt="Dashboard" class="icon">
+                <img src="{% static 'users/img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
         </li>
         <li>
             <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
-                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
+                <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
         <li>
             <a href="{% url 'profile' %}" class="{%if request.path == '/profile/' %}active{% endif %}">
-                <img src="{% static 'img/profile.svg' %}" alt="Profile" class="icon">
+                <img src="{% static 'users/img/profile.svg' %}" alt="Profile" class="icon">
                 <span>Profile</span>
             </a>
         </li>
         <div class="logout">
             <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
-            <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
+            <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
             <span>Logout</span>
             </a>
         </div>
     </ul>
 
     <div class="toggle">
-        <img src="{% static 'img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
+        <img src="{% static 'users/img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
     </div>
 
 </div>

@@ -4,27 +4,18 @@ from client.models import Module
 
 # Create your views here.
 
-def dashboard(request):
-    return render(request, 'dashboard.html')
-
-def modules(request):
-    return render(request, 'modules.html')
-
-def users(request):
-    return render(request, 'users.html')
-
 def programs(request):
-    return render(request, 'programs.html')
+    return render(request, 'client/programs.html')
 
 def logout_view(request):
-    return render(request, 'logout.html')
+    return render(request, 'client/logout.html')
 
 def client_dashboard(request):
-    return render(request, 'client_dashboard.html')
+    return render(request, 'client/client_dashboard.html')
 
 def users_management(request):
     users = User.objects.all().select_related('User_profile')
-    return render(request, 'users_management.html', {'users': users})
+    return render(request, 'client/users_management.html', {'users': users})
 
 def modules_management(request):
     modules = Module.objects.all().values("title")
@@ -38,5 +29,5 @@ def modules_management(request):
         }
         modules_list.append(module_data)
 
-    return render(request, "modules_management.html", {"modules": modules_list})
+    return render(request, "client/modules_management.html", {"modules": modules_list})
 
