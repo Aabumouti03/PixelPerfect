@@ -1,12 +1,10 @@
-<!-- index.html -->
-{% extends 'base.html' %}
+{% extends 'client_base.html' %}
 {% load static %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/modules_management.css' %}">
 {% endblock %}
 
-<!-- Content block  -->
 {% block content %}
     <div class="content">
 
@@ -15,7 +13,6 @@
         </div>
 
         <div class="card-container">
-        <!-- Dynamic Module Cards -->
         {% for module in modules %}
         <div class="card module-card {{ module.color_class }}">
             <h2>{{ module.title }}</h2>

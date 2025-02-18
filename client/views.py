@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User
 from client.models import Module
+from django.contrib.auth import authenticate, login, logout
+from .forms import ProgramForm 
+from .models import Program
 
 # Create your views here.
 def client_dashboard(request):
@@ -24,18 +27,42 @@ def modules_management(request):
 
     return render(request, "modules_management.html", {"modules": modules_list})
 
-
-def dashboard(request):
-    return render(request, 'dashboard.html')
-
-def modules(request):
-    return render(request, 'modules.html')
-
-def users(request):
-    return render(request, 'users.html')
+def users_management(request):
+    users = User.objects.all()
+    return render(request, 'users_management.html', {'users': users})
+    
 
 def programs(request):
-    return render(request, 'programs.html')
+    programs = Program.objects.all()
+    return render(request, 'programs.html', {'programs': programs})
 
-def logout_view(request):
-    return render(request, 'logout.html')
+def create_program(request):
+    if request.method == 'POST':
+        form = ProgramForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('programs')
+    else:
+        form = ProgramForm()
+    
+    return render(request, 'create_program.html', {'form': form})
+
+
+def log_out(request):
+    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
+    if request.method == "POST":
+        logout(request)
+        return redirect('welcome_page')
+
+    return render(request, 'client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+
+def program_detail(request, program_id):
+    """ View details of a single program """
+    program = get_object_or_404(Program, id=program_id)
+    return render(request, 'program_detail.html', {'program': program})
+
+def delete_program(request, program_id):
+    """ Delete a program and redirect to the programs list """
+    program = get_object_or_404(Program, id=program_id)
+    program.delete()
+    return redirect('programs')

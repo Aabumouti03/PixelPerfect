@@ -6,13 +6,13 @@
     </div>
     <ul class="nav-links">
         <li>
-            <a href="{% url 'dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
+            <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/client_dashboard/' %}active{% endif %}">
                 <img src="{% static 'img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
         </li>
         <li>
-            <a href="{% url 'users' %}" class="{%if request.path == '/users/' %}active{% endif %}">
+            <a href="{% url 'users_management' %}" class="{%if request.path == '/users_management/' %}active{% endif %}">
                 <img src="{% static 'img/users.svg' %}" alt="Users" class="icon">
                 <span>Users</span>
             </a>
@@ -24,13 +24,13 @@
             </a>
         </li>
         <li></li>
-            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
+            <a href="{% url 'modules_management' %}" class="{%if request.path == '/modules_management/' %}active{% endif %}">
                 <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
         <div class="logout">
-            <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
+            <a href="{% url 'log_out' %}" class="{%if request.path == '/log_out/' %}active{% endif %}">
             <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
             <span>Logout</span>
             </a>
