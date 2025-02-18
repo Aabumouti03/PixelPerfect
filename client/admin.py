@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,  
-    Questionnaire, Question, Choice, ProgramModule, Category 
+    Questionnaire, Question, Choice, ProgramModule, Category, BackgroundStyle  
 )
 
 
@@ -70,11 +70,11 @@ class SectionAdmin(admin.ModelAdmin):
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
+    list_display = ('title', 'description', 'background_style')  
     search_fields = ('title', 'description')
     ordering = ('title',)
     filter_horizontal = ('additional_resources',) 
-
+    autocomplete_fields = ('background_style',) 
 
 @admin.register(AdditionalResource)
 class AdditionalResourceAdmin(admin.ModelAdmin):
@@ -128,3 +128,9 @@ class ProgramModuleAdmin(admin.ModelAdmin):
     list_display = ('program', 'module', 'order')
     ordering = ('program', 'order')
     autocomplete_fields = ('program', 'module')  # Enables search dropdown
+
+@admin.register(BackgroundStyle)
+class BackgroundStyleAdmin(admin.ModelAdmin):
+    list_display = ('background_color', 'background_image')
+    search_fields = ('background_color', 'background_image')
+    list_filter = ('background_color',)
