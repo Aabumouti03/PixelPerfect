@@ -33,3 +33,12 @@ class LogInFormTestCase(TestCase):
         form = LogInForm(data=self.form_input)
         self.assertFalse(form.is_valid())
 
+    def test_form_accepts_incorrect_username(self):
+        self.form_input['username'] = 'da'
+        form = LogInForm(data=self.form_input)
+        self.assertFalse(form.is_valid())
+    
+    def test_form_accepts_incorrect_password(self):
+        self.form_input['password'] = '1'
+        form = LogInForm(data=self.form_input)
+        self.assertFalse(form.is_valid())

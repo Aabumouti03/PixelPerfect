@@ -287,6 +287,12 @@ def seed_users():
     else:
         print("⚠️ Admin already exists. Skipping creation.")
 
+        if created:
+            user.set_password(user_data["password"])
+            user.save()
+            self.stdout.write(self.style.SUCCESS(f"Created user: {user.username}"))
+        else:
+            self.stdout.write(self.style.WARNING(f"User {user.username} already exists."))
 
 def seed_data():
     """Seeds the database with modules, sections, exercises, and questions."""
