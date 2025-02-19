@@ -95,3 +95,12 @@ def log_out(request):
 
     # if user cancels, stay on the same page
     return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+
+def forget_password(request):
+    return render(request, 'forget_password.html')
+
+def password_reset_sent(request, reset_id):
+    return render(request, 'password_reset_sent.html')
+
+def reset_password(request, reset_id):
+    return render(request, 'reset_password.html')
