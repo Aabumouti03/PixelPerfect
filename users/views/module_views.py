@@ -3,6 +3,7 @@ from client.models import Module, Exercise, AdditionalResource
 from users.forms.moduleForms import ExerciseAnswerForm
 from django.contrib.auth.decorators import login_required 
 from users.models import ExerciseResponse,EndUser
+from django.contrib.auth import get_user_model
 
 
 # Create your views here.
@@ -48,7 +49,10 @@ def exercise_detail(request, exercise_id):
     exercise = get_object_or_404(Exercise, id=exercise_id)
 
     # Ensure request.user is an EndUser instance
-    user = EndUser.objects.get(id=request.user.id)
+    User = get_user_model()  # Dynamically get the correct user model
+
+    user, created = EndUser.objects.get_or_create(user=request.user)
+
 
     # Retrieve existing answers for this user
     saved_responses = {

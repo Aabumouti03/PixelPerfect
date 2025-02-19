@@ -24,11 +24,11 @@
             </a>
         </li>
         <div class="logout">
-            <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
-            <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
-            <span>Logout</span>
+            <a href="#logout-modal">
+                <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
+                <span>Logout</span>
             </a>
-        </div>
+        </div>        
     </ul>
 
     <div class="toggle">

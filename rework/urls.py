@@ -16,22 +16,29 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from client import views as clientViews
+from users.views import logViews as logViews
 from users.views import module_views as user_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dashboard/', user_views.dashboard, name='dashboard'),
-    path('modules/', user_views.modules, name='modules'),
-    path('profile/', user_views.profile, name='profile'),
-    path('logout/', user_views.logout_view, name='logout'),
+    path('', logViews.welcome_page, name="welcome_page"),
+    path('log_in/', logViews.log_in, name="log_in"),
+    path('log_out/', logViews.log_out, name="log_out"),
+    path('sign-up/', logViews.sign_up_step_1, name='sign_up_step_1'),
+    path('sign-up/profile/', logViews.sign_up_step_2, name='sign_up_step_2'),
+    path('dashboard/', logViews.dashboard, name='dashboard'),
+    path('modules/', logViews.modules, name='modules'),
+    path('profile/', logViews.profile, name='profile'),
+    path('about/', logViews.about, name='about'),
+    path('contact_us/', logViews.contact_us, name='contact_us'),
     path('module/<int:module_id>/', user_views.module_overview, name='module_overview'),
     path('exercise/<int:exercise_id>/', user_views.exercise_detail, name='exercise_detail'),
 
 ]
+
 # insures that media content is accesisble via URLs
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

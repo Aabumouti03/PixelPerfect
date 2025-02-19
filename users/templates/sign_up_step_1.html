@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReWork - Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/user_authentication.css' %}?v=2">
+</head>
+<body class="sign_up_body">
+
+    {% include 'welcome_page_navbar.html' %}
+
+    <div class="sign_up_wrapper">
+        <div class="sign_up_container">
+            <div class="sign_up_card">
+                <h4 class="sign_up_title text-center">Step 1 of 2: Account Details</h4>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    {% for field in user_form %}
+                        <div class="sign_up_input_group">
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="sign_up_error">
+                                    {% for error in field.errors %}
+                                        <p>⚠️ {{ error }} ⚠️</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+                    <button type="submit" class="sign_up_button">Next</button>
+                </form>
+
+                <a href="{% url 'log_in' %}">Already have an account? Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
