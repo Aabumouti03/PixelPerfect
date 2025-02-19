@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReWork - Readiness to Return</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/user_authentication.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/user_authentication.css' %}">
 </head>
 <body>
-    {% include 'welcome_page_navbar.html' %}
+    {% include 'users/welcome_page_navbar.html' %}
 
     <div class="main-content">
         <header class="text-center mt-5">
@@ -25,25 +25,25 @@
                     <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 1</h5>
                     <h4 class="mt-2">Answer a few questions.</h4>
                     <p class="sub-text">Start by answering a few quick questions about your current feelings, challenges, personal experiences, and goals.</p>
-                    <img src="{% static 'images/question.png' %}" alt="Question Mark" width="170">
+                    <img src="{% static 'users/img/question.png' %}" alt="Question Mark" width="170">
                 </div>
                 <div class="col-md-3">
                     <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 2</h5>
                     <h4 class="mt-2">Receive Personalized Recommendations</h4>
                     <p class="sub-text">Based on your responses, we'll suggest relevant resources tailored to your needs.</p>
-                    <img src="{% static 'images/light_bulb.webp' %}" alt="Lightbulb Icon" width="100">
+                    <img src="{% static 'users/img/light_bulb.webp' %}" alt="Lightbulb Icon" width="100">
                 </div>
                 <div class="col-md-3">
                     <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 3</h5>
                     <h4 class="mt-2">Explore Content</h4>
                     <p class="sub-text">Work through exercises, videos, and tasks designed to help you manage stress, build confidence, and prepare for work.</p>
-                    <img src="{% static 'images/notes.png' %}" alt="Notes Icon" width="150">
+                    <img src="{% static 'users/img/notes.png' %}" alt="Notes Icon" width="150">
                 </div>
                 <div class="col-md-3">
                     <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 4</h5>
                     <h4 class="mt-2">Track Your Progress</h4>
                     <p class="sub-text">As you complete the content, you'll see your progress and feel more prepared to take the next step.</p>
-                    <img src="{% static 'images/progress.png' %}" alt="Progress Icon" width="150">
+                    <img src="{% static 'users/img/progress.png' %}" alt="Progress Icon" width="150">
                 </div>
             </div>
         </section>
