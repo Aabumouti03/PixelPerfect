@@ -31,4 +31,6 @@ urlpatterns = [
     path('profile/', usersViews.profile, name='profile'),
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
+    path('create_program/', clientViews.create_program, name='create_program'),
+    path('temp/', clientViews.temp, name='temp'),
 ]
