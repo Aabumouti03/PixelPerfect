@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from client.models import Module, Exercise, AdditionalResource
-from users.forms.moduleForms import ExerciseAnswerForm
+from users.forms.users.moduleForms import ExerciseAnswerForm
 from django.contrib.auth.decorators import login_required 
 from users.models import ExerciseResponse,EndUser
 from django.contrib.auth import get_user_model

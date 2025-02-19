@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
-from users.forms.logForms import UserSignUpForm, EndUserProfileForm, LogInForm
+from users.forms.users.logForms import UserSignUpForm, EndUserProfileForm, LogInForm
 from django.contrib.auth import logout
 
 
@@ -17,7 +17,7 @@ def profile(request):
     return render(request, 'profile.html')
 
 def welcome_page(request):
-    return render(request, 'welcome_page.html')
+    return render(request, 'users/welcome_page.html')
 
 def about(request):
     return render(request, 'about.html')

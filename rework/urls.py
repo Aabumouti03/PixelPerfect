@@ -17,8 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from client import views as clientViews
-from users.views import logViews as logViews
-from users.views import module_views as user_views
+from users.views.users import logViews as logViews
+from users.views.users import module_views as user_views
 from django.conf import settings
 from django.conf.urls.static import static
 
