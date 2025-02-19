@@ -12,6 +12,7 @@ def client_dashboard(request):
 def users_management(request):
     users = User.objects.all().select_related('User_profile')
     return render(request, 'client/users_management.html', {'users': users})
+    return render(request, 'client/users_management.html', {'users': users})
 
 def modules_management(request):
     modules = Module.objects.all().values("title")
@@ -25,6 +26,7 @@ def modules_management(request):
         }
         modules_list.append(module_data)
 
+    return render(request, "client/modules_management.html", {"modules": modules_list})
     return render(request, "client/modules_management.html", {"modules": modules_list})
 
 def users_management(request):

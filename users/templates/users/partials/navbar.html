@@ -12,8 +12,13 @@
             </a>
         </li>
         <li>
+<<<<<<< HEAD
             <a href="{% url 'userModules' %}" class="{%if request.path == '/userModules/' %}active{% endif %}">
                 <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
+=======
+            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
+                <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
+>>>>>>> origin/client_dashboard
                 <span>Modules</span>
             </a>
         </li>
@@ -24,9 +29,15 @@
             </a>
         </li>
         <div class="logout">
+<<<<<<< HEAD
             <a href="#" id="logout-link">
                 <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
                 <span>Logout</span>
+=======
+            <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
+            <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
+            <span>Logout</span>
+>>>>>>> origin/client_dashboard
             </a>
         </div>
         
@@ -35,7 +46,7 @@
     </ul>
 
     <div class="toggle">
-        <img src="{% static 'img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
+        <img src="{% static 'users/img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
     </div>
 
 </div>

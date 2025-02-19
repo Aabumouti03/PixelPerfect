@@ -21,6 +21,8 @@ from users import views as usersViews
 
 
 urlpatterns = [
+
+    # Users Views
     path('admin/', admin.site.urls),
     path('programs/', clientViews.programs, name='programs'),
     path('logout/', clientViews.logout_view, name='logout'),
