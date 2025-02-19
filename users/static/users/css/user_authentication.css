@@ -479,6 +479,230 @@ button[type="submit"]:hover,
 
 
 /* ---------------------------- ABOUT PAGE --------------------------*/
-.about container{
-    background-color: #ff440f;
+.about_body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 80px;
 }
+
+.about_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    max-width: 1400px;
+    height: auto; 
+    margin: auto;
+    border-radius: 30px;
+    padding: 40px;
+    overflow: hidden; 
+}
+
+.about_inner_box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+
+.about_image img {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    border-radius: 20px;
+}
+
+.about_text {
+    flex: 1;
+    min-width: 300px;
+    padding-left: 30px;
+    text-align: center;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: normal;
+    max-height: 100%;
+}
+
+.about_text h2 {
+    font-size: 28px;
+    color: #ff440f;
+    margin-bottom: 10px;
+}
+
+.about_text p {
+    font-size: 18px;
+    color: #333;
+    line-height: 1.6;
+    max-height: 200px; /* ✅ Restricts excessive height */
+    overflow-y: auto; /* ✅ Adds scroll if needed */
+    padding-right: 10px;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 992px) {
+    .about_inner_box {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .about_image {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .about_image img {
+        width: 80%; /* ✅ Resizes on smaller screens */
+        max-width: 250px;
+        margin-bottom: 20px;
+    }
+
+    .about_text {
+        width: 100%;
+        padding: 0 20px;
+        text-align: center;
+    }
+}
+
+/*------------------------- CONTACT US ---------------------------*/
+.contact_body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+.contact_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 70%;
+    margin: auto;
+    border-radius: 30px;
+    padding: 40px;
+    overflow: hidden;
+    
+}
+
+
+.contact_left {
+    display: flex;
+    flex-direction: column; 
+    align-items: start;
+    gap: 20px; 
+    width: 50%;
+}
+
+.contact_left_title h2 {
+    font-weight: 600;
+    color: #ff440f;
+    font-size: 30px;
+    margin-bottom: 10px;
+    text-align: center;
+    padding-left: 50px;
+}
+
+.contact_inputs {
+    width: 600px;
+    height: 50px;
+    border: none;
+    outline: none;
+    padding-left: 25px;
+    font-weight: 500;
+    color: #ff440f;
+    border-radius: 50px;
+    display: block;
+    box-sizing: border-box;
+}
+
+textarea.contact_inputs {
+    height: 350px;
+    padding: 15px 25px;
+    border: 2px solid #ff440f;
+    border-radius: 20px;
+    resize: both;
+    box-sizing: border-box; 
+    min-width: 600px;
+    max-width: 100%;
+}
+
+
+
+.contact_body input{
+    border-radius: 50px;
+    background-color: white;
+    color: #ff440f;
+    border: 2px solid #ff440f; 
+    width: 600px;
+}
+.contact_body input:hover{
+    background-color: #ff430f26;
+}
+
+.contact_left button {
+    width: 600px;
+    height: 50px;
+    background-color: rgb(255, 255, 180);
+    color: #ff440f;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.contact_left button:hover {
+    background-color: #ff440f;
+    color: white;
+}
+.contact_inputs::placeholder {
+
+    color: #ff440f;
+}
+ 
+.contact_right {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    width: 50%;
+}
+
+.contact_right img {
+    width: 70%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 20px;
+}
+
+
+@media (max-width: 768px) {
+    .contact_container {
+        flex-direction: column; 
+        text-align: center;
+        gap: 20px;
+    }
+
+    .contact_left, .contact_right {
+        width: 100%;
+    }
+
+    .contact_body input, 
+    .contact_body textarea{
+        width: 100%;
+    }
+
+    .contact_left button {
+        width: 100%;
+    }
+
+    .contact_right img {
+        max-width: 80%;
+    }
+}
+
