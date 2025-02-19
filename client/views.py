@@ -31,3 +31,7 @@ def modules_management(request):
 
     return render(request, "client/modules_management.html", {"modules": modules_list})
 
+def reports(request):
+    return render(request, 'client/reports.html')
+
+
