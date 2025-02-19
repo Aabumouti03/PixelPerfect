@@ -24,4 +24,6 @@ urlpatterns = [
     path('modules/', views.modules, name='modules'),
     path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
+    path('save-notes/', views.save_notes, name='save_notes'),
+    path('get-notes/', views.get_notes, name='get_notes'),
 ]

@@ -1,27 +1,18 @@
 {% extends 'users/base.html' %}
 {% load static %} 
 
+{% block extra_css %} 
+    <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
+    <script src="{% static 'users/js/sticky_note.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-container">
-    <h1>Welcome to Your Dashboard</h1>
-    <p>Here you can manage your modules, view statistics, and update your profile.</p>
-
-    <div class="dashboard-widgets">
-        <div class="widget">
-            <h3>📊 Statistics</h3>
-            <p>View your activity and progress here.</p>
-        </div>
-
-        <div class="widget">
-            <h3>📂 Modules</h3>
-            <p>Manage your learning or work modules.</p>
-        </div>
-
-        <div class="widget">
-            <h3>⚙️ Settings</h3>
-            <p>Adjust your preferences and profile details.</p>
+    <div class="sticky-note">
+        <textarea placeholder="Write your note here..."></textarea>
+        <div class="note-controls">
+            <button class="bullet-btn">•</button> <!-- Bullet toggle button -->
         </div>
     </div>
-
 </div>
 {% endblock %}
