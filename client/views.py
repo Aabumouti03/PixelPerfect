@@ -1,17 +1,17 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from users.models import User
 from client.models import Module
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 from .forms import ProgramForm 
-from .models import Program
+from .models import Program, ProgramModule
 
 # Create your views here.
 def client_dashboard(request):
-    return render(request, 'client_dashboard.html')
+    return render(request, 'client/client_dashboard.html')
 
 def users_management(request):
     users = User.objects.all().select_related('User_profile')
-    return render(request, 'users_management.html', {'users': users})
+    return render(request, 'client/users_management.html', {'users': users})
 
 def modules_management(request):
     modules = Module.objects.all().values("title")
@@ -25,16 +25,16 @@ def modules_management(request):
         }
         modules_list.append(module_data)
 
-    return render(request, "modules_management.html", {"modules": modules_list})
+    return render(request, "client/modules_management.html", {"modules": modules_list})
 
 def users_management(request):
     users = User.objects.all()
-    return render(request, 'users_management.html', {'users': users})
+    return render(request, 'client/users_management.html', {'users': users})
     
 
 def programs(request):
     programs = Program.objects.all()
-    return render(request, 'programs.html', {'programs': programs})
+    return render(request, 'client/programs.html', {'programs': programs})
 
 def logout_view(request):
     return render(request, 'client/logout.html')
@@ -73,5 +73,5 @@ def log_out(request):
         return redirect('users:log_in')
 
     # if user cancels, stay on the same page
-    return render(request, 'client/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+    return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 

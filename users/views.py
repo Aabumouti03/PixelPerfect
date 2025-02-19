@@ -16,7 +16,7 @@ import random
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
-    return render(request, 'welcome_page.html')
+    return render(request, 'users/welcome_page.html')
 
 # Login view for the user
 def log_in(request):
@@ -31,18 +31,12 @@ def log_in(request):
             if user is not None:
                 login(request, user) 
                 return redirect('dashboard')  
-                messages.error(request, 'Invalid username or password')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = AuthenticationForm()
     
-    return render(request, 'log_in.html', {'form': form})
-
-#A function for displaying a sign up page
-def sign_up(request):
-    form = SignUpForm()
-    return render(request, 'sign_up.html', {'form': form})
+    return render(request, 'users/log_in.html', {'form': form})
 
 def dashboard(request):
     return render(request, 'users/dashboard.html')
@@ -80,7 +74,6 @@ def log_in(request):
         form = LogInForm()
 
     return render(request, 'users/log_in.html', {'form': form})
-
 
 #A function for displaying a sign up page
 def sign_up_step_1(request):
