@@ -1,6 +1,22 @@
 from django.shortcuts import render, redirect
 from .forms import ProgramForm
 from .models import Module, ProgramModule
+from django.contrib.auth import logout
+
+def dashboard(request):
+    return render(request, 'client/dashboard.html')
+
+def modules(request):
+    return render(request, 'client/modules.html')
+
+def users(request):
+    return render(request, 'client/users.html')
+
+def programs(request):
+    return render(request, 'client/all_programs.html')
+
+def logout_view(request):
+    return render(request, 'client/logout.html')
 
 def create_program(request):
     if request.method == "POST":
@@ -9,11 +25,9 @@ def create_program(request):
             program = form.save(commit=False)
             program.save()
 
-            # Process module order
             module_order = request.POST.get("module_order", "")
             module_ids = module_order.split(",") if module_order else []
 
-            # Clear existing program-module relationships if necessary
             program.program_modules.all().delete()
 
             # Add modules in the correct order
@@ -22,13 +36,21 @@ def create_program(request):
                     module = Module.objects.get(id=module_id)
                     ProgramModule.objects.create(program=program, module=module, order=index)
                 except Module.DoesNotExist:
-                    pass  # Skip if module does not exist
+                    pass
 
-            return redirect("temp")
+            return redirect("programs")
     else:
         form = ProgramForm()
 
     return render(request, "client/create_program.html", {"form": form})
 
-def temp(request):
-    return render(request, "client/temp.html")
+
+def log_out(request):
+    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
+    if request.method == "POST":
+        logout(request)
+        return redirect('users:log_in')
+
+    # if user cancels, stay on the same page
+    return render(request, 'client/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+

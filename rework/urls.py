@@ -19,8 +19,14 @@ from django.urls import path
 from client import views as clientViews
 from users import views as usersViews
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('dashboard/', clientViews.dashboard, name='dashboard'),
+    path('modules/', clientViews.modules, name='modules'),
+    path('users/', clientViews.users, name='users'),
+    path('programs/', clientViews.programs, name='programs'),
+    path('logout/', clientViews.logout_view, name='logout'),
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
@@ -32,5 +38,5 @@ urlpatterns = [
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
     path('create_program/', clientViews.create_program, name='create_program'),
-    path('temp/', clientViews.temp, name='temp'),
+    path('log_out/', clientViews.log_out, name="log_out"),
 ]
