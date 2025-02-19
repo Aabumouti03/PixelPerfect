@@ -17,8 +17,6 @@ def modules(request):
 def profile(request):
     return render(request, 'profile.html')
 
-def logout_view(request):
-    return render(request, 'logout.html')
 
 def module_overview(request, module_id):
     """Fetch the module by ID and retrieve related exercises and additional resources."""
@@ -41,7 +39,7 @@ def module_overview(request, module_id):
         'progress_value': 50  # ✅ Example progress value
     }
     
-    return render(request, 'moduleOverview.html', context)
+    return render(request, 'users/moduleOverview.html', context)
 
 
 
@@ -71,9 +69,9 @@ def exercise_detail(request, exercise_id):
                 defaults={'response_text': answer_text}
             )
 
-        return redirect('exercise_detail', exercise_id=exercise.id)
+        return redirect('users/exercise_detail', exercise_id=exercise.id)
 
-    return render(request, 'exercise_detail.html', {
+    return render(request, 'users/exercise_detail.html', {
         'exercise': exercise,
         'saved_responses': saved_responses,
     })

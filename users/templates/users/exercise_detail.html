@@ -1,99 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
 {% load custome_filters %}
 {% load static %}
 
 {% block title %}Exercise Details{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/module.css' %}">
-    <style>
-        .exercise-container {
-            display: flex;
-            flex-direction: row; /* Horizontal layout */
-            align-items: flex-start;
-            justify-content: center;
-            max-width: 1200px;
-            margin: auto;
-            padding: 5px;
-            gap: 40px; /* Space between questions and diagram */
-        }
 
-        /* Left Side - Questions */
-        .questions-container {
-            flex: 2; /* Takes more space */
-        }
-
-        .question-item {
-            margin-bottom: 20px;
-        }
-
-        .question-item label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .answer-field {
-            width: 100%;
-            min-height: 50px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f8fcff; /* Light blue background */
-            resize: vertical; /* Allows dynamic resizing */
-        }
-
-        /* Right Side - Diagram */
-        .diagram-container {
-            flex: 1;  /* Smaller than questions */
-            display: flex;
-            justify-content: center; /* Centers image */
-            align-items: center;
-            margin-top: 140px; /* Add upper margin */
-        }
-
-        .diagram-container img {
-            max-width: 400px;
-            height: auto;
-            border-radius: 10px;
-        }
-
-        /* Center the title */
-        .exercise-title {
-            text-align: center;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .submit-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .submit-container button {
-            background-color: #FF6600; /* Bright orange */
-            color: white; /* White text for contrast */
-            font-size: 16px;
-            font-weight: bold;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-
-        .submit-container button:hover {
-            background-color: #E65C00; /* Slightly darker orange for hover effect */
-            transform: scale(1.05); /* Slight zoom effect */
-        }
-
-        .submit-container button:active {
-            background-color: #CC4E00; /* Even darker orange when clicked */
-            transform: scale(0.98); /* Slight press-in effect */
-        }
-
-
-    </style>
+    <link rel="stylesheet" href="{% static 'users/css/module.css' %}">
+ 
 {% endblock %}
 
 {% block content %}
@@ -117,9 +31,8 @@
             {% for question in exercise.questions.all %}
                 <div class="question-item">
                     <label>{{ question.question_text }}</label>
-                    <textarea name="answer_{{ question.id }}" class="answer-field">
-                        {{ saved_responses|get_item:question.id|default:'' }}
-                    </textarea>
+                    <textarea name="answer_{{ question.id }}" class="answer-field">{{ saved_responses|get_item:question.id|default:'' }}</textarea>
+
                 </div>
             {% endfor %}
             <div class="submit-container">

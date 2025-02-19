@@ -8,22 +8,22 @@ from django.contrib.auth import logout
 # Create your views here.
 
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    return render(request, 'users/dashboard.html')
 
 def modules(request):
-    return render(request, 'modules.html')
+    return render(request, 'users/modules.html')
 
 def profile(request):
-    return render(request, 'profile.html')
+    return render(request, 'users/profile.html')
 
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
 
 def about(request):
-    return render(request, 'about.html')
+    return render(request, 'users/about.html')
 
 def contact_us(request):
-    return render(request, 'contact_us.html')
+    return render(request, 'users/contact_us.html')
 
 def log_in(request):
     """Log in page view function"""
@@ -36,13 +36,13 @@ def log_in(request):
 
             if user is not None:
                 login(request, user)
-                return redirect('dashboard')
+                return redirect('users/dashboard')
      
 
     else:
         form = LogInForm()
 
-    return render(request, 'log_in.html', {'form': form})
+    return render(request, 'users/log_in.html', {'form': form})
 
 
 #A function for displaying a sign up page
@@ -53,13 +53,13 @@ def sign_up_step_1(request):
         if user_form.is_valid():
 
             request.session['user_form_data'] = user_form.cleaned_data
-            return redirect('sign_up_step_2')
+            return redirect('users/sign_up_step_2')
     
     else:
         user_form_data = request.session.get('user_form_data', {})
         user_form = UserSignUpForm(initial=user_form_data) 
 
-    return render(request, 'sign_up_step_1.html', {'user_form': user_form})
+    return render(request, 'users/sign_up_step_1.html', {'user_form': user_form})
 
 def sign_up_step_2(request):
     """Handles Step 2: Profile Details"""
@@ -80,18 +80,18 @@ def sign_up_step_2(request):
                 profile.user = user
                 profile.save()
 
-                return redirect('log_in')
+                return redirect('users/log_in')
 
     else:
         profile_form = EndUserProfileForm()
 
-    return render(request, 'sign_up_step_2.html', {'profile_form': profile_form})
+    return render(request, 'users/sign_up_step_2.html', {'profile_form': profile_form})
 
 def log_out(request):
     """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
     if request.method == "POST":
         logout(request)
-        return redirect('log_in')
+        return redirect('users/log_in')
 
     # if user cancels, stay on the same page
-    return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
