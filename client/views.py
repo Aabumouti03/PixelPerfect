@@ -1,19 +1,40 @@
-from django.shortcuts import render, redirect
-from .forms import ProgramForm
-from .models import Module, ProgramModule
-from django.contrib.auth import logout
+from django.shortcuts import render, redirect, get_object_or_404
+from users.models import User
+from client.models import Module
+from django.contrib.auth import authenticate, login, logout
+from .forms import ProgramForm 
+from .models import Program
 
-def dashboard(request):
-    return render(request, 'client/dashboard.html')
+# Create your views here.
+def client_dashboard(request):
+    return render(request, 'client_dashboard.html')
 
-def modules(request):
-    return render(request, 'client/modules.html')
+def users_management(request):
+    users = User.objects.all().select_related('User_profile')
+    return render(request, 'users_management.html', {'users': users})
 
-def users(request):
-    return render(request, 'client/users.html')
+def modules_management(request):
+    modules = Module.objects.all().values("title")
+    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
+    
+    modules_list = []
+    for index, module in enumerate(modules):
+        module_data = {
+            "title": module["title"],
+            "color_class": module_colors[index % len(module_colors)]
+        }
+        modules_list.append(module_data)
+
+    return render(request, "modules_management.html", {"modules": modules_list})
+
+def users_management(request):
+    users = User.objects.all()
+    return render(request, 'users_management.html', {'users': users})
+    
 
 def programs(request):
-    return render(request, 'client/all_programs.html')
+    programs = Program.objects.all()
+    return render(request, 'programs.html', {'programs': programs})
 
 def logout_view(request):
     return render(request, 'client/logout.html')

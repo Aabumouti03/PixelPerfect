@@ -103,8 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # User model for authentication and login purposes
 AUTH_USER_MODEL = 'users.User'
-
-
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -126,6 +125,9 @@ STATICFILES_DIRS = [
     #BASE_DIR / 'static',  
     os.path.join(BASE_DIR, "client", "static"),
     os.path.join(BASE_DIR, "users", "static")
+]
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  
 ]
 
 # Default primary key field type

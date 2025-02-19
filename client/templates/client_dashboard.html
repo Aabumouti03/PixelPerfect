@@ -1,0 +1,94 @@
+<!-- index.html -->
+{% extends 'client_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
+{% endblock %}
+
+<!-- Content block  -->
+{% block content %}
+    <div class="content">
+        <div class="top-bar">
+            <h1>Welcome, Admin!</h1>
+        </div>
+        <div class="card-container">
+            <div class="card sales" data-url="{% url 'users_management' %}">
+                <img src="{% static 'img/profile.svg' %}" alt="Profile" class="icon">
+                <h2>Manage Users</h2>
+            </div>
+            <div class="card orders" data-url="{% url 'modules_management' %}">
+                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
+                <h2>Manage Modules</h2>
+            </div>
+            <div class="card visitors" data-url="{% url 'users_management' %}">
+                <img src="{% static 'img/Icon-4.svg' %}" alt="User" class="icon user-icon">
+                <h2 class="count">95,574</h2>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="chart-box">
+                <h3>User Gender Distribution</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="chart-box pie-chart">
+                <h3>Module Enrollment</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+            
+        </div>
+    </div>
+
+
+    <!-- Js Charts  -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+     <!-- JAVA SCRIPT -->
+
+    <script>
+
+    // Clickable cards 
+
+            document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".card").forEach(card => {
+            card.addEventListener("click", function() {
+                window.location.href = this.getAttribute("data-url");
+            });
+        });
+    });
+
+    // Charts
+
+        window.onload = function() {
+            var barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Female', 'Male', 'N/A'],
+                    datasets: [{
+                        label: 'Gender',
+                        data: [30, 40, 50],
+                        backgroundColor: '#ff4500'
+                    }]
+                },
+            });
+
+            var pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Exploring your work identity', 'Knowing your values', 'Understanding your superpowers', 'Exploring opportunities', 'Planning what\'s ahead'],
+                    datasets: [{
+                        data: [30, 45, 25, 100, 50],
+                        backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402","#4076FF"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+        };
+    </script>
+
+    {% endblock %}

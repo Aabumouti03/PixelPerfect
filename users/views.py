@@ -1,11 +1,48 @@
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from django.contrib.auth import authenticate, login, logout
-from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
-from django.contrib.auth import logout
-
+from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
+from django.shortcuts import render, get_object_or_404
+from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login 
+from django.contrib.auth.models import User  
+import os
+from django.conf import settings
+import random
 
 # Create your views here.
+
+#A function for displaying a page that welcomes users
+def welcome_page(request):
+    return render(request, 'welcome_page.html')
+
+# Login view for the user
+def log_in(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user) 
+                return redirect('dashboard')  
+                messages.error(request, 'Invalid username or password')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'log_in.html', {'form': form})
+
+#A function for displaying a sign up page
+def sign_up(request):
+    form = SignUpForm()
+    return render(request, 'sign_up.html', {'form': form})
 
 def dashboard(request):
     return render(request, 'users/dashboard.html')
