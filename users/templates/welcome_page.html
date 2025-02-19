@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReWork - Readiness to Return</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg shadow-sm p-3">
+        <div class="container">
+            <a class="logo navbar-brand fs-3" href="{% url 'welcome_page' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" width="40" class="me-2">
+                ReWork
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link navbar-text fw-bold" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link navbar-text fw-bold" href="#">About</a></li>
+                    <li class="nav-item"><a class="nav-link navbar-text fw-bold" href="#">Contact Us</a></li>
+                </ul>
+                <a href="{% url 'log_in' %}" class=" yellow-button ms-3 rounded-pill px-4 py-2 fw-bold">Log in</a>
+                <a href="{% url 'sign_up' %}" class=" yellow-button ms-2 rounded-pill px-4 py-2 fw-bold">Get Started</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-content">
+
+        <header class="text-center mt-5">
+            <h1 class="main-text fw-bold">Are you ready to return to work?</h1>
+            <p class="mid-text w-75 mx-auto">
+                This platform is designed to help you assess your readiness to return to work and provide personalized support to guide your journey.
+            </p>
+        </header>
+
+        <section class="container text-center my-5">
+            <div class="row">
+                <div class="col-md-3">
+                    <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 1</h5>
+                    <h4 class="mt-2">Answer a few questions.</h4>
+                    <p class="sub-text">Start by answering a few quick questions about your current feelings, challenges, personal experiences, and goals.</p>
+                    <img src="{% static 'images/question.png' %}" alt="Question Mark" width="170">
+                </div>
+                <div class="col-md-3">
+                    <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 2</h5>
+                    <h4 class="mt-2">Receive Personalized Recommendations</h4>
+                    <p class="sub-text">Based on your responses, we'll suggest relevant resources tailored to your needs.</p>
+                    <img src="{% static 'images/light_bulb.webp' %}" alt="Lightbulb Icon" width="100">
+                </div>
+                <div class="col-md-3">
+                    <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 3</h5>
+                    <h4 class="mt-2">Explore Content</h4>
+                    <p class="sub-text">Work through exercises, videos, and tasks designed to help you manage stress, build confidence, and prepare for work.</p>
+                    <img src="{% static 'images/notes.png' %}" alt="Notes Icon" width="150">
+                </div>
+                <div class="col-md-3">
+                    <h5 class="steps d-inline-block px-3 py-1 rounded-pill">Step 4</h5>
+                    <h4 class="mt-2">Track Your Progress</h4>
+                    <p class="sub-text">As you complete the content, you'll see your progress and feel more prepared to take the next step.</p>
+                    <img src="{% static 'images/progress.png' %}" alt="Progress Icon" width="150">
+                </div>
+            </div>
+        </section>
+        <div class="text-center my-5">
+            <p class="mid-text">Ready to begin? Take your first step by answering a few quick questions!</p>
+            <a href="#" style="font-size: 24px;" class="orange-button rounded-pill px-5 py-2 fw-bold ">Get Started!</a>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+</body>
+</html>

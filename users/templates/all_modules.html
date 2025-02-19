@@ -1,0 +1,310 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modules | ReWork</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* Layout: Sidebar + Main Content */
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #F24505;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        /* ReWork Title with Hexagon Icon */
+        .sidebar-title {
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title ion-icon {
+            font-size: 22px;
+            margin-right: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .sidebar ul li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .sidebar ul li.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        .sidebar ul li:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 5px;
+        }
+
+        /* Horizontal line between "Modules" and "Tasks" */
+        .sidebar hr {
+            width: 100%;
+            border: none;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 10px 0;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            padding: 40px;
+            background-color: #f9f9f9;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header (Title + Icons) */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            margin-bottom: 15px;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icons ion-icon {
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .profile-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Thinner line under title, placed closer to modules */
+        .title-line {
+            width: 100%;
+            max-width: 1100px;
+            height: 1px;
+            background-color: black;
+            margin-top: 2px;
+            margin-bottom: 15px;
+        }
+
+        /* Modules Container */
+        .modules-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 1100px;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Module Grid */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .module-card {
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: left;
+            position: relative;
+            height: 220px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-bottom: 15px;
+            padding-left: 15px;
+            transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        }
+
+        /* Alternating Colors */
+        .module-card:nth-child(6n+1),
+        .module-card:nth-child(6n+3),
+        .module-card:nth-child(6n+5) {
+            background-color: #0148FD;
+        }
+
+        .module-card:nth-child(6n+2),
+        .module-card:nth-child(6n+4),
+        .module-card:nth-child(6n+6) {
+            background-color: #73C4FD;
+        }
+
+        /* Plus/Minus Button */
+        .action-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .action-button ion-icon {
+            font-size: 18px;
+            color: white;
+        }
+        /* Smooth fade and scale animation */
+        .fade-in {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-title">
+                <ion-icon name="hexagon-outline"></ion-icon> ReWork <!-- Restored Hexagon Icon -->
+            </div>
+            <ul>
+                <li class="icon-item"><ion-icon name="grid-outline"></ion-icon>Dashboard</li>
+                <li class="icon-item"><ion-icon name="document-text-outline"></ion-icon>Programs</li>
+                <li class="icon-item active"><ion-icon name="folder-outline"></ion-icon>Modules</li>
+                <hr>
+                <li class="icon-item"><ion-icon name="list-outline"></ion-icon>Tasks</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="header">
+                <div class="header-left">
+                    <h1>Modules</h1>
+                </div>
+                <div class="header-icons">
+                    <ion-icon name="search-outline"></ion-icon>
+                    <ion-icon name="notifications-outline"></ion-icon>
+                    <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
+                </div>
+            </div>
+
+            <div class="title-line"></div>
+
+            <div class="modules-container">
+                <div class="module-grid">
+                    {% for module in all_modules %}
+                        <div class="module-card fade-in" data-module-id="{{ forloop.counter }}">
+                            <div class="action-button" onclick="toggleModule(this)">
+                                <ion-icon name="add-outline"></ion-icon>
+                            </div>
+                            <h5>{{ module.title }}</h5>
+                            <p>{{ module.description }}</p>
+                        </div>
+                    {% empty %}
+                        <p style="text-align: center; color: #555;">No modules found.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function toggleModule(button) {
+            let icon = button.querySelector("ion-icon");
+
+            if (icon.getAttribute("name") === "add-outline") {
+                icon.setAttribute("name", "remove-outline");
+                button.parentElement.classList.add("fade-out");
+                setTimeout(() => {
+                    button.parentElement.classList.remove("fade-out");
+                    button.parentElement.classList.add("fade-in");
+                }, 200);
+            } else {
+                icon.setAttribute("name", "add-outline");
+                button.parentElement.classList.add("fade-out");
+                setTimeout(() => {
+                    button.parentElement.classList.remove("fade-out");
+                    button.parentElement.classList.add("fade-in");
+                }, 200);
+            }
+        }
+    </script>
+</body>
+</html>
