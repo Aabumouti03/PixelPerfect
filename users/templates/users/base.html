@@ -3,7 +3,6 @@
 <head>
     {% load static %}  
     
-<<<<<<< HEAD
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
 
@@ -13,26 +12,12 @@
 </head>
 <body>
 
-=======
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ReWork{% endblock %}</title>
-
-    <!-- Link to your CSS file -->
-    <link rel="stylesheet" href="{% static 'users/css/styles.css' %}">
-    {% block extra_css %} {% endblock %}
-
-</head>
-<body>
-    
->>>>>>> origin/client_dashboard
     {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
-<<<<<<< HEAD
    
     <div id="logout-modal" class="modal">
         <div class="modal-content">
@@ -48,8 +33,6 @@
     
     <script src="{% static 'users/js/log_out.js' %}"></script>
 
-=======
->>>>>>> origin/client_dashboard
 
 </body>
 </html>
