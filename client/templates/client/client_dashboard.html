@@ -1,9 +1,9 @@
 <!-- index.html -->
-{% extends 'client_base.html' %}
+{% extends 'client/client_base.html' %}
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'client/css/client_dashboard.css' %}">
 {% endblock %}
 
 <!-- Content block  -->
@@ -14,15 +14,15 @@
         </div>
         <div class="card-container">
             <div class="card sales" data-url="{% url 'users_management' %}">
-                <img src="{% static 'img/profile.svg' %}" alt="Profile" class="icon">
+                <img src="{% static 'client/img/profile.svg' %}" alt="Profile" class="icon">
                 <h2>Manage Users</h2>
             </div>
             <div class="card orders" data-url="{% url 'modules_management' %}">
-                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
+                <img src="{% static 'client/img/modules.svg' %}" alt="Modules" class="icon">
                 <h2>Manage Modules</h2>
             </div>
             <div class="card visitors" data-url="{% url 'users_management' %}">
-                <img src="{% static 'img/Icon-4.svg' %}" alt="User" class="icon user-icon">
+                <img src="{% static 'client/img/Icon-4.svg' %}" alt="User" class="icon user-icon">
                 <h2 class="count">95,574</h2>
             </div>
         </div>

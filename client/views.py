@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User
 from client.models import Module
-from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login, logout
 from .forms import ProgramForm 
 from .models import Program, ProgramModule
 
@@ -75,3 +75,13 @@ def log_out(request):
     # if user cancels, stay on the same page
     return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 
+def program_detail(request, program_id):
+    """ View details of a single program """
+    program = get_object_or_404(Program, id=program_id)
+    return render(request, 'program_detail.html', {'program': program})
+
+def delete_program(request, program_id):
+    """ Delete a program and redirect to the programs list """
+    program = get_object_or_404(Program, id=program_id)
+    program.delete()
+    return redirect('programs')

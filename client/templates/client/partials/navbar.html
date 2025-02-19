@@ -6,13 +6,13 @@
     </div>
     <ul class="nav-links">
         <li>
-            <a href="{% url 'dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
+            <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
                 <img src="{% static 'client/img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
         </li>
         <li>
-            <a href="{% url 'users' %}" class="{%if request.path == '/users/' %}active{% endif %}">
+            <a href="{% url 'users_management' %}" class="{%if request.path == '/users/' %}active{% endif %}">
                 <img src="{% static 'client/img/users.svg' %}" alt="Users" class="icon">
                 <span>Users</span>
             </a>
@@ -24,7 +24,7 @@
             </a>
         </li>
         <li></li>
-            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
+            <a href="{% url 'modules_management' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
                 <img src="{% static 'client/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
