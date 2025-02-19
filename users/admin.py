@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
     UserProgramEnrollment, UserModuleEnrollment, UserResponse, 
-    Questionnaire_UserResponse, QuestionResponse  # ✅ Updated model name
+    Questionnaire_UserResponse, QuestionResponse, StickyNote# ✅ Updated model name
 )
 from client.models import Program, Module
 
@@ -109,4 +109,18 @@ class UserResponseAdmin(admin.ModelAdmin):
         """Ensure all EndUsers appear in the admin dropdown."""
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  
+        return form
+    
+@admin.register(StickyNote)
+class StickyNoteAdmin(admin.ModelAdmin):
+    """Admin panel for managing sticky notes."""
+    list_display = ('user', 'content', 'created_at', 'updated_at')  # Adjust the fields as needed
+    search_fields = ('user__username', 'content')  # Allow searching by the username and content
+    list_filter = ('created_at', 'user')  # Optionally filter by created_at and user
+    ordering = ('-created_at',)  # Optionally order by created_at in descending order
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
         return form

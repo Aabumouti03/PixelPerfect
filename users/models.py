@@ -193,3 +193,12 @@ class QuestionResponse(models.Model):
             raise ValidationError('Rating questions require a rating value')
 
 
+class StickyNote(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='sticky_notes')
+    content = models.TextField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    def __str__(self):
+        return f"StickyNote by {self.user.user.username}"
+
