@@ -104,6 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
+LOGIN_URL = "/log_in/"  # Change this to match your actual login URL
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

@@ -23,20 +23,21 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
-    path('log_out/', usersViews.log_out, name="log_out"),
+    path('log_out/', usersViews.log_out, name="log_out"),  # Keep this one
     path('sign_up/', usersViews.sign_up, name="sign_up"),
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
     path('profile/', usersViews.profile, name='profile'),
+
+    # Client URLs
     path('users_management/', clientViews.users_management, name='users_management'),
     path('modules_management/', clientViews.modules_management, name='modules_management'),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
-    path('users_management/', clientViews.users_management, name='users_management'),
+    
     path('programs/', clientViews.programs, name='programs'),
-    path('log_out/', clientViews.log_out, name="log_out"),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
-    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program')
+    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
 ]
