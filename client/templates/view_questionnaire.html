@@ -26,12 +26,14 @@
             <div class="question-card">
                 <h3>{{ question.question_text }}</h3>
                 
-                <!-- Multiple Choice Options -->
-                {% if question.question_type == "MULTIPLE_CHOICE" %}
+                <!-- Agreement Scale -->
+                {% if question.question_type == "AGREEMENT" %}
                 <ul class="choice-list">
-                    {% for choice in question.choices.all %}
-                    <li class="choice-item">{{ choice.text }}</li>
-                    {% endfor %}
+                    <li class="choice-item">Strongly Disagree</li>
+                    <li class="choice-item">Disagree</li>
+                    <li class="choice-item">Neutral</li>
+                    <li class="choice-item">Agree</li>
+                    <li class="choice-item">Strongly Agree</li>
                 </ul>
 
                 <!-- Rating Scale -->

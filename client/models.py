@@ -89,7 +89,7 @@ class Section(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     exercises = models.ManyToManyField('Exercise', related_name="sections")  
-    #diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
+    diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
     text_position_from_diagram = models.CharField(
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )
@@ -178,6 +178,7 @@ class Question (models.Model):
     ]
     SENTIMENT_CHOICES = [
         (1, 'Positive'),
+        (0, 'Neutral'),
         (-1, 'Negative'),
     ]
     questionnaire = models.ForeignKey(Questionnaire, related_name='questions', on_delete=models.CASCADE)

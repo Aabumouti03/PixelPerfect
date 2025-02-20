@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
 from django.contrib.auth import logout
-from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse, Choice
+from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import logging

@@ -168,3 +168,53 @@ body {
     background: #2980b9;
     transform: scale(1.05);
 }
+
+/* Style for the question type dropdown */
+.question-type-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Hover effect */
+.question-type-select:hover {
+    border-color: #3498db;
+}
+
+/* Focus (when clicked) */
+.question-type-select:focus {
+    outline: none;
+    border-color: #f24505;
+    box-shadow: 0px 0px 5px rgba(242, 69, 5, 0.5);
+}
+
+/* Dropdown arrow customization */
+.question-type-select::-ms-expand {
+    display: none; /* Hide default arrow in IE */
+}
+
+/* Apply custom styling when dropdown is opened */
+.question-type-select:active,
+.question-type-select:focus-within {
+    background-color: #f9f9f9;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Adjust width for smaller screens */
+@media (max-width: 768px) {
+    .question-type-select {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+

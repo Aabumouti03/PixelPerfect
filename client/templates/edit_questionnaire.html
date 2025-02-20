@@ -32,29 +32,31 @@
             <div class="questions-container">
                 {% for question in questions %}
                 <div class="question-card">
+                    <label>Question Text:</label>
                     <input type="text" name="question_text_{{ question.id }}" value="{{ question.question_text }}" required>
 
-                    <!-- Multiple Choice Options -->
-                    {% if question.question_type == "MULTIPLE_CHOICE" %}
-                    <ul class="choice-list">
-                        {% for choice in question.choices.all %}
-                        <li>
-                            <input type="text" name="choice_text_{{ choice.id }}" value="{{ choice.text }}" required>
-                            <a href="{% url 'delete_choice' choice.id %}" class="delete-btn">🗑</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                    <!-- Question Type Selector -->
+                    <label>Question Type:</label>
+                    <select name="question_type_{{ question.id }}" class="question-type-select" data-question-id="{{ question.id }}">
+                        <option value="AGREEMENT" {% if question.question_type == "AGREEMENT" %}selected{% endif %}>Agreement Scale</option>
+                        <option value="RATING" {% if question.question_type == "RATING" %}selected{% endif %}>Rating Scale</option>
+                    </select>
 
-                    <!-- Rating Scale -->
-                    {% elif question.question_type == "RATING" %}
-                    <div class="rating-scale">
-                        <label>Min Rating:</label>
-                        <input type="number" name="min_rating_{{ question.id }}" value="{{ question.min_rating }}" min="1" required>
-
-                        <label>Max Rating:</label>
-                        <input type="number" name="max_rating_{{ question.id }}" value="{{ question.max_rating }}" max="10" required>
+                    <!-- Agreement Scale (Fixed Choices) -->
+                    <div id="agreement-scale-{{ question.id }}" class="agreement-scale {% if question.question_type != 'AGREEMENT' %}hidden{% endif %}">
+                        <ul class="choice-list">
+                            <li class="choice-item">Strongly Disagree</li>
+                            <li class="choice-item">Disagree</li>
+                            <li class="choice-item">Neutral</li>
+                            <li class="choice-item">Agree</li>
+                            <li class="choice-item">Strongly Agree</li>
+                        </ul>
                     </div>
-                    {% endif %}
+
+                    <!-- Fixed Rating Scale -->
+                    <div id="rating-scale-{{ question.id }}" class="rating-scale {% if question.question_type != 'RATING' %}hidden{% endif %}">
+                        <label>Rating Scale: 1 - 5</label>
+                    </div>
 
                     <!-- Edit/Delete Question Buttons -->
                     <div class="question-actions">
@@ -73,6 +75,27 @@
         </form>
 
     </div>
+
+    <!-- JavaScript to Toggle Question Type Fields -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.question-type-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    let questionId = this.getAttribute('data-question-id');
+                    let agreementScale = document.getElementById('agreement-scale-' + questionId);
+                    let ratingScale = document.getElementById('rating-scale-' + questionId);
+
+                    if (this.value === "AGREEMENT") {
+                        agreementScale.classList.remove("hidden");
+                        ratingScale.classList.add("hidden");
+                    } else {
+                        agreementScale.classList.add("hidden");
+                        ratingScale.classList.remove("hidden");
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
