@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
-    UserProgramEnrollment, UserModuleEnrollment,
-    Questionnaire_UserResponse, QuestionResponse  # ✅ Updated model name
+    UserProgramEnrollment, UserModuleEnrollment, UserResponse, 
+    Questionnaire_UserResponse, QuestionResponse, StickyNote# ✅ Updated model name
 )
 from client.models import Program, Module
 
@@ -20,7 +20,7 @@ class QuestionnaireUserResponseAdmin(admin.ModelAdmin):
 @admin.register(QuestionResponse)
 class QuestionResponseAdmin(admin.ModelAdmin):
     """Admin panel for managing user responses to individual questions."""
-    list_display = ('user_response', 'question', 'selected_choice', 'rating_value')
+    list_display = ('user_response', 'question', 'rating_value')
     search_fields = ('user_response__user__username', 'question__questionnaire__title', 'question__question_type')
     list_filter = ('question__question_type',)
     ordering = ('user_response',)
@@ -100,3 +100,27 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     ordering = ('user__user__last_name', 'user__user__first_name')
 
 
+@admin.register(UserResponse)
+class UserResponseAdmin(admin.ModelAdmin):
+    list_display = ("user", "question", "response_text")
+    search_fields = ("user__user__username", "question__question_text")
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  
+        return form
+    
+@admin.register(StickyNote)
+class StickyNoteAdmin(admin.ModelAdmin):
+    """Admin panel for managing sticky notes."""
+    list_display = ('user', 'content', 'created_at', 'updated_at')  # Adjust the fields as needed
+    search_fields = ('user__username', 'content')  # Allow searching by the username and content
+    list_filter = ('created_at', 'user')  # Optionally filter by created_at and user
+    ordering = ('-created_at',)  # Optionally order by created_at in descending order
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
+        return form
