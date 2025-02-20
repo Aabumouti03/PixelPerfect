@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 import os
 from django.conf import settings
 import random
+from client.models import Module 
 
 # Create your views here.
 
@@ -106,24 +107,6 @@ def user_modules(request):
     return render(request, 'userModules.html', {"module_data": module_data})
 
 
-
 def all_modules(request):
-    modules = Module.objects.all()
-
-    return render(request, 'all_modules.html', {'modules': modules})
-
-def all_modules(request):
-    #modules = Module.objects.all()
-    
-    all_modules = [
-        {"title": "Mindfulness for a Balanced Life", "description": "Explore meditation, breathing exercises, and mental relaxation techniques to improve overall well-being.", "progress": 25},
-        {"title": "Workplace Safety & Adaptation", "description": "Covers health protocols, ergonomic setups, and adjustments to the work environment.", "progress": 82},
-        {"title": "Effective Communication & Collaboration", "description": "Focuses on rebuilding teamwork, trust, and clear workplace communication.", "progress": 9},
-        {"title": "Time Management & Productivity", "description": "Provides strategies for balancing tasks, avoiding burnout, and staying efficient.", "progress": 47},
-        {"title": "Leadership & Emotional Intelligence", "description": "Develop leadership skills, empathy, and team motivation strategies.", "progress": 64},
-        {"title": "Remote Work Best Practices", "description": "Learn how to stay productive while working remotely.", "progress": 38},
-        {"title": "Mental Health & Workplace Well-being", "description": "Gain awareness of workplace mental health and stress management techniques.", "progress": 55},
-        {"title": "Breaking the Stigma: Mental Health Awareness", "description": "A module focusing on reducing workplace stigma around mental health.", "progress": 15},
-    ]
-    return render(request, 'all_modules.html', {"all_modules": all_modules})
-
+    modules = Module.objects.all()  # Fetch all modules from the database
+    return render(request, 'all_modules.html', {'all_modules': modules})
