@@ -32,7 +32,7 @@ class LogInForm(AuthenticationForm):
     )
 
 
-class EndUserProfileForm(forms.ModelForm):
+class UserProfileForm(forms.ModelForm):
 
     #  User fields related to User model
     first_name = forms.CharField(max_length=50, required=True)
@@ -40,7 +40,7 @@ class EndUserProfileForm(forms.ModelForm):
     username = forms.CharField(max_length=30, required=True)
     email = forms.EmailField(required=True)
 
-        # EndUser fields that need extra validation
+    # EndUser fields that need extra validation
     phone_number = forms.CharField(
         max_length=15, required=False,
         validators=[RegexValidator(r'^\+?\d{7,15}$', message="Enter a valid phone number.")]
@@ -49,7 +49,7 @@ class EndUserProfileForm(forms.ModelForm):
 
     class Meta:
         model = EndUser
-        fields = ['phone_number', 'age', 'gender', 'ethnicity', 'last_time_to_Work', 'sector']
+        fields = ['phone_number', 'age', 'gender', 'ethnicity', 'last_time_to_work', 'sector']
 
 
     def __init__(self, *args, **kwargs):
@@ -69,7 +69,7 @@ class EndUserProfileForm(forms.ModelForm):
                 self.fields['age'].initial = end_user.age
                 self.fields['gender'].initial = end_user.gender
                 self.fields['ethnicity'].initial = end_user.ethnicity
-                self.fields['last_time_to_Work'].initial = end_user.last_time_to_Work
+                self.fields['last_time_to_work'].initial = end_user.last_time_to_work
                 self.fields['sector'].initial = end_user.sector
 
     def clean_email(self):

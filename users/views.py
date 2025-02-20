@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
-from .forms import EndUserProfileForm, UserSignUpForm, EndUserProfileForm, LogInForm
+from .forms import UserProfileForm, UserSignUpForm, EndUserProfileForm, LogInForm
+ 
 
 # Create your views here.
 
@@ -59,8 +60,7 @@ def sign_up(request):
 
     return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import logout
+
 
 def log_out(request):
     """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
@@ -77,11 +77,12 @@ def profile(request):
     """View to display the user profile"""
     user = request.user
 
-    if hasattr(user, 'User_profile'):  # Check if profile exists
-        return render(request, 'Profile/show_profile.html', {'user': user.User_profile})
+    if hasattr(user, 'User_profile'):
+        user_profile = user.User_profile
+        return render(request, 'Profile/show_profile.html', {'user': user, 'user_profile': user_profile})
     else:
         messages.error(request, "User profile not found.")
-        return redirect('welcome_page')  
+        return redirect('welcome_page')
 
 
  
@@ -95,7 +96,7 @@ def update_profile(request):
         return redirect('welcome_page')
 
     if request.method == "POST":
-        form = EndUserProfileForm(request.POST, instance=user.User_profile, user=user)
+        form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             try:
                 form.save()
@@ -105,7 +106,7 @@ def update_profile(request):
                 messages.success(request, "Your profile has been updated successfully!")
                 return redirect('show_profile')  
     else:
-        form = EndUserProfileForm(instance=user.User_profile, user=user)
+        form = UserProfileForm(instance=user.User_profile, user=user)
 
     return render(request, 'Profile/update_profile.html', {'form': form, 'user': user})
 

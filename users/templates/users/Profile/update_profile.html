@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/profile_style.css' %}">
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <span>Edit Profile</span>
+        <div class="small-partition"></div>
+    </div>
+
+    <!-- Profile Info Section: Image + Name -->
+    <div class="profile-info">
+        <img class="profile-pic" src="{{ request.user.gravatar }}" alt="Profile Picture">
+        <div class="profile-name">
+            <h2>{{ request.user.first_name }} {{ request.user.last_name }}</h2>
+        </div>
+    </div>
+
+    <!-- Partition Line -->
+    <hr class="partition-line">
+
+    <!-- Form Start -->
+    <form method="POST" action="{% url 'update_profile' %}">
+        {% csrf_token %}
+
+        <div class="profile-details">
+            <div class="form-group">
+                <label>First Name: <span class="required">*</span></label>
+                {{ form.first_name }}
+            </div>
+
+            <div class="form-group">
+                <label>Last Name: <span class="required">*</span></label>
+                {{ form.last_name }}
+            </div>
+
+            <div class="form-group">
+                <label>Username: <span class="required">*</span></label>
+                {{ form.username }}
+            </div>
+
+            <div class="form-group">
+                <label>Email Address: <span class="required">*</span></label>
+                {{ form.email }}
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number:</label>
+                {{ form.phone_number }}
+            </div>
+
+            <div class="form-group">
+                <label>Age: <span class="required">*</span></label>
+                {{ form.age }}
+            </div>
+
+            <div class="form-group">
+                <label>Gender: <span class="required">*</span></label>
+                {{ form.gender }}
+            </div>
+
+            <div class="form-group">
+                <label>Ethnicity:</label>
+                {{ form.ethnicity }}
+            </div>
+
+            <div class="form-group">
+                <label>Last Time Worked:  <span class="required">*</span></label>
+                {{ form.last_time_to_work }}
+            </div>
+
+            <div class="form-group">
+                <label>Sector: <span class="required">*</span></label>
+                {{ form.sector }}
+            </div>
+        </div>
+
+        <!-- Buttons Section -->
+        <div class="profile-buttons">
+            <div class="left-buttons">
+                <button type="submit" class="btn">Save Changes</button>
+                <a href="{% url 'show_profile' %}" class="btn cancel-btn">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
