@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Questionnaires</title>
+    <link rel="stylesheet" href="{% static 'css/Manage_Questionnaires.css' %}">
+</head>
+<body>
+
+    <div class="content">
+        <div class="top-bar">
+            <h1>Manage Questionnaires</h1>
+        </div>
+
+        <div class="card-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Created At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for questionnaire in questionnaires %}
+                    <tr>
+                        <td>{{ questionnaire.title }}</td>
+                        <td>{{ questionnaire.created_at }}</td>
+                        <td>
+                            {% if questionnaire.is_active %}
+                                <span class="active-status">Active</span>
+                            {% else %}
+                                <span class="inactive-status">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'view_questionnaire' questionnaire.id %}" class="btn view-btn">View</a>
+                            <a href="{% url 'edit_questionnaire' questionnaire.id %}" class="btn edit-btn">Edit</a>
+                            {% if not questionnaire.is_active %}
+                            <a href="{% url 'activate_questionnaire' questionnaire.id %}" class="btn activate-btn">Activate</a>
+                            {% endif %}
+                             <a href="{% url 'view_responders' questionnaire.id %}" class="btn responders-btn">View Responders</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No questionnaires available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

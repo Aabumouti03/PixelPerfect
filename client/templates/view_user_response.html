@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response by {{ user_response.user.user.first_name }}</title>
+    <link rel="stylesheet" href="{% static 'css/view_user_response.css' %}">
+</head>
+<body>
+
+    <div class="content">
+        <div class="top-bar">
+            <h1>Response by {{ user_response.user.user.full_name}}</h1>
+        </div>
+
+        <!-- User's Responses -->
+        <div class="questions-container">
+            {% for response in responses %}
+            <div class="question-card">
+                <h3>{{ response.question.question_text }}</h3>
+
+                <!-- Multiple Choice Response -->
+                {% if response.question.question_type == "MULTIPLE_CHOICE" %}
+                <ul class="choice-list">
+                    {% for choice in response.question.choices.all %}
+                    <li class="choice-item {% if response.selected_choice == choice %}selected-choice{% endif %}">
+                        {{ choice.text }}
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Rating Response -->
+                {% elif response.question.question_type == "RATING" %}
+                <div class="rating-scale">
+                    <span>Scale: {{ response.question.min_rating }} - {{ response.question.max_rating }}</span>
+                    <p class="selected-rating">User's Rating: <span class="highlighted-rating">{{ response.rating_value }}</span></p>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p>No responses available for this user.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

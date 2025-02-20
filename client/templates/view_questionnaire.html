@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ questionnaire.title }}</title>
+    <link rel="stylesheet" href="{% static 'css/view_questionnaire.css' %}">
+</head>
+<body>
+
+    <div class="content">
+        <div class="top-bar">
+            <h1>{{ questionnaire.title }}</h1>
+            <a href="#" class="btn edit-btn">Edit</a>
+        </div>
+
+        <!-- Questionnaire Description -->
+        <div class="description-box">
+            <p>{{ questionnaire.description }}</p>
+        </div>
+
+        <!-- Questions & Answers -->
+        <div class="questions-container">
+            {% for question in questions %}
+            <div class="question-card">
+                <h3>{{ question.question_text }}</h3>
+                
+                <!-- Multiple Choice Options -->
+                {% if question.question_type == "MULTIPLE_CHOICE" %}
+                <ul class="choice-list">
+                    {% for choice in question.choices.all %}
+                    <li class="choice-item">{{ choice.text }}</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Rating Scale -->
+                {% elif question.question_type == "RATING" %}
+                <div class="rating-scale">
+                    <span>Scale: {{ question.min_rating }} - {{ question.max_rating }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p>No questions available for this questionnaire.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

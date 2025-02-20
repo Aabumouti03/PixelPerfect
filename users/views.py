@@ -1,5 +1,5 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
 from django.contrib.auth import logout
@@ -7,10 +7,8 @@ from .models import Questionnaire, Question, QuestionResponse, Questionnaire_Use
 import json
 from django.views.decorators.csrf import csrf_exempt
 import logging
+from django.contrib import messages
 logger = logging.getLogger(__name__)
-
-
-
 
 def welcome_view(request):
     return render(request, 'welcome.html')

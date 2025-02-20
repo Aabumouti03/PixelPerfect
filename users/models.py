@@ -175,6 +175,7 @@ class Questionnaire_UserResponse(models.Model):
     
     class Meta:
         unique_together = ['user', 'questionnaire']
+        
 
 class QuestionResponse(models.Model):
     user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)

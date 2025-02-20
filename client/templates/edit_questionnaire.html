@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Questionnaire - {{ questionnaire.title }}</title>
+    <link rel="stylesheet" href="{% static 'css/edit_questionnaire.css' %}">
+</head>
+<body>
+
+    <div class="content">
+        <div class="top-bar">
+            <h1>Edit Questionnaire</h1>
+            <button type="submit" form="edit-form" class="btn save-btn">Save Changes</button>
+        </div>
+
+        <!-- Questionnaire Edit Form -->
+        <form id="edit-form" method="POST" action="{% url 'edit_questionnaire' questionnaire.id %}">
+            {% csrf_token %}
+
+            <!-- Editable Title & Description -->
+            <div class="description-box">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="{{ questionnaire.title }}" required>
+
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required>{{ questionnaire.description }}</textarea>
+            </div>
+
+            <!-- Questions List -->
+            <div class="questions-container">
+                {% for question in questions %}
+                <div class="question-card">
+                    <input type="text" name="question_text_{{ question.id }}" value="{{ question.question_text }}" required>
+
+                    <!-- Multiple Choice Options -->
+                    {% if question.question_type == "MULTIPLE_CHOICE" %}
+                    <ul class="choice-list">
+                        {% for choice in question.choices.all %}
+                        <li>
+                            <input type="text" name="choice_text_{{ choice.id }}" value="{{ choice.text }}" required>
+                            <a href="{% url 'delete_choice' choice.id %}" class="delete-btn">🗑</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Rating Scale -->
+                    {% elif question.question_type == "RATING" %}
+                    <div class="rating-scale">
+                        <label>Min Rating:</label>
+                        <input type="number" name="min_rating_{{ question.id }}" value="{{ question.min_rating }}" min="1" required>
+
+                        <label>Max Rating:</label>
+                        <input type="number" name="max_rating_{{ question.id }}" value="{{ question.max_rating }}" max="10" required>
+                    </div>
+                    {% endif %}
+
+                    <!-- Edit/Delete Question Buttons -->
+                    <div class="question-actions">
+                        <a href="{% url 'delete_question' question.id %}" class="btn delete-btn">Delete</a>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No questions available.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Add Question Button -->
+            <div class="add-question">
+                <a href="{% url 'add_question' questionnaire.id %}" class="btn add-btn">+ Add Question</a>
+            </div>
+        </form>
+
+    </div>
+
+</body>
+</html>

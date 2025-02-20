@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Manrope', sans-serif;
+    background: #ffffff;
+}
+
+/* Full Page Layout */
+.content {
+    flex-grow: 1;
+    padding: 30px;
+    margin-left: 25px;
+}
+
+/* Header Styling */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: #F24505;
+}
+
+/* Table Styling */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 18px;
+    text-align: left;
+}
+
+.styled-table th, .styled-table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.styled-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Status Labels */
+.active-status {
+    color: green;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.inactive-status {
+    color: red;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Button Styling */
+.btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-block;
+    transition: background 0.3s, transform 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+/* Button Colors */
+.view-btn {
+    background-color: white;
+    color: #3498db;
+    border-color: #3498db;
+}
+
+.edit-btn {
+    background-color: white;
+    color: #f39c12;
+    border-color: #f39c12;
+}
+
+.activate-btn {
+    background-color: white;
+    color: #27ae60;
+    border-color: #27ae60;
+}
+.responders-btn {
+    background-color: white;
+    color:purple;
+    border-color: purple;
+}
+
+/* Hover Effects */
+.btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+}
+
+/* Grid Layout for Consistency */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .card-container {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
