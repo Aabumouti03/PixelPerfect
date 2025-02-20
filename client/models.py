@@ -189,8 +189,9 @@ class Question (models.Model):
     sentiment = models.IntegerField(choices=SENTIMENT_CHOICES, default=1)  # +1 for positive, -1 for negative
 
     # For rating questions
-    min_rating = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
-    max_rating = models.IntegerField(null=True, blank=True, validators=[MaxValueValidator(10)])
+    #FIXED RATING SCALE (1 to 5)
+    FIXED_MIN_RATING = 1
+    FIXED_MAX_RATING = 5
 
     def __str__(self):
         return f"{self.questionnaire.title} - {self.question_text[:30]}"
