@@ -3,6 +3,7 @@
 
 {% block content %}
     <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -13,19 +14,18 @@
             font-family: 'Nunito', sans-serif;
         }
 
-        /* Main Content */
         .content {
-            flex: 1;
             padding: 40px;
             background-color: #f9f9f9;
-            width: 100%;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            justify-content: flex-start;
+            width: 100%;
         }
 
-        /* Header (Title + Search Bar) */
+        /* Header (Title + Icons + Search Bar) */
         .header {
             display: flex;
             justify-content: space-between;
@@ -36,9 +36,8 @@
         }
 
         .header-left h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: bold;
         }
 
         .header-icons {
@@ -47,6 +46,21 @@
             gap: 15px;
         }
 
+        .header-icons ion-icon {
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        /* Profile Icon */
+        .profile-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Search Bar */
         .search-bar {
             width: 250px;
             padding: 10px;
@@ -69,13 +83,11 @@
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
             max-width: 1100px;
             width: 100%;
-            flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Module Grid */
         .module-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -90,13 +102,15 @@
             text-align: left;
             position: relative;
             height: 220px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+            padding-bottom: 15px;
+            padding-left: 15px;
+            transition: transform 0.2s ease-in-out;
         }
 
-        /* Alternating Colors */
         .module-card:nth-child(6n+1),
         .module-card:nth-child(6n+3),
         .module-card:nth-child(6n+5) {
@@ -109,33 +123,54 @@
             background-color: #73C4FD;
         }
 
-        /* Smooth fade and scale animation */
-        .fade-in {
-            opacity: 1;
-            transform: scale(1);
+        /* Action Button */
+        .action-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
         }
 
-        .fade-out {
-            opacity: 0;
-            transform: scale(0.95);
+        .action-button ion-icon {
+            font-size: 18px;
+            color: white;
         }
 
     </style>
 
-    <main class="content">
+    <div class="content">
+        <!-- Header Section -->
         <div class="header">
             <div class="header-left">
-                <h1>All Modules</h1>
+                <h1>Modules</h1>
             </div>
             <div class="header-icons">
+                <!-- Search Bar -->
                 <input type="text" class="search-bar" placeholder="Search..." onkeyup="searchModules(event)">
+
+                <!-- Notification Bell -->
+                <ion-icon name="notifications-outline"></ion-icon>
+
+                <!-- Profile Picture -->
+                <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
             </div>
         </div>
 
+        <!-- Modules Grid -->
         <div class="modules-container">
             <div class="module-grid">
                 {% for module in all_modules %}
-                    <div class="module-card fade-in" data-module-id="{{ forloop.counter }}">
+                    <div class="module-card">
+                        <div class="action-button" onclick="toggleModule(this)">
+                            <ion-icon name="add-outline"></ion-icon>
+                        </div>
                         <h5>{{ module.title }}</h5>
                         <p>{{ module.description }}</p>
                     </div>
@@ -144,16 +179,33 @@
                 {% endfor %}
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
+        function toggleModule(button) {
+            let icon = button.querySelector("ion-icon");
+
+            if (icon.getAttribute("name") === "add-outline") {
+                icon.setAttribute("name", "remove-outline");
+            } else {
+                icon.setAttribute("name", "add-outline");
+            }
+        }
+
         function searchModules(event) {
             const query = event.target.value.toLowerCase();
             const modules = document.querySelectorAll('.module-card');
+            let count = 0;
+            const moduleGrid = document.querySelector('.module-grid');
 
             modules.forEach(module => {
                 const title = module.querySelector('h5')?.innerText.toLowerCase();
-                module.style.display = title.includes(query) ? '' : 'none';
+                if (title.includes(query)) {
+                    module.style.display = '';
+                    count++;
+                } else {
+                    module.style.display = 'none';
+                }
             });
         }
     </script>
