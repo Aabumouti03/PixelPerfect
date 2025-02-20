@@ -20,7 +20,7 @@ class QuestionnaireUserResponseAdmin(admin.ModelAdmin):
 @admin.register(QuestionResponse)
 class QuestionResponseAdmin(admin.ModelAdmin):
     """Admin panel for managing user responses to individual questions."""
-    list_display = ('user_response', 'question', 'selected_choice', 'rating_value')
+    list_display = ('user_response', 'question', 'rating_value')
     search_fields = ('user_response__user__username', 'question__questionnaire__title', 'question__question_type')
     list_filter = ('question__question_type',)
     ordering = ('user_response',)

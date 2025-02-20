@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,  
-    Questionnaire, Question, Choice, ProgramModule, Category, BackgroundStyle  
+    Questionnaire, Question, ProgramModule, Category, BackgroundStyle  
 )
 
 
@@ -19,14 +19,6 @@ class QuestionAdmin(admin.ModelAdmin):
     search_fields = ('questionnaire__title',)
     list_filter = ('question_type', 'is_required')
     ordering = ('questionnaire',)
-
-
-@admin.register(Choice)
-class ChoiceAdmin(admin.ModelAdmin):
-    list_display = ('question', 'text')
-    search_fields = ('question__questionnaire__title', 'text')
-    ordering = ('question',)
-
 
 class ProgramModuleInline(admin.TabularInline):
     model = ProgramModule
