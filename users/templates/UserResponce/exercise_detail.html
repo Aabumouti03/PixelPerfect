@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends 'users/base.html' %}
 
 {% block content %}
 <div class="container mt-4">
     <h2 class="text-center mb-4">{{ exercise.title }}</h2>
     {% load static %}
-    <link rel="stylesheet" href="{% static '/css/userresponse_style.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/exercise_detail.css' %}">
     <div class="row">
         {% for item in questions_with_responses %}
             <div class="col-md-6">

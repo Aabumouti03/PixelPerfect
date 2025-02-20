@@ -258,3 +258,29 @@ body {
     background-color: #F24505;
     color: white;
 }
+
+
+
+.nav-links .icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px; 
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+    white-space: nowrap;
+}
+
+.nav-links .fa-solid {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 1;
+}
