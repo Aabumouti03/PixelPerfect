@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
     UserProgramEnrollment, UserModuleEnrollment, UserResponse, 
-    Questionnaire_UserResponse, QuestionResponse, StickyNote# ✅ Updated model name
+    Questionnaire_UserResponse, QuestionResponse, StickyNote  # ✅ Updated model name
 )
 from client.models import Program, Module
 
