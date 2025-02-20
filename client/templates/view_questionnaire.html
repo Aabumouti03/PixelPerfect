@@ -11,6 +11,7 @@
 
     <div class="content">
         <div class="top-bar">
+            <a href="{% url 'manage_questionnaires' %}" class="btn back-btn">← Back</a>
             <h1>{{ questionnaire.title }}</h1>
             <a href="{% url 'edit_questionnaire' questionnaire.id %}" class="btn edit-btn">Edit</a>
         </div>
@@ -38,8 +39,8 @@
 
                 <!-- Rating Scale -->
                 {% elif question.question_type == "RATING" %}
-                <div class="rating-scale">
-                    <span>Scale: {{ question.min_rating }} - {{ question.max_rating }}</span>
+                <div id="rating-scale-{{ question.id }}" class="rating-scale {% if question.question_type != 'RATING' %}hidden{% endif %}">
+                    <label>Rating Scale: 1 - 5</label>
                 </div>
                 {% endif %}
             </div>

@@ -16,7 +16,7 @@ body {
 /* Top Bar */
 .top-bar {
     display: flex;
-    justify-content: space-between;
+    justify-content: stretch;
     align-items: center;
     margin-bottom: 20px;
     color: #F24505;
@@ -61,16 +61,9 @@ body {
 .choice-item {
     background: white;
     padding: 8px;
-    border-radius: 5px;
+    border-radius: 10px;
     margin-bottom: 5px;
     border: 1px solid #ddd;
-}
-
-/* Highlight User's Selected Answer */
-.selected-choice {
-    background-color: #3498db !important;
-    color: white;
-    font-weight: bold;
 }
 
 /* Rating Scale */
@@ -86,9 +79,33 @@ body {
     font-weight: bold;
 }
 
-.highlighted-rating {
-    background-color: #3498db;
+.selected-choice {
+    background-color: #007bff;
     color: white;
-    padding: 5px 10px;
+    font-weight: bold;
     border-radius: 10px;
+    padding: 8px;
+}
+
+.highlighted-rating {
+    font-size: 18px;
+    font-weight: bold;
+    color: #3498db;
+}
+.back-btn {
+    background-color: #F24505; 
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.back-btn:hover {
+    background: #F24505;
+    transform: scale(1.05);
 }

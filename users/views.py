@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
 from django.contrib.auth import logout
-from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
+from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser
 import json
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -22,10 +22,7 @@ def questionnaire(request):
             {
                 "id": q.id,
                 "question_text": q.question_text,
-                "question_type": q.question_type,  # Add question type
-                "choices": [{"id": choice.id, "text": choice.text} for choice in q.choices.all()] if q.question_type == "MULTIPLE_CHOICE" else [],
-                "min_rating": q.min_rating if q.question_type == "RATING" else None,
-                "max_rating": q.max_rating if q.question_type == "RATING" else None,
+                "question_type": q.question_type  # Add question type
             }
             for q in questions
         ]
@@ -49,41 +46,60 @@ def submit_responses(request):
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
-            user_id = request.user.id  # Ensure the user is authenticated and has an ID
-            if not user_id:
-                return JsonResponse({"success": False, "message": "User ID is missing. Please log in."})
+            # ✅ Ensure the user exists
+            try:
+                user = EndUser.objects.get(user=request.user)
+            except EndUser.DoesNotExist:
+                return JsonResponse({"success": False, "message": "User not found. Please sign in."})
 
+            # ✅ Ensure the questionnaire exists
             questionnaire_id = data.get("questionnaireId")
+            if not questionnaire_id:
+                return JsonResponse({"success": False, "message": "Questionnaire ID is missing."})
+
+            try:
+                questionnaire = Questionnaire.objects.get(id=questionnaire_id)
+            except Questionnaire.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Questionnaire not found."})
+
             responses = data.get("responses", [])
+            if not responses:
+                return JsonResponse({"success": False, "message": "No responses provided."})
 
-            logger.info("User ID: %s, Questionnaire ID: %s", user_id, questionnaire_id)
-
-            # Ensure questionnaire exists
+            # ✅ Ensure Questionnaire_UserResponse exists before adding responses
             questionnaire_user_response, created = Questionnaire_UserResponse.objects.get_or_create(
-                user_id=user_id,
-                questionnaire_id=questionnaire_id
+                user=user,
+                questionnaire=questionnaire
             )
 
             for response in responses:
                 question_id = response.get("questionId")
                 value = response.get("value")
 
-                logger.info("Processing response: %s", response)
+                if not question_id or value is None:
+                    logger.error("Missing questionId or value in response: %s", response)
+                    continue
 
-                question = Question.objects.get(id=question_id)
+                # ✅ Ensure the question exists
+                try:
+                    question = Question.objects.get(id=question_id)
+                except Question.DoesNotExist:
+                    logger.error("Question with ID %s does not exist.", question_id)
+                    continue
 
-                # Create QuestionResponse entry
+                # ✅ Save the QuestionResponse
                 question_response = QuestionResponse(
                     user_response=questionnaire_user_response,
-                    question=question
+                    question=question,
+                    rating_value=int(value) if question.question_type in ["AGREEMENT", "RATING"] else None
                 )
 
-                if question.question_type == "MULTIPLE_CHOICE":
-                    question_response.selected_choice = Choice.objects.get(id=value)
-                elif question.question_type == "RATING":
-                    question_response.rating_value = value
-
-                question_response.save()
+                try:
+                    question_response.full_clean()  # Validate the model instance
+                    question_response.save()
+                except ValidationError as e:
+                    logger.error("Validation error for question response: %s", str(e))
+                    continue
 
             return JsonResponse({"success": True, "message": "Responses saved successfully!"})
 

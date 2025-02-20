@@ -255,7 +255,7 @@ class Command(BaseCommand):
                     user=user,
                     age=random_age,
                     gender=random_gender,
-                    last_time_to_Work=random_last_time_to_work,
+                    last_time_to_work=random_last_time_to_work,
                     sector=random_sector
                 )
 

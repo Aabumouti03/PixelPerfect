@@ -67,12 +67,12 @@
     <script>
         // Retrieve CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
+    
         const questions = JSON.parse(document.getElementById("questions-data").textContent);
-
+    
         let currentQuestionIndex = 0;
         let selectedAnswers = {};
-
+    
         function updateQuestion() {
             if (questions.length === 0) {
                 document.getElementById("question-text").innerText = "No questions available.";
@@ -80,45 +80,53 @@
                 document.getElementById("rating-options").style.display = "none";
                 return;
             }
-
+    
             let currentQuestion = questions[currentQuestionIndex];
-
+    
             // Update question text
             document.getElementById("question-text").innerText = currentQuestion.question_text;
-
+    
+            // Clear previous answer options
+            document.getElementById("answer-options").innerHTML = "";
+            document.getElementById("rating-options").innerHTML = "";
+            document.getElementById("answer-options").style.display = "none";
+            document.getElementById("rating-options").style.display = "none";
+    
             // Check question type
-            if (currentQuestion.question_type === "MULTIPLE_CHOICE") {
+            if (currentQuestion.question_type === "AGREEMENT") {
                 document.getElementById("answer-options").style.display = "block";
-                document.getElementById("rating-options").style.display = "none";
-
-                // Generate multiple-choice buttons
-                let choicesHtml = "";
-                currentQuestion.choices.forEach((choice) => {
-                    choicesHtml += `<button class="answer-btn" data-value="${choice.id}">${choice.text}</button>`;
-                });
+    
+                let choicesHtml = `
+                    <button class="answer-btn" data-value="1">Strongly Disagree</button>
+                    <button class="answer-btn" data-value="2">Disagree</button>
+                    <button class="answer-btn" data-value="3">Neutral</button>
+                    <button class="answer-btn" data-value="4">Agree</button>
+                    <button class="answer-btn" data-value="5">Strongly Agree</button>
+                `;
                 document.getElementById("answer-options").innerHTML = choicesHtml;
             } 
             else if (currentQuestion.question_type === "RATING") {
-                document.getElementById("answer-options").style.display = "none";
                 document.getElementById("rating-options").style.display = "block";
-
-                // Generate rating scale buttons
-                let ratingHtml = "";
-                for (let i = currentQuestion.min_rating; i <= currentQuestion.max_rating; i++) {
-                    ratingHtml += `<button class="rating-btn" data-value="${i}">${i}</button>`;
-                }
+    
+                let ratingHtml = `
+                    <button class="rating-btn" data-value="1">1</button>
+                    <button class="rating-btn" data-value="2">2</button>
+                    <button class="rating-btn" data-value="3">3</button>
+                    <button class="rating-btn" data-value="4">4</button>
+                    <button class="rating-btn" data-value="5">5</button>
+                `;
                 document.getElementById("rating-options").innerHTML = ratingHtml;
             }
-
+    
             // Update progress bar
             let progress = ((currentQuestionIndex + 1) / questions.length) * 100;
             document.getElementById("progress-bar").style.width = progress + "%";
             document.getElementById("progress-bar").innerText = Math.round(progress) + "%";
-
+    
             // Enable/disable navigation buttons
             document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
             document.getElementById("next-btn").disabled = !selectedAnswers[currentQuestionIndex];
-
+    
             // Add event listeners for answer selection
             document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => {
                 btn.addEventListener("click", (e) => {
@@ -127,65 +135,63 @@
                         questionId: questions[currentQuestionIndex].id,
                         value: value,
                     };
-
+    
                     // Remove selected class from all buttons
                     document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => btn.classList.remove("selected"));
                     e.target.classList.add("selected");
-
+    
                     document.getElementById("next-btn").disabled = false;
                 });
             });
         }
-
+    
         // Navigation buttons
-                document.getElementById("next-btn").addEventListener("click", () => {
+        document.getElementById("next-btn").addEventListener("click", () => {
             if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
                 updateQuestion();
             } else {
-                console.log("Submitting responses...");  // Debugging log
+                console.log("Submitting responses...");  
                 submitResponses();
             }
         });
-
-
+    
         document.getElementById("prev-btn").addEventListener("click", () => {
             if (currentQuestionIndex > 0) {
                 currentQuestionIndex--;
                 updateQuestion();
             }
         });
-
+    
         // Initialize on page load
         window.onload = updateQuestion;
-
+    
         // Function to submit responses
-    function submitResponses() {
-    const responseData = {
-        "questionnaireId": "{{ active_questionnaire.id }}",
-        "responses": Object.values(selectedAnswers)
-    };
-
-    fetch("{% url 'submit_responses' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-        },
-        body: JSON.stringify(responseData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Responses saved successfully!");
-            window.location.href = "/dashboard/";
-        } else {
-            alert("Error: " + data.message);
+        function submitResponses() {
+            const responseData = {
+                "questionnaireId": "{{ active_questionnaire.id }}",
+                "responses": Object.values(selectedAnswers)
+            };
+    
+            fetch("{% url 'submit_responses' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify(responseData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Responses saved successfully!");
+                    window.location.href = "/dashboard/";
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
         }
-    })
-    .catch(error => console.error("Error:", error));
-}
-
-</script>
+    </script>    
 </body>
 </html>

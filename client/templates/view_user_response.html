@@ -11,7 +11,8 @@
 
     <div class="content">
         <div class="top-bar">
-            <h1>Response by {{ user_response.user.user.full_name}}</h1>
+            <a href="{% url 'manage_questionnaires' %}" class="back-btn">← Back</a>
+            <h1>Response by {{ user_response.user.user.full_name }}</h1>
         </div>
 
         <!-- User's Responses -->
@@ -20,20 +21,20 @@
             <div class="question-card">
                 <h3>{{ response.question.question_text }}</h3>
 
-                <!-- Multiple Choice Response -->
-                {% if response.question.question_type == "MULTIPLE_CHOICE" %}
+                <!-- Agreement Scale Response -->
+                {% if response.question.question_type == "AGREEMENT" %}
                 <ul class="choice-list">
-                    {% for choice in response.question.choices.all %}
-                    <li class="choice-item {% if response.selected_choice == choice %}selected-choice{% endif %}">
-                        {{ choice.text }}
-                    </li>
-                    {% endfor %}
+                    <li class="choice-item {% if response.rating_value == 1 %}selected-choice{% endif %}">Strongly Disagree</li>
+                    <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Disagree</li>
+                    <li class="choice-item {% if response.rating_value == 3 %}selected-choice{% endif %}">Neutral</li>
+                    <li class="choice-item {% if response.rating_value == 4 %}selected-choice{% endif %}">Agree</li>
+                    <li class="choice-item {% if response.rating_value == 5 %}selected-choice{% endif %}">Strongly Agree</li>
                 </ul>
 
-                <!-- Rating Response -->
+                <!-- Rating Scale Response -->
                 {% elif response.question.question_type == "RATING" %}
                 <div class="rating-scale">
-                    <span>Scale: {{ response.question.min_rating }} - {{ response.question.max_rating }}</span>
+                    <span>Scale: 1 - 5</span>
                     <p class="selected-rating">User's Rating: <span class="highlighted-rating">{{ response.rating_value }}</span></p>
                 </div>
                 {% endif %}

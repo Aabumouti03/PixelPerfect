@@ -50,6 +50,35 @@ def view_user_response(request, user_response_id):
         'responses': responses,
     })
 
+def create_questionnaire(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+
+        # Create new questionnaire
+        questionnaire = Questionnaire.objects.create(title=title, description=description)
+
+        # Retrieve all questions
+        question_index = 0
+        while f"question_text_{question_index}" in request.POST:
+            question_text = request.POST.get(f"question_text_{question_index}")
+            question_type = request.POST.get(f"question_type_{question_index}")
+            sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  # Default positive
+
+            # Create the question
+            Question.objects.create(
+                questionnaire=questionnaire,
+                question_text=question_text,
+                question_type=question_type,
+                sentiment=sentiment
+            )
+
+            question_index += 1  # Move to next question
+
+        messages.success(request, "Questionnaire created successfully!")
+        return redirect("manage_questionnaires")
+
+    return render(request, "create_questionnaire.html")
 
 def edit_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
@@ -64,25 +93,23 @@ def edit_questionnaire(request, questionnaire_id):
         # Update existing questions
         for question in questions:
             question_text = request.POST.get(f"question_text_{question.id}")
+            question_type = request.POST.get(f"question_type_{question.id}")  # ✅ Get question type from form
+
             if question_text:
                 question.question_text = question_text
 
-            # Handle Rating Question Updates
-            if question.question_type == "RATING":
-                min_rating = request.POST.get(f"min_rating_{question.id}")
-                max_rating = request.POST.get(f"max_rating_{question.id}")
-                if min_rating and max_rating:
-                    question.min_rating = int(min_rating)
-                    question.max_rating = int(max_rating)
+            if question_type:  # ✅ Update question type
+                question.question_type = question_type
 
             question.save()
 
-        return redirect("manage_questionnaires")
+        return redirect("view_questionnaire",  questionnaire_id=questionnaire.id)
 
     return render(request, "edit_questionnaire.html", {
         "questionnaire": questionnaire,
         "questions": questions
     })
+
 
 
 def delete_question(request, question_id):
@@ -104,3 +131,6 @@ def add_question(request, questionnaire_id):
     )
     
     return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+
+

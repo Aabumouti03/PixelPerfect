@@ -25,6 +25,7 @@ urlpatterns = [
     path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
     path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
     path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),
+    path("manage_questionnaires/create_questionnaire/", clientViews.create_questionnaire, name="create_questionnaire"),
     path('manage_questionnaires/<int:questionnaire_id>/', clientViews.view_questionnaire, name='view_questionnaire'),
     path('manage_questionnaires/<int:questionnaire_id>/responders/', clientViews.view_responders, name='view_responders'),
     path('manage_questionnaires/edit/<int:questionnaire_id>/', clientViews.edit_questionnaire, name='edit_questionnaire'),
