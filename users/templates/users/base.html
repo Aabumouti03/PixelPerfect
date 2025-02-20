@@ -1,34 +1,39 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}  
+    
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/profile.style.css' %}">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ReWonk{% endblock %}</title>
-
-    <!-- Keep the original CSS and add yours -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/profile.style.css' %}">
+    <title>{% block title %}ReWork{% endblock %}</title>
 </head>
 <body>
 
-    {% include 'partials/navbar.html' %}
+    {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
-
+   
     <div id="logout-modal" class="modal">
         <div class="modal-content">
             <h2>Are you sure you want to log out?</h2>
             <form method="POST" action="{% url 'log_out' %}">
                 {% csrf_token %}
-                <button type="submit">Yes, Log Out</button>
-                <a href="#"><button type="button">Cancel</button></a>
+                <button type="submit" class="confirm-logout">Yes, Log Out</button>
+                <button type="button" id="cancel-logout" class="cancel-logout">Cancel</button>
             </form>
         </div>
     </div>
+
+    
+    <script src="{% static 'users/js/log_out.js' %}"></script>
+
 
 </body>
 </html>

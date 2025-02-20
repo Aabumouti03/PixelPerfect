@@ -27,13 +27,17 @@ urlpatterns = [
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
-    path('sign_up/', usersViews.sign_up, name="sign_up"),
+    path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
+    path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('modules/', usersViews.modules, name='modules'),
     path('profile/', usersViews.profile, name='profile'),
+    path('about/', usersViews.about, name='about'),
+    path('contact_us/', usersViews.contact_us, name='contact_us'),
 
     #profile page add-ons
-    path('profile/', usersViews.profile, name='show_profile'),  
+    path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),  
 ]
+

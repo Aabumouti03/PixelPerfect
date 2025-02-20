@@ -11,16 +11,22 @@ from .forms import UserProfileForm, UserSignUpForm, EndUserProfileForm, LogInFor
 
 
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    return render(request, 'users/dashboard.html')
 
 def modules(request):
-    return render(request, 'modules.html')
+    return render(request, 'users/modules.html')
 
 def profile(request):
-    return render(request, 'profile.html')
+    return render(request, 'users/profile.html')
 
 def welcome_page(request):
-    return render(request, 'welcome_page.html')
+    return render(request, 'users/welcome_page.html')
+
+def about(request):
+    return render(request, 'users/about.html')
+
+def contact_us(request):
+    return render(request, 'users/contact_us.html')
 
 def log_in(request):
     """Log in page view function"""
@@ -34,52 +40,83 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
+     
 
     else:
         form = LogInForm()
 
-    return render(request, 'log_in.html', {'form': form})
+    return render(request, 'users/log_in.html', {'form': form})
 
 
 #A function for displaying a sign up page
-def sign_up(request):
+def sign_up_step_1(request):
+    """Handles Step 1: User Account Details"""
     if request.method == "POST":
         user_form = UserSignUpForm(request.POST)
-        profile_form = EndUserProfileForm(request.POST)
+        if user_form.is_valid():
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
-            return redirect('log_in')
+            request.session['user_form_data'] = user_form.cleaned_data
+            return redirect('sign_up_step_2')
+    
+    else:
+        user_form_data = request.session.get('user_form_data', {})
+        user_form = UserSignUpForm(initial=user_form_data) 
+
+    return render(request, 'users/sign_up_step_1.html', {'user_form': user_form})
+
+def sign_up_step_2(request):
+    """Handles Step 2: Profile Details"""
+    if 'user_form_data' not in request.session:
+        return redirect('sign_up_step_1')
+
+    if request.method == "POST":
+        profile_form = EndUserProfileForm(request.POST)
+        if profile_form.is_valid():
+
+            user_data = request.session.pop('user_form_data')
+            user_form = UserSignUpForm(data=user_data)
+            if user_form.is_valid():
+                user = user_form.save()
+                
+
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.save()
+
+                return redirect('log_in')
 
     else:
-        user_form = UserSignUpForm()
         profile_form = EndUserProfileForm()
 
-    return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
-
-
+    return render(request, 'users/sign_up_step_2.html', {'profile_form': profile_form})
 
 def log_out(request):
-    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
+    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
     if request.method == "POST":
         logout(request)
-        return redirect('welcome_page')
+        return redirect('log_in')
 
     # if user cancels, stay on the same page
-    return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+
+def forget_password(request):
+    return render(request, 'users/forget_password.html')
+
+def password_reset_sent(request, reset_id):
+    return render(request, 'users/password_reset_sent.html')
+
+def reset_password(request, reset_id):
+    return render(request, 'users/reset_password.html')
 
 
 @login_required 
-def profile(request):
+def show_profile(request):
     """View to display the user profile"""
     user = request.user
 
     if hasattr(user, 'User_profile'):
         user_profile = user.User_profile
-        return render(request, 'Profile/show_profile.html', {'user': user, 'user_profile': user_profile})
+        return render(request, 'users/Profile/show_profile.html', {'user': user, 'user_profile': user_profile})
     else:
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
@@ -108,7 +145,7 @@ def update_profile(request):
     else:
         form = UserProfileForm(instance=user.User_profile, user=user)
 
-    return render(request, 'Profile/update_profile.html', {'form': form, 'user': user})
+    return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
 
 
 
@@ -136,4 +173,7 @@ def delete_account(request):
         return redirect('welcome_page')
 
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
-    return render(request, 'Profile/delete_account.html', context)
+    return render(request, 'users/Profile/delete_account.html', context)
+
+
+
