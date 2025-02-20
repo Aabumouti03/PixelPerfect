@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - ReWork{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Welcome back, Giouliana!</h1>
+    <p>This is your personal dashboard where you can view your program, modules, and track your progress.</p>
+    <p>A clear mind goes a long way! Use the sticky note below to write down any thoughts on your mind.</p>
+
+    <!-- Programs Container -->
+    <div class="programs-container">
+        <!-- Program Header -->
+        <div class="programs-header">
+            <h2>Your Program: {{ program.title }}</h2>
+            <a href="{% url 'dashboard' %}" class="view-program-button">View Program</a>
+        </div>
+        <p>{{ program.description }}</p>
+
+        <!-- Program List -->
+        <div class="module-list">
+            {% for module in program_modules|slice:":4" %}
+            <div class="module-card">
+                <h3>{{ module.title }}</h3>
+                <p>{{ module.description }}</p>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%;"></div>
+                    </div>
+                    <span class="progress-text">50%</span>
+                </div>                
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <!-- Modules Container -->
+    <div class="modules-container">
+        <!-- Modules Header -->
+        <div class="modules-header">
+            <h2>Your Modules</h2>
+            <a href="{% url 'dashboard' %}" class="view-all-button">View All Modules</a>
+        </div>
+
+        <!-- Module List -->
+        <div class="module-list">
+            {% for module in modules|slice:":4" %} <!-- Show only the first 4 modules -->
+            <div class="module-card">
+                <h3>{{ module.title }}</h3>
+                <p>{{ module.description }}</p>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%;"></div>
+                    </div>
+                    <span class="progress-text">50%</span>
+                </div>                
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

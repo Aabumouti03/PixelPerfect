@@ -215,5 +215,166 @@ body {
 .sidebar:not(:hover) .toggle {
     opacity: 1;
 }
+/* Dashboard Container */
+.dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Modules Container */
+.modules-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832); /* Subtle shadow */
+    backdrop-filter: blur(10px); /* Blur effect for transparency */
+    margin-top: 20px;
+}
+
+.programs-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832); /* Subtle shadow */
+    backdrop-filter: blur(10px); /* Blur effect for transparency */
+    margin-top: 20px;
+}
+
+/* Modules Header */
+.modules-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px; /* Add space below the header */
+}
+
+.programs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px; /* Add space below the header */
+}
 
 
+/* Module List */
+.module-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Module Card */
+.module-card {
+    border-radius: 20px;
+    box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
+    width: 250px; /* Fixed width */
+    height: 283px; /* Fixed height */
+    flex-shrink: 0;
+    padding: 20px;
+    border-left: 5px solid #1d3c5337;
+    box-sizing: border-box; /* Ensure padding is included in the width/height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Align content evenly */
+}
+
+/* Alternate colors for adjacent cards */
+.module-card:nth-child(odd) {
+    background: #73C4FD; /* Color for odd-numbered cards */
+}
+
+.module-card:nth-child(even) {
+    background: #0148FD; /* Color for even-numbered cards */
+}
+
+.module-card h3 {
+    padding-top: 80px;
+    margin: 10px 0;
+    color: #e9e6e6;
+}
+
+.module-card h4 {
+    font-size: 12px;
+    padding-top: 80px;
+    margin: 10px 0;
+    color: #e9e6e6;
+}
+
+
+.module-card p {
+    margin: 2px 0;
+    color: #ffffff;
+}
+
+/* View All Button */
+.view-all-button {
+    font-size: 12px;
+    padding: 6px 10px;
+    background-color: #F24505;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.view-all-button:hover {
+    background-color: #f24405a5;
+}
+
+
+/* View All Button */
+.view-program-button {
+    font-size: 12px;
+    padding: 6px 10px;
+    background-color: #F24505;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.view-program-button:hover {
+    background-color: #f24405a5;
+}
+
+
+/* Flexbox container for alignment */
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Progress bar background */
+.progress-bar {
+    width: 200px;
+    height: 10px;
+    background: #ddd;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Progress fill (dynamic width) */
+.progress-fill {
+    height: 100%;
+    background: #F24505;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Percentage text */
+.progress-text {
+    font-weight: bold;
+    color: #ffffff;
+}
