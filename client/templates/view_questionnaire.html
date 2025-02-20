@@ -12,7 +12,7 @@
     <div class="content">
         <div class="top-bar">
             <h1>{{ questionnaire.title }}</h1>
-            <a href="#" class="btn edit-btn">Edit</a>
+            <a href="{% url 'edit_questionnaire' questionnaire.id %}" class="btn edit-btn">Edit</a>
         </div>
 
         <!-- Questionnaire Description -->
