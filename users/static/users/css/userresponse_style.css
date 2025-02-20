@@ -4,31 +4,31 @@ body {
     font-family: 'Manrope', sans-serif;
     background-color: white;
     margin: 0;
+    padding: 0;
+    display: flex; /* Allows sidebar and content to align */
 }
 
-/* Ensure full width */
-.container {
-    width: 90%;
-    max-width: 1200px; /* Limit width for larger screens */
-    margin: auto;
-    padding: 20px;
+/* Full Page Content */
+.content {
+    flex-grow: 1; /* Takes up all available space */
+    padding: 30px;
 }
 
-/* Title styling */
+/* Page Title */
 .page-title {
     text-align: center;
-    color: #0148fd;
+    color: #728bc9;
     font-size: 28px;
     margin-bottom: 20px;
 }
 
-/* Exercise Card (Full width) */
+/* Exercise Card */
 .exercise-card {
     background: #f8f9fa;
     border-radius: 10px;
     margin-bottom: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
+    width: 100%; /* Makes sure it fills the full width */
 }
 
 /* Exercise Header */
@@ -41,7 +41,6 @@ body {
     cursor: pointer;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    width: 100%;
 }
 
 .exercise-header h3 {
@@ -50,7 +49,7 @@ body {
     font-size: 20px;
 }
 
-/* Button (dropdown toggle) */
+/* Toggle Button */
 .toggle-btn {
     background: #FD5402;
     color: white;
@@ -61,7 +60,7 @@ body {
     border-radius: 50%;
 }
 
-/* Content inside each exercise (hidden by default) */
+/* Hidden Exercise Content */
 .exercise-content {
     display: none;
     padding: 15px;
@@ -91,17 +90,17 @@ body {
     border: 1px solid #ddd;
 }
 
-/* No Response Message */
+/* No Response / No Questions */
 .no-response, .no-question {
     color: #666;
     font-style: italic;
 }
 
-/* Ensure full width on small screens */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .container {
-        width: 95%;
-        padding: 10px;
+    .content {
+        width: 100%;
+        padding: 15px;
     }
 
     .exercise-header {
