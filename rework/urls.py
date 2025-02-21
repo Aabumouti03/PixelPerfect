@@ -19,13 +19,21 @@ from django.urls import path
 from client import views as clientViews
 from users import views as usersViews
 
+
 urlpatterns = [
+
+    # Users Views
     path('admin/', admin.site.urls),
+    path('programs/', clientViews.programs, name='programs'),
+    path('logout/', clientViews.logout_view, name='logout'),
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
-    path('log_out/', usersViews.log_out, name="log_out"),  # Keep this one
-    path('sign_up/', usersViews.sign_up, name="sign_up"),
+    path('log_out/', usersViews.log_out, name="log_out"),
+    path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
+    path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('dashboard/', usersViews.dashboard, name='dashboard'),
+    path('about/', usersViews.about, name='about'),
+    path('contact_us/', usersViews.contact_us, name='contact_us'),
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),

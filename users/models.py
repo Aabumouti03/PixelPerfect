@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Choice 
 from django.conf import settings
 
 #Choices used in more than one model
@@ -19,7 +19,7 @@ class User(AbstractUser):
         unique=True,
         validators=[RegexValidator(
             regex=r'^\w{3,}$',
-            message='Username must consist of @ followed by at least three alphanumericals'
+            message='Username must consist at least three alphanumericals'
         )]
     )
     first_name = models.CharField(max_length=50, blank=False)
@@ -157,6 +157,7 @@ class UserModuleProgress(models.Model):
     def __str__(self):
         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
+
 class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
@@ -164,7 +165,31 @@ class UserResponse(models.Model):
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Response by {self.user.username} for {self.question}"
+        return f"Response by {self.user.user.username} for {self.question}"
 
+
+# Questionnaire-related models
+class Questionnaire_UserResponse(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ['user', 'questionnaire']
+
+class QuestionResponse(models.Model):
+    user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_choice = models.ForeignKey(Choice, null=True, blank=True, on_delete=models.SET_NULL)
+    rating_value = models.IntegerField(null=True, blank=True)
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        
+        if self.question.question_type == 'MULTIPLE_CHOICE' and not self.selected_choice:
+            raise ValidationError('Multiple choice questions require a selected choice')
+        elif self.question.question_type == 'RATING' and not self.rating_value:
+            raise ValidationError('Rating questions require a rating value')
 
 

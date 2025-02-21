@@ -3,11 +3,13 @@ from users.models import User, EndUser, UserProgramEnrollment
 from client.models import Module
 from django.contrib.auth import authenticate, login, logout
 from .forms import ProgramForm 
+from .models import Program, ProgramModule
 from .models import Program
 from django.contrib.auth.decorators import user_passes_test
 
 # Create your views here.
 def client_dashboard(request):
+    return render(request, 'client/client_dashboard.html')
     return render(request, 'client/client_dashboard.html')
 
 def users_management(request):
@@ -27,9 +29,12 @@ def modules_management(request):
         modules_list.append(module_data)
 
     return render(request, "client/modules_management.html", {"modules": modules_list})
+    return render(request, "client/modules_management.html", {"modules": modules_list})
+    return render(request, "client/modules_management.html", {"modules": modules_list})
 
 def users_management(request):
     users = User.objects.all()
+    return render(request, 'client/users_management.html', {'users': users})
     return render(request, 'client/users_management.html', {'users': users})
     
 
@@ -37,24 +42,47 @@ def programs(request):
     programs = Program.objects.all()
     return render(request, 'client/programs.html', {'programs': programs})
 
+def logout_view(request):
+    return render(request, 'client/logout.html')
+    return render(request, 'client/programs.html', {'programs': programs})
+
 def create_program(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ProgramForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('programs')
+            program = form.save(commit=False)
+            program.save()
+
+            module_order = request.POST.get("module_order", "")
+            module_ids = module_order.split(",") if module_order else []
+
+            program.program_modules.all().delete()
+
+            # Add modules in the correct order
+            for index, module_id in enumerate(module_ids, start=1):
+                try:
+                    module = Module.objects.get(id=module_id)
+                    ProgramModule.objects.create(program=program, module=module, order=index)
+                except Module.DoesNotExist:
+                    pass
+
+            return redirect("programs")
     else:
         form = ProgramForm()
+
+    return render(request, "client/create_program.html", {"form": form})
     
     return render(request, 'client/create_program.html', {'form': form})
 
 
 def log_out(request):
-    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
+    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
     if request.method == "POST":
         logout(request)
-        return redirect('welcome_page')
+        return redirect('users:log_in')
 
+    # if user cancels, stay on the same page
+    return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
     return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 
 def program_detail(request, program_id):

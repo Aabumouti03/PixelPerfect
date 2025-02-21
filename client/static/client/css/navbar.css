@@ -216,7 +216,8 @@ body {
     opacity: 1;
 }
 
-/* The log out modal */
+
+/*---------------LOG OUT------------*/
 .modal {
     display: none;
     position: fixed;
@@ -225,45 +226,35 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); 
     justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease-in-out;
+    align-items: center;
 }
 
-#logout-modal:target {
-    display: flex;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Modal content */
 .modal-content {
-    background: white;
+    background-color: white;
+    color: #F24505;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    box-shadow: 0px 0px 10px #F24505;
-    min-width: 300px;
+    width: 300px;
 }
 
-/* Buttons */
-.modal-content button {
+
+.confirm-logout, .cancel-logout {
     margin: 10px;
-    padding: 10px 20px;
-    border: none;
+    padding: 12px 20px;
+    border: 2px solid #F24505;
+    background-color: transparent;
+    color: #F24505;
+    font-size: 16px;
+    border-radius: 50px;
     cursor: pointer;
+    transition: all 0.3s ease-in-out;
 }
 
-.modal-content button:first-child {
-    background: red;
-    color: white;
-}
 
-.modal-content button:last-child {
-    background: #F24505;
+.confirm-logout:hover, .cancel-logout:hover {
+    background-color: #F24505;
     color: white;
 }
