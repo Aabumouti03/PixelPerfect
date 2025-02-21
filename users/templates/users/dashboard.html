@@ -3,6 +3,7 @@
 
 {% block extra_css %} 
     <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/styles.css' %}">
     <script src="{% static 'users/js/sticky_note.js' %}"></script>
 {% endblock %}
 
@@ -10,69 +11,83 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <h1>Welcome back, Giouliana!</h1>
+    {% if user %} 
+        <h1>Welcome back, {{ user.first_name }}!</h1>
+    {% endif %}
     <p>This is your personal dashboard where you can view your program, modules, and track your progress.</p>
     <p>A clear mind goes a long way! Use the sticky note below to write down any thoughts on your mind.</p>
 
     <!-- Programs Container -->
     <div class="programs-container">
-        <!-- Program Header -->
         <div class="programs-header">
             <h2>Your Program: {{ program.title }}</h2>
-            <a href="{% url 'dashboard' %}" class="view-program-button">View Program</a>
+            <p>{{ program.description }}</p>
+            <a href="{% url 'program_detail' program.id %}" class="view-all-button">View Program</a>
         </div>
-        <p>{{ program.description }}</p>
 
-        <!-- Program List -->
         <div class="module-list">
-            {% for module in program_modules|slice:":4" %}
-            <div class="module-card">
-                <h3>{{ module.title }}</h3>
-                <p>{{ module.description }}</p>
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 50%;"></div>
-                    </div>
-                    <span class="progress-text">50%</span>
-                </div>                
-            </div>
+            {% for program_module in program_modules %}
+                {% with module=program_module.module %}
+                    {% if forloop.first or module.progress_value == 100 %}
+                        <!-- ✅ First module unlocked or completed modules -->
+                        <div class="module-card">
+                            <h3>{{ module.title }}</h3>
+                            <p>{{ module.description }}</p>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
+                                </div>
+                                <span class="progress-text">{{ module.progress_value }}% Complete</span>
+                            </div>                
+                            <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
+                        </div>
+                    {% else %}
+                        <!-- 🔒 Locked Module -->
+                        <div class="module-card locked">
+                            <h3>{{ module.title }}</h3>
+                            <p>{{ module.description }}</p>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <span class="progress-text">Locked</span>
+                            </div>                
+                            <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
+                        </div>
+                    {% endif %}
+                {% endwith %}
             {% endfor %}
         </div>
     </div>
 
-
     <!-- Modules Container -->
     <div class="modules-container">
-        <!-- Modules Header -->
         <div class="modules-header">
             <h2>Your Modules</h2>
             <a href="{% url 'dashboard' %}" class="view-all-button">View All Modules</a>
         </div>
 
-        <!-- Module List -->
         <div class="module-list">
-            {% for module in modules|slice:":4" %} <!-- Show only the first 4 modules -->
-            <div class="module-card">
+            {% for module in modules|slice:":4" %}
+            <div class="module-card {% if module in program_modules and module.progress_value == 0 %}locked{% endif %}">
                 <h3>{{ module.title }}</h3>
                 <p>{{ module.description }}</p>
                 <div class="progress-container">
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: 50%;"></div>
+                        <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
                     </div>
-                    <span class="progress-text">50%</span>
+                    <span class="progress-text">{{ module.progress_value }}% Complete</span>
                 </div>                
             </div>
-            {% endfor %}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="sticky-note">
+        <textarea placeholder="Write your note here..."></textarea>
+        <div class="note-controls">
+            <button class="bullet-btn">•</button>
         </div>
     </div>
 </div>
-
-        <div class="sticky-note">
-            <textarea placeholder="Write your note here..."></textarea>
-            <div class="note-controls">
-                <button class="bullet-btn">•</button> <!-- Bullet toggle button -->
-            </div>
-        </div>
-        
 {% endblock %}
-

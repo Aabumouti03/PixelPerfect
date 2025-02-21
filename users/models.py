@@ -107,7 +107,7 @@ class EndUser(models.Model):
     age = models.PositiveIntegerField(blank=False, null=True)  # Required
     gender = models.CharField(max_length=20, choices=GENDER_OPTIONS, blank=False, null = True)
     ethnicity = models.CharField(max_length=50, choices=ETHNICITY_CHOICES, blank=True, null=True)  # Optional
-    last_time_to_Work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
+    last_time_to_work = models.CharField(max_length=20, choices=TIME_DURATION_CHOICES, blank=False, null= True)
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, blank=False, null = True)  # Required
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional
 

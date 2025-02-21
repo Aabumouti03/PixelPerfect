@@ -1,7 +1,6 @@
 import django
 import os
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings")  
 django.setup()
 
@@ -255,7 +254,7 @@ class Command(BaseCommand):
                     user=user,
                     age=random_age,
                     gender=random_gender,
-                    last_time_to_Work=random_last_time_to_work,
+                    last_time_to_work=random_last_time_to_work,
                     sector=random_sector
                 )
 

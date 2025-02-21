@@ -270,18 +270,19 @@ body {
 
 /* Module Card */
 .module-card {
-    border-radius: 20px;
-    box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
-    width: 250px; /* Fixed width */
-    height: 283px; /* Fixed height */
-    flex-shrink: 0;
-    padding: 20px;
-    border-left: 5px solid #1d3c5337;
-    box-sizing: border-box; /* Ensure padding is included in the width/height */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Align content evenly */
+    justify-content: space-between; /* Ensures even spacing */
+    align-items: center; /* Center-align text */
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 220px; /* Ensure all cards have the same height */
+    max-width: 280px; /* Prevent overflow */
+    text-align: center;
 }
+
 
 /* Alternate colors for adjacent cards */
 .module-card:nth-child(odd) {
@@ -293,9 +294,10 @@ body {
 }
 
 .module-card h3 {
-    padding-top: 80px;
-    margin: 10px 0;
-    color: #e9e6e6;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
 }
 
 .module-card h4 {
@@ -305,10 +307,10 @@ body {
     color: #e9e6e6;
 }
 
-
 .module-card p {
-    margin: 2px 0;
-    color: #ffffff;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px; /* Increased space between description and progress bar */
 }
 
 /* View All Button */
@@ -348,33 +350,88 @@ body {
     background-color: #f24405a5;
 }
 
-
-/* Flexbox container for alignment */
+/* Progress Bar Styling */
 .progress-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Progress bar background */
-.progress-bar {
-    width: 200px;
-    height: 10px;
-    background: #ddd;
-    position: relative;
+    width: 90%;
+    background-color: #eee;
     border-radius: 10px;
+    height: 10px;
+    position: relative;
     overflow: hidden;
+    margin-top: 30px; /* Adds space between module description and progress bar */
 }
 
-/* Progress fill (dynamic width) */
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background-color: #ddd;
+    border-radius: 10px;
+}
+
 .progress-fill {
     height: 100%;
-    background: #F24505;
+    background: linear-gradient(90deg, #007bff, #0056b3);
     transition: width 0.5s ease-in-out;
 }
 
-/* Percentage text */
 .progress-text {
+    color: #ffffff; /* Ensure it's not set to white or transparent */
+    position: relative;
+    z-index: 10;
+    margin-top: 5px;
+}
+
+/* Locked module styling */
+.module-card.locked {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures even spacing */
+    align-items: center; /* Center-align text */
+    padding: 20px;
+    background: #e6e6e6;
+    color: #999;
+    pointer-events: none;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 220px; /* Ensure all cards have the same height */
+    max-width: 280px; /* Prevent overflow */
+    text-align: center;
+    opacity: 0.8; /* Slight fade effect to indicate locked state */
+}
+
+/* Locked module title and description styling */
+.module-card.locked h3 {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 8px; /* Adjusted spacing */
+}
+
+.module-card.locked p {
+    color: #777;
+    font-size: 0.9rem;
+    padding: 10px 0;
+    margin-bottom: 20px; /* Adjusted spacing */
+}
+
+/* Locked module progress bar */
+.module-card.locked .progress-container {
+    width: 90%;
+    background-color: #d6d6d6;
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: auto;
+}
+
+.module-card.locked .progress-fill {
+    background: #aaa; /* Dimmed progress bar for locked modules */
+}
+
+/* Locked module message */
+.module-card.locked .locked-message {
+    font-size: 0.85rem;
+    color: #666;
     font-weight: bold;
-    color: #ffffff;
+    text-align: center;
+    margin-top: 10px;
 }
