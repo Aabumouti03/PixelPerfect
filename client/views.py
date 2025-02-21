@@ -6,7 +6,19 @@ from users.models import Questionnaire_UserResponse, QuestionResponse
 
 def manage_questionnaires(request):
     questionnaires = Questionnaire.objects.all().order_by('-created_at')  
-    return render(request, 'Manage_Questionnaires.html', {'questionnaires': questionnaires})
+
+    # Get response count for each questionnaire
+    questionnaires_data = [
+        {
+            "questionnaire": q,
+            "response_count": Questionnaire_UserResponse.objects.filter(questionnaire=q).count()
+        }
+        for q in questionnaires
+    ]
+
+    return render(request, 'Manage_Questionnaires.html', 
+                  {'questionnaires_data': questionnaires_data})
+
 
 
 def activate_questionnaire(request, questionnaire_id):
@@ -110,13 +122,17 @@ def edit_questionnaire(request, questionnaire_id):
         "questions": questions
     })
 
-
+def delete_questionnaire(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    questionnaire.delete()
+    return redirect("manage_questionnaires")
 
 def delete_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     questionnaire_id = question.questionnaire.id
     question.delete()
     return redirect("edit_questionnaire", questionnaire_id=questionnaire_id)
+
 
 
 def add_question(request, questionnaire_id):

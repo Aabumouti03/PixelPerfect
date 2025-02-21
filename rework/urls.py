@@ -27,6 +27,7 @@ urlpatterns = [
     path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),
     path("manage_questionnaires/create_questionnaire/", clientViews.create_questionnaire, name="create_questionnaire"),
     path('manage_questionnaires/<int:questionnaire_id>/', clientViews.view_questionnaire, name='view_questionnaire'),
+    path('manage_questionnaires/<int:questionnaire_id>/delete/', clientViews.delete_questionnaire, name='delete_questionnaire'),
     path('manage_questionnaires/<int:questionnaire_id>/responders/', clientViews.view_responders, name='view_responders'),
     path('manage_questionnaires/edit/<int:questionnaire_id>/', clientViews.edit_questionnaire, name='edit_questionnaire'),
     path('manage_questionnaires/delete_question/<int:question_id>/', clientViews.delete_question, name='delete_question'),

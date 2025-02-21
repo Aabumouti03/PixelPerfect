@@ -22,32 +22,34 @@
                         <th>Title</th>
                         <th>Created At</th>
                         <th>Status</th>
+                        <th>Number of Responders</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for questionnaire in questionnaires %}
+                    {% for item in questionnaires_data %}
                     <tr>
-                        <td>{{ questionnaire.title }}</td>
-                        <td>{{ questionnaire.created_at }}</td>
+                        <td>{{ item.questionnaire.title }}</td>
+                        <td>{{ item.questionnaire.created_at|date:"M d, Y" }}</td>
                         <td>
-                            {% if questionnaire.is_active %}
+                            {% if item.questionnaire.is_active %}
                                 <span class="active-status">Active</span>
                             {% else %}
                                 <span class="inactive-status">Inactive</span>
                             {% endif %}
                         </td>
+                        <td class="center-text">{{ item.response_count }}</td>
                         <td>
-                            <a href="{% url 'view_questionnaire' questionnaire.id %}" class="btn view-btn">View</a>
-                            {% if not questionnaire.is_active %}
-                            <a href="{% url 'activate_questionnaire' questionnaire.id %}" class="btn activate-btn">Activate</a>
+                            <a href="{% url 'view_questionnaire' item.questionnaire.id %}" class="btn view-btn">View</a>
+                            {% if not item.questionnaire.is_active %}
+                            <a href="{% url 'activate_questionnaire' item.questionnaire.id %}" class="btn activate-btn">Activate</a>
                             {% endif %}
-                            <a href="{% url 'view_responders' questionnaire.id %}" class="btn responders-btn">View Responders</a>
+                            <a href="{% url 'view_responders' item.questionnaire.id %}" class="btn responders-btn">View Responders</a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">No questionnaires available.</td>
+                        <td colspan="5" class="text-center">No questionnaires available.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

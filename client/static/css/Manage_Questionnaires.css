@@ -149,3 +149,9 @@ body {
 .create-btn:hover {
     background: #d63008;
 }
+
+.center-text {
+    text-align: center; 
+    vertical-align: middle; 
+    font-weight: bold; /* Makes the number stand out */
+}
