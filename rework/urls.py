@@ -36,7 +36,7 @@ urlpatterns = [
     path('modules_management/', client_views.modules_management, name='modules_management'),
     path('logout/', client_views.logout_view, name='logout'),
     path('reports/', client_views.reports, name='reports'),
-
+    path('userStatistics/', client_views.userStatistics, name='userStatistics'),
 
 
 ]

@@ -1,4 +1,4 @@
-<!-- index.html -->
+<!-- index html -->
 {% extends 'client/base.html' %}
 {% load static %}
 
@@ -6,105 +6,122 @@
 <link rel="stylesheet" href="{% static 'client/css/reports.css' %}">
 {% endblock %}
 
-<!-- Content block  -->
+<!-- Content block -->
 {% block content %}
     <div class="content">
         <div class="top-bar">
             <h1>Reports Dashboard 📊</h1>
         </div>
 
-
         <!-- Charts Section -->
         <div class="charts">
             <!-- User Registration Trend (Line Chart) -->
-            <div class="chart-box" data-url="{% url 'users_management' %}">
+            <div class="chart-box" data-url="{% url 'userStatistics' %}">
                 <h3>User Registration Trend</h3>
                 <canvas id="lineChart"></canvas>
+
+                <!-- More User Statistics Button -->
+                <div class="more-stats-btn">
+                    More User Statistics →
+                </div>
             </div>
 
             <!-- Module Enrollment (Horizontal Bar Chart) -->
             <div class="chart-box pie-chart" data-url="{% url 'modules_management' %}">
                 <h3>Module Enrollment</h3>
                 <canvas id="horizontalBarChart"></canvas>
-            </div>
-        </div>
 
-        <div class="card-container">
-            <div class="card sales" data-url="{% url 'userStatistics' %}">
-                <img src="{% static 'client/img/profile.svg' %}" alt="Profile" class="icon">
-                <h2>Users Statistics</h2>
+                <!-- More Module Statistics Button -->
+                <div class="more-stats-btn">
+                    More Modules Statistics →
+                </div>
             </div>
-            <div class="card orders" data-url="{% url 'modules_management' %}">
-                <img src="{% static 'client/img/modules.svg' %}" alt="Modules" class="icon">
-                <h2>Modules Statistics</h2>
+
+            <!-- New User Activity Trend Chart (Bar Chart) -->
+            <div class="chart-box" data-url="{% url 'modules_management' %}">
+                <h3>User Activity Trend</h3>
+                <canvas id="activityChart"></canvas>
+
+                <!-- More Activity Statistics Button -->
+                <div class="more-stats-btn">
+                    More Programms Statistics →
+                </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Js Charts  -->
+    <!-- Js Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-     <!-- JAVA SCRIPT -->
 
-     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            try {
-                const statsData = JSON.parse('{{ stats|safe }}');
-                console.log("Parsed Stats Data:", statsData); // ✅ Debugging Log
-    
-                function createPieChart(ctxId, labels, data, colors) {
-                    const ctx = document.getElementById(ctxId);
-                    if (!ctx) {
-                        console.error(`Chart element #${ctxId} not found`);
-                        return;
-                    }
-                    new Chart(ctx.getContext('2d'), {
-                        type: 'pie',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: data,
-                                backgroundColor: colors
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
-                }
-    
-                const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#8D44AD", "#4CAF50", "#F39C12"];
-    
-                if (statsData) {
-                    const activationCtx = document.getElementById('activationChart');
-                    if (activationCtx) {
-                        new Chart(activationCtx.getContext('2d'), {
-                            type: 'bar',
-                            data: {
-                                labels: ['Active Users', 'Inactive Users'],
-                                datasets: [{
-                                    label: 'User Activation',
-                                    data: [statsData.active_users || 0, statsData.inactive_users || 0],
-                                    backgroundColor: ['green', 'red']
-                                }]
-                            },
-                            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-                        });
-                    } else {
-                        console.error("Activation Chart element not found.");
-                    }
-    
-                    createPieChart("genderChart", Object.keys(statsData.gender_distribution || {}), Object.values(statsData.gender_distribution || {}), colors);
-                    createPieChart("ethnicityChart", Object.keys(statsData.ethnicity_distribution || {}), Object.values(statsData.ethnicity_distribution || {}), colors);
-                    createPieChart("sectorChart", Object.keys(statsData.sector_distribution || {}), Object.values(statsData.sector_distribution || {}), colors);
-                } else {
-                    console.error("Stats data is undefined.");
-                }
-            } catch (error) {
-                console.error("Error parsing stats data:", error);
-            }
+    <!-- JavaScript -->
+    <script>
+    // Clickable cards
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".chart-box").forEach(card => {
+            card.addEventListener("click", function() {
+                window.location.href = this.getAttribute("data-url");
+            });
         });
+    });
+
+    // User Registration Trend (Line Chart)
+    var lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'New Users',
+                data: [10, 25, 15, 30, 45, 50],
+                borderColor: "#ff4500",
+                backgroundColor: "rgba(255, 69, 0, 0.2)",
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Module Enrollment (Horizontal Bar Chart)
+    var barCtx = document.getElementById('horizontalBarChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Exploring Work Identity', 'Knowing Values', 'Understanding Superpowers', 'Exploring Opportunities', 'Planning Ahead'],
+            datasets: [{
+                label: 'Enrollments',
+                data: [50, 80, 40, 90, 60],
+                backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402","#4076FF"],
+            }]
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // New User Activity Trend (Bar Chart)
+    var activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Active Users',
+                data: [20, 35, 50, 40, 60, 80],
+                backgroundColor: "#36a2eb",
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
     </script>
     
     
 
-    {% endblock %}
+{% endblock %}

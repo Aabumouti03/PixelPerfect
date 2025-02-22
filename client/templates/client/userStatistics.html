@@ -1,0 +1,134 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'client/css/reports.css' %}">
+<style>
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* ✅ 2 charts per row */
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .chart-box {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div class="content">
+        <h2>User Statistics Overview</h2>
+
+        <div class="chart-grid">
+            <!-- User Activation Chart -->
+            <div class="chart-box">
+                <h3>User Activity</h3>
+                <canvas id="activationChart"></canvas>
+            </div>
+
+            <!-- Gender Distribution Chart -->
+            <div class="chart-box">
+                <h3>Gender Distribution</h3>
+                <canvas id="genderChart"></canvas>
+            </div>
+
+            <!-- Ethnicity Distribution Chart -->
+            <div class="chart-box">
+                <h3>Ethnicity Distribution</h3>
+                <canvas id="ethnicityChart"></canvas>
+            </div>
+
+            <!-- Sector Distribution Chart -->
+            <div class="chart-box">
+                <h3>Sector Distribution</h3>
+                <canvas id="sectorChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                const statsData = JSON.parse('{{ stats|safe }}');
+                console.log("Parsed Stats Data:", statsData);
+
+                function createPieChart(ctxId, labels, data) {
+                    const ctx = document.getElementById(ctxId);
+                    if (!ctx) return;
+                    new Chart(ctx.getContext('2d'), {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: data,
+                                backgroundColor: ['#007bff', '#F24505', '#007bff', '#F24505', '#007bff', '#F24505']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+
+                const colors = ['#007bff', '#F24505'];
+
+                if (statsData) {
+                    const activationCtx = document.getElementById('activationChart');
+                    if (activationCtx) {
+                        new Chart(activationCtx.getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: ['Active Users', 'Inactive Users'],
+                                datasets: [{
+                                    label: 'User Activation',
+                                    data: [statsData.active_users || 0, statsData.inactive_users || 0],
+                                    backgroundColor: colors
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    createPieChart(
+                        "genderChart",
+                        Object.keys(statsData.gender_distribution || {}),
+                        Object.values(statsData.gender_distribution || {})
+                    );
+
+                    createPieChart(
+                        "ethnicityChart",
+                        Object.keys(statsData.ethnicity_distribution || {}),
+                        Object.values(statsData.ethnicity_distribution || {})
+                    );
+
+                    createPieChart(
+                        "sectorChart",
+                        Object.keys(statsData.sector_distribution || {}),
+                        Object.values(statsData.sector_distribution || {})
+                    );
+                } else {
+                    console.error("Stats data is undefined.");
+                }
+            } catch (error) {
+                console.error("Error parsing stats data:", error);
+            }
+        });
+    </script>
+{% endblock %}
