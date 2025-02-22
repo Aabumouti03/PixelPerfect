@@ -20,15 +20,14 @@ def welcome_page(request):
 
 def dashboard(request):
     return render(request, 'users/dashboard.html')
-    return render(request, 'users/dashboard.html')
 
 def modules(request):
     return render(request, 'users/modules.html')
-    return render(request, 'users/modules.html')
+
 
 def profile(request):
     return render(request, 'users/profile.html')
-    return render(request, 'users/profile.html')
+    
 
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
