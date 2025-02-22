@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import SignUpForm
+from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
 from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
 from django.contrib.auth.decorators import login_required
@@ -56,6 +56,56 @@ def modules(request):
 def profile(request):
     return render(request, 'profile.html')
 
+def welcome_page(request):
+    return render(request, 'welcome_page.html')
+
+def log_in(request):
+    """Log in page view function"""
+    if request.method == "POST":
+        form = LogInForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+
+    else:
+        form = LogInForm()
+
+    return render(request, 'log_in.html', {'form': form})
+
+
+#A function for displaying a sign up page
+def sign_up(request):
+    if request.method == "POST":
+        user_form = UserSignUpForm(request.POST)
+        profile_form = EndUserProfileForm(request.POST)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user = user_form.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
+            return redirect('log_in')
+
+    else:
+        user_form = UserSignUpForm()
+        profile_form = EndUserProfileForm()
+
+    return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
+
+
+def log_out(request):
+    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
+    if request.method == "POST":
+        logout(request)
+        return redirect('welcome_page')
+
+    # if user cancels, stay on the same page
+    return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 def logout_view(request):
     return render(request, 'logout.html')
 

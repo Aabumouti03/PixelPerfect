@@ -12,7 +12,7 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
+            <a href="{% url 'userModules' %}" class="{%if request.path == '/userModules/' %}active{% endif %}">
                 <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
@@ -24,11 +24,11 @@
             </a>
         </li>
         <div class="logout">
-            <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
-            <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
-            <span>Logout</span>
+            <a href="#logout-modal">
+                <img src="{% static 'img/logout.svg' %}" alt="Logout" class="icon">
+                <span>Logout</span>
             </a>
-        </div>
+        </div>        
     </ul>
 
     <div class="toggle">

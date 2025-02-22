@@ -104,6 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
+LOGIN_URL = "/log_in/"  # Change this to match your actual login URL
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -123,8 +126,14 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',  
 ]
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '' 
+LOGOUT_REDIRECT_URL = 'log_in'

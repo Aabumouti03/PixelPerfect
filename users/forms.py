@@ -1,27 +1,31 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import EndUser
-from django.contrib.auth.forms import AuthenticationForm
+from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import User, EndUser
 
-class SignUpForm(UserCreationForm):
-    password_confirmation = forms.CharField(
-        label="Password confirmation",
+
+class UserSignUpForm(UserCreationForm):
+    """Form for creating a new user account."""
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+
+class EndUserProfileForm(forms.ModelForm):
+    """Form for additional user profile information."""
+    
+    class Meta:
+        model = EndUser
+        fields = ['age', 'gender', 'sector', 'ethnicity', 'last_time_to_work', 'phone_number']
+
+
+class LogInForm(AuthenticationForm):
+    """Form for user log in."""
+    username = forms.CharField(
+        label="Username",
+        widget=forms.TextInput()
+    )
+    password = forms.CharField(
+        label="Password",
         widget=forms.PasswordInput()
     )
-
-    
-    def clean(self):
-        """Validate password and password confirmation match."""
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password1")
-        password_confirmation = cleaned_data.get("password_confirmation")
-
-        if password and password_confirmation and password != password_confirmation:
-            self.add_error('password_confirmation', "Passwords do not match.")
-
-        return cleaned_data
-
-# You can optionally customize the AuthenticationForm if needed
-class LogInForm(AuthenticationForm):
-    # If you need to add custom widgets or fields, you can modify the form here
-    pass

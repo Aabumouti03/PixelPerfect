@@ -9,10 +9,12 @@
 
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %} {% endblock %}
+
 </head>
 <body>
 
-    {% include 'partials/navbar.html' %}
+    {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
