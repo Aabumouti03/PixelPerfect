@@ -30,7 +30,7 @@
         </div>
 
         <div class="card-container">
-            <div class="card sales" data-url="{% url 'users_management' %}">
+            <div class="card sales" data-url="{% url 'userStatistics' %}">
                 <img src="{% static 'client/img/profile.svg' %}" alt="Profile" class="icon">
                 <h2>Users Statistics</h2>
             </div>
@@ -47,66 +47,64 @@
     
      <!-- JAVA SCRIPT -->
 
-    <script>
-
-    // Clickable cards 
-
-            document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".card").forEach(card => {
-            card.addEventListener("click", function() {
-                window.location.href = this.getAttribute("data-url");
-            });
+     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                const statsData = JSON.parse('{{ stats|safe }}');
+                console.log("Parsed Stats Data:", statsData); // ✅ Debugging Log
+    
+                function createPieChart(ctxId, labels, data, colors) {
+                    const ctx = document.getElementById(ctxId);
+                    if (!ctx) {
+                        console.error(`Chart element #${ctxId} not found`);
+                        return;
+                    }
+                    new Chart(ctx.getContext('2d'), {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: data,
+                                backgroundColor: colors
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+    
+                const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#8D44AD", "#4CAF50", "#F39C12"];
+    
+                if (statsData) {
+                    const activationCtx = document.getElementById('activationChart');
+                    if (activationCtx) {
+                        new Chart(activationCtx.getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: ['Active Users', 'Inactive Users'],
+                                datasets: [{
+                                    label: 'User Activation',
+                                    data: [statsData.active_users || 0, statsData.inactive_users || 0],
+                                    backgroundColor: ['green', 'red']
+                                }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                        });
+                    } else {
+                        console.error("Activation Chart element not found.");
+                    }
+    
+                    createPieChart("genderChart", Object.keys(statsData.gender_distribution || {}), Object.values(statsData.gender_distribution || {}), colors);
+                    createPieChart("ethnicityChart", Object.keys(statsData.ethnicity_distribution || {}), Object.values(statsData.ethnicity_distribution || {}), colors);
+                    createPieChart("sectorChart", Object.keys(statsData.sector_distribution || {}), Object.values(statsData.sector_distribution || {}), colors);
+                } else {
+                    console.error("Stats data is undefined.");
+                }
+            } catch (error) {
+                console.error("Error parsing stats data:", error);
+            }
         });
-    });
-
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".chart-box").forEach(card => {
-            card.addEventListener("click", function() {
-                window.location.href = this.getAttribute("data-url");
-            });
-        });
-    });
-
-    // Charts
-
-
-    // Charts
-    var lineCtx = document.getElementById('lineChart').getContext('2d');
-    new Chart(lineCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'New Users',
-                data: [10, 25, 15, 30, 45, 50],
-                borderColor: "#ff4500",
-                backgroundColor: "rgba(255, 69, 0, 0.2)",
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-
-    var barCtx = document.getElementById('horizontalBarChart').getContext('2d');
-    new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Exploring Work Identity', 'Knowing Values', 'Understanding Superpowers', 'Exploring Opportunities', 'Planning Ahead'],
-            datasets: [{
-                label: 'Enrollments',
-                data: [50, 80, 40, 90, 60],
-                backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402","#4076FF"],
-            }]
-        },
-        options: {
-            indexAxis: "y", // Makes it horizontal
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
     </script>
+    
+    
 
     {% endblock %}
