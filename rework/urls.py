@@ -19,7 +19,7 @@ from django.urls import path
 from client import views as clientViews
 from client import views as client_views
 from users import views as usersViews
-
+from client import reports_views as reports_views
 
 
 urlpatterns = [
@@ -49,9 +49,9 @@ urlpatterns = [
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-    path('reports/', clientViews.reports, name='reports'),
+    path('reports/', reports_views.reports, name='reports'),
     path('userStatistics/', client_views.userStatistics, name='userStatistics'),    
-    path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
-    path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
+    path('modules_statistics/', reports_views.modules_statistics, name='modules_statistics'),
+    path('programs_statistics/', reports_views.programs_statistics, name='programs_statistics'),
     
 ]

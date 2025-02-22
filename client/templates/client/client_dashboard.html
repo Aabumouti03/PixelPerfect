@@ -25,7 +25,7 @@
         </div>
         <div class="charts">
             <div class="chart-box">
-                <h3>User Gender Distribution</h3>
+                <h3>User Last Working Time</h3>
                 <canvas id="barChart"></canvas>
             </div>
             <div class="chart-box pie-chart">
@@ -57,34 +57,85 @@
     // Charts
 
         window.onload = function() {
-            var barCtx = document.getElementById('barChart').getContext('2d');
-            new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Female', 'Male', 'N/A'],
-                    datasets: [{
-                        label: 'Gender',
-                        data: [30, 40, 50],
-                        backgroundColor: '#ff4500'
-                    }]
-                },
-            });
 
-            var pieCtx = document.getElementById('pieChart').getContext('2d');
-            new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Exploring your work identity', 'Knowing your values', 'Understanding your superpowers', 'Exploring opportunities', 'Planning what\'s ahead'],
-                    datasets: [{
-                        data: [30, 45, 25, 100, 50],
-                        backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402","#4076FF"]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                }
-            });
+             // BAR CHART ( sector distribution )
+            var last_work_time_labels = JSON.parse('{{ last_work_time_labels|default:"[]"|safe|escapejs }}');
+            var last_work_time_data = JSON.parse('{{ last_work_time_data|default:"[]"|safe|escapejs }}');
+
+            if (document.getElementById('barChart')) {
+                var barCtx = document.getElementById('barChart').getContext('2d');
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: last_work_time_labels,
+                        datasets: [{
+                            label: 'Last Working Time',
+                            data: last_work_time_data,
+                            backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402", "#4076FF"],
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        var value = tooltipItem.raw;
+                                        return value === 0 ? 'No users' : value + 'sector';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.warn("⚠️ bar Chart not found in the document");
+            }
+
+            
+
+             // PIE CHART ( modules enrollement )
+             var enrollmentLabels = JSON.parse('{{ enrollment_labels|default:"[]"|safe|escapejs }}');
+            var enrollmentData = JSON.parse('{{ enrollment_data|default:"[]"|safe|escapejs }}');
+
+            if (document.getElementById('pieChart')) {
+                var pieCtx = document.getElementById('pieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: enrollmentLabels,
+                        datasets: [{
+                            label: 'Users Enrolled',
+                            data: enrollmentData,
+                            backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402", "#4076FF"],
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        var value = tooltipItem.raw;
+                                        return value === 0 ? 'No enrollments' : value + ' enrollments';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.warn("⚠️ Pie Chart not found in the document");
+            }
+
+
+
         };
     </script>
 
