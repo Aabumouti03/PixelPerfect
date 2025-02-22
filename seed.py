@@ -5,154 +5,114 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings")
 django.setup()
 
-from django.contrib.auth.models import User
+# Import the correct User model
+from users.models import User, EndUser, UserModuleEnrollment, UserModuleProgress
 from client.models import Module, Section, Exercise, ExerciseQuestion, Program
-from users.models import EndUser, UserModuleEnrollment, UserModuleProgress
 
-# Data structure for seeding
+# ✅ New modules added
 MODULES_AND_SECTIONS = {
     "Exploring your work identity": {
         "description": "Understand your work motivations and identity.",
-        "sections": [
-            {
-                "title": "Where are you now?",
-                "description": "Reflect on your current work status and aspirations.",
-                "exercises": [
-                    {
-                        "title": "Motivation PDF - where are you now?",
-                        "exercise_type": "short_answer",
-                        "questions": [
-                            "What are you putting up with at the moment?",
-                            "What do you think you should be doing right now, professionally?",
-                            "What do you really want in your professional life?",
-                            "What did you learn from this exercise?"
-                        ]
-                    }
-                ]
-            },
-            {
-                "title": "Your best possible self",
-                "description": "Visualize and plan your ideal professional future.",
-                "exercises": [
-                    {
-                        "title": "Getting unstuck PDF - your best possible self",
-                        "exercise_type": "short_answer",
-                        "questions": [
-                            "What did you do to make this happen?",
-                            "What personal qualities did you use?",
-                            "What did you have to work on?",
-                            "Who helped you get to this point?",
-                            "What resources made the difference?"
-                        ]
-                    }
-                ]
-            }
-        ]
+    },
+    "Understanding your superpowers": {
+        "description": "Finding your strengths supercharges your self-belief.",
+    },
+    "Exploring opportunities": {
+        "description": "Motivation, where do you want to go?",
+    },
+    "Planning what's next": {
+        "description": "Confidence PDF - what is getting in the way, personal SWOT.",
+    },
+    "Knowing your values": {
+        "description": "Getting unstuck PDF - know your values, getting unstuck PDF - Be, do and have exercise.",
     },
 }
 
 def seed_data():
-    """Seeds the database with modules, sections, exercises, questions, users, and enrollments."""
-    
-    # Define users
-    users = [
+    """Seeds the database with modules, users, enrollments, and progress."""
+
+    # ✅ Create Users
+    users_data = [
         {"username": "bob", "first_name": "Bob", "last_name": "Smith", "email": "bob@example.com", "password": "password123"},
         {"username": "alice", "first_name": "Alice", "last_name": "Johnson", "email": "alice@example.com", "password": "password123"}
     ]
 
     created_users = []
-    
-    # Create users and associated EndUsers
-    for user_data in users:
+    for user_data in users_data:
         try:
-            # Ensure password is hashed
-            user = User.objects.create_user(
+            user, created = User.objects.get_or_create(
                 username=user_data['username'],
-                first_name=user_data['first_name'],
-                last_name=user_data['last_name'],
-                email=user_data['email'],
-                password=user_data['password']  # password will be hashed automatically
+                defaults={
+                    "first_name": user_data['first_name'],
+                    "last_name": user_data['last_name'],
+                    "email": user_data['email'],
+                }
             )
-            created_users.append(user)
+            if created:
+                user.set_password(user_data['password'])  # Hash the password
+                user.save()
+                created_users.append(user)
+                print(f"✅ Created user: {user.username}")
 
-            # Create corresponding EndUser profile with additional info
-            end_user = EndUser.objects.create(
+            # Create EndUser profile
+            end_user, _ = EndUser.objects.get_or_create(
                 user=user,
-                age=25,
-                gender='male',  # Or 'female', or 'other' as needed
-                last_time_to_Work='1_year',  # Or your required value
-                sector='it',  # Your choice of sector
+                defaults={
+                    "age": 25,
+                    "gender": "male",  # Adjust as needed
+                    "last_time_to_Work": "1_year",
+                    "sector": "IT"
+                }
             )
-
-            print(f"Created User: {user.username}, EndUser: {end_user.user.username}")  # Debugging line
         except Exception as e:
-            print(f"Error creating user {user_data['username']}: {e}")  # Debugging line
+            print(f"❌ Error creating user {user_data['username']}: {e}")
 
-    # Create and link modules, sections, exercises, questions, and program (same as you had)
+    # ✅ Create Modules
+    created_modules = []
     for module_title, module_data in MODULES_AND_SECTIONS.items():
         try:
-            module, _ = Module.objects.get_or_create(
+            module, created = Module.objects.get_or_create(
                 title=module_title,
                 defaults={"description": module_data["description"]}
             )
-
-            for section_data in module_data["sections"]:
-                section, _ = Section.objects.get_or_create(
-                    title=section_data["title"],
-                    defaults={"description": section_data["description"]}
-                )
-
-                module.sections.add(section)
-
-                for exercise_data in section_data["exercises"]:
-                    exercise, _ = Exercise.objects.get_or_create(
-                        title=exercise_data["title"],
-                        defaults={"exercise_type": exercise_data["exercise_type"]}
-                    )
-
-                    section.exercises.add(exercise)
-
-                    for question_text in exercise_data["questions"]:
-                        question, _ = ExerciseQuestion.objects.get_or_create(
-                            question_text=question_text,
-                            defaults={"has_blank": False}  # Adjust as needed
-                        )
-
-                        exercise.questions.add(question)
+            if created:
+                print(f"✅ Created module: {module_title}")
+            created_modules.append(module)
         except Exception as e:
-            print(f"Error creating module/section: {module_title}, {e}")
+            print(f"❌ Error creating module {module_title}: {e}")
 
-    # Create Program and link modules
+    # ✅ Create Program and Link Modules
     try:
         program, created = Program.objects.get_or_create(
             title="Next Step",
             defaults={"description": "Figuring your next steps."}
         )
 
-        program.modules.set([
-            Module.objects.get(title="Exploring opportunities"),
-            Module.objects.get(title="Exploring your work identity"),
-            Module.objects.get(title="Planning what's next")
-        ])
-    except Exception as e:
-        print(f"Error creating program: {e}")
+        required_modules = list(MODULES_AND_SECTIONS.keys())  # All modules in the dictionary
+        existing_modules = Module.objects.filter(title__in=required_modules)
 
-    # Enroll Users in modules
+        if existing_modules.count() == len(required_modules):
+            program.modules.set(existing_modules)
+            print(f"✅ Program '{program.title}' linked to all modules.")
+        else:
+            print(f"⚠️ Warning: Not all modules exist. Skipping some program-module linking.")
+
+    except Exception as e:
+        print(f"❌ Error creating program: {e}")
+
+    # ✅ Enroll Users in Modules
     for user in created_users:
         try:
             end_user = EndUser.objects.get(user=user)
             for module in Module.objects.all():
-                # Enroll the user in the module
                 UserModuleEnrollment.objects.get_or_create(user=end_user, module=module)
-
-                # Set user progress for each module
                 UserModuleProgress.objects.get_or_create(user=end_user, module=module, completion_percentage=0, status='not_started')
 
-            print(f"User {user.username} enrolled in modules.")
+            print(f"✅ User {user.username} enrolled in all modules.")
         except Exception as e:
-            print(f"Error enrolling user {user.username}: {e}")  # Debugging line
+            print(f"❌ Error enrolling user {user.username}: {e}")
 
-    print("✅ Modules, Sections, Exercises, Questions, Users, and Enrollments seeded successfully!")
+    print("🎉 ✅ Seeding completed successfully!")
 
 if __name__ == "__main__":
     seed_data()

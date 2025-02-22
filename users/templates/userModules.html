@@ -168,18 +168,20 @@
         </div>
 
         <div class="module-grid">
-            {% for item in module_data %}
-            <div class="module-card" style="background-image: url('{% static item.background_image %}');">
-                <h5>{{ item.title }}</h5>
-                <p>{{ item.description }}</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: {{ item.progress }}%;"></div>
+            {% for module in module_data %}
+                <div class="module-card" style="background-image: url('{% static module.background_image %}');">
+                    <h5>{{ module.title }}</h5>
+                    <p>{{ module.description }}</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: {{ module.progress }}%;"></div>
+                    </div>
+                    <div class="progress-container">
+                        <small>{{ module.progress }}% completed</small>
+                        <a href="{% url 'module_overview' module.id %}">View →</a>
+                    </div>
                 </div>
-                <div class="progress-container">
-                    <small>{{ item.progress }}% completed</small>
-                    <a href="{% url 'module_overview' item.id %}">View →</a>
-                </div>
-            </div>
+            {% empty %}
+                <p style="text-align: center; color: #555;">No modules enrolled yet.</p>
             {% endfor %}
         
             <div class="view-all-container">

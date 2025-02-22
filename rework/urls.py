@@ -19,6 +19,7 @@ from django.urls import path
 from users import views
 from client import views as clientViews
 from users import views as usersViews
+from users.views import enroll_module, unenroll_module 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +31,9 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
     path('module-overview/<int:id>/', views.module_overview, name='module_overview'),
+    path("enroll-module/", enroll_module, name="enroll_module"),
+    path("unenroll-module/", unenroll_module, name="unenroll_module"),  # ✅ New route
     path('user-modules/', views.user_modules, name='modules'),
     path('all-modules/', views.all_modules, name='all_modules'),
-    
+
 ]
