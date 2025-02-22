@@ -12,8 +12,8 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
-                <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
+            <a href="{% url 'userModules' %}" class="{%if request.path == '/userModules/' %}active{% endif %}">
+                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
@@ -35,7 +35,7 @@
     </ul>
 
     <div class="toggle">
-        <img src="{% static 'img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
+        <img src="{% static 'users/img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
     </div>
 
 </div>

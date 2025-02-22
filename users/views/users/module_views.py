@@ -4,6 +4,7 @@ from users.forms.users.moduleForms import ExerciseAnswerForm
 from django.contrib.auth.decorators import login_required 
 from users.models import ExerciseResponse,EndUser
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -43,14 +44,14 @@ def module_overview(request, module_id):
 
 
 
+@login_required
 def exercise_detail(request, exercise_id):
     exercise = get_object_or_404(Exercise, id=exercise_id)
 
-    # Ensure request.user is an EndUser instance
-    User = get_user_model()  # Dynamically get the correct user model
-
-    user, created = EndUser.objects.get_or_create(user=request.user)
-
+    if request.user.is_authenticated:
+        user, created = EndUser.objects.get_or_create(user=request.user)
+    else:
+        return redirect('log_in')  # Redirect anonymous users
 
     # Retrieve existing answers for this user
     saved_responses = {
@@ -64,12 +65,12 @@ def exercise_detail(request, exercise_id):
 
             # Update existing response or create a new one
             response_obj, created = ExerciseResponse.objects.update_or_create(
-                user=user,  # ✅ Ensure this is an EndUser instance
+                user=user,  
                 question=question,
                 defaults={'response_text': answer_text}
             )
 
-        return redirect('users/exercise_detail', exercise_id=exercise.id)
+        return redirect('exercise_detail', exercise_id=exercise.id)
 
     return render(request, 'users/exercise_detail.html', {
         'exercise': exercise,

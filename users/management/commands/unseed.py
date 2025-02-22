@@ -1,42 +1,52 @@
+import django
+import os
 from django.core.management.base import BaseCommand
+from django.db import transaction, connection
 from client.models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
-from users.models import (
-    UserProgramEnrollment, UserModuleEnrollment, 
-    UserProgramProgress, UserModuleProgress, ExerciseResponse
-)
-from django.db import connection, transaction
+from users.models import EndUser, User, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress, UserResponse
 
 class Command(BaseCommand):
-    help = "Safely deletes all seeded data while avoiding missing tables."
+    help = "Deletes all seeded data except Admins and their users"
 
     def handle(self, *args, **kwargs):
-        """Deletes all seeded data."""
         self.stdout.write("⚠️ Deleting all seeded data...")
 
-        try:
-            with transaction.atomic():  # Ensure atomicity
-                # ✅ Disable foreign key constraints (SQLite/PostgreSQL fix)
-                with connection.cursor() as cursor:
-                    cursor.execute("PRAGMA foreign_keys = OFF;")
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = OFF;")
 
-                models_to_delete = [
-                    ExerciseResponse, ExerciseQuestion, Exercise,
-                    Section, AdditionalResource, Module, Program,
-                    UserProgramProgress, UserModuleProgress,
-                    UserProgramEnrollment, UserModuleEnrollment
-                ]
+            models_to_delete = [
+                UserResponse,
+                ExerciseQuestion,
+                Exercise,
+                Section,
+                AdditionalResource,
+                Module,
+                Program,
+                UserProgramProgress,
+                UserModuleProgress,
+                UserProgramEnrollment,
+                UserModuleEnrollment,
+            ]
 
-                for model in models_to_delete:
-                    try:
-                        deleted_count, _ = model.objects.all().delete()
-                        self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_count} objects from {model.__name__}"))
-                    except Exception as e:
-                        self.stdout.write(self.style.WARNING(f"⚠️ Skipping {model.__name__}: {e}"))
+            for model in models_to_delete:
+                try:
+                    deleted_count, _ = model.objects.all().delete()
+                    self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_count} objects from {model.__name__}"))
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f"⚠️ Skipping {model.__name__}: {e}"))
 
-                # ✅ Re-enable foreign key constraints
-                with connection.cursor() as cursor:
-                    cursor.execute("PRAGMA foreign_keys = ON;")
+            end_users = EndUser.objects.all()
+            deleted_endusers = end_users.count()
 
-            self.stdout.write(self.style.SUCCESS("✅ Unseeding complete!"))
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"❌ Error during unseeding: {e}"))
+            for enduser in end_users:
+                user = enduser.user
+                enduser.delete()
+                user.delete()
+
+            self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_endusers} EndUsers and their User accounts."))
+
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = ON;")
+
+        self.stdout.write(self.style.SUCCESS("✅ Unseeding complete! Admins and their related users are preserved."))

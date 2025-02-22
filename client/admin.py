@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,  
-    Questionnaire, Question, Choice, ProgramModule, Category 
+    Questionnaire, Question, Choice, ProgramModule, Category, BackgroundStyle  
 )
 
 
@@ -28,7 +28,6 @@ class ChoiceAdmin(admin.ModelAdmin):
     ordering = ('question',)
 
 
-### 🔹 NEW: Inline Admin for ProgramModule (to manage module order within a program)
 class ProgramModuleInline(admin.TabularInline):
     model = ProgramModule
     extra = 1  # Allows adding modules inline
@@ -45,11 +44,6 @@ class ProgramAdmin(admin.ModelAdmin):
     inlines = [ProgramModuleInline]  # 🔹 ADDED: Allows managing module order within a program
 
 
-@admin.register(Module)
-class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
-    search_fields = ('title', 'description')
-    ordering = ('title',)
 
 
 @admin.register(Category)  # 🔹 ADDED: To manage categories in Django Admin
@@ -65,9 +59,7 @@ class SectionAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     ordering = ('title',)
     list_filter = ('text_position_from_diagram',)  
-    filter_horizontal = ('additional_resources',)  
     readonly_fields = ('diagram_preview',)  
-
     def diagram_preview(self, obj):
         if obj.diagram:
             return f"✅ Diagram Uploaded"
@@ -75,6 +67,14 @@ class SectionAdmin(admin.ModelAdmin):
     
     diagram_preview.short_description = "Diagram"
 
+
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description', 'background_style')  
+    search_fields = ('title', 'description')
+    ordering = ('title',)
+    filter_horizontal = ('additional_resources',) 
+    autocomplete_fields = ('background_style',) 
 
 @admin.register(AdditionalResource)
 class AdditionalResourceAdmin(admin.ModelAdmin):
@@ -128,3 +128,9 @@ class ProgramModuleAdmin(admin.ModelAdmin):
     list_display = ('program', 'module', 'order')
     ordering = ('program', 'order')
     autocomplete_fields = ('program', 'module')  # Enables search dropdown
+
+@admin.register(BackgroundStyle)
+class BackgroundStyleAdmin(admin.ModelAdmin):
+    list_display = ('background_color', 'background_image')
+    search_fields = ('background_color', 'background_image')
+    list_filter = ('background_color',)

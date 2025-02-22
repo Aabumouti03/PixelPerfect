@@ -1,0 +1,108 @@
+/* Make the content fit the full viewport */
+.content {
+    width: 100%;
+    min-height: 100vh; /* Ensures full height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Keeps content at the top */
+    background: white;
+    padding: 20px;
+}
+
+/* Users Container should stretch */
+.users-container {
+    width: 95%;
+    max-width: 1200px;
+    background: #d6eaf3;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust Title */
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 26px;
+    color: #ff4500;
+}
+
+/* Improve Search & Filter Layout */
+.table-controls {
+    display: flex;
+    justify-content: space-between; /* Spread elements evenly */
+    align-items: center;
+    flex-wrap: wrap; /* Wrap controls on small screens */
+    gap: 15px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 10px;
+}
+
+/* Style input fields and select dropdown */
+.table-controls input,
+.table-controls select {
+    flex: 1; /* Make all inputs take equal space */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    min-width: 180px;
+    max-width: 250px;
+    transition: 0.3s ease;
+}
+
+/* Table should be wider */
+.rounded-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 15px;
+}
+
+/* Table Headers */
+.rounded-table th {
+    background: #007bff;
+    color: white;
+    padding: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s ease;
+    text-align: center;
+}
+
+/* Make sure table columns are centered */
+.rounded-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+}
+
+/* Alternate Row Colors */
+.rounded-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+/* Hover Effect */
+.rounded-table tbody tr:hover {
+    background: #e3f2fd;
+    transition: 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .table-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .rounded-table th, .rounded-table td {
+        padding: 10px;
+        font-size: 14px;
+    }
+}

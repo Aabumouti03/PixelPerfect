@@ -1,0 +1,115 @@
+@import url("styles.css");
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 30px;
+    background: #ffffff;
+    margin-left: 25px;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: #F24505;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Auto-adjust to fit 4-5 modules */
+    gap: 30px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.card {
+    height: 180px;
+    min-width: 200px;
+    max-width: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 10px;
+    color: white;
+}
+
+.card h2 {
+    margin-left: 5px;
+}
+
+/* .card.sales { background: #0048FF; } */
+
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+/* Style for dynamically generated module cards */
+.module-card {
+    height: 180px;
+    min-width: 200px;
+    max-width: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 10px;
+    color: white;
+    transition: transform 0.2s ease-in-out;    
+}
+
+/* Ensure text is centered properly */
+.module-card h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+/* Hover Effect */
+.module-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.color1 { background-color: #CEE7F2; }
+.color2 { background-color: #44778d; }
+.color3 { background-color: #a7d4e8; }
+.color4 { background-color: #ff5733; }
+.color5 { background-color: #3498DB; }
+.color6 { background-color: #CEE7F2; }
+
+
+
+/* Adjusts the number of columns for smaller screens */
+@media (max-width: 1024px) {
+    .card-container {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: repeat(2, 1fr); /* Show 2 per row on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container {
+        grid-template-columns: repeat(1, 1fr); /* Show 1 per row on mobile */
+    }
+}
