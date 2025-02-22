@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from client import views as clientViews
+from client import views as client_views
 from users import views as usersViews
+
 
 
 urlpatterns = [
@@ -48,6 +50,7 @@ urlpatterns = [
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
     path('reports/', clientViews.reports, name='reports'),
+    path('userStatistics/', client_views.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
     
 ]

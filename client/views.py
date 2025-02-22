@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User
 from client.models import Module
+from collections import Counter
+import json
+from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
+
 from django.contrib.auth import authenticate, login, logout
 from .forms import ProgramForm 
 from .models import Program, ProgramModule, Module
@@ -110,3 +114,31 @@ def modules_statistics(request):
         'completion_time_labels': json.dumps(avg_completion_labels),
         'completion_time_data': json.dumps(avg_completion_data),  
     })
+
+def userStatistics(request):
+    total_users = EndUser.objects.count()
+    active_users = EndUser.objects.filter(user__is_active=True).count()
+    inactive_users = total_users - active_users
+    total_programs_enrolled = UserProgramEnrollment.objects.count()
+
+    # Get gender distribution
+    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
+    
+    # Get ethnicity distribution
+    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
+    
+    # Get sector distribution
+    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
+
+    # Pass data as JSON
+    stats_data = {
+        "total_users": total_users,
+        "active_users": active_users,
+        "inactive_users": inactive_users,
+        "programs_enrolled": total_programs_enrolled,
+        "gender_distribution": gender_counts,
+        "ethnicity_distribution": ethnicity_counts,
+        "sector_distribution": sector_counts,
+    }
+
+    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})  # ✅ Pass JSON data

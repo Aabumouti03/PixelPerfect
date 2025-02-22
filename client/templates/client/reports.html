@@ -16,7 +16,7 @@
         <!-- Charts Section -->
         <div class="charts">
             <!-- User Registration Trend (Line Chart) -->
-            <div class="chart-box line-chart" data-url="{% url 'users_management' %}">
+            <div class="chart-box" data-url="{% url 'userStatistics' %}">
                 <h3>User Registration Trend</h3>
                 <canvas id="lineChart"></canvas>
 
@@ -121,5 +121,7 @@
         }
     });
     </script>
+    
+    
 
 {% endblock %}

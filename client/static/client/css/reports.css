@@ -52,6 +52,19 @@ body {
 }
 
 
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* ✅ Responsive layout */
+    gap: 20px;
+    margin-top: 20px;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto;
+    min-height: 300px; /* ✅ Ensure it isn't too small */
+}
+
 /* 🔹 Make Buttons Uniform */
 .more-stats-btn {
     background-color: #3498DB;
