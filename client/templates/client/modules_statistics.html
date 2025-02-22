@@ -1,9 +1,9 @@
-{% extends 'client/base.html' %}
+{% extends 'client/client_base.html' %}
 {% load static %}
 
 <!-- Content block  -->
 {% block content %}
-<link rel="stylesheet" href="{% static 'client/css/modules_statistics.css' %}">
+<link rel="stylesheet" href="{% static 'client/css/statistics.css' %}">
     <div class="content">
         <div class="top-bar">
             <h1>Modules Statistics 📊</h1>
@@ -13,8 +13,8 @@
         <div class="charts">
             <!-- User Gender Distribution -->
             <div class="chart-box count">
-                <h3 class= modules_count>Number of Modules 📊</h3>
-                <h3 class= modules_count>{{ modules_count }}</h3>
+                <h3 class= count>Number of Modules 📊</h3>
+                <h3 class= count>{{ modules_count }}</h3>
             </div>
 
             <!-- Module Enrollment -->
@@ -22,6 +22,7 @@
                 <h3>Module Enrollment</h3>
                 <canvas id="pieChart"></canvas>
             </div>
+
         </div>
         
          <!-- CHARTS -->
@@ -38,6 +39,7 @@
                 <h3>Average Module Completion Rate</h3>
                 <canvas id="completionTimeChart"></canvas>
             </div>
+            
         </div>
 
     </div>

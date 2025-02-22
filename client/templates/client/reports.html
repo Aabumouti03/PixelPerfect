@@ -1,13 +1,11 @@
 <!-- index html -->
-{% extends 'client/base.html' %}
+{% extends 'client/client_base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'client/css/reports.css' %}">
-{% endblock %}
 
 <!-- Content block -->
 {% block content %}
+    <link rel="stylesheet" href="{% static 'client/css/reports.css' %}">
     <div class="content">
         <div class="top-bar">
             <h1>Reports Dashboard 📊</h1>
@@ -17,18 +15,18 @@
         <div class="charts">
             <!-- User Registration Trend (Line Chart) -->
             <div class="chart-box" data-url="{% url 'userStatistics' %}">
-                <h3>User Registration Trend</h3>
+                <h3>Users Last-Working-Time</h3>
                 <canvas id="lineChart"></canvas>
 
                 <!-- More User Statistics Button -->
                 <div class="more-stats-btn">
-                    More User Statistics →
+                    More Users Statistics →
                 </div>
             </div>
 
             <!-- Module Enrollment (Horizontal Bar Chart) -->
             <div class="chart-box pie-chart" data-url="{% url 'modules_statistics' %}">
-                <h3>Module Enrollment</h3>
+                <h3>Modules Enrollment</h3>
                 <canvas id="horizontalBarChart"></canvas>
 
                 <!-- More Module Statistics Button -->
@@ -38,8 +36,8 @@
             </div>
 
             <!-- New User Activity Trend Chart (Bar Chart) -->
-            <div class="chart-box bar-chart" data-url="{% url 'modules_management' %}">
-                <h3>User Activity Trend</h3>
+            <div class="chart-box bar-chart" data-url="{% url 'programs_statistics' %}">
+                <h3>Programs Enrollment</h3>
                 <canvas id="activityChart"></canvas>
 
                 <!-- More Activity Statistics Button -->
@@ -50,76 +48,178 @@
         </div>
     </div>
 
-    <!-- Js Charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Js Charts -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- JavaScript -->
-    <script>
-    // Clickable cards
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".chart-box").forEach(card => {
-            card.addEventListener("click", function() {
-                window.location.href = this.getAttribute("data-url");
+
+        <!-- JavaScript -->
+        <script>
+
+        // Clickable cards
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".chart-box").forEach(card => {
+                card.addEventListener("click", function() {
+                    window.location.href = this.getAttribute("data-url");
+                });
             });
         });
-    });
 
-    // User Registration Trend (Line Chart)
-    var lineCtx = document.getElementById('lineChart').getContext('2d');
-    new Chart(lineCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'New Users',
-                data: [10, 25, 15, 30, 45, 50],
-                borderColor: "#ff4500",
-                backgroundColor: "rgba(255, 69, 0, 0.2)",
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
+        // LAST WORKING TIME CHART (Line Chart)
+        var lastWorkLabels = JSON.parse('{{ last_work_labels|default:"[]"|safe|escapejs }}');  // Work time categories
+        var lastWorkData = JSON.parse('{{ last_work_data|default:"[]"|safe|escapejs }}');  // User count per category
 
-    // Module Enrollment (Horizontal Bar Chart)
-    var barCtx = document.getElementById('horizontalBarChart').getContext('2d');
-    new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Exploring Work Identity', 'Knowing Values', 'Understanding Superpowers', 'Exploring Opportunities', 'Planning Ahead'],
-            datasets: [{
-                label: 'Enrollments',
-                data: [50, 80, 40, 90, 60],
-                backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402","#4076FF"],
-            }]
-        },
-        options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false
+        if (document.getElementById('lineChart')) {
+            var lineCtx = document.getElementById('lineChart').getContext('2d');
+            new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: lastWorkLabels,  // Work categories
+                    datasets: [{
+                        label: 'Users per Last Working Time',
+                        data: lastWorkData,  // Count of users
+                        borderColor: "#0044ff",
+                        backgroundColor: "rgba(0, 68, 255, 0.2)",
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: false, // ✅ Ensures all categories are displayed
+                                maxRotation: 30,
+                                minRotation: 30,
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,  // ✅ Uses whole numbers only
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("⚠️ Line Chart not found in the document");
         }
-    });
 
-    // New User Activity Trend (Bar Chart)
-    var activityCtx = document.getElementById('activityChart').getContext('2d');
-    new Chart(activityCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Active Users',
-                data: [20, 35, 50, 40, 60, 80],
-                backgroundColor: "#36a2eb",
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+
+        // Module Enrollment (Horizontal Bar Chart)
+        var enrollmentLabels = JSON.parse('{{ enrollment_labels|default:"[]"|safe|escapejs }}');
+        var enrollmentData = JSON.parse('{{ enrollment_data|default:"[]"|safe|escapejs }}');
+        if (document.getElementById('horizontalBarChart')) {
+            var barCtx = document.getElementById('horizontalBarChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: enrollmentLabels, // Module Names
+                    datasets: [{
+                        label: 'Users Enrolled',
+                        data: enrollmentData, // Enrollment Counts
+                        backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402", "#4076FF"],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',  // ✅ Makes it a horizontal bar chart
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,  // Ensures whole numbers for enrollments
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false,  // Ensures all module names are displayed
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false,  // ✅ Hides unnecessary legend
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    var value = tooltipItem.raw;
+                                    return value === 0 ? 'No enrollments' : value + ' enrollments';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("⚠️ Bar Chart not found in the document");
         }
-    });
+
+        // PROGRAM ENROLLMENT BAR CHART
+        var programLabels = JSON.parse('{{ program_labels|default:"[]"|safe|escapejs }}');  // Program Names
+        var programData = JSON.parse('{{ program_data|default:"[]"|safe|escapejs }}');  // Enrollment Counts
+
+        if (document.getElementById('activityChart')) {
+            var activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: programLabels,  // Program Names
+                    datasets: [{
+                        label: 'Users Enrolled',
+                        data: programData,  // Enrollment Counts
+                        backgroundColor: "#36a2eb",
+                        borderColor: "#ffffff",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: false,  // Ensures all program names are displayed
+                                maxRotation: 30,
+                                minRotation: 30,
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,  // Ensures whole numbers only
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    var value = tooltipItem.raw;
+                                    return value === 0 ? 'No enrollments' : value + ' enrollments';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("⚠️ Program Enrollment Chart not found in the document");
+        }
+
     </script>
     
     

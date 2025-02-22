@@ -38,12 +38,12 @@
             <tr>
                 <td>{{ user.id }}</td>
                 <td>{{ user.full_name }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.User_profile.age|default:"N/A" }}</td>
-                <td>{{ user.User_profile.gender|default:"N/A" }}</td>
-                <td>{{ user.User_profile.sector|default:"N/A" }}</td>
-                <td>{{ user.User_profile.phone_number|default:"N/A" }}</td>
-                <td>{{ user.User_profile.last_time_to_Work|default:"N/A" }}</td>
+                <td>{{ user.user.email }}</td>
+                <td>{{ user.age|default:"N/A" }}</td>
+                <td>{{ user.gender|default:"N/A" }}</td>
+                <td>{{ user.sector|default:"N/A" }}</td>
+                <td>{{ user.phone_number|default:"N/A" }}</td>
+                <td>{{ user.last_time_to_work|default:"N/A" }}</td>
             </tr>
             {% endfor %}
         </tbody>

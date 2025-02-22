@@ -52,5 +52,6 @@ urlpatterns = [
     path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', client_views.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
+    path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
     
 ]

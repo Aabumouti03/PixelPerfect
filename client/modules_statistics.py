@@ -1,5 +1,5 @@
-from users.models import UserModuleEnrollment, UserModuleProgress
-from client.models import Module
+from users.models import UserModuleEnrollment, UserModuleProgress, EndUser, UserProgramEnrollment
+from client.models import Module, Program
 from django.db.models import Count, Avg
 
 def get_module_enrollment_stats():    
@@ -65,3 +65,17 @@ def get_average_completion_percentage():
 def get_modules_count():
     modules = Module.objects.all().values("title")
     return len(modules)
+
+# this is for users 
+def get_users_last_work_time():
+    """Fetch number of users for each last work time category."""
+    last_work_stats = (
+        EndUser.objects.values("last_time_to_work")  
+        .annotate(count=Count("id"))  
+        .order_by("last_time_to_work")  # Keep the order consistent
+    )
+
+    labels = [entry["last_time_to_work"] for entry in last_work_stats]
+    data = [entry["count"] for entry in last_work_stats]
+
+    return labels, data
