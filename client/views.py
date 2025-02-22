@@ -3,11 +3,25 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import Questionnaire, Question
 from users.models import Questionnaire_UserResponse, QuestionResponse
+from django.core.paginator import Paginator
 
 def manage_questionnaires(request):
-    questionnaires = Questionnaire.objects.all().order_by('-created_at')  
+    is_active_filter = request.GET.get('is_active')
+    sort_order = request.GET.get('sort', 'desc')  # Default to descending order
 
-    # Get response count for each questionnaire
+    questionnaires = Questionnaire.objects.all()
+
+    # Apply active filter
+    if is_active_filter == 'true':
+        questionnaires = questionnaires.filter(is_active=True)
+
+    # Apply sorting
+    if sort_order == 'asc':
+        questionnaires = questionnaires.order_by('created_at')
+    else:
+        questionnaires = questionnaires.order_by('-created_at')
+
+    # Get response count
     questionnaires_data = [
         {
             "questionnaire": q,
@@ -16,8 +30,18 @@ def manage_questionnaires(request):
         for q in questionnaires
     ]
 
-    return render(request, 'Manage_Questionnaires.html', 
-                  {'questionnaires_data': questionnaires_data})
+    # Paginate (10 per page)
+    paginator = Paginator(questionnaires_data, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'Manage_Questionnaires.html', {
+        'questionnaires_data': page_obj,
+        'page_obj': page_obj,
+        'is_active_filter': is_active_filter,
+        'sort_order': sort_order
+    })
+
 
 
 
@@ -45,11 +69,25 @@ def view_questionnaire(request, questionnaire_id):
 
 def view_responders(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    search_query = request.GET.get('search', '')  # ✅ Get search query
     responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
+    
+    if search_query:
+        responders = responders.filter(
+            user__user__first_name__icontains=search_query
+        ) | responders.filter(
+            user__user__last_name__icontains=search_query
+        )
+    
+    # set 10 requests per page
+    paginator = Paginator(responders, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'view_responders.html', {
         'questionnaire': questionnaire,
-        'responders': responders,
+        'responders': page_obj.object_list,
+        'page_obj':page_obj
     })
 
 
@@ -132,7 +170,6 @@ def delete_question(request, question_id):
     questionnaire_id = question.questionnaire.id
     question.delete()
     return redirect("edit_questionnaire", questionnaire_id=questionnaire_id)
-
 
 
 def add_question(request, questionnaire_id):
