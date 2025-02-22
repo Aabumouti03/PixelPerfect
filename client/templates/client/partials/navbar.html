@@ -6,13 +6,13 @@
     </div>
     <ul class="nav-links">
         <li>
-            <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/client_dashboard/' %}active{% endif %}">
+            <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
                 <img src="{% static 'client/img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
         </li>
         <li>
-            <a href="{% url 'users_management' %}" class="{%if request.path == '/users_management/' %}active{% endif %}">
+            <a href="{% url 'users_management' %}" class="{%if request.path == '/users/' %}active{% endif %}">
                 <img src="{% static 'client/img/users.svg' %}" alt="Users" class="icon">
                 <span>Users</span>
             </a>
@@ -24,7 +24,7 @@
             </a>
         </li>
         <li></li>
-            <a href="{% url 'modules_management' %}" class="{%if request.path == '/modules_management/' %}active{% endif %}">
+            <a href="{% url 'modules_management' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
                 <img src="{% static 'client/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
@@ -36,9 +36,9 @@
             </a>
         </li>
         <div class="logout">
-            <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
-            <img src="{% static 'client/img/logout.svg' %}" alt="Logout" class="icon">
-            <span>Logout</span>
+            <a href="#" id="logout-link">
+                <img src="{% static 'client/img/logout.svg' %}" alt="Logout" class="icon">
+                <span>Logout</span>
             </a>
         </div>
     </ul>

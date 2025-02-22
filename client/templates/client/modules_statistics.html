@@ -1,0 +1,190 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+<!-- Content block  -->
+{% block content %}
+<link rel="stylesheet" href="{% static 'client/css/modules_statistics.css' %}">
+    <div class="content">
+        <div class="top-bar">
+            <h1>Modules Statistics 📊</h1>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts">
+            <!-- User Gender Distribution -->
+            <div class="chart-box count">
+                <h3 class= modules_count>Number of Modules 📊</h3>
+                <h3 class= modules_count>{{ modules_count }}</h3>
+            </div>
+
+            <!-- Module Enrollment -->
+            <div class="chart-box pie-chart">
+                <h3>Module Enrollment</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+        
+         <!-- CHARTS -->
+         <div class="charts">
+
+            <!-- Module Completion Statistics -->
+            <div class="chart-box">
+                <h3>Module Completion Status</h3>
+                <canvas id="completionChart"></canvas>
+            </div>
+
+            <!-- Average Completion Time -->
+            <div class="chart-box">
+                <h3>Average Module Completion Rate</h3>
+                <canvas id="completionTimeChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Js Charts  -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- JAVA SCRIPT -->
+    <script>
+        // Clickable cards 
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".card").forEach(card => {
+                card.addEventListener("click", function() {
+                    window.location.href = this.getAttribute("data-url");
+                });
+            });
+        });
+
+        // Charts
+        window.onload = function() {
+
+
+            // PIE CHART ( modules enrollement )
+            var enrollmentLabels = JSON.parse('{{ enrollment_labels|default:"[]"|safe|escapejs }}');
+            var enrollmentData = JSON.parse('{{ enrollment_data|default:"[]"|safe|escapejs }}');
+
+            if (document.getElementById('pieChart')) {
+                var pieCtx = document.getElementById('pieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: enrollmentLabels,
+                        datasets: [{
+                            label: 'Users Enrolled',
+                            data: enrollmentData,
+                            backgroundColor: ['#ff4500', '#0044ff', '#cfe2f3', "#FD5402", "#4076FF"],
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        var value = tooltipItem.raw;
+                                        return value === 0 ? 'No enrollments' : value + ' enrollments';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.warn("⚠️ Pie Chart not found in the document");
+            }
+
+
+            // Module Completion Statistics (Stacked Bar Chart)
+            var completionLabels = JSON.parse('{{ completion_labels|default:"[]"|safe|escapejs }}');
+            var completedData = JSON.parse('{{ completed_data|default:"[]"|safe|escapejs }}');
+            var inProgressData = JSON.parse('{{ in_progress_data|default:"[]"|safe|escapejs }}');
+
+            if (document.getElementById('completionChart')) {
+                var ctx2 = document.getElementById('completionChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: completionLabels,
+                        datasets: [
+                            {
+                                label: 'Completed',
+                                data: completedData,
+                                backgroundColor: '#4076FF',
+                            },
+                            {
+                                label: 'In Progress',
+                                data: inProgressData,
+                                backgroundColor: '#ff4500',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true }
+                        }
+                    }
+                });
+            } else {
+                console.warn("⚠️ Completion Chart not found in the document");
+            }
+
+
+
+          // Average Completion Percentage per Module (Line Chart)
+            var completionTimeLabels = JSON.parse('{{ completion_time_labels|default:"[]"|safe|escapejs }}');  // All module names
+            var completionTimeData = JSON.parse('{{ completion_time_data|default:"[]"|safe|escapejs }}');  // 0% for empty modules
+
+            console.log("✅ Completion Time Labels:", completionTimeLabels); // Debugging Output
+            console.log("✅ Completion Time Data:", completionTimeData);
+
+            var ctx3 = document.getElementById('completionTimeChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: completionTimeLabels,  // Module names
+                    datasets: [{
+                        label: 'Average Completion (%)',
+                        data: completionTimeData,  // Completion percentages (including 0%)
+                        borderColor: "#FF4500",
+                        backgroundColor: "rgba(255, 69, 0, 0.2)",
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: false,  // Ensures all module labels are shown
+                                maxRotation: 30,  // Rotates labels to prevent overlap
+                                minRotation: 30,
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,  // Completion is in percentage (0 - 100%)
+                            ticks: {
+                                callback: function(value) {
+                                    return value + "%";  // Add % symbol to values
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+
+
+
+        };
+    </script>
+
+{% endblock %}

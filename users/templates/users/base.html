@@ -3,23 +3,36 @@
 <head>
     {% load static %}  
     
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ReWork{% endblock %}</title>
-
-    <!-- Link to your CSS file -->
-    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
-    {% block extra_css %} {% endblock %}
-
 </head>
 <body>
-    
+
     {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
+   
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <h2>Are you sure you want to log out?</h2>
+            <form method="POST" action="{% url 'log_out' %}">
+                {% csrf_token %}
+                <button type="submit" class="confirm-logout">Yes, Log Out</button>
+                <button type="button" id="cancel-logout" class="cancel-logout">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    
+    <script src="{% static 'users/js/log_out.js' %}"></script>
+
 
 </body>
 </html>
