@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Modules</title>
+    <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+{% block content %}
+    <div class="container">
+        <h2 class="page-title">Manage Modules</h2>
+
+        <div class="module-list">
+            {% for module in modules %}
+                <div class="module-card">
+                    <div class="module-header" onclick="toggleModule('{{ module.id }}')">
+                        <h3>{{ module.title }}</h3>
+                        <button class="toggle-btn">
+                            <i class="fas fa-chevron-left" id="toggle-icon-{{ module.id }}"></i>
+                        </button>
+                    </div>
+
+                    <div id="module-{{ module.id }}" class="module-content">
+                        <p class="module-description">{{ module.description }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No modules available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleModule(moduleId) {
+            const content = document.getElementById(`module-${moduleId}`);
+            const icon = document.getElementById(`toggle-icon-${moduleId}`);
+
+            content.classList.toggle("show");
+
+            if (content.classList.contains("show")) {
+                icon.classList.remove("fa-chevron-left");
+                icon.classList.add("fa-chevron-down");
+            } else {
+                icon.classList.remove("fa-chevron-down");
+                icon.classList.add("fa-chevron-left");
+            }
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}

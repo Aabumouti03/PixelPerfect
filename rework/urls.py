@@ -19,8 +19,10 @@ from django.urls import path
 from client import views as clientViews
 from users import views as usersViews
 from users.views import user_responses_main,exercise_detail_view
+from client.views import CreateModule
 
 urlpatterns = [
+    # Users
     path('admin/', admin.site.urls),
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
@@ -34,4 +36,10 @@ urlpatterns = [
     path('contact_us/', usersViews.contact_us, name='contact_us'),
     path('responses/', user_responses_main, name='user_responses_main'),
     path('responses/exercise/<int:exercise_id>/', exercise_detail_view, name='exercise_detail'),
+
+
+    # Client
+    path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
+    path("modules/edit/<int:module_id>/", clientViews.EditModule, name="edit_module"),  
+    path("modules/add/", clientViews.AddModule, name="add_module"),  
 ]
