@@ -1,19 +1,15 @@
+{% extends 'users/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Modules</title>
-    <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-</head>
-<body>
-
 {% block content %}
-    <div class="container">
+    <div class="content">
         <h2 class="page-title">Manage Modules</h2>
+        <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
+
+        <!-- Add Module Button -->
+        <div class="top-buttons">
+            <a href="{% url 'add_module' %}" class="add-btn">+ Add Module</a>
+        </div>
 
         <div class="module-list">
             {% for module in modules %}
@@ -27,6 +23,10 @@
 
                     <div id="module-{{ module.id }}" class="module-content">
                         <p class="module-description">{{ module.description }}</p>
+
+                        <div class="buttons">
+                            <a href="{% url 'edit_module' module.id %}" class="edit-btn">Edit</a>
+                        </div>
                     </div>
                 </div>
             {% empty %}
@@ -51,7 +51,4 @@
             }
         }
     </script>
-
-</body>
-</html>
 {% endblock %}
