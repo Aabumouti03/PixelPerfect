@@ -3,8 +3,10 @@ from client.models import Program, Module
 from django.shortcuts import render, get_object_or_404
 from client.models import Module
 
+# Module Managment 
+
 def CreateModule(request):
-    modules = Module.objects.all()
+    modules = Module.objects.prefetch_related("sections__exercises__questions").all()
     return render(request, "Module/Edit_Add_Module.html", {"modules": modules})
 
 def EditModule(request, module_id):

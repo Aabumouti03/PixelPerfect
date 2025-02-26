@@ -14,18 +14,49 @@
         <div class="module-list">
             {% for module in modules %}
                 <div class="module-card">
-                    <div class="module-header" onclick="toggleModule('{{ module.id }}')">
-                        <h3>{{ module.title }}</h3>
-                        <button class="toggle-btn">
-                            <i class="fas fa-chevron-left" id="toggle-icon-{{ module.id }}"></i>
-                        </button>
+                    <div class="module-header">
+                        <div class="module-title">
+                            <h3>{{ module.title }}</h3>
+                        </div>
+                        <div class="module-actions">
+                            <a href="{% url 'edit_module' module.id %}" class="edit-btn">Edit</a>
+                            <button class="toggle-btn" onclick="toggleModule('{{ module.id }}')">
+                                <i class="fas fa-chevron-left" id="toggle-icon-{{ module.id }}"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div id="module-{{ module.id }}" class="module-content">
-                        <p class="module-description">{{ module.description }}</p>
+                        <p class="module-description"><strong>Description:</strong> {{ module.description }}</p>
 
-                        <div class="buttons">
-                            <a href="{% url 'edit_module' module.id %}" class="edit-btn">Edit</a>
+                        <!-- Sections -->
+                        <div class="sections">
+                            <h4>Sections</h4>
+                            {% for section in module.sections.all %}
+                                <div class="section-card">
+                                    <h5>{{ section.title }}</h5>
+                                    <p>{{ section.description }}</p>
+
+                                    <!-- Exercises inside each section -->
+                                    <div class="exercises">
+                                        <h6>Exercises</h6>
+                                        {% for exercise in section.exercises.all %}
+                                            <div class="exercise-card">
+                                                <h6>{{ exercise.title }} ({{ exercise.exercise_type }})</h6>
+                                                <ul>
+                                                    {% for question in exercise.questions.all %}
+                                                        <li>{{ question.question_text }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% empty %}
+                                            <p>No exercises available.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p>No sections available.</p>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

@@ -19,6 +19,8 @@ urlpatterns = [
     # Redirect "Modules" to "Edit_Add_Module"
     path('modules/', clientViews.CreateModule, name="modules"),
 
+    path('about/', usersViews.about, name='about'),
+
     # Other Paths
     path('profile/', usersViews.profile, name='profile'),
     path('log_in/', usersViews.log_in, name="log_in"),
@@ -30,4 +32,9 @@ urlpatterns = [
     path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
     path("modules/edit/<int:module_id>/", clientViews.EditModule, name="edit_module"),
     path("modules/add/", clientViews.AddModule, name="add_module"),
+
+
+    path('modules/', usersViews.modules, name='modules'),
+    path('contact_us/', usersViews.contact_us, name='contact_us'),
+   
 ]
