@@ -21,6 +21,9 @@ def modules(request):
 def profile(request):
     return render(request, 'users/profile.html')
 
+def logout_view(request):
+    return render(request, 'users/logout.html')
+
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
 

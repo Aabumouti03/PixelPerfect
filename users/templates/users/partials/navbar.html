@@ -32,16 +32,12 @@
                 <span>Profile</span>
             </a>
         </li>
-
         <div class="logout">
-            <a href="#" id="logout-link">
-                <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
-                <span>Logout</span>
+            <a href="{% url 'logout' %}" class="{%if request.path == '/logout/' %}active{% endif %}">
+            <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
+            <span>Logout</span>
             </a>
         </div>
-        
-          
-        
     </ul>
 
     <div class="toggle">

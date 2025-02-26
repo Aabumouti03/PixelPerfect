@@ -1,0 +1,28 @@
+<!-- index.html -->
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'client/css/modules_management.css' %}">
+{% endblock %}
+
+<!-- Content block  -->
+{% block content %}
+    <div class="content">
+
+        <div class="top-bar">
+            <h1>Manage Modules</h1>
+        </div>
+
+        <div class="card-container">
+        <!-- Dynamic Module Cards -->
+        {% for module in modules %}
+        <div class="card module-card {{ module.color_class }}">
+            <h2>{{ module.title }}</h2>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+
+
+{% endblock %}

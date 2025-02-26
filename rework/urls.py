@@ -1,9 +1,14 @@
 from django.contrib import admin
 from django.urls import path
+from client import views
+from users import views
+from client import views as client_views
 from client import views as clientViews
 from users import views as usersViews
 
 urlpatterns = [
+
+    # Users Views
     # Admin
     path('admin/', admin.site.urls),
 
