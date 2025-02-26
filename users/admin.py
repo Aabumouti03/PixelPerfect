@@ -109,7 +109,6 @@ class UserResponseAdmin(admin.ModelAdmin):
         """Ensure all EndUsers appear in the admin dropdown."""
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  
-        return form
     
 @admin.register(StickyNote)
 class StickyNoteAdmin(admin.ModelAdmin):
@@ -123,4 +122,3 @@ class StickyNoteAdmin(admin.ModelAdmin):
         """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
-        return form

@@ -1,14 +1,13 @@
+{% extends 'client/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Questionnaire - {{ questionnaire.title }}</title>
-    <link rel="stylesheet" href="{% static 'css/edit_questionnaire.css' %}">
-</head>
-<body>
 
+{% block title %}Edit Questionnaire - {{ questionnaire.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/edit_questionnaire.css' %}">
+{% endblock %}
+
+{% block content %}
     <div class="content">
         <div class="top-bar">
             <a href="{% url 'view_questionnaire' questionnaire.id %}" class="btn back-btn">← Back</a>
@@ -74,29 +73,27 @@
                 <a href="{% url 'add_question' questionnaire.id %}" class="btn add-btn">+ Add Question</a>
             </div>
         </form>
-
     </div>
+{% endblock %}
 
-    <!-- JavaScript to Toggle Question Type Fields -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.question-type-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    let questionId = this.getAttribute('data-question-id');
-                    let agreementScale = document.getElementById('agreement-scale-' + questionId);
-                    let ratingScale = document.getElementById('rating-scale-' + questionId);
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.question-type-select').forEach(select => {
+            select.addEventListener('change', function() {
+                let questionId = this.getAttribute('data-question-id');
+                let agreementScale = document.getElementById('agreement-scale-' + questionId);
+                let ratingScale = document.getElementById('rating-scale-' + questionId);
 
-                    if (this.value === "AGREEMENT") {
-                        agreementScale.classList.remove("hidden");
-                        ratingScale.classList.add("hidden");
-                    } else {
-                        agreementScale.classList.add("hidden");
-                        ratingScale.classList.remove("hidden");
-                    }
-                });
+                if (this.value === "AGREEMENT") {
+                    agreementScale.classList.remove("hidden");
+                    ratingScale.classList.add("hidden");
+                } else {
+                    agreementScale.classList.add("hidden");
+                    ratingScale.classList.remove("hidden");
+                }
             });
         });
-    </script>
-
-</body>
-</html>
+    });
+</script>
+{% endblock %}

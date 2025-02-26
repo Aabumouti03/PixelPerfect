@@ -1,132 +1,129 @@
+{% extends 'client/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Questionnaires</title>
+
+{% block title %}Manage Questionnaires{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/Manage_Questionnaires.css' %}">
-</head>
-<body>
+{% endblock %}
 
-    <div class="content">
-        <!-- Top Bar with Create Button -->
-        <div class="top-bar">
-            <h1>Manage Questionnaires</h1>
-            <a href="{% url 'create_questionnaire' %}" class="btn create-btn">+ Create Questionnaire</a>
-        </div>
-
-        <!-- Search & Filter -->
-        <div class="search-filter-container">
-            <!-- Search Bar -->
-            <form method="GET" class="search-form">
-                <input type="text" name="search" placeholder="Search by title..." value="{{ search_query }}" class="search-input">
-                <button type="submit" class="btn search-btn">Search</button>
-            </form>
-
-            <!-- Filter Toggle -->
-            <div class="filter-container">
-                <label class="switch">
-                    <input type="checkbox" id="active-filter" {% if is_active_filter == "true" %}checked{% endif %}>
-                    <span class="slider round"></span>
-                </label>
-                <span class="filter-label">Show Only Active</span>
-            </div>
-        </div>
-
-        <!-- Table Container -->
-        <div class="card-container">
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Created At</th>
-                        <th>Status</th>
-                        <th>Responders</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in page_obj %}
-                    <tr>
-                        <td>{{ item.questionnaire.title }}</td>
-                        <td>{{ item.questionnaire.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            {% if item.questionnaire.is_active %}
-                                <span class="active-status">Active</span>
-                            {% else %}
-                                <span class="inactive-status">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td class="center-text">{{ item.response_count }}</td>
-                        <td>
-                            <a href="{% url 'view_questionnaire' item.questionnaire.id %}" class="btn view-btn">View</a>
-                            {% if not item.questionnaire.is_active %}
-                            <a href="{% url 'activate_questionnaire' item.questionnaire.id %}" class="btn activate-btn">Activate</a>
-                            {% endif %}
-                            <a href="{% url 'view_responders' item.questionnaire.id %}" class="btn responders-btn">Responders</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No questionnaires found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        {% if page_obj.has_other_pages %}
-        <nav class="pagination-container">
-            <ul class="pagination">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link prev-next" href="?page=1{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link prev-next" href="?page={{ page_obj.previous_page_number }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Prev</a>
-                    </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link prev-next" href="?page={{ page_obj.next_page_number }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link prev-next" href="?page={{ page_obj.paginator.num_pages }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
+{% block content %}
+<div class="content">
+    <!-- Top Bar with Create Button -->
+    <div class="top-bar">
+        <h1>Manage Questionnaires</h1>
+        <a href="{% url 'create_questionnaire' %}" class="btn create-btn">+ Create Questionnaire</a>
     </div>
 
-    <!-- JavaScript to Toggle Active Filter -->
-    <script>
-        document.getElementById("active-filter").addEventListener("change", function() {
-            let isChecked = this.checked;
-            let url = new URL(window.location.href);
-            
-            if (isChecked) {
-                url.searchParams.set('is_active', 'true');  
-            } else {
-                url.searchParams.delete('is_active');  
-            }
+    <!-- Search & Filter -->
+    <div class="search-filter-container">
+        <!-- Search Bar -->
+        <form method="GET" class="search-form">
+            <input type="text" name="search" placeholder="Search by title..." value="{{ search_query }}" class="search-input">
+            <button type="submit" class="btn search-btn">Search</button>
+        </form>
 
-            window.location.href = url.toString();
-        });
-    </script>
+        <!-- Filter Toggle -->
+        <div class="filter-container">
+            <label class="switch">
+                <input type="checkbox" id="active-filter" {% if is_active_filter == "true" %}checked{% endif %}>
+                <span class="slider round"></span>
+            </label>
+            <span class="filter-label">Show Only Active</span>
+        </div>
+    </div>
 
-</body>
-</html>
+    <!-- Table Container -->
+    <div class="card-container">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Responders</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in page_obj %}
+                <tr>
+                    <td>{{ item.questionnaire.title }}</td>
+                    <td>{{ item.questionnaire.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if item.questionnaire.is_active %}
+                            <span class="active-status">Active</span>
+                        {% else %}
+                            <span class="inactive-status">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="center-text">{{ item.response_count }}</td>
+                    <td>
+                        <a href="{% url 'view_questionnaire' item.questionnaire.id %}" class="btn view-btn">View</a>
+                        {% if not item.questionnaire.is_active %}
+                        <a href="{% url 'activate_questionnaire' item.questionnaire.id %}" class="btn activate-btn">Activate</a>
+                        {% endif %}
+                        <a href="{% url 'view_responders' item.questionnaire.id %}" class="btn responders-btn">Responders</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No questionnaires found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav class="pagination-container">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link prev-next" href="?page=1{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link prev-next" href="?page={{ page_obj.previous_page_number }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Prev</a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link prev-next" href="?page={{ page_obj.next_page_number }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link prev-next" href="?page={{ page_obj.paginator.num_pages }}{% if is_active_filter %}&is_active={{ is_active_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- JavaScript to Toggle Active Filter -->
+<script>
+    document.getElementById("active-filter").addEventListener("change", function() {
+        let isChecked = this.checked;
+        let url = new URL(window.location.href);
+        
+        if (isChecked) {
+            url.searchParams.set('is_active', 'true');  
+        } else {
+            url.searchParams.delete('is_active');  
+        }
+
+        window.location.href = url.toString();
+    });
+</script>
+{% endblock %}

@@ -1,14 +1,13 @@
+{% extends 'client/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Response by {{ user_response.user.user.first_name }}</title>
-    <link rel="stylesheet" href="{% static 'css/view_user_response.css' %}">
-</head>
-<body>
 
+{% block title %}Response by {{ user_response.user.user.first_name }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/view_user_response.css' %}">
+{% endblock %}
+
+{% block content %}
     <div class="content">
         <div class="top-bar">
             <a href="{% url 'manage_questionnaires' %}" class="back-btn">← Back</a>
@@ -44,6 +43,4 @@
             {% endfor %}
         </div>
     </div>
-
-</body>
-</html>
+{% endblock %}
