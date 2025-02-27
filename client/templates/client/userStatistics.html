@@ -1,135 +1,158 @@
 {% extends 'client/client_base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'client/css/reports.css' %}">
-<style>
-    .chart-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* ✅ 2 charts per row */
-        gap: 20px;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-    }
-    .chart-box {
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<link rel="stylesheet" href="{% static 'client/css/reports.css' %}">
+
+<link rel="stylesheet" href="{% static 'client/css/statistics.css' %}">
+<style>
+
+.chart-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.chart-box {
+    flex: 1 1 calc(50% - 20px); /* Makes each chart take 50% of the row */
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    min-width: 300px; /* Ensures proper width */
+    max-width: 500px;
+}
+
+.chart-box canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 300px;
+}
+
+
+
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <div class="content">
-        <h2>User Statistics Overview</h2>
 
-        <div class="chart-grid">
-            <!-- User Activation Chart -->
-            <div class="chart-box">
-                <h3>User Activity</h3>
-                <canvas id="activationChart"></canvas>
-            </div>
-
-            <!-- Gender Distribution Chart -->
-            <div class="chart-box">
-                <h3>Gender Distribution</h3>
-                <canvas id="genderChart"></canvas>
-            </div>
-
-            <!-- Ethnicity Distribution Chart -->
-            <div class="chart-box">
-                <h3>Ethnicity Distribution</h3>
-                <canvas id="ethnicityChart"></canvas>
-            </div>
-
-            <!-- Sector Distribution Chart -->
-            <div class="chart-box">
-                <h3>Sector Distribution</h3>
-                <canvas id="sectorChart"></canvas>
-            </div>
-        </div>
+<div class="content">
+    <div class="top-bar">
+        <h1>User Statistics 📊</h1>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            try {
-                const statsData = JSON.parse('{{ stats|safe }}');
-                console.log("Parsed Stats Data:", statsData);
+    <!-- CHARTS CONTAINER -->
+    <div class="chart-container">
+        <!-- User Activation Chart -->
+        <div class="chart-box">
+            <h3>User Activity</h3>
+            <canvas id="activationChart"></canvas>
+        </div>
 
-                function createPieChart(ctxId, labels, data) {
-                    const ctx = document.getElementById(ctxId);
-                    if (!ctx) return;
-                    new Chart(ctx.getContext('2d'), {
-                        type: 'pie',
+        <!-- Gender Distribution Chart -->
+        <div class="chart-box">
+            <h3>Gender Distribution</h3>
+            <canvas id="genderChart"></canvas>
+        </div>
+
+        <!-- Ethnicity Distribution Chart -->
+        <div class="chart-box">
+            <h3>Ethnicity Distribution</h3>
+            <canvas id="ethnicityChart"></canvas>
+        </div>
+
+        <!-- Sector Distribution Chart -->
+        <div class="chart-box">
+            <h3>Sector Distribution</h3>
+            <canvas id="sectorChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Charts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        try {
+            const statsData = JSON.parse('{{ stats|escapejs }}'); // Ensuring safe parsing
+            console.log("Parsed Stats Data:", statsData);
+
+            function createPieChart(ctxId, labels, data, colors) {
+                const ctx = document.getElementById(ctxId);
+                if (!ctx) return;
+                new Chart(ctx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            const defaultColors = ['#007bff', '#F24505'];
+            const sectorColors = ['#0048FF', '#FF5400', '#4076FF', '#FD7402', '#6EA8FE', '#FFA500', '#B0C4DE'];
+            const ethnicityColors = ['#0048FF', '#FF5400', '#4076FF', '#FD7402', '#6EA8FE', '#FFA500', '#B0C4DE'];
+
+            if (statsData) {
+                // User Activation Chart
+                const activationCtx = document.getElementById('activationChart');
+                if (activationCtx) {
+                    new Chart(activationCtx.getContext('2d'), {
+                        type: 'bar',
                         data: {
-                            labels: labels,
+                            labels: ['Active Users', 'Inactive Users'],
                             datasets: [{
-                                data: data,
-                                backgroundColor: ['#007bff', '#F24505', '#007bff', '#F24505', '#007bff', '#F24505']
+                                label: 'User Activation',
+                                data: [statsData.active_users || 0, statsData.inactive_users || 0],
+                                backgroundColor: defaultColors
                             }]
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: false
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
                         }
                     });
                 }
 
-                const colors = ['#007bff', '#F24505'];
+                // Gender Distribution Chart
+                createPieChart(
+                    "genderChart",
+                    Object.keys(statsData.gender_distribution || {}),
+                    Object.values(statsData.gender_distribution || {}),
+                    defaultColors
+                );
 
-                if (statsData) {
-                    const activationCtx = document.getElementById('activationChart');
-                    if (activationCtx) {
-                        new Chart(activationCtx.getContext('2d'), {
-                            type: 'bar',
-                            data: {
-                                labels: ['Active Users', 'Inactive Users'],
-                                datasets: [{
-                                    label: 'User Activation',
-                                    data: [statsData.active_users || 0, statsData.inactive_users || 0],
-                                    backgroundColor: colors
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                    }
+                // Ethnicity Distribution Chart
+                createPieChart(
+                    "ethnicityChart",
+                    Object.keys(statsData.ethnicity_distribution || {}),
+                    Object.values(statsData.ethnicity_distribution || {}),
+                    defaultColors
+                );
 
-                    createPieChart(
-                        "genderChart",
-                        Object.keys(statsData.gender_distribution || {}),
-                        Object.values(statsData.gender_distribution || {})
-                    );
-
-                    createPieChart(
-                        "ethnicityChart",
-                        Object.keys(statsData.ethnicity_distribution || {}),
-                        Object.values(statsData.ethnicity_distribution || {})
-                    );
-
-                    createPieChart(
-                        "sectorChart",
-                        Object.keys(statsData.sector_distribution || {}),
-                        Object.values(statsData.sector_distribution || {})
-                    );
-                } else {
-                    console.error("Stats data is undefined.");
-                }
-            } catch (error) {
-                console.error("Error parsing stats data:", error);
+                // Sector Distribution Chart
+                createPieChart(
+                    "sectorChart",
+                    Object.keys(statsData.sector_distribution || {}),
+                    Object.values(statsData.sector_distribution || {}),
+                    sectorColors
+                );
+            } else {
+                console.error("Stats data is undefined.");
             }
-        });
-    </script>
+        } catch (error) {
+            console.error("Error parsing stats data:", error);
+        }
+    });
+</script>
+
 {% endblock %}

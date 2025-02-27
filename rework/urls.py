@@ -50,7 +50,7 @@ urlpatterns = [
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
     path('reports/', reports_views.reports, name='reports'),
-    path('userStatistics/', client_views.userStatistics, name='userStatistics'),    
+    path('userStatistics/', reports_views.userStatistics, name='userStatistics'),    
     path('modules_statistics/', reports_views.modules_statistics, name='modules_statistics'),
     path('programs_statistics/', reports_views.programs_statistics, name='programs_statistics'),
     
