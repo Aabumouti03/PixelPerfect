@@ -14,7 +14,7 @@ def get_program_enrollment_stats():
     enrollment_data = {program_title: 0 for _, program_title in all_programs}
 
     for entry in programs_enrollments:
-        program_title = entry['prgram__title']
+        program_title = entry['program__title']
         enrollment_data[program_title] = entry['count']
 
     labels = list(enrollment_data.keys())  
