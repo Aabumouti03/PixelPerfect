@@ -3,6 +3,7 @@
 
 {% block content %}
     <div class="content">
+        
         <h2 class="page-title">Manage Modules</h2>
         <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
 
@@ -27,11 +28,10 @@
                     </div>
 
                     <div id="module-{{ module.id }}" class="module-content">
-                        <p class="module-description"><strong>Description:</strong> {{ module.description }}</p>
+                        <p class="module-description"><strong></strong> {{ module.description }}</p>
 
                         <!-- Sections -->
                         <div class="sections">
-                            <h4>Sections</h4>
                             {% for section in module.sections.all %}
                                 <div class="section-card">
                                     <h5>{{ section.title }}</h5>
@@ -39,10 +39,10 @@
 
                                     <!-- Exercises inside each section -->
                                     <div class="exercises">
-                                        <h6>Exercises</h6>
+                        
                                         {% for exercise in section.exercises.all %}
                                             <div class="exercise-card">
-                                                <h6>{{ exercise.title }} ({{ exercise.exercise_type }})</h6>
+                                                <h6>{{ exercise.title }}</h6>
                                                 <ul>
                                                     {% for question in exercise.questions.all %}
                                                         <li>{{ question.question_text }}</li>

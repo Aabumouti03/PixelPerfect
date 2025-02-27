@@ -1,1 +1,59 @@
 {% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <h2 class="page-title">Edit Module</h2>
+        <link rel="stylesheet" href="{% static 'client/css/edit_module_style.css' %}">
+
+        <!-- Module Title -->
+        <div class="module-section">
+            <h3>Module Title</h3>
+            <div class="editable-field">
+                <p>{{ module.title }}</p>
+                <a href="#" class="edit-btn">Edit</a>
+            </div>
+        </div>
+
+        <!-- Module Description -->
+        <div class="module-section">
+            <h3>Description</h3>
+            <div class="editable-field">
+                <p>{{ module.description }}</p>
+                <a href="#" class="edit-btn">Edit</a>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        <div class="module-section">
+            <h3>Sections</h3>
+            {% for section in module.sections.all %}
+                <div class="section-card">
+                    <div class="section-header">
+                        <h4>{{ section.title }}</h4>
+                        <a href="#" class="edit-btn">Edit</a>
+                    </div>
+                    <p>{{ section.description }}</p>
+
+                    <!-- Exercises -->
+                    <div class="exercises">
+                        {% for exercise in section.exercises.all %}
+                            <div class="exercise-card">
+                                <h5>{{ exercise.title }}</h5>
+                                <ul>
+                                    {% for question in exercise.questions.all %}
+                                        <li>{{ question.question_text }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% empty %}
+                            <p>No exercises available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>No sections available.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

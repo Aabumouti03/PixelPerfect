@@ -11,7 +11,7 @@ def CreateModule(request):
 
 def EditModule(request, module_id):
     module = get_object_or_404(Module, id=module_id)
-    return render(request, "Module/Edit_Module.html", {"module": module})
+    return render(request, "Module/edit_module.html", {"module": module})
 
 def AddModule(request):
     return render(request, "Module/Add_Module.html")

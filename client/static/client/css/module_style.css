@@ -62,7 +62,7 @@ body {
     background: #f8f9fa;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-left: 6px solid #73c4fd;
+    border-left: 6px solid #73c4fd; /* Blue left border */
     padding: 15px;
     transition: background 0.3s ease-in-out;
 }
@@ -137,23 +137,61 @@ body {
 }
 
 /* Sections */
+.sections {
+    margin-top: 15px;
+}
+
 .section-card {
-    background: #f5f5f5;
-    padding: 10px;
+    background: #ffffff; /* White background */
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px; /* Rounded corners */
+    border-left: 6px solid #FD5402;  /* Orange left border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease-in-out;
+}
+
+/* Section Title */
+.section-card h5 {
+    font-size: 20px;
+    color: #FD5402; /* Orange color */
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Section Description */
+.section-card p {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Exercises inside Sections */
+.exercise-card {
+    background: #E8F4FC; /* Light blue */
+    padding: 12px;
     margin-top: 10px;
     border-radius: 8px;
+    border-left: 5px solid #73c4fd; /* Blue left border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-/* Exercises */
-.exercise-card {
-    background: #e8f4fc;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 5px;
-}
-
+/* Exercise Title */
 .exercise-card h6 {
-    margin: 0;
+    font-size: 18px;
+    color: #73c4fd;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Exercise Questions */
+.exercise-card ul {
+    padding-left: 20px;
+}
+
+.exercise-card li {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
 }
 
 /* Responsive Design */
