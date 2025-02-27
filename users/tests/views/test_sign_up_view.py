@@ -1,81 +1,104 @@
-"""Unit Tests of the sign up view"""
 from django.test import TestCase
-from users.forms import UserSignUpForm
-from users.models import User
 from django.urls import reverse
-from users.tests.helpers import LogInTester
-from django.contrib.auth.hashers import check_password
+from users.models import User, EndUser
+from users.forms import UserSignUpForm, EndUserProfileForm
 
-class SignUpViewTestCase(TestCase, LogInTester):
-    """Unit Tests of the sign up view"""
+class SignUpViewTestCase(TestCase):
+    """Unit tests for the sign-up process (step 1 and step 2)."""
 
     def setUp(self):
-        self.url = reverse('sign_up')
-        self.form_input_for_user = {
-            'username': 'dandoe',
-            'first_name':'Dan',
-            'last_name':'Doe',
-            'email':'dandoe@example.org',
-            'password1':'Testuser123',
-            'password2':'Testuser123'
+        """Set up the sign-up URLs and test user data."""
+        self.sign_up_step_1_url = reverse("sign_up_step_1")
+        self.sign_up_step_2_url = reverse("sign_up_step_2")
+        self.log_in_url = reverse("log_in")
+
+        self.valid_user_data = {
+            "username": "testuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "test@example.com",
+            "password1": "TestUser123!",
+            "password2": "TestUser123!",
         }
 
-        self.form_input_for_end_user = {
-            'age': '20',
-            'gender':'male',
-            'sector':'healthcare',
-            'ethnicity':'asian',
-            'last_time_to_work':'1_month',
-            'phone_number':'11111111'
+        self.valid_profile_data = {
+            "age": 25,
+            "gender": "male",
+            "sector": "it",
+            "ethnicity": "asian",
+            "last_time_to_work": "1_year",
+            "phone_number": "+1234567890",
         }
-    
-    def test_sign_up_url(self):
-        self.assertTrue(self.url, '/sign_up/')
-    
-    def test_get_sign_up(self):
-        response = self.client.get(self.url)
+
+    # --- Step 1 Tests ---
+
+    def test_get_sign_up_step_1_page(self):
+        """Ensure the sign-up step 1 page loads successfully."""
+        response = self.client.get(self.sign_up_step_1_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'sign_up.html')
-        form = response.context['form']
-        self.assertTrue(isinstance(form, UserSignUpForm))
-        self.assertFalse(form.is_bound)
+        self.assertTemplateUsed(response, "users/sign_up_step_1.html")
+        self.assertIsInstance(response.context["user_form"], UserSignUpForm)
 
+    def test_post_valid_sign_up_step_1_redirects_to_step_2(self):
+        """Ensure valid user details in step 1 redirect to step 2."""
+        response = self.client.post(self.sign_up_step_1_url, self.valid_user_data, follow=True)
+        self.assertRedirects(response, self.sign_up_step_2_url)
+        self.assertIn("user_form_data", self.client.session)
 
-    # def test_unsuccessful_sign_up(self):
-    #     before_count = User.objects.count()
-    #     form_input = {**self.form_input_for_user, **self.form_input_for_end_user}  
-
-    #     form_input['username'] = 'WRONG_USERNAME'
-
-    #     response = self.client.post(self.url, form_input)
-
-    #     after_count = User.objects.count()
-    #     self.assertEqual(after_count, before_count)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'sign_up.html')
-    #     form = response.context['form']
-    #     self.assertTrue(isinstance(form, UserSignUpForm))
-    #     self.assertTrue(form.is_bound)
-    #     self.assertFalse(self._is_logged_in())
-
-    
-    # def test_successful_sign_up(self):
-    #     before_count = User.objects.count()
-    #     form_input = {**self.form_input_for_user, **self.form_input_for_end_user}  
-    #     response = self.client.post(self.url, form_input, follow=True)
-
-    #     after_count = User.objects.count()
-    #     self.assertEqual(after_count, before_count + 1)
-
-    #     response_url = reverse('log_in')
-    #     self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
-    #     self.assertTemplateUsed(response, 'log_in.html')
-    #     user = User.objects.get(username='dandoe')
-    #     self.assertEqual(user.first_name, 'Dan')
-    #     self.assertEqual(user.last_name, 'Doe')
-    #     self.assertEqual(user.email, 'dandoe@example.org')
-
-    #     self.assertTrue(check_password('Testuser123', user.password))
-    #     self.assertTrue(self._is_logged_in())
-
+    def test_post_invalid_sign_up_step_1_shows_errors(self):
+        """Ensure invalid user details in step 1 show form errors."""
+        invalid_data = self.valid_user_data.copy()
+        invalid_data["email"] = ""  # Missing email
+        response = self.client.post(self.sign_up_step_1_url, invalid_data)
         
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/sign_up_step_1.html")
+        self.assertIn("user_form", response.context)
+        self.assertTrue(response.context["user_form"].errors)
+        self.assertIn("email", response.context["user_form"].errors)
+
+    # --- Step 2 Tests ---
+
+    def test_get_sign_up_step_2_without_step_1_redirects_to_step_1(self):
+        """Ensure users cannot access step 2 without completing step 1."""
+        response = self.client.get(self.sign_up_step_2_url, follow=True)
+        self.assertRedirects(response, self.sign_up_step_1_url)
+
+    def test_get_sign_up_step_2_after_step_1(self):
+        """Ensure users can access step 2 only after step 1 is completed."""
+        session = self.client.session
+        session["user_form_data"] = self.valid_user_data  # Simulate step 1 completion
+        session.save()
+
+        response = self.client.get(self.sign_up_step_2_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/sign_up_step_2.html")
+        self.assertIsInstance(response.context["profile_form"], EndUserProfileForm)
+
+    def test_post_valid_sign_up_step_2_creates_user_and_redirects_to_login(self):
+        """Ensure completing step 2 creates a user and redirects to login."""
+        session = self.client.session
+        session["user_form_data"] = self.valid_user_data  # Simulate step 1 completion
+        session.save()
+
+        response = self.client.post(self.sign_up_step_2_url, self.valid_profile_data, follow=True)
+
+        self.assertRedirects(response, self.log_in_url)
+        self.assertTrue(User.objects.filter(username="testuser").exists())
+        self.assertTrue(EndUser.objects.filter(user__username="testuser").exists())
+
+    def test_post_invalid_sign_up_step_2_shows_errors(self):
+        """Ensure invalid profile details in step 2 show form errors."""
+        session = self.client.session
+        session["user_form_data"] = self.valid_user_data
+        session.save()
+
+        invalid_profile_data = self.valid_profile_data.copy()
+        invalid_profile_data["age"] = 15  # Invalid age (too young)
+
+        response = self.client.post(self.sign_up_step_2_url, invalid_profile_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/sign_up_step_2.html")
+        self.assertTrue(response.context["profile_form"].errors)
+        self.assertIn("age", response.context["profile_form"].errors)

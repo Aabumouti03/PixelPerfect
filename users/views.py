@@ -4,10 +4,7 @@ from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
 from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout 
-from django.contrib.auth.models import User  
 import os
 from django.conf import settings
 import random
@@ -18,16 +15,18 @@ import random
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+@login_required(login_url='log_in')
 def dashboard(request):
-    return render(request, 'users/dashboard.html')
+    """Dashboard view, accessible only to logged-in users."""
     return render(request, 'users/dashboard.html')
 
 def modules(request):
     return render(request, 'users/modules.html')
-    return render(request, 'users/modules.html')
 
 def profile(request):
-    return render(request, 'users/profile.html')
     return render(request, 'users/profile.html')
 
 def welcome_page(request):
@@ -41,6 +40,9 @@ def contact_us(request):
 
 def log_in(request):
     """Log in page view function"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
@@ -51,7 +53,6 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
-     
 
     else:
         form = LogInForm()
@@ -102,13 +103,13 @@ def sign_up_step_2(request):
     return render(request, 'users/sign_up_step_2.html', {'profile_form': profile_form})
 
 def log_out(request):
-    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
+    """Handles logout only if the user confirms via modal."""
     if request.method == "POST":
         logout(request)
         return redirect('log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))  
 
 
 def forget_password(request):
