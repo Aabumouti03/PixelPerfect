@@ -1,0 +1,13 @@
+{% block content %}
+    <h1>All Modules</h1>
+
+    <div class="module-grid">
+        {% for module in modules %}
+            <div class="module-card">
+                <h5>{{ module.title }}</h5>
+                <p>{{ module.description }}</p>
+                <a href="{% url 'module_overview' module.id %}" class="text-white">View →</a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,4 +1,5 @@
-from django.shortcuts import redirect, render
+<<<<<<< HEAD
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
@@ -7,9 +8,22 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import UserProfileForm, UserSignUpForm, EndUserProfileForm, LogInForm
 from django.contrib.auth import update_session_auth_hash
 
+from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User  
+import os
+from django.conf import settings
+import random
 
 # Create your views here.
 
+
+
+# Create your views here.
+
+#A function for displaying a page that welcomes users
+def welcome_page(request):
+    return render(request, 'users/welcome_page.html')
 
 def dashboard(request):
     return render(request, 'users/dashboard.html')
@@ -19,10 +33,7 @@ def modules(request):
 
 #edit back to users/profile.html later
 def profile(request):
-    return render(request, 'users/Profile/show_profile.html')
-
-def welcome_page(request):
-    return render(request, 'users/welcome_page.html')
+    return render(request, 'users/profile.html')
 
 def about(request):
     return render(request, 'users/about.html')
@@ -183,4 +194,58 @@ def delete_account(request):
     return render(request, 'users/Profile/delete_account.html', context)
 
 
+def module_overview(request, id):
+    module = get_object_or_404(Module, id=id)
 
+    try:
+        end_user = EndUser.objects.get(user=request.user)
+    except EndUser.DoesNotExist:
+        return HttpResponse("EndUser profile does not exist. Please contact support.")
+
+    progress = UserModuleProgress.objects.filter(module=module, user=end_user).first()
+    progress_value = progress.completion_percentage if progress else 0
+
+    return render(request, 'moduleOverview2.html', {'module': module, 'progress_value': progress_value})
+
+
+@login_required
+def user_modules(request):
+    user = request.user
+
+    try:
+        end_user = EndUser.objects.get(user=user)
+    except EndUser.DoesNotExist:
+        end_user = EndUser.objects.create(user=user)
+
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
+
+    background_folder = os.path.join(settings.BASE_DIR, 'static/img/backgrounds')
+    
+    background_images = os.listdir(background_folder)
+    
+    module_data = []
+
+    for enrollment in enrolled_modules:
+        module = enrollment.module
+        progress = UserModuleProgress.objects.filter(user=end_user, module=module).first()
+
+        progress_percentage = progress.completion_percentage if progress else 0
+
+        background_image = random.choice(background_images)
+
+        module_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress": progress_percentage,
+            "background_image": f'img/backgrounds/{background_image}' 
+        })
+
+    return render(request, 'userModules.html', {"module_data": module_data})
+
+
+
+def all_modules(request):
+    modules = Module.objects.all()
+
+    return render(request, 'all_modules.html', {'modules': modules})
