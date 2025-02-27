@@ -18,8 +18,10 @@ def client_dashboard(request):
     # GENERAL STATISTICS IN THE DASHBOARD
     enrollment_labels, enrollment_data = get_module_enrollment_stats()  
     last_work_time_labels, last_work_time_data = get_users_last_work_time()
+    users_count = EndUser.objects.all()
 
     return render(request, 'client/client_dashboard.html' , {
+        'users_count':len(users_count),
         'enrollment_labels': json.dumps(enrollment_labels),
         'enrollment_data': json.dumps(enrollment_data),
         'last_work_time_labels': json.dumps(last_work_time_labels),

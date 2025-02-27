@@ -3,6 +3,9 @@ from client.modules_statistics import *
 from client.programs_statistics import * 
 import json
 from collections import Counter
+import csv
+from django.http import HttpResponse
+
 
 def reports(request):
     # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
@@ -90,3 +93,57 @@ def userStatistics(request):
 
     return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})  # ✅ Pass JSON data
 
+
+def export_modules_statistics_csv(request):
+    """Generate a CSV report of module statistics."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="modules_statistics.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(["Statistic", "Value"])
+
+    # Fetch statistics
+    modules_count = get_modules_count()
+    writer.writerow(["Total Modules", modules_count])
+
+    enrollment_labels, enrollment_data = get_module_enrollment_stats()
+    for label, value in zip(enrollment_labels, enrollment_data):
+        writer.writerow([f"Enrollment - {label}", value])
+
+    completion_labels, completed_data, in_progress_data = get_module_completion_stats()
+    for label, comp, in_prog in zip(completion_labels, completed_data, in_progress_data):
+        writer.writerow([f"Completion - {label} (Completed)", comp])
+        writer.writerow([f"Completion - {label} (In Progress)", in_prog])
+
+    avg_completion_labels, avg_completion_data = get_average_completion_percentage()
+    for label, value in zip(avg_completion_labels, avg_completion_data):
+        writer.writerow([f"Avg Completion - {label}", value])
+
+    return response
+
+def export_programs_statistics_csv(request):
+    """Generate a CSV report of program statistics."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="programs_statistics.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(["Statistic", "Value"])
+
+    # Fetch statistics
+    programs_count = get_programs_count()
+    writer.writerow(["Total Programs", programs_count])
+
+    enrollment_labels, enrollment_data = get_program_enrollment_stats()
+    for label, value in zip(enrollment_labels, enrollment_data):
+        writer.writerow([f"Enrollment - {label}", value])
+
+    completion_labels, completed_data, in_progress_data = get_program_completion_stats()
+    for label, comp, in_prog in zip(completion_labels, completed_data, in_progress_data):
+        writer.writerow([f"Completion - {label} (Completed)", comp])
+        writer.writerow([f"Completion - {label} (In Progress)", in_prog])
+
+    avg_completion_labels, avg_completion_data = get_average_program_completion_percentage()
+    for label, value in zip(avg_completion_labels, avg_completion_data):
+        writer.writerow([f"Avg Completion - {label}", value])
+
+    return response

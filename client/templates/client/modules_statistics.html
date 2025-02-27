@@ -3,10 +3,18 @@
 
 <!-- Content block  -->
 {% block content %}
+
 <link rel="stylesheet" href="{% static 'client/css/statistics.css' %}">
     <div class="content">
         <div class="top-bar">
             <h1>Modules Statistics 📊</h1>
+
+            <div class="export-buttons">
+                <a href="{% url 'export_modules_statistics_csv' %}" class="custom-btn">
+                    Generate Report (CSV)
+                </a>
+            </div>
+
         </div>
 
         <!-- CHARTS -->

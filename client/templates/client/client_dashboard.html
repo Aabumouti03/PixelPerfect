@@ -20,7 +20,7 @@
             </div>
             <div class="card visitors" data-url="{% url 'users_management' %}">
                 <img src="{% static 'client/img/Icon-4.svg' %}" alt="User" class="icon user-icon">
-                <h2 class="count">95,574</h2>
+                <h2 class="count">{{ users_count }}</h2>
             </div>
         </div>
         <div class="charts">
