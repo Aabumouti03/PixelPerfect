@@ -1,0 +1,330 @@
+/* General Page Styles */
+html, body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    min-height: 100vh; /* Ensure full viewport height */
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+    overflow-y: auto; /* Allow scrolling */
+}
+
+.content {
+    display: flex;
+    justify-content: center; /* Center the profile horizontally */
+    align-items: flex-start; /* Ensure scrolling works */
+    width: 100%;
+    min-height: 100vh;
+    padding: 50px 0; /* Adds spacing */
+}
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 60vw;
+    max-width: 800px;
+    min-width: 500px;
+
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 auto; /* Center horizontally */
+}
+
+
+
+
+/* Profile Header */
+.profile-header {
+    width: 100%;
+    text-align: left;
+    font-size: 22px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+/* Small Partition Under "User Profile" */
+.small-partition {
+    width: 120px;
+    height: 2px;
+    background-color: #C84545;
+    border: none;
+    margin-top: 3px;
+    display: block;
+}
+
+/* Profile Info Section */
+.profile-info {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+    padding: 10px 0;
+    justify-content: flex-start;
+}
+
+/* Profile Name */
+.profile-name {
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Profile Picture */
+.profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+}
+
+/* Profile Details */
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+}
+
+/* Labels and Input Styling */
+.profile-details label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.input-wrapper {
+    width: 90%;
+    background: #FBFCF5;
+    padding: 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    border: 1px solid #CCC;
+}
+
+
+/* Password Field Container */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Password Input Field */
+#password-field {
+    width: 100%;
+    padding-right: 40px; /* Space for the eye icon */
+}
+
+/* Show Password Button (Eye Icon) */
+.show-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.5;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Make Icon Brighter on Hover */
+.show-password:hover {
+    opacity: 1;
+}
+
+
+
+/* Ensure the parent container takes full width */
+.profile-details {
+    width: 100% !important;
+}
+
+/* Ensure form-group spans full width */
+.profile-details .form-group {
+    width: 100% !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* FORCE Django Form Fields to Stretch */
+.profile-details .form-group input, 
+.profile-details .form-group select, 
+.profile-details .form-group textarea {
+    width: 100% !important;  /* Makes sure inputs match the profile page */
+    max-width: none !important;  /* Prevents unwanted restrictions */
+    padding: 14px;
+    border-radius: 30px;
+    font-size: 14px;
+    border: 1px solid #CCC;
+    background: #FBFCF5;
+    box-sizing: border-box;
+}
+
+/* Override Django default form styles */
+.profile-details .form-group input[type="text"],
+.profile-details .form-group input[type="email"],
+.profile-details .form-group input[type="number"],
+.profile-details .form-group select,
+.profile-details .form-group textarea {
+    width: 100% !important;
+    display: block;
+}
+
+
+
+
+/* Partition Line */
+.partition-line {
+    width: 100%;
+    height: 2px;
+    background-color: #C84545;
+    margin: 10px 0;
+}
+
+/* Buttons Section */
+.profile-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.left-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 12px 18px;
+    text-decoration: none;
+    background: #F24505;
+    color: white;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+}
+
+.btn:hover {
+    background: #D43802;
+}
+
+.btn-danger {
+    background: #C84545;
+    border-radius: 20px;
+}
+
+.btn-danger:hover {
+    background: #A63434;
+}
+
+.cancel-btn {
+    padding: 12px 18px;
+    text-decoration: none;
+    background: #ddd;
+    color: black;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.cancel-btn:hover {
+    background: #bbb;
+}
+
+
+/* Red asterisks for required fields */
+.required {
+    color: red;
+    font-weight: bold;
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+
+/* Centered Confirmation Box */
+.confirm-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+    margin: 50px auto;
+}
+
+/* Heading Style */
+.confirm-box h2 {
+    font-size: 22px;
+    color: #C84545;
+    margin-bottom: 10px;
+}
+
+/* Confirmation Text */
+.confirm-box p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Button Group: Flexbox to align buttons */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Delete Button */
+.delete-btn {
+    padding: 12px 18px;
+    text-decoration: none;
+    background: #C84545;
+    color: white;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+}
+
+.delete-btn:hover {
+    background: #A63434;
+}
+
+/* Cancel Button */
+.cancel-btn {
+    padding: 12px 18px;
+    text-decoration: none;
+    background: #ddd;
+    color: black;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.cancel-btn:hover {
+    background: #bbb;
+}
+
+

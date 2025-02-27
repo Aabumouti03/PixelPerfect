@@ -3,7 +3,7 @@ from .models import User, EndUser
 from django.core.validators import RegexValidator
 from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-
+from django.contrib.auth.hashers import make_password
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -64,6 +64,17 @@ class UserProfileForm(forms.ModelForm):
     username = forms.CharField(max_length=30, required=True)
     email = forms.EmailField(required=True)
 
+    new_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'placeholder': 'Enter new password', 'class': 'form-control'}),
+        label="New Password"
+    )
+    confirm_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'placeholder': 'Confirm new password', 'class': 'form-control'}),
+        label="Confirm Password"
+    )
+
     # EndUser fields that need extra validation
     phone_number = forms.CharField(
         max_length=15, required=False,
@@ -96,6 +107,19 @@ class UserProfileForm(forms.ModelForm):
                 self.fields['last_time_to_work'].initial = end_user.last_time_to_work
                 self.fields['sector'].initial = end_user.sector
 
+    def clean(self):
+        """Ensure new password and confirm password match."""
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if new_password and confirm_password:
+            if new_password != confirm_password:
+                self.add_error('confirm_password', "Passwords do not match!")  
+
+        return cleaned_data
+
+    
     def clean_email(self):
         """Ensure email uniqueness, case insensitive."""
         email = self.cleaned_data.get('email', '').strip().lower()  
@@ -126,6 +150,11 @@ class UserProfileForm(forms.ModelForm):
         user.last_name = self.cleaned_data['last_name']
         user.username = self.cleaned_data['username']
         user.email = self.cleaned_data['email']
+
+        # If user entered a new password, update it
+        new_password = self.cleaned_data.get("new_password")
+        if new_password:
+            user.set_password(new_password)  
 
         if commit:
             user.save()  

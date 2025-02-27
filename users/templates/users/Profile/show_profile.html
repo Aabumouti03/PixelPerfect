@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "users/base.html" %}
 {% load static %}
 
 {% block title %}User Profile{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/profile_style.css' %}">
+<link rel="stylesheet" href="{% static 'users/css/profile_style.css' %}">
 
 <div class="profile-container">
     <!-- Profile Header -->
@@ -39,22 +39,22 @@
         <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.email|default:'N/A' }}" disabled>
 
         <label>Phone Number:</label>
-        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user_profile.phone_number|default:'N/A' }}" disabled>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.phone_number|default:'N/A' }}" disabled>
 
         <label>Age: <span class="required">*</span></label>
-        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user_profile.age|default:'N/A' }}" disabled>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.age|default:'N/A' }}" disabled>
 
         <label>Gender: <span class="required">*</span></label>
-        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user_profile.gender|default:'N/A' }}" disabled>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.gender|default:'N/A' }}" disabled>
 
         <label>Ethnicity:</label>
-        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user_profile.ethnicity|default:'N/A' }}" disabled>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.ethnicity|default:'N/A' }}" disabled>
 
         <label>Last Time Worked: <span class="required">*</span></label>
-        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user_profile.last_time_to_work|default:'N/A' }}" disabled>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.last_time_to_work|default:'N/A' }}" disabled>
 
         <label>Sector: <span class="required">*</span></label>
-        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user_profile.sector|default:'N/A' }}" disabled>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.sector|default:'N/A' }}" disabled>
     </div>
 
     <!-- Buttons Section -->
@@ -66,7 +66,6 @@
         <a href="{% url 'delete_account' %}" class="btn btn-danger">Delete Account</a>
     </div>
 </div>
-
-
+    
 
 {% endblock %}

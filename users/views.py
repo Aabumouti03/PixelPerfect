@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserProfileForm, UserSignUpForm, EndUserProfileForm, LogInForm
- 
+from django.contrib.auth import update_session_auth_hash
+
 
 # Create your views here.
 
@@ -16,8 +17,9 @@ def dashboard(request):
 def modules(request):
     return render(request, 'users/modules.html')
 
+#edit back to users/profile.html later
 def profile(request):
-    return render(request, 'users/profile.html')
+    return render(request, 'users/Profile/show_profile.html')
 
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
@@ -115,8 +117,7 @@ def show_profile(request):
     user = request.user
 
     if hasattr(user, 'User_profile'):
-        user_profile = user.User_profile
-        return render(request, 'users/Profile/show_profile.html', {'user': user, 'user_profile': user_profile})
+        return render(request, 'users/Profile/show_profile.html', {'user': user})
     else:
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
@@ -137,6 +138,12 @@ def update_profile(request):
         if form.is_valid():
             try:
                 form.save()
+                
+                # Keep user logged in after changing the password
+                new_password = form.cleaned_data.get("new_password")
+                if new_password:
+                    update_session_auth_hash(request, user)
+
             except Exception:
                 form.add_error(None, "An unexpected error occurred. Please try again.")
             else:

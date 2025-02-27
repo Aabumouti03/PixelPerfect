@@ -19,6 +19,10 @@ from django.urls import path
 
 from client import views as clientViews
 from users import views as usersViews
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import PasswordChangeView
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,5 +43,9 @@ urlpatterns = [
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),  
+    path('password_change/', PasswordChangeView.as_view(template_name='users/change_password.html'), name='change_password'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+
+
 ]
 
