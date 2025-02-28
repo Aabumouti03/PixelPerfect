@@ -128,8 +128,15 @@ class UserModuleEnrollment(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
 
+    # def __str__(self):
+    #     return f"{self.user.user.username} started {self.module.title}"
+
+    #raghad's (for testing - temporary)
     def __str__(self):
-        return f"{self.user.user.username} started {self.module.title}"
+        if self.program:
+            return f"{self.user.user.username} enrolled in {self.program.title}"
+        return f"{self.user.user.username} skipped program selection"
+
 
 class UserProgramProgress (models.Model):
 
