@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from client import views as clientViews
 from users import views as usersViews
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 
 urlpatterns = [
@@ -35,7 +38,9 @@ urlpatterns = [
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
     path('userModules/', usersViews.user_modules, name='userModules'),
-    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
+    path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
     path('profile/', usersViews.profile, name='profile'),
     path('users_management/', clientViews.users_management, name='users_management'),
@@ -48,3 +53,7 @@ urlpatterns = [
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program')
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

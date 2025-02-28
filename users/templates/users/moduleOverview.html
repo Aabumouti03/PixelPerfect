@@ -1,0 +1,148 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Module Overview{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'users/css/moduleOverview.css' %}">
+{% endblock %}
+
+{% block content %}
+   
+    <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Overview</title>
+
+        <main class="content">
+            <div class="header">
+                <div class="header-left">
+                    <h1 class="module-name">{{ module.title }}</h1>
+                </div>
+                <div class="header-icons">
+                    <ion-icon name="search-outline"></ion-icon>
+                    <ion-icon name="notifications-outline"></ion-icon>
+                    <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
+                </div>
+            </div>
+            
+
+            <div class="module-info">
+                <div class="module-overview">
+                    <p>{{ module.description }}</p> 
+                </div>
+                <div class="progress-container">
+                    <canvas id="progressChart"></canvas>
+                    <p>Progress</p>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" class="collapsible">Videos</button>
+                <div class="collapsible-content">
+                    <p>Video Content.</p>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" class="collapsible">Excersises</button>
+                <div class="collapsible-content">
+                    {% if exercises %}
+                    <ul>
+                        {% for exercise in exercises %}
+                            <li>
+                                <strong>{{ exercise.title }}</strong> ({{ exercise.exercise_type }})
+                                {% if exercise.pdf_file %}
+                                    - <a href="{{ exercise.pdf_file.url }}" target="_blank">Download PDF</a>
+                                {% endif %}
+                                - <a href="{% url 'exercise_detail' exercise.id %}" class="view-exercise-link"> View Exercise
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <p>No exercises available for this module.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div>
+                <button type="button" class="collapsible">Additional Resources</button>
+                <div class="collapsible-content">  
+                    {% if additional_resources %}
+                    <ul>
+                        {% for resource in additional_resources %}
+                            <li>
+                                <strong>{{ resource.title }}</strong> ({{ resource.get_resource_type_display }})
+                                
+                                {% if resource.file %}
+                                    - <a href="{{ resource.file.url }}" target="_blank">Download PDF</a>
+                                {% endif %}
+                                
+                                {% if resource.url %}
+                                    - <a href="{{ resource.url }}" target="_blank">Visit Resource</a>
+                                {% endif %}
+            
+                                {% if resource.description %}
+                                    <p>{{ resource.description }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                                    
+                {% else %}
+                    <p>No additional resources available for this module.</p>
+                {% endif %}
+                                
+                </div>
+            </div>
+            
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('progressChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [50, 50], // Example progress
+                        backgroundColor: ['#4A90E2', '#E0E0E0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+    var coll = document.getElementsByClassName("collapsible");
+
+    for (var i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+
+            // Make sure content exists before trying to toggle it
+            if (content && content.classList.contains("collapsible-content")) {
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            }
+        });
+    }
+});
+
+    </script>
+    {% endblock %}
+
+

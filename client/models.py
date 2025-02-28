@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
+
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -79,8 +81,27 @@ class Module(models.Model):
     sections = models.ManyToManyField('Section', related_name="modules")  
     additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
     background_style = models.ForeignKey(BackgroundStyle, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def average_rating(self):
+        avg_rating = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
+
     def __str__(self):
         return self.title
+
+
+class ModuleRating(models.Model):
+    """Tracks user ratings for a module."""
+    module = models.ForeignKey("client.Module", related_name="ratings", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('module', 'user')  # Ensures a user can rate a module only once.
+
+    def __str__(self):
+        return f"{self.user.user.username} rated {self.module.title} - {self.rating}/5"
+
 
 
 class Section(models.Model):
@@ -88,7 +109,7 @@ class Section(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     exercises = models.ManyToManyField('Exercise', related_name="sections")  
-    #diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
+    diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
     text_position_from_diagram = models.CharField(
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )

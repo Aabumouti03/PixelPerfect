@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
-from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
+from client.models import Module,  ModuleRating, Exercise, AdditionalResource, Section
+from users.models import UserModuleProgress, UserModuleEnrollment, EndUser, UserResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
@@ -11,6 +12,10 @@ from django.contrib.auth.models import User
 import os
 from django.conf import settings
 import random
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.db.models import Avg
 
 # Create your views here.
 
@@ -47,10 +52,12 @@ def log_in(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
-
+            '''
+            rememebr to vgange to this after testing
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
+           '''
      
 
     else:
@@ -121,18 +128,59 @@ def reset_password(request, reset_id):
     return render(request, 'users/reset_password.html')
 
 
-def module_overview(request, id):
-    module = get_object_or_404(Module, id=id)
 
-    try:
-        end_user = EndUser.objects.get(user=request.user)
-    except EndUser.DoesNotExist:
-        return HttpResponse("EndUser profile does not exist. Please contact support.")
+@login_required
+def exercise_detail(request, exercise_id):
+    """Fetch the exercise details, including questions, saved responses, and the related diagram."""
 
-    progress = UserModuleProgress.objects.filter(module=module, user=end_user).first()
-    progress_value = progress.completion_percentage if progress else 0
+    exercise = get_object_or_404(Exercise, id=exercise_id)
 
-    return render(request, 'moduleOverview2.html', {'module': module, 'progress_value': progress_value})
+    user, created = EndUser.objects.get_or_create(user=request.user)
+
+    
+
+    # Find a **single** diagram from sections linked to this exercise
+    diagram = None
+    for section in exercise.sections.all():
+        if section.diagram:  
+            diagram = section.diagram  
+            break  # ✅ Stop at the first diagram found
+
+    if request.method == 'POST':
+        for question in exercise.questions.all():
+            answer_text = request.POST.get(f'answer_{question.id}', '').strip()
+
+
+        return redirect('exercise_detail', exercise_id=exercise.id)
+
+    return render(request, 'users/exercise_detail.html', {
+        'exercise': exercise,
+        'diagram': diagram,  # ✅ Pass the diagram to template
+    })
+
+def module_overview(request, module_id):
+    """Fetch the module by ID and retrieve related exercises and additional resources."""
+
+    # ✅ Get the module object, or return 404 if not found
+    module = get_object_or_404(Module, id=module_id)
+
+    # ✅ Separate sections into exercises (diagram removed)
+    exercises = []
+    additional_resources = list(module.additional_resources.all())  # ✅ Retrieve additional resources
+
+    for section in module.sections.all():
+        if section.exercises.exists():  
+            exercises.extend(section.exercises.all())  # ✅ Store exercises
+
+    context = {
+        'module': module,
+        'exercises': exercises,  # ✅ Pass exercises to template
+        'additional_resources': additional_resources,  # ✅ Pass additional resources to template
+        'progress_value': 50  # ✅ Example progress value
+    }
+    
+    return render(request, 'users/moduleOverview.html', context)
+
 
 
 @login_required
@@ -176,3 +224,28 @@ def all_modules(request):
     modules = Module.objects.all()
 
     return render(request, 'all_modules.html', {'modules': modules})
+
+@csrf_exempt
+def rate_module(request, module_id):
+    """Handles AJAX-based user rating for a module."""
+    if request.method == "POST":
+        module = get_object_or_404(Module, id=module_id)
+        data = json.loads(request.body)
+        rating_value = int(data.get("rating", 0))
+
+        if 1 <= rating_value <= 5:
+            # Save or update rating
+            rating_obj, created = ModuleRating.objects.update_or_create(
+                user=request.user.enduser,  # Ensure the user is logged in
+                module=module,
+                defaults={'rating': rating_value}
+            )
+
+            # Recalculate average rating
+            average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+            if average_rating:
+                average_rating = round(average_rating, 1)
+
+            return JsonResponse({"success": True, "average_rating": average_rating})
+
+    return JsonResponse({"success": False, "message": "Invalid request"})
