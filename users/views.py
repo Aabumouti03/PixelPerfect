@@ -1,21 +1,127 @@
-import os
-import random
 
-from django.conf import settings
-from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
+from django.contrib.auth import logout
+from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, Module, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
+import json
+from django.views.decorators.csrf import csrf_exempt
+import logging
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
-from django.http import HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth.models import User  
+import os
+import random
+logger = logging.getLogger(__name__)
 
+from django.conf import settings
 from client.models import Program  
-from .forms import EndUserProfileForm, LogInForm, UserProfileForm, UserSignUpForm
-from .models import EndUser, Module, UserModuleEnrollment, UserModuleProgress, UserProgramEnrollment
 
 
 # Create your views here.
+
+
+def welcome_view(request):
+    return render(request, 'welcome.html')
+
+def questionnaire(request):
+    active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
+
+    if active_questionnaire:
+        questions = Question.objects.filter(questionnaire=active_questionnaire)
+        questions_data = [
+            {
+                "id": q.id,
+                "question_text": q.question_text,
+                "question_type": q.question_type  # Add question type
+            }
+            for q in questions
+        ]
+    else:
+        questions_data = []
+
+    context = {
+        "active_questionnaire": active_questionnaire,
+        "questions_json": json.dumps(questions_data),
+    }
+    return render(request, "questionnaire.html", context)
+
+@csrf_exempt
+def submit_responses(request):
+    if request.method == "POST":
+        try:
+            if not request.user.is_authenticated:
+                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
+
+            data = json.loads(request.body)
+            logger.info("Received data: %s", data)
+
+            # ✅ Ensure the user exists
+            try:
+                user = EndUser.objects.get(user=request.user)
+            except EndUser.DoesNotExist:
+                return JsonResponse({"success": False, "message": "User not found. Please sign in."})
+
+            # ✅ Ensure the questionnaire exists
+            questionnaire_id = data.get("questionnaireId")
+            if not questionnaire_id:
+                return JsonResponse({"success": False, "message": "Questionnaire ID is missing."})
+
+            try:
+                questionnaire = Questionnaire.objects.get(id=questionnaire_id)
+            except Questionnaire.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Questionnaire not found."})
+
+            responses = data.get("responses", [])
+            if not responses:
+                return JsonResponse({"success": False, "message": "No responses provided."})
+
+            # ✅ Ensure Questionnaire_UserResponse exists before adding responses
+            questionnaire_user_response, created = Questionnaire_UserResponse.objects.get_or_create(
+                user=user,
+                questionnaire=questionnaire
+            )
+
+            for response in responses:
+                question_id = response.get("questionId")
+                value = response.get("value")
+
+                if not question_id or value is None:
+                    logger.error("Missing questionId or value in response: %s", response)
+                    continue
+
+                # ✅ Ensure the question exists
+                try:
+                    question = Question.objects.get(id=question_id)
+                except Question.DoesNotExist:
+                    logger.error("Question with ID %s does not exist.", question_id)
+                    continue
+
+                # ✅ Save the QuestionResponse
+                question_response = QuestionResponse(
+                    user_response=questionnaire_user_response,
+                    question=question,
+                    rating_value=int(value) if question.question_type in ["AGREEMENT", "RATING"] else None
+                )
+
+                try:
+                    question_response.full_clean()  # Validate the model instance
+                    question_response.save()
+                except ValidationError as e:
+                    logger.error("Validation error for question response: %s", str(e))
+                    continue
+
+            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+
+        except Exception as e:
+            logger.error("Error saving responses: %s", str(e))
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request method"})
+
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
@@ -87,12 +193,16 @@ def sign_up_step_2(request):
             if user_form.is_valid():
                 user = user_form.save()
                 
+                  # Added to autheticate user for questionnaire process
+                authenticated_user = authenticate(username=user.username, password=user_data["password1"])
+                if authenticated_user:
+                    login(request, authenticated_user)
 
                 profile = profile_form.save(commit=False)
                 profile.user = user
                 profile.save()
 
-                return redirect('log_in')
+                return redirect('welcome')
 
     else:
         profile_form = EndUserProfileForm()

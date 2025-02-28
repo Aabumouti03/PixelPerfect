@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Manrope', sans-serif;
+    background: #ffffff;
+}
+
+/* Page Layout */
+.content {
+    flex-grow: 1;
+    padding: 30px;
+    margin-left: 25px;
+}
+
+/* Top Bar */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: #F24505;
+}
+
+/* Save Button */
+.save-btn {
+    background-color: #f39c12;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.save-btn:hover {
+    background: #F39c12;
+    transform: scale(1.05);
+}
+
+/* Editable Title & Description */
+.description-box {
+    background: #FCEFEA;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.description-box input,
+.description-box textarea {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: none;
+}
+
+/* Questions Container */
+.questions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Question Card */
+.question-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.question-card input {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Choice List */
+.choice-list {
+    list-style: none;
+    padding: 0;
+}
+
+.choice-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+}
+
+.choice-list input {
+    flex-grow: 1;
+    border: none;
+    font-size: 16px;
+}
+
+/* Rating Scale */
+.rating-scale {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.rating-scale input {
+    width: 50px;
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Delete Buttons */
+.delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Add Question Button */
+.add-question {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.add-btn {
+    background-color: #F24505;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 20px;
+    display: inline-block;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.add-btn:hover {
+    background: #F24505;
+    transform: scale(1.05);
+}
+
+/* Style for the question type dropdown */
+.question-type-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Hover effect */
+.question-type-select:hover {
+    border-color: #3498db;
+}
+
+/* Focus (when clicked) */
+.question-type-select:focus {
+    outline: none;
+    border-color: #f24505;
+    box-shadow: 0px 0px 5px rgba(242, 69, 5, 0.5);
+}
+
+/* Dropdown arrow customization */
+.question-type-select::-ms-expand {
+    display: none; /* Hide default arrow in IE */
+}
+
+/* Apply custom styling when dropdown is opened */
+.question-type-select:active,
+.question-type-select:focus-within {
+    background-color: #f9f9f9;
+}
+
+.back-btn {
+    background-color: #F24505; 
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.back-btn:hover {
+    background: #F24505;
+    transform: scale(1.05);
+}
+/* Adjust width for smaller screens */
+@media (max-width: 768px) {
+    .question-type-select {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+

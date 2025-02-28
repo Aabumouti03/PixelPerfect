@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ('started_at', models.DateTimeField(auto_now_add=True)),
                 ('completed_at', models.DateTimeField(blank=True, null=True)),
                 ('questionnaire', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='client.questionnaire')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.enduser')),
             ],
             options={
                 'unique_together': {('user', 'questionnaire')},
@@ -79,10 +79,19 @@ class Migration(migrations.Migration):
             name='QuestionResponse',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('rating_value', models.IntegerField(blank=True, null=True)),
+                ('rating_value', models.IntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)])),
                 ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='client.question')),
-                ('selected_choice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='client.choice')),
                 ('user_response', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='question_responses', to='users.questionnaire_userresponse')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='StickyNote',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('content', models.TextField()),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sticky_notes', to='users.enduser')),
             ],
         ),
         migrations.CreateModel(

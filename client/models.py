@@ -33,8 +33,9 @@ class Category(models.Model):
 class Program(models.Model):
     """A program that consists of multiple modules (Reusable)."""
     title = models.CharField(max_length=255)
+    categories = models.ManyToManyField(Category, related_name="programs")
     description = models.TextField(blank=True, null=True)
-    # modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
+    modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
 
     def __str__(self):
         return self.title
@@ -87,7 +88,7 @@ class Section(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     exercises = models.ManyToManyField('Exercise', related_name="sections")  
-    #diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
+    diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
     text_position_from_diagram = models.CharField(
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )
@@ -171,26 +172,29 @@ class Questionnaire (models.Model):
 
 class Question (models.Model):
     QUESTION_TYPES = [
-        ('MULTIPLE_CHOICE', 'Multiple Choice'),
+        ('AGREEMENT', 'Agreement Scale'),
         ('RATING', 'Rating Scale'),
+    ]
+    SENTIMENT_CHOICES = [
+        (1, 'Positive'),
+        (0, 'Neutral'),
+        (-1, 'Negative'),
     ]
     questionnaire = models.ForeignKey(Questionnaire, related_name='questions', on_delete=models.CASCADE)
     question_text = models.TextField(blank=False)
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
     is_required = models.BooleanField(default=True)
 
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  # 🆕 Added for categorization
+    sentiment = models.IntegerField(choices=SENTIMENT_CHOICES, default=1)  # +1 for positive, -1 for negative
+
     # For rating questions
-    min_rating = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
-    max_rating = models.IntegerField(null=True, blank=True, validators=[MaxValueValidator(10)])
+    #FIXED RATING SCALE (1 to 5)
+    FIXED_MIN_RATING = 1
+    FIXED_MAX_RATING = 5
 
     def __str__(self):
         return f"{self.questionnaire.title} - {self.question_text[:30]}"
     
-class Choice(models.Model):
-    question = models.ForeignKey(Question, related_name='choices', on_delete=models.CASCADE)
-    text = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return self.text
-    
+
 

@@ -1,0 +1,46 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block title %}Response by {{ user_response.user.user.first_name }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/view_user_response.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <div class="top-bar">
+            <a href="{% url 'manage_questionnaires' %}" class="back-btn">← Back</a>
+            <h1>Response by {{ user_response.user.user.full_name }}</h1>
+        </div>
+
+        <!-- User's Responses -->
+        <div class="questions-container">
+            {% for response in responses %}
+            <div class="question-card">
+                <h3>{{ response.question.question_text }}</h3>
+
+                <!-- Agreement Scale Response -->
+                {% if response.question.question_type == "AGREEMENT" %}
+                <ul class="choice-list">
+                    <li class="choice-item {% if response.rating_value == 1 %}selected-choice{% endif %}">Strongly Disagree</li>
+                    <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Disagree</li>
+                    <li class="choice-item {% if response.rating_value == 3 %}selected-choice{% endif %}">Neutral</li>
+                    <li class="choice-item {% if response.rating_value == 4 %}selected-choice{% endif %}">Agree</li>
+                    <li class="choice-item {% if response.rating_value == 5 %}selected-choice{% endif %}">Strongly Agree</li>
+                </ul>
+
+                <!-- Rating Scale Response -->
+                {% elif response.question.question_type == "RATING" %}
+                <div class="rating-scale">
+                    <span>Scale: 1 - 5</span>
+                    <p class="selected-rating">User's Rating: <span class="highlighted-rating">{{ response.rating_value }}</span></p>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p>No responses available for this user.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

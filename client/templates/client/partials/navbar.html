@@ -29,6 +29,13 @@
                 <span>Modules</span>
             </a>
         </li>
+        <li>
+            <a href="{% url 'manage_questionnaires' %}" class="{% if request.path == '/manage_qstionnaires/' %}active{% endif %}">
+                <img src="{% static 'client/img/modules.svg' %}" alt="Users" class="icon">
+                <span>Questionnaires</span>
+            </a>
+        </li>
+        
         <div class="logout">
             <a href="#" id="logout-link">
                 <img src="{% static 'client/img/logout.svg' %}" alt="Logout" class="icon">

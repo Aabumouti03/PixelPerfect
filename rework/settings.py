@@ -57,7 +57,7 @@ ROOT_URLCONF = 'rework.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,18 +121,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    #BASE_DIR / 'static',  
-    os.path.join(BASE_DIR, "client", "static"),
-    os.path.join(BASE_DIR, "users", "static")
-]
-STATICFILES_DIRS = [
-    # BASE_DIR / 'static',
-    os.path.join(BASE_DIR, "client", "static"),
-    os.path.join(BASE_DIR, "users", "static"),
-]
+STATIC_URL = '/static/'
 
+# Define the specific static directories you want Django to use
+STATICFILES_DIRS = [
+    BASE_DIR / "client" / "static",
+    BASE_DIR / "users" / "static" / "users",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
