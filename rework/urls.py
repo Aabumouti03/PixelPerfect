@@ -39,14 +39,13 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
+    path('password_change/', PasswordChangeView.as_view(template_name='users/change_password.html'), name='change_password'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
     #profile page add-ons
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),  
-    path('password_change/', PasswordChangeView.as_view(template_name='users/change_password.html'), name='change_password'),
-    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-
 
 
     path('programs/', clientViews.programs, name='programs'),

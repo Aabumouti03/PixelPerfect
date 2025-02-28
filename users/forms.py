@@ -1,13 +1,15 @@
-from django import forms
-from .models import User, EndUser
-from django.core.validators import RegexValidator
-from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.hashers import make_password
+import re
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
+
+from .models import User, EndUser
+
 
 class UserSignUpForm(UserCreationForm):
     """Form for creating a new user account with custom placeholders."""
@@ -107,6 +109,87 @@ class UserProfileForm(forms.ModelForm):
                 self.fields['last_time_to_work'].initial = end_user.last_time_to_work
                 self.fields['sector'].initial = end_user.sector
 
+    def clean_first_name(self):
+        """Ensure first name contains only letters."""
+        first_name = self.cleaned_data.get("first_name", "").strip()
+
+        if not first_name.isalpha():
+            self.add_error("first_name", "First name should only contain letters.")
+
+        return first_name
+
+    def clean_last_name(self):
+        """Ensure last name contains only letters."""
+        last_name = self.cleaned_data.get("last_name", "").strip()
+
+        if not last_name.isalpha():
+            self.add_error("last_name", "Last name should only contain letters.")
+
+        return last_name
+
+    def clean_username(self):
+        """Validate username based on the provided rules."""
+        username = self.cleaned_data.get('username', '').strip()
+
+        if len(username) < 3:
+            self.add_error('username', "Username must be at least 3 characters long.")
+
+        if " " in username:
+            self.add_error('username', "Username should not contain spaces.")
+
+        if not re.match(r'^\w+$', username):
+            self.add_error('username', "Username can only contain letters, digits, and underscores.")
+
+        # Ensure username is unique (excluding the current user)
+        user_id = self.instance.user.id if hasattr(self.instance, 'user') else None
+        if User.objects.exclude(id=user_id).filter(username=username).exists():
+            self.add_error('username', "This username is already taken.")
+
+        return username
+    
+    def clean_new_password(self):
+        """Validate new password using Django's built-in rules + additional requirements."""
+        new_password = self.cleaned_data.get("new_password")
+
+        if new_password:
+            # Apply Django's built-in password validation (checks length, common words, etc.)
+            try:
+                validate_password(new_password)
+            except ValidationError as e:
+                self.add_error('new_password', e)
+
+            # Ensure password does not contain spaces
+            if " " in new_password:
+                self.add_error('new_password', "Password should not contain spaces.")
+
+            # Ensure password contains at least one uppercase letter
+            if not any(char.isupper() for char in new_password):
+                self.add_error('new_password', "Password must contain at least one uppercase letter.")
+
+            # Ensure password contains at least one lowercase letter
+            if not any(char.islower() for char in new_password):
+                self.add_error('new_password', "Password must contain at least one lowercase letter.")
+
+            # Ensure password contains at least one number
+            if not any(char.isdigit() for char in new_password):
+                self.add_error('new_password', "Password must contain at least one number.")
+
+        return new_password
+    
+    def clean_email(self):
+        """Ensure email is unique, case-insensitive, and exclude the current user's email."""
+        email = self.cleaned_data.get('email', '').strip().lower()  
+        user_id = self.instance.user.id if hasattr(self.instance, 'user') else None  # Get User ID, not EndUser ID
+
+        # Ensure email is unique (case insensitive), excluding the current user
+        if User.objects.exclude(id=user_id).filter(email=email).exists():
+            self.add_error('email', "A user with this email already exists.")
+
+        # Normalize email to lowercase before saving
+        self.cleaned_data['email'] = email
+        return email  
+
+
     def clean(self):
         """Ensure new password and confirm password match."""
         cleaned_data = super().clean()
@@ -118,27 +201,6 @@ class UserProfileForm(forms.ModelForm):
                 self.add_error('confirm_password', "Passwords do not match!")  
 
         return cleaned_data
-
-    
-    def clean_email(self):
-        """Ensure email uniqueness, case insensitive."""
-        email = self.cleaned_data.get('email', '').strip().lower()  
-        user_id = self.instance.id if self.instance else None
-
-        if User.objects.filter(email__iexact=email).exclude(id=user_id).exists():
-            self.add_error('email', "This email is already in use.")  
-
-        return email  
-
-    def clean_username(self):
-        """Ensure username uniqueness."""
-        username = self.cleaned_data.get('username', '').strip()    
-        user_id = self.instance.id if self.instance else None
-
-        if User.objects.filter(username=username).exclude(id=user_id).exists():
-            self.add_error('username', "This username is already taken.")  
-
-        return username
     
     def save(self, commit=True):
         """Save both the User and EndUser fields."""

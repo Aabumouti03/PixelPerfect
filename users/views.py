@@ -1,22 +1,17 @@
-<<<<<<< HEAD
-from django.shortcuts import redirect, render, get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
-from django.http import HttpResponse
-from django.contrib.auth import authenticate, login, logout
-from .forms import UserProfileForm, UserSignUpForm, EndUserProfileForm, LogInForm
-from django.contrib.auth import update_session_auth_hash
-
-from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User  
 import os
-from django.conf import settings
 import random
 
-# Create your views here.
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.shortcuts import redirect, render, get_object_or_404
 
+from .forms import EndUserProfileForm, LogInForm, UserProfileForm, UserSignUpForm
+from .models import EndUser, Module, UserModuleEnrollment, UserModuleProgress
 
 
 # Create your views here.
@@ -133,7 +128,6 @@ def show_profile(request):
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
 
-
  
 @login_required  
 def update_profile(request):
@@ -147,19 +141,22 @@ def update_profile(request):
     if request.method == "POST":
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
-            try:
-                form.save()
-                
-                # Keep user logged in after changing the password
-                new_password = form.cleaned_data.get("new_password")
-                if new_password:
-                    update_session_auth_hash(request, user)
+            form.save()
+            
+            new_password = form.cleaned_data.get("new_password")
+            if new_password:
+                print("Updating password for user:", user.username)  # Debugging
+                user.set_password(new_password)
+                user.save()
+                print("Password updated successfully!")  # Debugging
+                update_session_auth_hash(request, user)
 
-            except Exception:
-                form.add_error(None, "An unexpected error occurred. Please try again.")
-            else:
-                messages.success(request, "Your profile has been updated successfully!")
-                return redirect('show_profile')  
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('show_profile')
+
+        else:
+            print("Form is invalid! Errors:", form.errors)  # Debugging
+ 
     else:
         form = UserProfileForm(instance=user.User_profile, user=user)
 
