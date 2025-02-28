@@ -2,8 +2,10 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Choice 
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from django.core.exceptions import ValidationError 
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -170,7 +172,7 @@ class UserResponse(models.Model):
 
 # Questionnaire-related models
 class Questionnaire_UserResponse(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
@@ -181,15 +183,27 @@ class Questionnaire_UserResponse(models.Model):
 class QuestionResponse(models.Model):
     user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    selected_choice = models.ForeignKey(Choice, null=True, blank=True, on_delete=models.SET_NULL)
-    rating_value = models.IntegerField(null=True, blank=True)
+    rating_value = models.IntegerField(
+    null=True, 
+    blank=True, 
+    validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     
     def clean(self):
-        from django.core.exceptions import ValidationError
-        
-        if self.question.question_type == 'MULTIPLE_CHOICE' and not self.selected_choice:
-            raise ValidationError('Multiple choice questions require a selected choice')
-        elif self.question.question_type == 'RATING' and not self.rating_value:
-            raise ValidationError('Rating questions require a rating value')
+        if self.question.question_type == 'RATING' and self.rating_value is None:
+            raise ValidationError('Rating scale questions require a rating value')
 
+        if self.question.question_type == 'AGREEMENT' and self.rating_value is None:
+            raise ValidationError('Agreement scale questions require a selection')
+
+
+
+class StickyNote(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='sticky_notes')
+    content = models.TextField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    def __str__(self):
+        return f"StickyNote by {self.user.user.username}"
 

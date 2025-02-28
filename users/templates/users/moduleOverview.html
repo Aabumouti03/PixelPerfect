@@ -16,17 +16,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Module Overview</title>
 
-        <main class="content">
-            <div class="header">
-                <div class="header-left">
-                    <h1 class="module-name">{{ module.title }}</h1>
-                </div>
-                <div class="header-icons">
-                    <ion-icon name="search-outline"></ion-icon>
-                    <ion-icon name="notifications-outline"></ion-icon>
-                    <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
+    <main class="content">
+        <div class="header">
+            <!-- Left: Module Title -->
+            <div class="header-left">
+                <h1 class="module-name">{{ module.title }}</h1>
+            </div>
+        
+            <!-- Right: Star Rating System -->
+             
+            <div class="header-right">
+                <div class="star-container">
+                    <div class="star-rating">
+                        {% for star in "12345" %}
+                            <span class="star" data-value="{{ forloop.counter }}">&#9733;</span>
+                        {% endfor %}
+                    </div>
+                    <p id="rating-value">(Rated: {{ module.average_rating|default:"0" }}/5)</p>
                 </div>
             </div>
+        </div> 
             
 
             <div class="module-info">
@@ -142,7 +151,55 @@
     }
 });
 
-    </script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const stars = document.querySelectorAll(".star");
+    const ratingValue = document.getElementById("rating-value");
+    const csrfToken = "{{ csrf_token }}"; // Ensure CSRF token is included
+
+    function updateStars(rating) {
+        stars.forEach(star => {
+            let starValue = parseInt(star.getAttribute("data-value"));
+            if (starValue <= rating) {
+                star.classList.add("selected"); // ✅ Highlight selected stars
+            } else {
+                star.classList.remove("selected"); // ✅ Remove highlight from unselected stars
+            }
+        });
+    }
+
+    stars.forEach(star => {
+        star.addEventListener("click", function () {
+            const rating = parseInt(this.getAttribute("data-value"));
+
+            fetch("{% url 'rate_module' module.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({ rating: rating })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    ratingValue.textContent = `(Rated: ${data.average_rating}/5)`;
+                    updateStars(data.average_rating);  // ✅ Ensure correct number type
+                } else {
+                    alert("Error submitting rating.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
+
+    // ✅ Ensure initial stars match the current rating
+    let initialRating = parseFloat("{{ module.average_rating|default:0 }}");
+    updateStars(isNaN(initialRating) ? 0 : initialRating);
+});
+
+
+</script>
     {% endblock %}
 
 

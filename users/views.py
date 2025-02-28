@@ -225,27 +225,33 @@ def all_modules(request):
 
     return render(request, 'all_modules.html', {'modules': modules})
 
-@csrf_exempt
+@csrf_exempt  # Remove this if you're using CSRF protection in JS
 def rate_module(request, module_id):
     """Handles AJAX-based user rating for a module."""
-    if request.method == "POST":
+    if request.method == "POST" and request.user.is_authenticated:
         module = get_object_or_404(Module, id=module_id)
-        data = json.loads(request.body)
-        rating_value = int(data.get("rating", 0))
+        try:
+            data = json.loads(request.body)
+            rating_value = int(data.get("rating", 0))
 
-        if 1 <= rating_value <= 5:
-            # Save or update rating
-            rating_obj, created = ModuleRating.objects.update_or_create(
-                user=request.user.enduser,  # Ensure the user is logged in
-                module=module,
-                defaults={'rating': rating_value}
-            )
+            if 1 <= rating_value <= 5:
+                # ✅ Corrected access to the EndUser profile
+                end_user = request.user.User_profile  # Access related_name from EndUser model
 
-            # Recalculate average rating
-            average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-            if average_rating:
-                average_rating = round(average_rating, 1)
+                # Save or update rating
+                rating_obj, created = ModuleRating.objects.update_or_create(
+                    user=end_user,  # ✅ Use the correct reference to the EndUser instance
+                    module=module,
+                    defaults={'rating': rating_value}
+                )
 
-            return JsonResponse({"success": True, "average_rating": average_rating})
+                # Recalculate average rating
+                average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+                average_rating = round(average_rating, 1) if average_rating else 0
 
-    return JsonResponse({"success": False, "message": "Invalid request"})
+                return JsonResponse({"success": True, "average_rating": average_rating})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON data"})
+
+    return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
