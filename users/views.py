@@ -45,39 +45,60 @@ def get_notes(request):
     except StickyNote.DoesNotExist:
         return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
     
+from django.shortcuts import render, get_object_or_404
+from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, EndUser
+
+
+from django.shortcuts import render
+from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, UserModuleEnrollment, EndUser
 
 def dashboard(request):
     user = request.user
-
-    program = Program.objects.first()
-    program_modules = program.program_modules.all() if program else []
-    modules = Module.objects.all()
 
     try:
         end_user = EndUser.objects.get(user=user)
     except EndUser.DoesNotExist:
         end_user = EndUser.objects.create(user=user)
 
-    # Fetch user progress for each module
+    # Fetch the program the user is enrolled in (if any)
+    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
+    program = user_program_enrollment.program if user_program_enrollment else None
+
+    # Fetch program modules if the user is enrolled, sorted by order
+    program_modules = program.program_modules.all().order_by("order") if program else []
+
+    # Get user progress for each module
     user_progress = {
         progress.module.id: progress.completion_percentage
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Add progress values directly to module objects
-    for module in modules:
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0 if not found
-
+    # Mark only the first module as accessible
+    previous_module_completed = True  # The first module is always accessible
     for program_module in program_modules:
-        program_module.module.progress_value = user_progress.get(program_module.module.id, 0)
+        module = program_module.module
+        module.progress_value = user_progress.get(module.id, 0)
+
+        if previous_module_completed:
+            module.is_unlocked = True  # Unlock if it's the first or previous is completed
+        else:
+            module.is_unlocked = False  # Keep locked
+
+        previous_module_completed = module.progress_value == 100  # Update for next iteration
+
+    # Get modules outside the program that the user is enrolled in
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
+    outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
     context = {
         'user': user,
         'program': program,
         'program_modules': program_modules,
-        'modules': modules,
+        'outside_modules': outside_modules,  # Only enrolled modules outside the program
     }
     return render(request, 'users/dashboard.html', context)
+
+
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
