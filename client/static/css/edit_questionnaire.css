@@ -10,7 +10,7 @@ body {
 .content {
     flex-grow: 1;
     padding: 30px;
-    margin-left: 25px;
+    margin-left: 20px;
 }
 
 /* Top Bar */
@@ -18,13 +18,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     color: #F24505;
 }
 
 /* Save Button */
 .save-btn {
-    background-color: #f39c12;
+    background-color: #F24505;
     color: white;
     padding: 10px 15px;
     text-decoration: none;
@@ -37,7 +37,7 @@ body {
 }
 
 .save-btn:hover {
-    background: #F39c12;
+    background: #F24505;
     transform: scale(1.05);
 }
 
@@ -55,12 +55,12 @@ body {
 
 .description-box input,
 .description-box textarea {
-    width: 100%;
+    width: 99%;
     padding: 8px;
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    resize: none;
+    resize: both;
 }
 
 /* Questions Container */
@@ -82,7 +82,7 @@ body {
 }
 
 .question-card input {
-    width: 100%;
+    width: 99%;
     padding: 8px;
     font-size: 16px;
     border: 1px solid #ddd;
@@ -195,19 +195,13 @@ body {
     box-shadow: 0px 0px 5px rgba(242, 69, 5, 0.5);
 }
 
-/* Dropdown arrow customization */
-.question-type-select::-ms-expand {
-    display: none; /* Hide default arrow in IE */
-}
-
-/* Apply custom styling when dropdown is opened */
-.question-type-select:active,
-.question-type-select:focus-within {
-    background-color: #f9f9f9;
+/* Hide elements */
+.hidden {
+    display: none;
 }
 
 .back-btn {
-    background-color: #F24505; 
+    background-color: #F24505;
     color: white;
     padding: 10px 15px;
     text-decoration: none;
@@ -223,11 +217,11 @@ body {
     background: #F24505;
     transform: scale(1.05);
 }
-/* Adjust width for smaller screens */
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
     .question-type-select {
         font-size: 14px;
         padding: 8px;
     }
 }
-

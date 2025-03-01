@@ -9,10 +9,16 @@ from .forms import ProgramForm
 
 
 def manage_questionnaires(request):
+    search_query = request.GET.get('search', '')  
     is_active_filter = request.GET.get('is_active')
-    sort_order = request.GET.get('sort', 'desc')  # Default to descending order
+    sort_order = request.GET.get('sort', 'desc')
 
+    # Fetch all questionnaires
     questionnaires = Questionnaire.objects.all()
+
+    # Apply search filter
+    if search_query:
+        questionnaires = questionnaires.filter(title__icontains=search_query)
 
     # Apply active filter
     if is_active_filter == 'true':
@@ -42,8 +48,10 @@ def manage_questionnaires(request):
         'questionnaires_data': page_obj,
         'page_obj': page_obj,
         'is_active_filter': is_active_filter,
+        'search_query': search_query,  
         'sort_order': sort_order
     })
+
 
 
 
@@ -147,16 +155,20 @@ def edit_questionnaire(request, questionnaire_id):
         for question in questions:
             question_text = request.POST.get(f"question_text_{question.id}")
             question_type = request.POST.get(f"question_type_{question.id}")  # ✅ Get question type from form
+            sentiment = request.POST.get(f"sentiment_{question.id}")  # ✅ Get updated sentiment
 
             if question_text:
                 question.question_text = question_text
 
-            if question_type:  # ✅ Update question type
+            if question_type:
                 question.question_type = question_type
+
+            if sentiment:
+                question.sentiment = int(sentiment)  # ✅ Store updated sentiment
 
             question.save()
 
-        return redirect("view_questionnaire",  questionnaire_id=questionnaire.id)
+        return redirect("view_questionnaire", questionnaire_id=questionnaire.id)
 
     return render(request, "edit_questionnaire.html", {
         "questionnaire": questionnaire,

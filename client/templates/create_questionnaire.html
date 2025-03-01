@@ -1,13 +1,14 @@
-{% extends 'client/base.html' %}
 {% load static %}
-
-{% block title %}Create Questionnaire{% endblock %}
-
-{% block extra_css %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Questionnaire</title>
     <link rel="stylesheet" href="{% static 'css/create_questionnaire.css' %}">
-{% endblock %}
+</head>
+<body>
 
-{% block content %}
     <div class="content">
         <div class="top-bar">
             <a href="{% url 'manage_questionnaires' %}" class="back-btn">← Back</a>
@@ -38,36 +39,39 @@
                 <button type="button" id="add-question-btn" class="btn add-btn">+ Add Question</button>
             </div>
         </form>
+
     </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    document.getElementById('add-question-btn').addEventListener('click', function() {
-        let questionIndex = document.querySelectorAll('.question-card').length;
+    <script>
+        document.getElementById('add-question-btn').addEventListener('click', function() {
+            let questionIndex = document.querySelectorAll('.question-card').length;
 
-        let newQuestionHTML = `
-            <div class="question-card">
-                <label>Question Text:</label>
-                <input type="text" name="question_text_${questionIndex}" required>
+            let newQuestionHTML = `
+                <div class="question-card">
+                    <label>Question Text:</label>
+                    <input type="text" name="question_text_${questionIndex}" required>
 
-                <label>Question Type:</label>
-                <select name="question_type_${questionIndex}" class="question-type-select">
-                    <option value="AGREEMENT">Agreement Scale</option>
-                    <option value="RATING">Rating Scale</option>
-                </select>
+                    <label>Question Type:</label>
+                    <select name="question_type_${questionIndex}" class="question-type-select">
+                        <option value="AGREEMENT">Agreement Scale</option>
+                        <option value="RATING">Rating Scale</option>
+                    </select>
 
-                <label>Sentiment:</label>
-                <select name="sentiment_${questionIndex}" class="question-type-select">
-                    <option value="1">Positive</option>
-                    <option value="-1">Negative</option>
-                </select>
+                    <label>Sentiment:</label>
+                    <select name="sentiment_${questionIndex}" class= "question-type-select">
+                        <option value="1">Positive</option>
+                        <option value="-1">Negative</option>
+                    </select>
 
-                <button type="button" class="btn delete-btn" onclick="this.parentElement.remove()">Delete</button>
-            </div>
-        `;
+                    <div class="question-actions">
+                    <button type="button" class="btn delete-btn" onclick="this.parentElement.remove()">Delete</button>
+                    </div>
+                </div>
+            `;
 
-        document.getElementById('questions-container').insertAdjacentHTML('beforeend', newQuestionHTML);
-    });
-</script>
-{% endblock %}
+            document.getElementById('questions-container').insertAdjacentHTML('beforeend', newQuestionHTML);
+        });
+    </script>
+
+</body>
+</html>
