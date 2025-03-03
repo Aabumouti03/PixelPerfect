@@ -38,7 +38,7 @@
         </thead>
         <tbody>
             {% for user in users %}
-            <tr>
+            <tr onclick="window.location.href='{% url 'user_detail' user.id %}'" style="cursor: pointer;">
                 <td>{{ user.id }}</td>
                 <td>{{ user.full_name }}</td>
                 <td>{{ user.email }}</td>
@@ -50,6 +50,7 @@
             </tr>
             {% endfor %}
         </tbody>
+        
     </table>
 </div>
 

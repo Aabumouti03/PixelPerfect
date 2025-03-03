@@ -1,0 +1,55 @@
+{% extends 'client/base.html' %}
+
+{% block content %}
+<div class="user-detail-container">
+    <h2>👤 User Details</h2>
+    <p><strong>ID:</strong> {{ user.user.id }}</p>
+    <p><strong>Name:</strong> {{ user.user.full_name }}</p>
+    <p><strong>Email:</strong> {{ user.user.email }}</p>
+    <p><strong>Age:</strong> {{ user.age|default:"N/A" }}</p>
+    <p><strong>Gender:</strong> {{ user.gender|default:"N/A" }}</p>
+    <p><strong>Sector:</strong> {{ user.sector|default:"N/A" }}</p>
+    <p><strong>Phone:</strong> {{ user.phone_number|default:"N/A" }}</p>
+    <p><strong>Last Work:</strong> {{ user.last_time_to_Work|default:"N/A" }}</p>
+
+    <!-- ✅ Display Enrolled Programs -->
+    <h3>📚 Enrolled Programs</h3>
+    {% if enrolled_programs %}
+        <ul>
+            {% for enrollment in enrolled_programs %}
+                <li>{{ enrollment.program.title }} (Enrolled on: {{ enrollment.enrolled_on|date:"Y-m-d" }})</li>
+                <li>{{ enrollment.program.title }} - Progress: {{ enrollment.program.user_progress.completion_percentage }}%</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No enrolled programs.</p>
+    {% endif %}
+
+    <!-- ✅ Display Enrolled Modules -->
+    <h3>📖 Enrolled Modules</h3>
+    {% if enrolled_modules %}
+        <ul>
+            {% for enrollment in enrolled_modules %}
+                <li>{{ enrollment.module.title }} (Enrolled on: {{ enrollment.enrolled_on|date:"Y-m-d" }})</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No enrolled modules.</p>
+    {% endif %}
+
+    <!-- ✅ Display Filtering Questionnaire Responses -->
+    <h3>📝 Filtering Questionnaire Responses</h3>
+    {% if exercise_responses %}
+        <ul>
+            {% for response in exercise_responses %}
+                <li><strong>Question:</strong> {{ response.question.question_text }} <br>
+                    <strong>Response:</strong> {{ response.response_text|default:"No response provided" }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No questionnaire responses recorded.</p>
+    {% endif %}
+
+</div>
+{% endblock %}
