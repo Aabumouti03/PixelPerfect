@@ -19,6 +19,13 @@
         </li>
 
         <li>
+            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
+                <i class="fa-regular fa-pen-to-square icon"></i>
+                <span>Response</span>
+            </a>
+        </li>        
+
+        <li>
             <a href="{% url 'profile' %}" class="{%if request.path == '/profile/' %}active{% endif %}">
                 <img src="{% static 'users/img/profile.svg' %}" alt="Profile" class="icon">
                 <span>Profile</span>

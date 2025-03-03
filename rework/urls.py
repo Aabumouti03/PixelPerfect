@@ -33,7 +33,7 @@ urlpatterns = [
     path("modules/edit/<int:module_id>/", clientViews.EditModule, name="edit_module"),
     path("modules/add/", clientViews.AddModule, name="add_module"),
 
-
+    path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
    

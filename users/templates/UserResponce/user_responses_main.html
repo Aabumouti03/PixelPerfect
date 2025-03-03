@@ -5,7 +5,7 @@
     <div class="content">
         <h2 class="page-title">My Responses</h2>
         <link rel="stylesheet" href="{% static 'users/css/userresponse_style.css' %}">
-
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         {% for exercise in exercises %}
         <div class="exercise-card">
             <div class="exercise-header" onclick="toggleExercise('{{ exercise.id }}')">
