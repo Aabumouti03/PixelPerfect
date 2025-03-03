@@ -12,6 +12,9 @@ from django.contrib import messages
 from django.conf import settings
 import random
 from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
+from django.shortcuts import render, get_object_or_404
+from client.models import Program
+from users.models import UserProgramEnrollment, EndUser
 
 
 @csrf_exempt
@@ -48,7 +51,12 @@ from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, 
 
 from django.shortcuts import render
 from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, UserModuleEnrollment, EndUser
+from django.shortcuts import render, get_object_or_404
+from client.models import Program, ProgramModule
+from users.models import UserProgramEnrollment, EndUser
 
+
+@login_required
 def dashboard(request):
     user = request.user
 
@@ -95,6 +103,54 @@ def dashboard(request):
     }
     return render(request, 'users/dashboard.html', context)
 
+
+@login_required
+def view_program(request, program_id):
+    user = request.user
+
+    try:
+        end_user = EndUser.objects.get(user=user)
+    except EndUser.DoesNotExist:
+        return render(request, 'users/program_not_found.html')
+
+    # Get the user's enrolled program
+    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user, program_id=program_id).first()
+    
+    if not user_program_enrollment:
+        return render(request, 'users/program_not_found.html')
+
+    program = user_program_enrollment.program
+    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
+
+    # Fetch user progress for each module
+    user_progress = {
+        progress.module.id: progress.completion_percentage
+        for progress in UserModuleProgress.objects.filter(user=end_user)
+    }
+
+    # Assign progress values and determine if a module is locked
+    previous_completed = True  # First module should be unlocked
+    for index, program_module in enumerate(program_modules):
+        module = program_module.module
+        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
+        module.module_order = index + 1  # Assign order number
+
+        # Lock modules that are not the first and depend on previous completion
+        if previous_completed:
+            module.locked = False
+        else:
+            module.locked = True
+
+        # Update `previous_completed` for the next iteration
+        previous_completed = module.progress_value == 100
+
+    context = {
+        'user': user,
+        'program': program,
+        'program_modules': program_modules,
+    }
+    
+    return render(request, 'users/view_program.html', context)
 
 
 #A function for displaying a page that welcomes users
@@ -261,5 +317,3 @@ def all_modules(request):
     return render(request, 'all_modules.html', {'modules': modules})
 
 
-def logout_view(request):
-    return render(request, 'logout.html')
