@@ -4,7 +4,7 @@
 {% block extra_css %} 
 
     <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
-    <link rel="stylesheet" href="{% static 'users/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <script src="{% static 'users/js/sticky_note.js' %}"></script>
 
 
@@ -38,12 +38,12 @@
                 <p>{{ program.description }}</p>
             </div>
 
-            <a href="{% url 'dashboard' %}" class="view-all-button">View Program</a>
+            <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
         </div>
 
         <div class="module-list">
 
-            {% for program_module in program_modules %}
+            {% for program_module in program_modules|slice:":3" %}
                 {% with module=program_module.module %}
 
                     <div class="module-card {% if not forloop.first and module.progress_value == 0 %}locked{% endif %}">
@@ -86,7 +86,7 @@
         </div>
 
         <div class="module-list">
-            {% for module in outside_modules|slice:":4" %}
+            {% for module in outside_modules|slice:":3" %}
 
                 <div class="module-card">
                     <h3>{{ module.title }}</h3>

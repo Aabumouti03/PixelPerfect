@@ -387,3 +387,41 @@ body {
     background: #F24505;
     color: white;
 }
+
+
+/* Locked module styling */
+.module-card.locked {
+    background: #e6e6e6 !important; /* Ensure it's a gray background */
+    color: #999;
+    pointer-events: none;
+    opacity: 0.8; /* Slight fade effect */
+}
+
+/* Locked module title */
+.module-card.locked h3 {
+    color: #555;
+}
+
+/* Locked module description */
+.module-card.locked p {
+    color: #777;
+}
+
+/* Locked progress bar */
+.module-card.locked .progress-container {
+    background-color: #d6d6d6;
+}
+
+/* Locked progress fill */
+.module-card.locked .progress-fill {
+    background: #aaa; /* Dimmed progress bar */
+}
+
+/* Locked module message */
+.module-card.locked .locked-message {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
