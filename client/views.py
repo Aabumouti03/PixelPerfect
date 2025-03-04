@@ -6,7 +6,7 @@ import json
 from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
 
 from django.contrib.auth import authenticate, login, logout
-from .forms import ProgramForm 
+from .forms import ProgramForm
 from .models import Program, ProgramModule, Module
 import json
 from client.modules_statistics import * 
@@ -99,6 +99,4 @@ def delete_program(request, program_id):
     program = get_object_or_404(Program, id=program_id)
     program.delete()
     return redirect('programs')
-
-
 
