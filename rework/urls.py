@@ -29,6 +29,7 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    
     path('all_modules/', usersViews.all_modules, name='all_modules'),
     path('profile/', usersViews.profile, name='profile'),
 

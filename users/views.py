@@ -109,18 +109,23 @@ def log_out(request):
 def logout_view(request):
     return render(request, 'logout.html')
 
-def module_overview(request, id):
-    module = get_object_or_404(Module, id=id)
+# def module_overview(request, id):
+#     module = get_object_or_404(Module, id=id)
 
-    try:
-        end_user = EndUser.objects.get(user=request.user)
-    except EndUser.DoesNotExist:
-        return HttpResponse("EndUser profile does not exist. Please contact support.")
+#     try:
+#         end_user = EndUser.objects.get(user=request.user)
+#     except EndUser.DoesNotExist:
+#         return HttpResponse("EndUser profile does not exist. Please contact support.")
 
-    progress = UserModuleProgress.objects.filter(module=module, user=end_user).first()
-    progress_value = progress.completion_percentage if progress else 0
+#     progress = UserModuleProgress.objects.filter(module=module, user=end_user).first()
+#     progress_value = progress.completion_percentage if progress else 0
 
-    return render(request, 'moduleOverview2.html', {'module': module, 'progress_value': progress_value})
+#     return render(request, 'moduleOverview2.html', {'module': module, 'progress_value': progress_value})
+
+def module_overview(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    return render(request, "users/moduleOverview.html", {"module": module})
+
 
 @login_required
 def unenroll_module(request):

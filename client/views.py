@@ -13,21 +13,47 @@ def client_dashboard(request):
 def users_management(request):
     users = User.objects.all().select_related('User_profile')
     return render(request, 'client/users_management.html', {'users': users})
+#####################
+def module_overview(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    return render(request, "users/moduleOverview.html", {"module": module})
 
-def modules_management(request):
-    modules = Module.objects.all().values("title")
+def client_modules(request):
+    modules = Module.objects.all().values("id", "title")  # Include "id"
     module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
     
     modules_list = []
     for index, module in enumerate(modules):
         module_data = {
+            "id": module["id"],  # Add "id"
             "title": module["title"],
             "color_class": module_colors[index % len(module_colors)]
         }
         modules_list.append(module_data)
 
-    return render(request, "client/modules_management.html", {"modules": modules_list})
+    return render(request, "client/client_modules.html", {"modules": modules_list})
 
+
+def edit_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    
+    if request.method == "POST":
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            form.save()
+            return redirect('client_modules')  # Redirect back to module management
+    
+    else:
+        form = ModuleForm(instance=module)
+
+    return render(request, 'client/edit_module.html', {'form': form, 'module': module})
+
+def delete_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    module.delete()
+    return redirect("client_modules")
+
+#####################
 def users_management(request):
     users = User.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
