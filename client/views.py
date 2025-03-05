@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from client.models import Program, Module
 from django.shortcuts import render, get_object_or_404
 from client.models import Module
-from .forms import ModuleForm, SectionForm, ExerciseForm, QuestionForm
+from .forms import ModuleForm, SectionForm
 from .models import Module, Section, Exercise, Question
+from django.db import transaction
+from django.http import JsonResponse
 
 
 def CreateModule(request):
@@ -14,44 +16,36 @@ def EditModule(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     return render(request, "Module/edit_module.html", {"module": module})
 
-def AddModule(request):
+def add_module(request):
+    """Handles adding a module with an option to select existing sections."""
     if request.method == 'POST':
-        module_form = ModuleForm(request.POST)
-
-        if module_form.is_valid():
-            module = module_form.save()  # ✅ Save module first
-
-            section_counter = 0
-            while f'sections[{section_counter}][title]' in request.POST:
-                section_title = request.POST[f'sections[{section_counter}][title]']
-                if section_title.strip():
-                    section = Section.objects.create(title=section_title)  # ✅ Save section
-                    module.sections.add(section)
-
-                    exercise_counter = 0
-                    while f'sections[{section_counter}][exercises][{exercise_counter}][title]' in request.POST:
-                        exercise_title = request.POST[f'sections[{section_counter}][exercises][{exercise_counter}][title]']
-                        if exercise_title.strip():
-                            # ✅ Save the exercise before linking it
-                            exercise = Exercise.objects.create(title=exercise_title)
-                            section.exercises.add(exercise)  # ✅ Now it's safe to add
-
-                            question_counter = 0
-                            while f'sections[{section_counter}][exercises][{exercise_counter}][questions][{question_counter}][text]' in request.POST:
-                                question_text = request.POST[f'sections[{section_counter}][exercises][{exercise_counter}][questions][{question_counter}][text]']
-                                if question_text.strip():
-                                    question = Question.objects.create(question_text=question_text)
-                                    exercise.questions.add(question)  # ✅ Link question to saved exercise
-                                question_counter += 1
-                        exercise_counter += 1
-                section_counter += 1
-
-            return redirect('edit_add_module')  # ✅ Redirect after saving
-
+        form = ModuleForm(request.POST)
+        if form.is_valid():
+            module = form.save(commit=False)
+            module.save()
+            form.save_m2m()  # Save selected sections
+            return redirect('add_module')  # Redirect after saving
     else:
-        module_form = ModuleForm()
+        form = ModuleForm()
+    
+    return render(request, 'Module/add_module.html', {'form': form})
 
-    return render(request, 'Module/add_module.html', {'module_form': module_form})
+def add_section(request):
+    """Handles adding a new section separately."""
+    if request.method == 'POST':
+        form = SectionForm(request.POST)
+        if form.is_valid():
+            section = form.save()
+            return redirect('add_module')  # Redirect back to add module page
+    else:
+        form = SectionForm()
+    
+    return render(request, 'Module/add_section.html', {'form': form})
+
+def get_sections(request):
+    """Returns all sections as JSON (for dynamically updating dropdown)."""
+    sections = list(Section.objects.values('id', 'title'))
+    return JsonResponse({'sections': sections})
    
 
 def programs(request):

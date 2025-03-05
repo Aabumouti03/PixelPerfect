@@ -1,0 +1,16 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <h2 class="page-title">Add New Section</h2>
+        <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <button type="submit" class="save-btn">Save Section</button>
+        </form>
+    </div>
+{% endblock %}

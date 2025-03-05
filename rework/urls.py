@@ -31,10 +31,13 @@ urlpatterns = [
     # Modules (Client)
     path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
     path("modules/edit/<int:module_id>/", clientViews.EditModule, name="edit_module"),
-    path("modules/add/", clientViews.AddModule, name="add_module"),
+    # path("modules/add/", clientViews.AddModule, name="add_module"),
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
    
+    path('modules/add/', clientViews.add_module, name='add_module'),
+    path('sections/add/', clientViews.add_section, name='add_section'),
+    path('sections/get_all/', clientViews.get_sections, name='get_sections'),
 ]

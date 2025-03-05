@@ -6,72 +6,36 @@
         <h2 class="page-title">Add New Module</h2>
         <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
 
-        <form method="POST" action="">
+        <form method="POST">
             {% csrf_token %}
+            {{ form.as_p }}
+
+            <!-- Add Section Button -->
+            <a href="{% url 'add_section' %}" class="btn btn-secondary">+ Add New Section</a>
             
-            <!-- Module Form -->
-            <div class="form-group">
-                <label>Module Title</label>
-                {{ module_form.title }}
-            </div>
-
-            <div class="form-group">
-                <label>Module Description</label>
-                {{ module_form.description }}
-            </div>
-
-            <!-- Sections -->
-            <h3>Sections</h3>
-            <div id="sections-container">
-                <button type="button" onclick="addSection()">+ Add Section</button>
-            </div>
-
             <button type="submit" class="save-btn">Save Module</button>
         </form>
     </div>
 
     <script>
-        let sectionCounter = 0;
-    
-        function addSection() {
-            let container = document.getElementById('sections-container');
-            let sectionIndex = sectionCounter++;
-
-            let sectionDiv = document.createElement('div');
-            sectionDiv.innerHTML = `
-                <div class="section">
-                    <input type="text" name="sections[${sectionIndex}][title]" placeholder="Section Title">
-                    <button type="button" onclick="addExercise(${sectionIndex})">+ Add Exercise</button>
-                    <div class="exercises-container" id="exercises-container-${sectionIndex}"></div>
-                </div>
-            `;
-            container.appendChild(sectionDiv);
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateSectionsDropdown() {
+            fetch("{% url 'get_sections' %}")  // Fetch updated section list
+            .then(response => response.json())
+            .then(data => {
+                let sectionDropdown = document.querySelector('select[name="sections"]');
+                sectionDropdown.innerHTML = "";  // Clear old options
+                
+                data.sections.forEach(section => {
+                    let option = document.createElement("option");
+                    option.value = section.id;
+                    option.textContent = section.title;
+                    sectionDropdown.appendChild(option);
+                });
+            });
         }
-    
-        function addExercise(sectionIndex) {
-            let exerciseContainer = document.getElementById(`exercises-container-${sectionIndex}`);
-            let exerciseIndex = exerciseContainer.children.length;
 
-            let exerciseDiv = document.createElement('div');
-            exerciseDiv.innerHTML = `
-                <div class="exercise">
-                    <input type="text" name="sections[${sectionIndex}][exercises][${exerciseIndex}][title]" placeholder="Exercise Title">
-                    <button type="button" onclick="addQuestion(${sectionIndex}, ${exerciseIndex})">+ Add Question</button>
-                    <div class="questions-container" id="questions-container-${sectionIndex}-${exerciseIndex}"></div>
-                </div>
-            `;
-            exerciseContainer.appendChild(exerciseDiv);
-        }
-    
-        function addQuestion(sectionIndex, exerciseIndex) {
-            let questionContainer = document.getElementById(`questions-container-${sectionIndex}-${exerciseIndex}`);
-            let questionIndex = questionContainer.children.length;
-
-            let questionDiv = document.createElement('div');
-            questionDiv.innerHTML = `
-                <input type="text" name="sections[${sectionIndex}][exercises][${exerciseIndex}][questions][${questionIndex}][text]" placeholder="Question Text">
-            `;
-            questionContainer.appendChild(questionDiv);
-        }
+        updateSectionsDropdown();  // Call the function when the page loads
+    });
     </script>
 {% endblock %}

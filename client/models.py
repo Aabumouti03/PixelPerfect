@@ -74,7 +74,7 @@ class BackgroundStyle(models.Model):
 
 class Module(models.Model):
     """A module that contains multiple sections (Reusable)."""
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     categories = models.ManyToManyField(Category, related_name="modules")
     sections = models.ManyToManyField('Section', related_name="modules")  
@@ -86,7 +86,7 @@ class Module(models.Model):
 
 class Section(models.Model):
     """A section that can be used across multiple modules."""
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     exercises = models.ManyToManyField('Exercise', related_name="sections")  
     diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
