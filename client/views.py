@@ -17,38 +17,42 @@ def EditModule(request, module_id):
 def AddModule(request):
     if request.method == 'POST':
         module_form = ModuleForm(request.POST)
-        
+
         if module_form.is_valid():
-            module = module_form.save()
+            module = module_form.save()  # ✅ Save module first
 
-            # Processing sections
-            sections_data = request.POST.getlist('section_title')  # Correct field name
-            for section_title in sections_data:
-                if section_title.strip():  # Ensure it's not empty
-                    section = Section.objects.create(title=section_title)
-                    module.sections.add(section)  # Correctly link Section to Module
+            section_counter = 0
+            while f'sections[{section_counter}][title]' in request.POST:
+                section_title = request.POST[f'sections[{section_counter}][title]']
+                if section_title.strip():
+                    section = Section.objects.create(title=section_title)  # ✅ Save section
+                    module.sections.add(section)
 
-                    # Processing exercises for each section
-                    exercises_data = request.POST.getlist(f'exercise_title_{section_title}')
-                    for exercise_title in exercises_data:
+                    exercise_counter = 0
+                    while f'sections[{section_counter}][exercises][{exercise_counter}][title]' in request.POST:
+                        exercise_title = request.POST[f'sections[{section_counter}][exercises][{exercise_counter}][title]']
                         if exercise_title.strip():
+                            # ✅ Save the exercise before linking it
                             exercise = Exercise.objects.create(title=exercise_title)
-                            section.exercises.add(exercise)  # Correctly link Exercise to Section
+                            section.exercises.add(exercise)  # ✅ Now it's safe to add
 
-                            # Processing questions for each exercise
-                            questions_data = request.POST.getlist(f'question_text_{exercise_title}')
-                            for question_text in questions_data:
+                            question_counter = 0
+                            while f'sections[{section_counter}][exercises][{exercise_counter}][questions][{question_counter}][text]' in request.POST:
+                                question_text = request.POST[f'sections[{section_counter}][exercises][{exercise_counter}][questions][{question_counter}][text]']
                                 if question_text.strip():
                                     question = Question.objects.create(question_text=question_text)
-                                    exercise.questions.add(question)  # Correctly link Question to Exercise
+                                    exercise.questions.add(question)  # ✅ Link question to saved exercise
+                                question_counter += 1
+                        exercise_counter += 1
+                section_counter += 1
 
-            return redirect('edit_add_module')  
+            return redirect('edit_add_module')  # ✅ Redirect after saving
 
     else:
         module_form = ModuleForm()
 
     return render(request, 'Module/add_module.html', {'module_form': module_form})
-
+   
 
 def programs(request):
     return render(request, 'client/programs.html')
