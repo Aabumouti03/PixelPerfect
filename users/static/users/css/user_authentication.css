@@ -478,7 +478,7 @@ button[type="submit"]:hover,
 }
 
 
-/* ---------------------------- ABOUT PAGE --------------------------*/
+/* ---------------- ABOUT PAGE ---------------- */
 .about_body {
     display: flex;
     justify-content: center;
@@ -487,84 +487,136 @@ button[type="submit"]:hover,
     padding-top: 80px;
 }
 
+
 .about_container {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 90%;
-    max-width: 1400px;
-    height: auto; 
+    width: 85%;
+    max-width: 1200px;
+    min-height: 550px;
+    height: auto;
     margin: auto;
-    border-radius: 30px;
-    padding: 40px;
-    overflow: hidden; 
+    border-radius: 20px;
 }
+
 
 .about_inner_box {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     flex-wrap: wrap;
     width: 100%;
+    padding: 50px;
+    border-radius: 15px;
 }
 
-
-.about_image img {
-    width: 100%;
-    max-width: 350px;
-    height: auto;
-    border-radius: 20px;
-}
 
 .about_text {
-    flex: 1;
-    min-width: 300px;
-    padding-left: 30px;
     text-align: center;
-    overflow: hidden;
-    word-wrap: break-word;
-    white-space: normal;
-    max-height: 100%;
+    max-width: 800px;
+    margin: auto;
 }
 
-.about_text h2 {
+
+.about_title {
     font-size: 28px;
-    color: #ff440f;
-    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 20px;
+    text-align: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.about_text p {
+
+.title-background {
+    display: inline-block;
+    background: #ff5722;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    letter-spacing: 1.2px;
+    width: 100%;
+    max-width: 800px;
+}
+
+
+.highlight {
+    color: #ffe082;
+    font-weight: bold;
+}
+
+/* Paragraph Styling */
+.about_description {
     font-size: 18px;
-    color: #333;
-    line-height: 1.6;
-    max-height: 200px; /* ✅ Restricts excessive height */
-    overflow-y: auto; /* ✅ Adds scroll if needed */
-    padding-right: 10px;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    text-align: justify;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* ✅ Responsive Design */
+
+.cta-button {
+    display: block;
+    background-color: #ff440f;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    margin-top: 20px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-button:hover {
+    background-color: #d9380c;
+    transform: translateY(-2px);
+}
+
+.strong_personalization{
+    color: #ff440f;
+}
+
+.start_journey{
+    color: #ff440f;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+
+
 @media (max-width: 992px) {
     .about_inner_box {
         flex-direction: column;
         text-align: center;
-    }
-
-    .about_image {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-    }
-
-    .about_image img {
-        width: 80%; /* ✅ Resizes on smaller screens */
-        max-width: 250px;
-        margin-bottom: 20px;
+        padding: 30px;
     }
 
     .about_text {
         width: 100%;
         padding: 0 20px;
-        text-align: center;
+    }
+
+    .title-background {
+        padding: 10px 20px;
+        font-size: 20px;
+    }
+
+    .about_description {
+        font-size: 16px;
     }
 }
 
@@ -631,7 +683,6 @@ textarea.contact_inputs {
     min-width: 600px;
     max-width: 100%;
 }
-
 
 
 .contact_body input{
