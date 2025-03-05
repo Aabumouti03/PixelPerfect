@@ -31,48 +31,47 @@
     </div>
 
     <script>
-    let sectionCounter = 0;
-
-    function addSection() {
-        let container = document.getElementById('sections-container');
-        let sectionIndex = sectionCounter++;
-
-        let sectionDiv = document.createElement('div');
-        sectionDiv.innerHTML = `
-            <div class="section">
-                <input type="text" name="sections[${sectionIndex}][title]" placeholder="Section Title">
-                <button type="button" onclick="addExercise(${sectionIndex})">+ Add Exercise</button>
-                <div class="exercises-container" id="exercises-container-${sectionIndex}"></div>
-            </div>
-        `;
-        container.appendChild(sectionDiv);
-    }
-
-    function addExercise(sectionIndex) {
-        let exerciseContainer = document.getElementById(`exercises-container-${sectionIndex}`);
-        let exerciseIndex = exerciseContainer.children.length;
-
-        let exerciseDiv = document.createElement('div');
-        exerciseDiv.innerHTML = `
-            <div class="exercise">
-                <input type="text" name="sections[${sectionIndex}][exercises][${exerciseIndex}][title]" placeholder="Exercise Title">
-                <button type="button" onclick="addQuestion(${sectionIndex}, ${exerciseIndex})">+ Add Question</button>
-                <div class="questions-container" id="questions-container-${sectionIndex}-${exerciseIndex}"></div>
-            </div>
-        `;
-        exerciseContainer.appendChild(exerciseDiv);
-    }
-
-    function addQuestion(sectionIndex, exerciseIndex) {
-        let questionContainer = document.getElementById(`questions-container-${sectionIndex}-${exerciseIndex}`);
-        let questionIndex = questionContainer.children.length;
-
-        let questionDiv = document.createElement('div');
-        questionDiv.innerHTML = `
-            <input type="text" name="sections[${sectionIndex}][exercises][${exerciseIndex}][questions][${questionIndex}][text]" placeholder="Question Text">
-        `;
-        questionContainer.appendChild(questionDiv);
-    }
-</script>
-
+        let sectionCounter = 0;
+    
+        function addSection() {
+            let container = document.getElementById('sections-container');
+            let sectionId = `section-${sectionCounter++}`;
+            
+            let sectionDiv = document.createElement('div');
+            sectionDiv.innerHTML = `
+                <div class="section">
+                    <input type="text" name="section_title" placeholder="Section Title">
+                    <button type="button" onclick="addExercise('${sectionId}')">+ Add Exercise</button>
+                    <div class="exercises-container" id="${sectionId}"></div>
+                </div>
+            `;
+            container.appendChild(sectionDiv);
+        }
+    
+        function addExercise(sectionId) {
+            let container = document.getElementById(sectionId);
+            let exerciseId = `exercise-${Math.random().toString(36).substr(2, 5)}`;
+    
+            let exerciseDiv = document.createElement('div');
+            exerciseDiv.innerHTML = `
+                <div class="exercise">
+                    <input type="text" name="exercise_title_${sectionId}" placeholder="Exercise Title">
+                    <button type="button" onclick="addQuestion('${exerciseId}')">+ Add Question</button>
+                    <div class="questions-container" id="${exerciseId}"></div>
+                </div>
+            `;
+            container.appendChild(exerciseDiv);
+        }
+    
+        function addQuestion(exerciseId) {
+            let container = document.getElementById(exerciseId);
+    
+            let questionDiv = document.createElement('div');
+            questionDiv.innerHTML = `
+                <input type="text" name="question_text_${exerciseId}" placeholder="Question Text">
+            `;
+            container.appendChild(questionDiv);
+        }
+    </script>
+    
 {% endblock %}
