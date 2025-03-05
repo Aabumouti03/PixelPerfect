@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User
-from client.models import Module
+from client.models import Module, Category
 from collections import Counter
 import json
 from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
 
 from django.contrib.auth import authenticate, login, logout
-from .forms import ProgramForm
+from .forms import ProgramForm, CategoryForm
 from .models import Program, ProgramModule, Module
 import json
 from client.modules_statistics import * 
@@ -100,3 +100,48 @@ def delete_program(request, program_id):
     program.delete()
     return redirect('programs')
 
+
+def category_list(request):
+    categories = Category.objects.all()
+
+    context = {
+        'categories': categories,
+    }
+    
+    return render(request, 'client/category_list.html', context)
+
+def category_detail(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    
+    programs = category.programs.all()
+    modules = category.modules.all()
+
+    context = {
+        'category': category,
+        'programs': programs,
+        'modules': modules,
+    }
+
+    return render(request, 'client/category_detail.html', context)
+
+def create_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save()
+
+            modules = form.cleaned_data['modules']
+            programs = form.cleaned_data['programs']
+
+            category.modules.set(modules)
+            category.programs.set(programs)
+
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'client/create_category.html', context)

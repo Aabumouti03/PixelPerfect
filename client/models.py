@@ -35,6 +35,7 @@ class Program(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     # modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
+    categories = models.ManyToManyField(Category, related_name="programs")
 
     def __str__(self):
         return self.title

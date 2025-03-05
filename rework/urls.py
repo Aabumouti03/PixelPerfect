@@ -55,7 +55,9 @@ urlpatterns = [
     path('programs_statistics/', reports_views.programs_statistics, name='programs_statistics'),
     path('export/modules_statistics/', reports_views.export_modules_statistics_csv, name='export_modules_statistics_csv'),
     path('export/programs_statistics/', reports_views.export_programs_statistics_csv, name='export_programs_statistics_csv'),
+    path('category_list/', clientViews.category_list, name='category_list'),  
+    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
+    path('create_category/', clientViews.create_category, name='create_category'),
 
 
-    
 ]
