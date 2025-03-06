@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+/* ✅ Main Layout: User Details on Left, Cards on Right */
+.user-detail-container {
+    display: flex;
+    justify-content: space-between; /* Keeps sections apart */
+    align-items: flex-start;
+    gap: 30px; /* Adjust spacing */
+    width: 100%;
+    padding: 20px;
+}
+
+/* ✅ General Card Styling for Consistency */
+.card {
+    width: 100%;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* ✅ Ensure Titles Are Left-Aligned */
+.card h2 {
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* ✅ User Info Box - Now Styled as a Card */
+.user-info-box {
+    width: 350px; /* Fixed width */
+    min-height: 370px; /* Keeps consistent height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ✅ Right Section - Ensures Cards are Visible */
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+/* ✅ Program, Modules & Questionnaire Cards */
+.programs-container, 
+.modules-container, 
+.questionnaire-container {
+    width: 92%;
+    min-height: 150px; /* Keeps consistent size */
+}
+
+/* ✅ Module List - Keeps Modules Aligned */
+.module-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 10px;
+}
+
+/* ✅ Ensure Module & Program Cards Are Identical */
+.module-card, 
+.program-card {
+    width: 120px; /* Uniform square */
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ✅ Fix: Ensure Right Section Cards Are Visible */
+.right-section .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 160px;
+}
+
+/* ✅ Alternate Colors for Modules */
+.module-card:nth-child(odd) {
+    background: #73C4FD;
+}
+.module-card:nth-child(even) {
+    background: #0148FD;
+}
+
+/* ✅ Title Consistency in Cards */
+.module-card h3, 
+.program-card h3 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ✅ Progress Bar */
+.progress-container {
+    width: 90%;
+    background: #ddd;
+    border-radius: 5px;
+    height: 6px;
+    margin-bottom: 5px;
+}
+
+/* ✅ Progress Fill */
+.progress-fill {
+    height: 100%;
+    background: #007bff;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* ✅ Fix: Back Button Styling */
+.back-button-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+/* ✅ Back Button */
+.back-button {
+    display: inline-block;
+    font-size: 24px;
+    color: #F24505;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+.back-button:hover {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+/* ✅ Responsive Adjustments */
+@media (max-width: 1024px) {
+    .user-detail-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-info-box, 
+    .right-section {
+        width: 90%;
+        max-width: none;
+    }
+
+    .module-card, 
+    .program-card {
+        width: 120px;
+        height: 120px;
+    }
+
+    .progress-container {
+        height: 5px;
+    }
+}
