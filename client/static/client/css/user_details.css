@@ -31,6 +31,26 @@
     font-weight: bold;
 }
 
+/* ✅ Default smaller height when the card is empty */
+.empty-card {
+    min-height: 50px !important;  /* Smaller size when empty */
+    display: flex;
+    justify-content: center;
+}
+
+/* ✅ Ensure normal height when content is present */
+.card:not(.empty-card) {
+    min-height: 150px; /* Normal height when filled */
+}
+
+/* ✅ Style for text inside empty cards */
+.empty-card p {
+    font-size: 14px;
+    color: #777;
+    font-weight: bold;
+    text-align: center;
+}
+
 /* ✅ User Info Box - Now Styled as a Card */
 .user-info-box {
     width: 350px; /* Fixed width */
@@ -51,8 +71,9 @@
 .programs-container, 
 .modules-container, 
 .questionnaire-container {
-    width: 780px;
-    min-height: 150px; /* Keeps consistent size */
+    position: relative;
+    width: 800px;
+    min-height: 100px; /* Keeps consistent size */
 }
 
 /* ✅ Module List - Keeps Modules Aligned */
@@ -64,21 +85,45 @@
     padding: 10px;
 }
 
-/* ✅ Ensure Module & Program Cards Are Identical */
-.module-card, 
+/* ✅ **Larger Program Card with Proper Content Fit** */
 .program-card {
-    width: 120px; /* Uniform square */
-    height: 120px;
+    width: 100%;
+    max-width: 300px; /* Bigger card */
+    height: 100px; /* Fixed height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center content */
+    padding: 10px;
+    background: #FFA726; /* Warm yellow */
+    border-radius: 12px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative; /* Required to position progress text correctly */
+}
+
+/* ✅ **Bigger Title for Program Card Only** */
+.program-card h3 {
+    font-size: 1.2rem; /* Adjusted for better fit */
+    font-weight: bold;
+    margin: 0; /* Removes extra spacing */
+    color: #333; /* Darker text */
+}
+
+/* ✅ **Fixed Height & Layout for Module Cards** */
+.module-card {
+    width: 140px;
+    height: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     padding: 10px;
-    background: #fff;
+    background: white;
     border-radius: 10px;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
-    font-size: 12px;
     text-align: center;
+    position: relative; /* Allows absolute positioning inside */
 }
 
 /* ✅ Fix: Ensure Right Section Cards Are Visible */
@@ -97,29 +142,48 @@
     background: #0148FD;
 }
 
-/* ✅ Title Consistency in Cards */
-.module-card h3, 
-.program-card h3 {
-    font-size: 0.85rem;
+/* ✅ Title Consistency in Module Cards (Kept Smaller) */
+.module-card h3 {
+    font-size: 0.85rem; /* Default module title size */
     font-weight: bold;
     text-align: center;
 }
 
-/* ✅ Progress Bar */
-.progress-container {
-    width: 90%;
-    background: #ddd;
-    border-radius: 5px;
+/* ✅ **Different Progress Bar Sizes for Program & Modules** */
+.program-card .progress-container {
+    width: 100%; /* Bigger progress bar */
+    height: 12px;
+    background: #E0E0E0; /* Light gray background */
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+/* ✅ **Keep Progress Bar Fixed at Bottom** */
+.module-card .progress-container {
+    width: 80%;
     height: 6px;
-    margin-bottom: 5px;
+    background: #E0E0E0;
+    border-radius: 5px;
+    position: absolute; /* 🔥 Keeps the progress bar in the same spot */
+    bottom: 30px; /* 🔥 Ensures it stays in place */
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* ✅ Progress Fill */
 .progress-fill {
     height: 100%;
-    background: #007bff;
-    border-radius: 5px;
+    background: linear-gradient(90deg, #007bff, #0056b3); /* Blue gradient */
+    border-radius: 6px;
     transition: width 0.5s ease-in-out;
+}
+
+/* ✅ Progress Percentage Text */
+.progress-text {
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+    color: #333;
 }
 
 /* ✅ Back Button Container - Fixed to Top Left */
@@ -163,6 +227,39 @@
 /* ✅ Hover Arrow Animation */
 .back-button:hover::before {
     transform: translateX(-2px);
+}
+
+/* ✅ Initially hide extra modules */
+.hidden-module {
+    display: none; /* Extra modules are hidden */
+}
+
+/* ✅ Adjust module container height when expanded */
+.modules-container.expanded {
+    height: auto;
+}
+
+/* ✅ Style for the View All button */
+.view-all-button {
+    position: absolute;
+    bottom: 10px; /* 🔥 Pushes the button to the bottom */
+    right: 10px;
+    width: 85px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background-color: #F24505;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Manrope', sans-serif; /* 🔥 Ensures the same font is used */
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.view-all-button:hover {
+    background-color: #c9301c;
 }
 
 /* ✅ Responsive Adjustments */

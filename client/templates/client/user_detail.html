@@ -3,6 +3,8 @@
 
 {% block extra_css %} 
     <link rel="stylesheet" href="{% static 'client/css/user_details.css' %}">
+    <script src="{% static 'client/js/toggle_card.js' %}" defer></script>
+
 {% endblock %}
 
 {% block content %}
@@ -27,64 +29,59 @@
     <!-- ✅ Right Section (Programs, Modules, Questionnaire) -->
     <div class="right-section">
         
-        <!-- Enrolled Program -->
-        <div class="programs-container card">
-            <h2>Enrolled Program</h2>
-            {% if enrolled_programs %}
-                {% for enrollment in enrolled_programs %}
-                    <div class="program-card">
-                        <h3>{{ enrollment.program.title }}</h3>
+    <!-- Programs Container -->
+    <div class="programs-container card {% if not enrolled_programs %}empty-card{% endif %}">
+        <h2>Enrolled Program</h2>
+        {% if enrolled_programs %}
+            {% for enrollment in enrolled_programs %}
+                <div class="program-card">
+                    <h3>{{ enrollment.program.title }}</h3>
+                    <div class="progress-container">
+                        <div class="progress-fill" style="width: {{ enrollment.program.progress_value|default:0 }}%;"></div>
+                    </div>
+                    <span class="progress-text">{{ enrollment.program.progress_value|default:0 }}% Complete</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No enrolled programs</p>
+        {% endif %}
+    </div>
 
-                        <!-- ✅ Progress Bar -->
+    <!-- Modules Container -->
+    <div class="modules-container card {% if not enrolled_modules %}empty-card{% endif %}">
+        <h2>Enrolled Modules</h2>
+        {% if enrolled_modules %}
+            <div class="module-list">
+                {% for enrollment in enrolled_modules %}
+                    <div class="module-card">
+                        <h3>{{ enrollment.module.title }}</h3>
                         <div class="progress-container">
-                            <div class="progress-fill" style="width: {{ enrollment.program.progress_value|default:0 }}%;"></div>
+                            <div class="progress-fill" style="width: {{ enrollment.module.progress_value|default:0 }}%;"></div>
                         </div>
-                        <span class="progress-text">{{ enrollment.program.progress_value|default:0 }}% Complete</span>
+                        <span class="progress-text">{{ enrollment.module.progress_value|default:0 }}% Complete</span>
                     </div>
                 {% endfor %}
-            {% else %}
-                <h3>Not Enrolled in Any Program</h3>
-            {% endif %}
-        </div>
-
-        <!-- Enrolled Modules -->
-        <div class="modules-container card">
-            <h2>Enrolled Modules</h2>
-            <div class="module-list">
-                {% if enrolled_modules %}
-                    {% for enrollment in enrolled_modules %}
-                        <div class="module-card">
-                            <h3>{{ enrollment.module.title }}</h3>
-
-                            <!-- ✅ Progress Bar -->
-                            <div class="progress-container">
-                                <div class="progress-fill" style="width: {{ enrollment.module.progress_value|default:0 }}%;"></div>
-                            </div>
-                            <span class="progress-text">{{ enrollment.module.progress_value|default:0 }}% Complete</span>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p>No Modules Available</p>
-                {% endif %}
             </div>
-        </div>
+        {% else %}
+            <p>No enrolled modules</p>
+        {% endif %}
+    </div>
 
-        <!-- Questionnaire Responses -->
-        <div class="questionnaire-container card">
-            <h2>📝 Questionnaire Responses</h2>
-            {% if questionnaire_responses %}
-            <ul>
+    <!-- Questionnaire Responses -->
+    <div class="questionnaire-container card {% if not questionnaire_responses %}empty-card{% endif %}">
+        <h2>📝 Questionnaire Responses</h2>
+        {% if questionnaire_responses %}
+            <div class="questionnaire-list">
                 {% for response in questionnaire_responses %}
-                    <li>
+                    <div class="questionnaire-item">
                         <strong>Question:</strong> {{ response.question.question_text }} <br>
                         <strong>Response:</strong> {{ response.response_text|default:"No response provided" }}
-                    </li>
+                    </div>
                 {% endfor %}
-            </ul>
-            {% else %}
-                <p class="no-data">No Questionnaire Responses</p>
-            {% endif %}
-        </div>
+            </div>
+        {% else %}
+            <p>No Questionnaire Responses</p>
+        {% endif %}
     </div>
 
 </div>
