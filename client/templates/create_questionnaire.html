@@ -58,13 +58,22 @@
                     </select>
 
                     <label>Sentiment:</label>
-                    <select name="sentiment_${questionIndex}" class= "question-type-select">
-                        <option value="1">Positive</option>
-                        <option value="-1">Negative</option>
+                    <select name="sentiment_${questionIndex}" class="question-type-select">
+                        {% for value, label in sentiment_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label>Category:</label>
+                    <select name="category_${questionIndex}" class="question-type-select">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
                     </select>
 
                     <div class="question-actions">
-                    <button type="button" class="btn delete-btn" onclick="this.parentElement.remove()">Delete</button>
+                        <button type="button" class="btn delete-btn" onclick="this.parentElement.remove()">Delete</button>
                     </div>
                 </div>
             `;

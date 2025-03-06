@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm
 from django.contrib.auth import logout
 from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, Module, UserModuleProgress, UserModuleEnrollment
+from client.models import Category, Program
 import json
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -15,11 +16,15 @@ from django.contrib.auth.models import User
 import os
 from django.conf import settings
 import random
+from collections import defaultdict
+
 logger = logging.getLogger(__name__)
 
+@login_required
 def welcome_view(request):
     return render(request, 'welcome.html')
 
+@login_required
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
 
@@ -43,6 +48,7 @@ def questionnaire(request):
     return render(request, "questionnaire.html", context)
 
 @csrf_exempt
+@login_required
 def submit_responses(request):
     if request.method == "POST":
         try:
@@ -72,8 +78,8 @@ def submit_responses(request):
             if not responses:
                 return JsonResponse({"success": False, "message": "No responses provided."})
 
-            # ✅ Ensure Questionnaire_UserResponse exists before adding responses
-            questionnaire_user_response, created = Questionnaire_UserResponse.objects.get_or_create(
+            # Create a new Questionnaire_UserResponse 
+            questionnaire_user_response = Questionnaire_UserResponse.objects.create(
                 user=user,
                 questionnaire=questionnaire
             )
@@ -115,6 +121,52 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
+def assess_user_responses(user):
+    """
+    Evaluates the user's latest questionnaire responses, calculates scores for each category, 
+    and suggests programs based on negative scores.
+
+    Args:
+        user (EndUser): The user whose responses will be assessed.
+
+    Returns:
+        dict: A dictionary where keys are category names and values are lists of suggested programs.
+    """
+
+    # Step 1: Get the latest questionnaire response for the user
+    latest_response = Questionnaire_UserResponse.objects.filter(user=user).order_by('-started_at').first()
+
+    if not latest_response:
+        return {}  # No responses, return empty recommendations
+
+    # Step 2: Fetch all responses from the latest questionnaire submission
+    user_responses = QuestionResponse.objects.filter(user_response=latest_response).select_related('question__category')
+
+    # Step 3: Reset category scores for this new response
+    category_scores = defaultdict(int)
+
+    # Step 4: Calculate scores for each category
+    for response in user_responses:
+        question = response.question  # Get the related question
+        category = question.category  # Get the category
+
+        if category:  # Ensure question has a category
+            adjusted_score = response.rating_value * question.sentiment  # Multiply response by sentiment
+            category_scores[category.id] += adjusted_score  # Update category score
+
+    # Step 5: Find categories with negative scores
+    low_score_categories = [category_id for category_id, score in category_scores.items() if score < 0]
+
+    # Step 6: Fetch programs from the negatively scored categories
+    suggested_programs = {}
+    for category_id in low_score_categories:
+        category = get_object_or_404(Category, id=category_id)
+        programs = Program.objects.filter(categories=category)  
+        suggested_programs[category.name] = list(programs)  # Convert queryset to list
+
+    return suggested_programs
+
+
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
@@ -128,9 +180,6 @@ def modules(request):
 
 def profile(request):
     return render(request, 'users/profile.html')
-
-def welcome_page(request):
-    return render(request, 'users/welcome_page.html')
 
 def about(request):
     return render(request, 'users/about.html')
@@ -150,8 +199,6 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
-     
-
     else:
         form = LogInForm()
 
@@ -272,8 +319,6 @@ def user_modules(request):
         })
 
     return render(request, 'userModules.html', {"module_data": module_data})
-
-
 
 def all_modules(request):
     modules = Module.objects.all()

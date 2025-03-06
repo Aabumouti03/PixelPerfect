@@ -1,13 +1,15 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Questionnaire, Question, Module,  Program, ProgramModule
+from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
 from users.models import Questionnaire_UserResponse, QuestionResponse, User
 from django.core.paginator import Paginator
 from .forms import ProgramForm 
+from django.contrib.auth.decorators import login_required
 
 
 
+@login_required
 def manage_questionnaires(request):
     search_query = request.GET.get('search', '')  
     is_active_filter = request.GET.get('is_active')
@@ -52,10 +54,7 @@ def manage_questionnaires(request):
         'sort_order': sort_order
     })
 
-
-
-
-
+@login_required
 def activate_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
 
@@ -67,7 +66,7 @@ def activate_questionnaire(request, questionnaire_id):
     messages.success(request, f'Activated: {questionnaire.title}')
     return redirect('manage_questionnaires')
 
-
+@login_required
 def view_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
@@ -77,7 +76,7 @@ def view_questionnaire(request, questionnaire_id):
         'questions': questions
     })
 
-
+@login_required
 def view_responders(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     search_query = request.GET.get('search', '')  # ✅ Get search query
@@ -101,7 +100,7 @@ def view_responders(request, questionnaire_id):
         'page_obj':page_obj
     })
 
-
+@login_required
 def view_user_response(request, user_response_id):
     user_response = get_object_or_404(Questionnaire_UserResponse, id=user_response_id)
     responses = QuestionResponse.objects.filter(user_response=user_response_id).select_related('question')
@@ -110,52 +109,60 @@ def view_user_response(request, user_response_id):
         'user_response': user_response,
         'responses': responses,
     })
-
+@login_required
 def create_questionnaire(request):
+    categories = Category.objects.all()
+    sentiment_choices = Question.SENTIMENT_CHOICES  
+
     if request.method == "POST":
         title = request.POST.get("title")
         description = request.POST.get("description")
 
-        # Create new questionnaire
         questionnaire = Questionnaire.objects.create(title=title, description=description)
 
-        # Retrieve all questions
         question_index = 0
         while f"question_text_{question_index}" in request.POST:
             question_text = request.POST.get(f"question_text_{question_index}")
             question_type = request.POST.get(f"question_type_{question_index}")
-            sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  # Default positive
+            sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  
+            category_id = request.POST.get(f"category_{question_index}")
+            category = Category.objects.get(id=category_id) if category_id else None  
 
-            # Create the question
             Question.objects.create(
                 questionnaire=questionnaire,
                 question_text=question_text,
                 question_type=question_type,
-                sentiment=sentiment
+                sentiment=sentiment,
+                category=category
             )
 
-            question_index += 1  # Move to next question
+            question_index += 1  
 
         messages.success(request, "Questionnaire created successfully!")
         return redirect("manage_questionnaires")
 
-    return render(request, "create_questionnaire.html")
+    return render(request, "create_questionnaire.html", {
+        "categories": categories,
+        "sentiment_choices": sentiment_choices,  
+    })
 
+@login_required
 def edit_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
+    categories = Category.objects.all()
+    sentiment_choices = Question.SENTIMENT_CHOICES  # ✅ Get choices from model
 
     if request.method == "POST":
-        # Update questionnaire title and description
         questionnaire.title = request.POST.get("title")
         questionnaire.description = request.POST.get("description")
         questionnaire.save()
 
-        # Update existing questions
         for question in questions:
             question_text = request.POST.get(f"question_text_{question.id}")
-            question_type = request.POST.get(f"question_type_{question.id}")  # ✅ Get question type from form
-            sentiment = request.POST.get(f"sentiment_{question.id}")  # ✅ Get updated sentiment
+            question_type = request.POST.get(f"question_type_{question.id}")
+            sentiment = request.POST.get(f"sentiment_{question.id}")
+            category_id = request.POST.get(f"category_{question.id}")
 
             if question_text:
                 question.question_text = question_text
@@ -164,7 +171,10 @@ def edit_questionnaire(request, questionnaire_id):
                 question.question_type = question_type
 
             if sentiment:
-                question.sentiment = int(sentiment)  # ✅ Store updated sentiment
+                question.sentiment = int(sentiment)  
+
+            if category_id:
+                question.category = Category.objects.get(id=category_id)
 
             question.save()
 
@@ -172,21 +182,24 @@ def edit_questionnaire(request, questionnaire_id):
 
     return render(request, "edit_questionnaire.html", {
         "questionnaire": questionnaire,
-        "questions": questions
+        "questions": questions,
+        "categories": categories,
+        "sentiment_choices": sentiment_choices,  
     })
 
+@login_required
 def delete_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questionnaire.delete()
     return redirect("manage_questionnaires")
-
+@login_required
 def delete_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     questionnaire_id = question.questionnaire.id
     question.delete()
     return redirect("edit_questionnaire", questionnaire_id=questionnaire_id)
 
-
+@login_required
 def add_question(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     
@@ -206,7 +219,6 @@ def client_dashboard(request):
 def users_management(request):
     users = User.objects.all().select_related('User_profile')
     return render(request, 'client/users_management.html', {'users': users})
-    return render(request, 'client/users_management.html', {'users': users})
 
 def modules_management(request):
     modules = Module.objects.all().values("title")
@@ -220,7 +232,6 @@ def modules_management(request):
         }
         modules_list.append(module_data)
 
-    return render(request, "client/modules_management.html", {"modules": modules_list})
     return render(request, "client/modules_management.html", {"modules": modules_list})
 
 def users_management(request):

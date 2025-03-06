@@ -46,8 +46,18 @@
                     <!-- Sentiment Selector -->
                     <label>Sentiment:</label>
                     <select name="sentiment_{{ question.id }}" class="question-type-select">
-                        <option value="1" {% if question.sentiment == 1 %}selected{% endif %}>Positive</option>
-                        <option value="-1" {% if question.sentiment == -1 %}selected{% endif %}>Negative</option>
+                        {% for value, label in sentiment_choices %}
+                            <option value="{{ value }}" {% if question.sentiment == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- Category Selector -->
+                    <label>Category:</label>
+                    <select name="category_{{ question.id }}" class="question-type-select">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if question.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
                     </select>
 
                     <!-- Edit/Delete Question Buttons -->

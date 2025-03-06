@@ -11,7 +11,7 @@
 
     <div class="content">
         <div class="top-bar">
-            <a href="{% url 'manage_questionnaires' %}" class="back-btn">← Back</a>
+            <a href="{% url 'view_responders' %}" class="back-btn">← Back</a>
             <h1>Response by {{ user_response.user.user.full_name }}</h1>
         </div>
 
@@ -24,11 +24,11 @@
                 <!-- Agreement Scale Response -->
                 {% if response.question.question_type == "AGREEMENT" %}
                 <ul class="choice-list">
-                    <li class="choice-item {% if response.rating_value == 1 %}selected-choice{% endif %}">Strongly Disagree</li>
-                    <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Disagree</li>
-                    <li class="choice-item {% if response.rating_value == 3 %}selected-choice{% endif %}">Neutral</li>
-                    <li class="choice-item {% if response.rating_value == 4 %}selected-choice{% endif %}">Agree</li>
                     <li class="choice-item {% if response.rating_value == 5 %}selected-choice{% endif %}">Strongly Agree</li>
+                    <li class="choice-item {% if response.rating_value == 4 %}selected-choice{% endif %}">Agree</li>
+                    <li class="choice-item {% if response.rating_value == 3 %}selected-choice{% endif %}">Neutral</li>
+                    <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Disagree</li>
+                    <li class="choice-item {% if response.rating_value == 1 %}selected-choice{% endif %}">Strongly Disagree</li>
                 </ul>
 
                 <!-- Rating Scale Response -->
