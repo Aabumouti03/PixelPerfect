@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
 from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
 from django.contrib.auth.decorators import login_required
@@ -14,12 +13,14 @@ from django.http import JsonResponse
 from django.conf import settings
 import random
 from client.models import Module 
+from .forms import UserSignUpForm
+
 
 # Create your views here.
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
-    return render(request, 'welcome_page.html')
+    return render(request, 'users/welcome_page.html')
 
 # Login view for the user
 def log_in(request):
@@ -40,15 +41,15 @@ def log_in(request):
     else:
         form = AuthenticationForm()
     
-    return render(request, 'log_in.html', {'form': form})
+    return render(request, 'users/log_in.html', {'form': form})
 
 #A function for displaying a sign up page
 def sign_up(request):
-    form = SignUpForm()
+    form = UserSignUpForm()
     return render(request, 'sign_up.html', {'form': form})
 
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    return render(request, 'users/dashboard.html')
 
 def modules(request):
     return render(request, 'modules.html')
@@ -56,56 +57,6 @@ def modules(request):
 def profile(request):
     return render(request, 'profile.html')
 
-def welcome_page(request):
-    return render(request, 'welcome_page.html')
-
-def log_in(request):
-    """Log in page view function"""
-    if request.method == "POST":
-        form = LogInForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                login(request, user)
-                return redirect('dashboard')
-
-    else:
-        form = LogInForm()
-
-    return render(request, 'log_in.html', {'form': form})
-
-
-#A function for displaying a sign up page
-def sign_up(request):
-    if request.method == "POST":
-        user_form = UserSignUpForm(request.POST)
-        profile_form = EndUserProfileForm(request.POST)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
-            return redirect('log_in')
-
-    else:
-        user_form = UserSignUpForm()
-        profile_form = EndUserProfileForm()
-
-    return render(request, 'sign_up.html', {'user_form': user_form, 'profile_form': profile_form})
-
-
-def log_out(request):
-    """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
-    if request.method == "POST":
-        logout(request)
-        return redirect('welcome_page')
-
-    # if user cancels, stay on the same page
-    return render(request, 'dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 def logout_view(request):
     return render(request, 'logout.html')
 
@@ -124,7 +75,7 @@ def logout_view(request):
 
 def module_overview(request, module_id):
     module = get_object_or_404(Module, id=module_id)
-    return render(request, "users/moduleOverview.html", {"module": module})
+    return render(request, "users/moduleOverview2.html", {"module": module})
 
 
 @login_required
@@ -233,7 +184,7 @@ def user_modules(request):
             "background_image": f'img/backgrounds/{module.id}.jpg'  # Change based on actual background path
         })
 
-    return render(request, 'userModules.html', {"module_data": module_data})
+    return render(request, 'users/userModules.html', {"module_data": module_data})
 
 
 @login_required
@@ -248,7 +199,7 @@ def all_modules(request):
     except EndUser.DoesNotExist:
         enrolled_modules = []
 
-    return render(request, 'all_modules.html', {
+    return render(request, 'users/all_modules.html', {
         'all_modules': modules,
         'enrolled_modules': list(enrolled_modules)  # Convert QuerySet to list
     })

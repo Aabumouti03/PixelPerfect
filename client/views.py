@@ -16,7 +16,7 @@ def users_management(request):
 #####################
 def module_overview(request, module_id):
     module = get_object_or_404(Module, id=module_id)
-    return render(request, "users/moduleOverview.html", {"module": module})
+    return render(request, "client/moduleOverview.html", {"module": module})
 
 def client_modules(request):
     modules = Module.objects.all().values("id", "title")  # Include "id"

@@ -17,16 +17,23 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from client import views as clientViews
+from client import views
 from users import views as usersViews
+from client.views import delete_module
 from users.views import enroll_module, unenroll_module 
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
-    path('log_out/', usersViews.log_out, name="log_out"),  # Keep this one
+    # path('log_out/', usersViews.log_out, name="log_out"),  # Keep this one
+    path('log_out/', usersViews.logout_view, name="log_out"),
+
     path('sign_up/', usersViews.sign_up, name="sign_up"),
     path('dashboard/', usersViews.dashboard, name='dashboard'),
+     path("enroll-module/", enroll_module, name="enroll_module"),
+    path("unenroll-module/", unenroll_module, name="unenroll_module"),  # ✅ New route
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     
@@ -35,8 +42,14 @@ urlpatterns = [
 
     # Client URLs
     path('users_management/', clientViews.users_management, name='users_management'),
-    path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
     
+    #
+    path("client_modules/", views.client_modules, name="client_modules"),
+    path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  # ADD THIS
+    path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
+
+    
+    path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
     path('programs/', clientViews.programs, name='programs'),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
