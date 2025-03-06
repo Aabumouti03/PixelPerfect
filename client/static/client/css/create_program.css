@@ -81,7 +81,6 @@ body {
 
 .create_program h2 {
     font-weight: bold;
-    font-style: italic;
     color: #ff440f;
     text-align: center;
     margin-bottom: 20px;
@@ -157,4 +156,33 @@ textarea.form-control {
 .module-box ul li {
     padding: 10px;
     border-bottom: 2px solid #80bef5;
+}
+
+.saveProgram {
+    margin-top: 30px;
+}
+
+.sortable-item:hover {
+    background-color: #80bef5;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#availableModules li[style*="display: none"] {
+    display: none !important;
+}
+
+.filterButton {
+    background-color: #ff440f;
+    border-color: #ff440f;
+    color: white;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+
+.filterButton:focus,
+.filterButton:active,
+.filterButton:hover,
+.filterButton[aria-expanded="true"] {
+    background-color: #80bef5 !important;
+    border-color: #80bef5 !important;
 }
