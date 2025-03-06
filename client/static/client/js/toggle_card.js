@@ -16,3 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+function toggleAnswers(questionnaireId) {
+    let answersContainer = document.getElementById(`answers-${questionnaireId}`);
+    let button = document.querySelector(`button[onclick="toggleAnswers('${questionnaireId}')"]`);
+
+    if (answersContainer.classList.contains("hidden")) {
+        answersContainer.classList.remove("hidden");
+        button.innerText = "Hide Answers";
+    } else {
+        answersContainer.classList.add("hidden");
+        button.innerText = "View Answers";
+    }
+}

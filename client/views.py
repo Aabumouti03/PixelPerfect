@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from users.models import User
 from client.models import Module
-from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, Questionnaire_UserResponse
+from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, Questionnaire_UserResponse, QuestionResponse
 
 # Create your views here.
 
@@ -39,13 +39,22 @@ def user_detail_view(request, user_id):
     enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
     enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
 
-    # Get questionnaire responses
-    questionnaire_responses = Questionnaire_UserResponse.objects.filter(user=user_profile).prefetch_related('question_responses__question')
+    user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
+        user=user_profile
+    ).prefetch_related("questionnaire", "question_responses__question")
+
+    # Group responses by questionnaire
+    questionnaires_with_responses = {}
+    for user_response in user_questionnaire_responses:
+        if user_response.questionnaire not in questionnaires_with_responses:
+            questionnaires_with_responses[user_response.questionnaire] = []
+        for response in user_response.question_responses.all():
+            questionnaires_with_responses[user_response.questionnaire].append(response)
 
     context = {
         'user': user_profile,
         'enrolled_programs': enrolled_programs,
         'enrolled_modules': enrolled_modules,
-        'questionnaire_responses': questionnaire_responses,
+        'questionnaires_with_responses': questionnaires_with_responses,  # 👈 Fixed context structure
     }
     return render(request, 'client/user_detail.html', context)

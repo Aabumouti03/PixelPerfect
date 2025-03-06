@@ -295,7 +295,7 @@
 
 /* ✅ Highlight selected choice */
 .selected-choice {
-    background: #007bff;
+    background: #f24405;
     color: white;
     font-weight: bold;
 }
@@ -308,7 +308,36 @@
 
 .highlighted-rating {
     font-weight: bold;
-    color: #007bff;
+    color: #000000;
+}
+
+/* ✅ Style for Questionnaire Header */
+.questionnaire-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+/* ✅ Hide Answers by Default */
+.hidden {
+    display: none;
+}
+
+/* ✅ Button Style */
+.view-answers-btn {
+    background-color: #F24505;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.view-answers-btn:hover {
+    background-color: #c9301c;
 }
 
 /* ✅ Responsive Adjustments */
