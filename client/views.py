@@ -3,7 +3,7 @@ from users.models import User
 from client.models import Module
 from django.contrib.auth import authenticate, login, logout
 from .forms import ProgramForm 
-from .models import Program, ProgramModule
+from .models import Program, ProgramModule, Category
 
 # Create your views here.
 def client_dashboard(request):
@@ -38,35 +38,39 @@ def programs(request):
     programs = Program.objects.all()
     return render(request, 'client/programs.html', {'programs': programs})
 
-def logout_view(request):
-    return render(request, 'client/logout.html')
 
 def create_program(request):
+    categories = Category.objects.all()
+
     if request.method == "POST":
+
         form = ProgramForm(request.POST)
         if form.is_valid():
             program = form.save(commit=False)
             program.save()
 
-            module_order = request.POST.get("module_order", "")
+            module_order = request.POST.get("module_order", "").strip()
             module_ids = module_order.split(",") if module_order else []
 
-            program.program_modules.all().delete()
+            
+            ProgramModule.objects.filter(program=program).delete()
 
-            # Add modules in the correct order
             for index, module_id in enumerate(module_ids, start=1):
                 try:
                     module = Module.objects.get(id=module_id)
                     ProgramModule.objects.create(program=program, module=module, order=index)
                 except Module.DoesNotExist:
-                    pass
+                    print(f"Module ID {module_id} does not exist")
 
             return redirect("programs")
+
     else:
         form = ProgramForm()
 
-    return render(request, "client/create_program.html", {"form": form})
-
+    return render(request, "client/create_program.html", {
+        "form": form,
+        "categories": categories,
+    })
 
 def log_out(request):
     """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
