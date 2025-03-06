@@ -4,8 +4,8 @@ from .models import Module, Section, Exercise, Question
 class ModuleForm(forms.ModelForm):
     sections = forms.ModelMultipleChoiceField(
         queryset=Section.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
-        required=False  # Sections are optional
+        widget=forms.CheckboxSelectMultiple,  # ✅ Change to checkboxes
+        required=False
     )
 
     class Meta:

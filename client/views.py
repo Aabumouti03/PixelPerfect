@@ -17,30 +17,36 @@ def EditModule(request, module_id):
     return render(request, "Module/edit_module.html", {"module": module})
 
 def add_module(request):
-    """Handles adding a module with an option to select existing sections."""
+    """Handles adding a module with multiple sections."""
+    form_data = request.session.get('module_form_data', {})  # Load stored data
+    form = ModuleForm(initial=form_data) if form_data else ModuleForm()
+
     if request.method == 'POST':
         form = ModuleForm(request.POST)
         if form.is_valid():
             module = form.save(commit=False)
             module.save()
-            form.save_m2m()  # Save selected sections
-            return redirect('add_module')  # Redirect after saving
-    else:
-        form = ModuleForm()
-    
-    return render(request, 'Module/add_module.html', {'form': form})
+            form.save_m2m()  # Save many-to-many relationship
+            
+            request.session.pop('module_form_data', None)  # Clear stored data after save
+            return redirect('modules')  
+
+        request.session['module_form_data'] = request.POST  # Save form data if invalid
+
+    sections = Section.objects.all()
+    return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
 
 def add_section(request):
-    """Handles adding a new section separately."""
+    """Handles adding a new section separately (AJAX-friendly)."""
     if request.method == 'POST':
         form = SectionForm(request.POST)
         if form.is_valid():
-            section = form.save()
-            return redirect('add_module')  # Redirect back to add module page
-    else:
-        form = SectionForm()
-    
-    return render(request, 'Module/add_section.html', {'form': form})
+            new_section = form.save()
+            return JsonResponse({'success': True, 'id': new_section.id, 'title': new_section.title})
+
+    return JsonResponse({'success': False, 'error': 'Invalid data'})
+
+
 
 def get_sections(request):
     """Returns all sections as JSON (for dynamically updating dropdown)."""

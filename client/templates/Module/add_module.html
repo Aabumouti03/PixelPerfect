@@ -6,36 +6,139 @@
         <h2 class="page-title">Add New Module</h2>
         <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
 
-        <form method="POST">
+        <form method="POST" id="moduleForm">
             {% csrf_token %}
-            {{ form.as_p }}
 
-            <!-- Add Section Button -->
-            <a href="{% url 'add_section' %}" class="btn btn-secondary">+ Add New Section</a>
-            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                {{ form.title }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+            </div>
+
+            <!-- ✅ Display Selected Sections Here -->
+            <div class="form-group">
+                <label>Selected Sections:</label>
+                <ul id="selected-sections"></ul>
+            </div>
+
+            <!-- Section Selection (Checkboxes) -->
+            <div class="form-group">
+                <label>Select Sections:</label>
+                <div id="section-checkboxes">
+                    {{ form.sections }}
+                </div>
+            </div>
+
             <button type="submit" class="save-btn">Save Module</button>
         </form>
     </div>
 
+    <!-- Add Section Modal -->
+    <div id="section-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Section</h2>
+            <form id="addSectionForm">
+                {% csrf_token %}
+                {{ section_form.as_p }}
+                <button type="submit" class="save-btn">Save Section</button>
+            </form>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // ✅ Update Selected Sections List
+        function updateSelectedSections() {
+            let selectedList = document.getElementById('selected-sections');
+            selectedList.innerHTML = "";
+
+            // ✅ Fix: Select checkboxes correctly even if Django wraps them in divs
+            document.querySelectorAll('input[type="checkbox"][name="sections"]:checked').forEach(checkbox => {
+                let label = document.querySelector(`label[for="${checkbox.id}"]`);
+                if (label) {
+                    let li = document.createElement('li');
+                    li.textContent = label.textContent.trim();
+                    selectedList.appendChild(li);
+                }
+            });
+        }
+
+        // ✅ Attach event listener to checkboxes
+        document.querySelectorAll('input[type="checkbox"][name="sections"]').forEach(input => {
+            input.addEventListener('change', updateSelectedSections);
+        });
+
+        // ✅ Update the selected sections list on page load (for pre-selected sections)
+        updateSelectedSections();
+
+        // ✅ Open & Close Modal
+        let modal = document.getElementById("section-modal");
+        let openModalBtn = document.getElementById("open-section-modal");
+        let closeModalBtn = document.querySelector(".close");
+
+        openModalBtn.onclick = function() {
+            modal.style.display = "block";
+        }
+        closeModalBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // ✅ Handle New Section Submission
+        document.getElementById("addSectionForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let formData = new FormData(this);
+            fetch("{% url 'add_section' %}", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json()) 
+            .then(data => {
+                if (data.success) {
+                    modal.style.display = "none";
+                    updateSectionsDropdown();
+                }
+            });
+        });
+
+        // ✅ Fetch Updated Sections After Adding
         function updateSectionsDropdown() {
-            fetch("{% url 'get_sections' %}")  // Fetch updated section list
+            fetch("{% url 'get_sections' %}") 
             .then(response => response.json())
             .then(data => {
-                let sectionDropdown = document.querySelector('select[name="sections"]');
-                sectionDropdown.innerHTML = "";  // Clear old options
-                
+                let sectionContainer = document.getElementById("section-checkboxes");
+                sectionContainer.innerHTML = ""; 
+
                 data.sections.forEach(section => {
-                    let option = document.createElement("option");
-                    option.value = section.id;
-                    option.textContent = section.title;
-                    sectionDropdown.appendChild(option);
+                    let div = document.createElement("div");
+                    div.innerHTML = `
+                        <input type="checkbox" name="sections" value="${section.id}" id="section_${section.id}">
+                        <label for="section_${section.id}">${section.title}</label>
+                    `;
+                    sectionContainer.appendChild(div);
+                });
+
+                // Re-attach event listener to new checkboxes
+                document.querySelectorAll('input[name="sections"]').forEach(input => {
+                    input.addEventListener('change', updateSelectedSections);
                 });
             });
         }
 
-        updateSectionsDropdown();  // Call the function when the page loads
+        updateSectionsDropdown();
     });
     </script>
+
+    <style>
+        /* Simple Modal Styling */
+        .modal { display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; padding: 20px; width: 50%; margin: 10% auto; border-radius: 8px; }
+        .close { float: right; font-size: 20px; cursor: pointer; }
+    </style>
+
 {% endblock %}
