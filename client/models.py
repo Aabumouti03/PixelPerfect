@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -14,6 +16,13 @@ QUESTION_POSITIONS = [
     ('left', 'Left of the Diagram'),
     ('right', 'Right of the Diagram'),
 ]
+
+STATUS_CHOICES = [
+        ('not_started','Not Started'),
+        ('in_progress', 'In_Progress'),
+        ('completed', 'Completed')
+]
+
 
 class Program(models.Model):
     """A program that consists of multiple modules (Reusable)."""
@@ -31,8 +40,26 @@ class Module(models.Model):
     description = models.TextField(blank=True, null=True)
     sections = models.ManyToManyField('Section', related_name="modules")  
 
+    def average_rating(self):
+        avg_rating = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
+
+
     def __str__(self):
         return self.title
+
+
+class ModuleRating(models.Model):
+    """Tracks user ratings for a module."""
+    module = models.ForeignKey("client.Module", related_name="ratings", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('module', 'user')  # Ensures a user can rate a module only once.
+
+    def __str__(self):
+        return f"{self.user.user.username} rated {self.module.title} - {self.rating}/5"
 
 
 class Section(models.Model):
