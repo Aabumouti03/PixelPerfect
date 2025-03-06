@@ -69,7 +69,12 @@
                             - <a href="{% url 'exercise_detail' exercise.id %}" class="view-exercise-link"> View Exercise </a>
                             
                             <!-- Done Button -->
-                            <button class="done-button" data-id="{{ exercise.id }}" data-type="exercise">Done</button>
+                            <button class="done-button undo" 
+                            data-id="{{ exercise.id }}" data-type="exercise">
+                        {% if exercise.status == 'completed' %}Undo{% else %}Done{% endif %}
+                    </button>
+
+
 
                         </li>                        
                         {% endfor %}
@@ -103,7 +108,12 @@
                             {% endif %}
                         
                             <!-- Done Button -->
-                            <button class="done-button" data-id="{{ resource.id }}" data-type="resource">Done</button>
+                            <button class="done-button undo" 
+                            data-id="{{ resource.id }}" data-type="resource">
+                        {% if resource.status == 'completed' %}Undo{% else %}Done{% endif %}
+                    </button>
+
+
                         </li>
                         
                         {% endfor %}
@@ -224,7 +234,11 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             const itemId = this.getAttribute("data-id");
             const itemType = this.getAttribute("data-type");
-            const action = this.textContent.trim() === "Done" ? "done" : "undo";  // Determine action
+            const currentText = this.textContent.trim();
+            const action = currentText === "Done" ? "done" : "undo";  // Determine action
+
+            // Change the button text immediately
+            this.textContent = action === "done" ? "Undo" : "Done";
 
             // Send the request to mark the item as done or undone
             fetch("{% url 'mark_done' %}", {
@@ -238,17 +252,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update the button's text and color
-                    if (this.textContent === "Done") {
-                        this.textContent = "Undo";  // Change text to "Undo"
-                        this.classList.add("done");   // Apply green style
-                        this.classList.remove("undo"); // Remove orange style
-                    } else {
-                        this.textContent = "Done";  // Change text to "Done"
-                        this.classList.add("undo");  // Apply orange style
-                        this.classList.remove("done"); // Remove green style
-                    }
-
                     // Update the progress value on the frontend
                     const updatedProgress = data.updated_progress || 0;
                     document.getElementById("progress-value").textContent = `${updatedProgress}%`;
@@ -257,7 +260,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     var progressChart = Chart.instances[0]; // Assuming there's only one chart
                     progressChart.data.datasets[0].data = [updatedProgress, 100 - updatedProgress];
                     progressChart.update(); // Update the chart
-
                 } else {
                     alert("Error marking as done.");
                 }
@@ -266,6 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
 
 </script>
     {% endblock %}

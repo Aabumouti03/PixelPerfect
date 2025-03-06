@@ -286,13 +286,18 @@ canvas#progressChart {
     transition: background-color 0.3s ease;
 }
 
-.done-button.done {
-    background-color: #28a745;  /* Green when 'done' */
+/* Style for "Done" state (orange) */
+.done-button.undo {
+    background-color: orange;
+    color: white;
 }
 
-.done-button.undo {
-    background-color: #FFA500;  /* Orange when 'undo' */
+/* Style for "Undo" state (green) */
+.done-button.done {
+    background-color: green;
+    color: white;
 }
+
 
 .done-button:disabled {
     background-color: #d3d3d3;  /* Gray when disabled */

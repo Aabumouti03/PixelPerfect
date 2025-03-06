@@ -224,68 +224,64 @@ def mark_done(request):
         user = request.user
         end_user = EndUser.objects.get(user=user)  # Get the EndUser instance associated with the user
 
-        if item_type == "exercise":
-            exercise = Exercise.objects.get(id=item_id)
-            if  exercise.status=='completed':
-                exercise.status='in_progress'
+        if item_type == "resource":
+            resource = AdditionalResource.objects.get(id=item_id)
+            if resource.status == 'completed':
+                resource.status = 'in_progress'
             else:
-                 exercise.status = 'completed' 
+                resource.status = 'completed'
+            resource.save()
+            module = Module.objects.filter(additional_resources=resource).first()
 
+        elif item_type == "exercise":
+            exercise = Exercise.objects.get(id=item_id)
+            if exercise.status == 'completed':
+                exercise.status = 'in_progress'
+            else:
+                exercise.status = 'completed'
             exercise.save()
             module = exercise.sections.first().modules.first()
 
-            module = exercise.sections.first().modules.first()
-        elif item_type == "resource":
-            resource = AdditionalResource.objects.get(id=item_id)
-            if  resource.status=='completed':
-                resource.status='in_progress'
-            else:
-                 resource.status = 'completed' 
-            resource.save()
-
-            module = resource.modules.first()
-
-
-        # Calculate and update progress
+        # Recalculate the progress and update the user module progress
         user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
         user_module_progress.completion_percentage = calculate_progress(end_user, module)
         user_module_progress.save()
 
-        # Return the updated progress
-        return JsonResponse({"success": True, "updated_progress": user_module_progress.completion_percentage})
+        # Return the updated progress as JSON
+        return JsonResponse({
+            "success": True,
+            "updated_progress": user_module_progress.completion_percentage
+        })
 
     return JsonResponse({"success": False})
 
 
+
+
 def calculate_progress(end_user, module):
-    # Count how many exercises are completed
-    exercises = [] 
+    # Get all exercises in the module
+    exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
 
-    completed_exercises = []
+    # Count completed exercises
+    completed_exercises = [exercise for exercise in exercises if exercise.status == 'completed']
 
-    for exercise in exercises:
-        if exercise.status=='completed':
-            completed_exercises.append(exercise)
+    # Count completed resources
+    completed_resources = [resource for resource in module.additional_resources.all() if resource.status == 'completed']
 
+    # Calculate total and completed items
+    total_items = len(exercises) + module.additional_resources.count()
+    completed_items = len(completed_exercises) + len(completed_resources)
 
-    # Count how many resources are completed
-    completed_resources = module.additional_resources.filter(status='completed').count()
-
-    total_items = len(exercises)+ module.additional_resources.count()
-    completed_items = len(completed_exercises) + completed_resources
-
-    # Calculate the percentage of progress
+    # Calculate progress percentage
     if total_items > 0:
         progress = (completed_items / total_items) * 100
     else:
         progress = 0
 
     return progress
-
-
 
 
 
@@ -363,24 +359,3 @@ def rate_module(request, module_id):
 
     return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
 
-'''
-def mark_done(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        item_id = data.get("id")
-        item_type = data.get("type")
-
-        # Example logic to mark item as done (modify as per your model)
-        if item_type == "exercise":
-            exercise = Exercise.objects.get(id=item_id)
-            exercise.completed = True
-            exercise.save()
-        elif item_type == "resource":
-            resource = Resource.objects.get(id=item_id)
-            resource.completed = True
-            resource.save()
-
-        return JsonResponse({"success": True})
-
-    return JsonResponse({"success": False})
-'''
