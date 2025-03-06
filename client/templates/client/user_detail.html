@@ -68,21 +68,42 @@
     </div>
 
     <!-- Questionnaire Responses -->
-    <div class="questionnaire-container card {% if not questionnaire_responses %}empty-card{% endif %}">
-        <h2>📝 Questionnaire Responses</h2>
-        {% if questionnaire_responses %}
-            <div class="questionnaire-list">
-                {% for response in questionnaire_responses %}
-                    <div class="questionnaire-item">
-                        <strong>Question:</strong> {{ response.question.question_text }} <br>
-                        <strong>Response:</strong> {{ response.response_text|default:"No response provided" }}
+    <!-- Questionnaire Responses - Now Follows Same Structure -->
+<div class="questionnaire-container card {% if not questionnaire_responses %}empty-card{% endif %}">
+    <h2>📝 Questionnaire Responses</h2>
+    {% if questionnaire_responses %}
+        <div class="questionnaire-list">
+            {% for response in questionnaire_responses %}
+                <div class="questionnaire-item">
+                    <strong>Questionnaire:</strong> {{ response.questionnaire.title }} <br>
+                    <strong>Question:</strong> {{ response.question.question_text }} <br>
+
+                    <!-- Agreement Scale Response -->
+                    {% if response.question.question_type == "AGREEMENT" %}
+                    <ul class="choice-list">
+                        <li class="choice-item {% if response.response_text == "5" %}selected-choice{% endif %}">Strongly Agree</li>
+                        <li class="choice-item {% if response.response_text == "4" %}selected-choice{% endif %}">Agree</li>
+                        <li class="choice-item {% if response.response_text == "3" %}selected-choice{% endif %}">Neutral</li>
+                        <li class="choice-item {% if response.response_text == "2" %}selected-choice{% endif %}">Disagree</li>
+                        <li class="choice-item {% if response.response_text == "1" %}selected-choice{% endif %}">Strongly Disagree</li>
+                    </ul>
+
+                    <!-- Rating Scale Response -->
+                    {% elif response.question.question_type == "RATING" %}
+                    <div class="rating-scale">
+                        <span>Scale: 1 - 5</span>
+                        <p class="selected-rating">User's Rating: <span class="highlighted-rating">{{ response.response_text }}</span></p>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>No Questionnaire Responses</p>
-        {% endif %}
-    </div>
+                    {% else %}
+                        <p>{{ response.response_text|default:"No response provided" }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No Questionnaire Responses</p>
+    {% endif %}
+</div>
 
 </div>
 
