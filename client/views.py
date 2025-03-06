@@ -37,16 +37,17 @@ def add_module(request):
     return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
 
 def add_section(request):
-    """Handles adding a new section separately (AJAX-friendly)."""
+    """Handles the addition of a new section with title and description."""
     if request.method == 'POST':
         form = SectionForm(request.POST)
         if form.is_valid():
-            new_section = form.save()
-            return JsonResponse({'success': True, 'id': new_section.id, 'title': new_section.title})
+            form.save() 
+            return redirect('add_module') 
 
-    return JsonResponse({'success': False, 'error': 'Invalid data'})
-
-
+    else:
+        form = SectionForm() 
+        
+    return render(request, 'Module/add_section.html', {'form': form})
 
 def get_sections(request):
     """Returns all sections as JSON (for dynamically updating dropdown)."""

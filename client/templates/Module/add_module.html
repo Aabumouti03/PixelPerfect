@@ -33,11 +33,14 @@
                 </div>
             </div>
 
+            <a href="{% url 'add_section' %}" class="btn btn-secondary">+ Add New Section</a>
+
+
             <button type="submit" class="save-btn">Save Module</button>
         </form>
     </div>
 
-    <!-- Add Section Modal -->
+    <!-- ✅ Add Section Modal -->
     <div id="section-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -73,20 +76,20 @@
             input.addEventListener('change', updateSelectedSections);
         });
 
-        // ✅ Update the selected sections list on page load (for pre-selected sections)
+        // ✅ Update the selected sections list on page load
         updateSelectedSections();
 
         // ✅ Open & Close Modal
         let modal = document.getElementById("section-modal");
         let openModalBtn = document.getElementById("open-section-modal");
-        let closeModalBtn = document.querySelector(".close");
+        let closeModalBtn = modal.querySelector(".close");
 
         openModalBtn.onclick = function() {
             modal.style.display = "block";
-        }
+        };
         closeModalBtn.onclick = function() {
             modal.style.display = "none";
-        }
+        };
 
         // ✅ Handle New Section Submission
         document.getElementById("addSectionForm").addEventListener("submit", function(event) {

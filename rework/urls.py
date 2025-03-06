@@ -40,6 +40,6 @@ urlpatterns = [
     path('modules/add/', clientViews.add_module, name='add_module'),
     path('sections/add/', clientViews.add_section, name='add_section'),
     path('sections/get_all/', clientViews.get_sections, name='get_sections'),
-    
-    
+
+    # path('exercises/add/', clientViews.add_exercise, name='add_exercise'),
 ]
