@@ -274,30 +274,24 @@ def update_profile(request):
     return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
 
 
-
 @login_required
 def delete_account(request):
     """Handle both confirmation page and actual account deletion."""
+    user = request.user  # Get the logged-in user
+
     if request.method == "POST":
-        user = request.user
+        try:
+            # Delete the user account, which will cascade-delete related objects
+            user.delete()
+            logout(request)  # Log out after deletion
+            messages.success(request, "Your account has been successfully deleted.")
+            return redirect('welcome_page')  # Redirect to a safe page after deletion
 
-        # Delete all related objects first
-        user.User_profile.program_enrollments.all().delete()
-        user.User_profile.module_enrollments.all().delete()
-        user.User_profile.program_progress.all().delete()
-        user.User_profile.module_progress.all().delete()
+        except Exception as e:
+            messages.error(request, f"An error occurred while deleting your account: {e}")
+            return redirect('profile_page')  # Redirect back to the profile if deletion fails
 
-        # Delete EndUser profile first, if it exists
-        end_user_profile = getattr(user, 'User_profile', None)
-        if end_user_profile:
-            end_user_profile.delete()
-        
-        # Then delete user and log them out
-        user.delete()
-        logout(request)
-        messages.success(request, "Your account has been successfully deleted.")
-        return redirect('welcome_page')
-
+    # Confirmation before deletion
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
     return render(request, 'users/Profile/delete_account.html', context)
 

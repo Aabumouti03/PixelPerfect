@@ -121,8 +121,14 @@ class UserProgramEnrollment(models.Model):
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
 
+    # def __str__(self):
+    #     return f"{self.user.user.username} enrolled in {self.program.title}"
+    
+    #(for testing - temporary)
     def __str__(self):
-        return f"{self.user.user.username} enrolled in {self.program.title}"
+        if self.program:
+            return f"{self.user.user.username} enrolled in {self.program.title}"
+        return f"{self.user.user.username} skipped program selection"
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -133,11 +139,11 @@ class UserModuleEnrollment(models.Model):
     # def __str__(self):
     #     return f"{self.user.user.username} started {self.module.title}"
 
-    #raghad's (for testing - temporary)
+    #(for testing - temporary)
     def __str__(self):
-        if self.program:
-            return f"{self.user.user.username} enrolled in {self.program.title}"
-        return f"{self.user.user.username} skipped program selection"
+        if self.module:
+            return f"{self.user.user.username} enrolled in {self.module.title}"
+        return f"{self.user.user.username} skipped module selection"
 
 
 class UserProgramProgress (models.Model):
