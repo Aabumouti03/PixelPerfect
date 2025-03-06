@@ -1,12 +1,19 @@
 from django import forms
-from .models import Program, Module
+from .models import Program, Module, Category
 
 class ProgramForm(forms.ModelForm):
+    categories = forms.ModelMultipleChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "category-checkbox"}),
+        required=False
+    )
+
     modules = forms.ModelMultipleChoiceField(
-        queryset=Module.objects.all(),
+        queryset=Module.objects.prefetch_related('categories'),
         widget=forms.CheckboxSelectMultiple(attrs={"class": "module-checkbox"}),
         required=False
     )
+
     module_order = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
@@ -23,3 +30,7 @@ class ProgramForm(forms.ModelForm):
                 'placeholder': 'Enter description:'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['modules'].queryset = Module.objects.prefetch_related('categories')
