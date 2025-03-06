@@ -147,3 +147,46 @@ def export_programs_statistics_csv(request):
         writer.writerow([f"Avg Completion - {label}", value])
 
     return response
+
+def export_user_statistics_csv(request):
+    """Generate a CSV report of user statistics."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="user_statistics.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Statistic", "Value"])
+
+    # Fetch statistics
+    total_users = EndUser.objects.count()
+    active_users = EndUser.objects.filter(user__is_active=True).count()
+    inactive_users = total_users - active_users
+    total_programs_enrolled = UserProgramEnrollment.objects.count()
+
+    # Get gender distribution
+    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
+    
+    # Get ethnicity distribution
+    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
+    
+    # Get sector distribution
+    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
+
+    # Writing the statistics to the CSV file
+    writer.writerow(["Total Users", total_users])
+    writer.writerow(["Active Users", active_users])
+    writer.writerow(["Inactive Users", inactive_users])
+    writer.writerow(["Total Programs Enrolled", total_programs_enrolled])
+
+    # Gender distribution
+    for gender, count in gender_counts.items():
+        writer.writerow([f"Gender - {gender}", count])
+
+    # Ethnicity distribution
+    for ethnicity, count in ethnicity_counts.items():
+        writer.writerow([f"Ethnicity - {ethnicity}", count])
+
+    # Sector distribution
+    for sector, count in sector_counts.items():
+        writer.writerow([f"Sector - {sector}", count])
+
+    return response

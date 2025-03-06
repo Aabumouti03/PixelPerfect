@@ -55,7 +55,6 @@ urlpatterns = [
     path('programs_statistics/', reports_views.programs_statistics, name='programs_statistics'),
     path('export/modules_statistics/', reports_views.export_modules_statistics_csv, name='export_modules_statistics_csv'),
     path('export/programs_statistics/', reports_views.export_programs_statistics_csv, name='export_programs_statistics_csv'),
-
-
+    path('export/users_statistics/', reports_views.export_user_statistics_csv, name='export_user_statistics_csv'),
     
 ]
