@@ -1,0 +1,112 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
+
+        <h2 class="page-title">Add New Exercise</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                {{ form.title }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.exercise_type.id_for_label }}">{{ form.exercise_type.label }}</label>
+                {{ form.exercise_type }}
+            </div>
+
+            <!-- ✅ Display Selected Questions Here -->
+            <div class="form-group">
+                <label>Selected Questions:</label>
+                <ul id="selected-questions"></ul>
+            </div>
+
+            <!-- ✅ Grouped Question Selection -->
+            <div class="form-group">
+                <label>Select Questions:</label>
+                {% if questions %}
+                    {% regroup questions by exercises.all.0 as grouped_questions %}
+                    
+                    {% for group in grouped_questions %}
+                        <h4>{{ group.grouper.title }}</h4>  <!-- ✅ Exercise title as section header -->
+                        <div class="exercise-group">
+                            {% for question in group.list %}
+                                <div class="question-item">
+                                    <input type="checkbox" name="questions" value="{{ question.id }}" id="question_{{ question.id }}">
+                                    <label for="question_{{ question.id }}">{{ question.question_text }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No questions available. <a href="{% url 'add_question' %}">Add a new question</a></p>
+                {% endif %}
+            </div>
+
+            <a href="{% url 'add_question' %}" class="btn btn-secondary">+ Add New Question</a>
+
+            <button type="submit" class="save-btn">Save Exercise</button>
+        </form>
+    </div>
+
+    <style>
+        .exercise-group {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .question-item {
+            padding-left: 10px;
+        }
+    </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ✅ Function to update selected items dynamically
+        function updateSelectedItems(checkboxName, displayListId) {
+            let selectedList = document.getElementById(displayListId);
+            if (!selectedList) return;  // If element doesn't exist, exit function
+    
+            selectedList.innerHTML = "";
+    
+            document.querySelectorAll(`input[type="checkbox"][name="${checkboxName}"]:checked`).forEach(checkbox => {
+                let label = document.querySelector(`label[for="${checkbox.id}"]`);
+                if (label) {
+                    let li = document.createElement('li');
+                    li.textContent = label.textContent.trim();
+                    selectedList.appendChild(li);
+                }
+            });
+        }
+    
+        // ✅ Update sections when selected
+        document.querySelectorAll('input[type="checkbox"][name="sections"]').forEach(input => {
+            input.addEventListener('change', () => updateSelectedItems("sections", "selected-sections"));
+        });
+    
+        // ✅ Update exercises when selected
+        document.querySelectorAll('input[type="checkbox"][name="exercises"]').forEach(input => {
+            input.addEventListener('change', () => updateSelectedItems("exercises", "selected-exercises"));
+        });
+    
+        // ✅ Update questions when selected
+        document.querySelectorAll('input[type="checkbox"][name="questions"]').forEach(input => {
+            input.addEventListener('change', () => updateSelectedItems("questions", "selected-questions"));
+        });
+    
+        // ✅ Trigger updates on page load (in case of pre-selected values)
+        updateSelectedItems("sections", "selected-sections");
+        updateSelectedItems("exercises", "selected-exercises");
+        updateSelectedItems("questions", "selected-questions");
+    });
+    </script>
+    
+{% endblock %}
+s

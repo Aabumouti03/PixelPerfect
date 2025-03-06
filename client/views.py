@@ -2,10 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from client.models import Program, Module
 from django.shortcuts import render, get_object_or_404
 from client.models import Module
-from .forms import ModuleForm, SectionForm
-from .models import Module, Section, Exercise, Question
+from .forms import ModuleForm, SectionForm, ExerciseForm,ExerciseQuestionForm
+from .models import Module, Section, Exercise, Question, ExerciseQuestion
 from django.db import transaction
 from django.http import JsonResponse
+from collections import defaultdict
 
 
 def CreateModule(request):
@@ -37,23 +38,40 @@ def add_module(request):
     return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
 
 def add_section(request):
-    """Handles the addition of a new section with title and description."""
-    if request.method == 'POST':
-        form = SectionForm(request.POST)
-        if form.is_valid():
-            form.save() 
-            return redirect('add_module') 
+    """Handles the addition of a new section with title, description, and exercises."""
+    form = SectionForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('add_module')
 
-    else:
-        form = SectionForm() 
-        
-    return render(request, 'Module/add_section.html', {'form': form})
+    exercises = Exercise.objects.all()  # ✅ Fetch all exercises
+    return render(request, 'Module/add_section.html', {'form': form, 'exercises': exercises})
 
 def get_sections(request):
     """Returns all sections as JSON (for dynamically updating dropdown)."""
     sections = list(Section.objects.values('id', 'title'))
     return JsonResponse({'sections': sections})
    
+def add_exercise(request):
+    """Handles adding a new exercise with title, type, and related questions."""
+    form = ExerciseForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('add_section')
+
+    questions = ExerciseQuestion.objects.all()  # ✅ Fetch all questions
+    return render(request, 'Module/add_exercise.html', {'form': form, 'questions': questions})
+
+
+def add_question(request):
+    """Handles adding a new question with only the required fields."""
+    form = ExerciseQuestionForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('add_exercise')  # ✅ Redirect back to add exercise page
+
+    return render(request, 'Module/add_question.html', {'form': form})
+
 
 def programs(request):
     return render(request, 'client/programs.html')

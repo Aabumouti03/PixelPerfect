@@ -5,44 +5,21 @@
     <div class="content">
         <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
 
-        <h2 class="page-title">Add New Section</h2>
+        <h2 class="page-title">Add New Question</h2>
 
         <form method="POST">
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
-                {{ form.title }}
+                <label for="{{ form.question_text.id_for_label }}">{{ form.question_text.label }}</label>
+                {{ form.question_text }}
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-                {{ form.description }}
-            </div>
 
-            <!-- ✅ Display Selected Exercises Here -->
-            <div class="form-group">
-                <label>Selected Exercises:</label>
-                <ul id="selected-exercises"></ul>
-            </div>
-
-            <div class="form-group">
-                <label>Select Exercises:</label>
-                {% for exercise in exercises %}
-                    <div>
-                        <input type="checkbox" name="exercises" value="{{ exercise.id }}" id="exercise_{{ exercise.id }}">
-                        <label for="exercise_{{ exercise.id }}">{{ exercise.title }}</label>
-                    </div>
-                {% empty %}
-                    <p>No exercises available. </p>
-                {% endfor %}
-            </div>
-
-            <a href="{% url 'add_exercise' %}" class="btn btn-secondary">+ Add New Exercise</a>
-
-            <button type="submit" class="save-btn">Save Section</button>
+            <button type="submit" class="save-btn">Save Question</button>
         </form>
     </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
