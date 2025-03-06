@@ -6,6 +6,9 @@ from client.models import Program, Module, ExerciseQuestion, Questionnaire, Ques
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.timezone import now  # ✅ Fix: Import now
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -206,4 +209,19 @@ class StickyNote(models.Model):
 
     def __str__(self):
         return f"StickyNote by {self.user.user.username}"
+    
 
+class JournalEntry(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Correct user reference
+    date = models.DateField(default=now)  # Ensures each entry belongs to a specific day
+    sleep_hours = models.PositiveIntegerField(blank=True, null=True)
+    coffee = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    hydration = models.PositiveIntegerField(blank=True, null=True)
+    stress = models.CharField(max_length=10, choices=[("low", "Low"), ("medium", "Medium"), ("high", "High")], blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('user', 'date')  # Ensure only one entry per day per user
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"

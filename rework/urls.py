@@ -48,4 +48,9 @@ urlpatterns = [
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
     path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
+    path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+    path("journal/submit/", usersViews.journal_submit, name="journal_submit"),  # Save journal entries
+
+
 ]

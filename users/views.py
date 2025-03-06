@@ -17,7 +17,10 @@ import random
 from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
 from django.shortcuts import render, get_object_or_404
 from client.models import Program
-from users.models import UserProgramEnrollment, EndUser
+from users.models import UserProgramEnrollment, EndUser, JournalEntry
+from django.utils.timezone import now
+from datetime import datetime, timedelta
+
 
 
 @csrf_exempt
@@ -312,3 +315,137 @@ def all_modules(request):
 
 def logout_view(request):
     return render(request, 'users/logout.html')
+
+@login_required
+def journal(request):
+    return render(request, 'users/journal.html')
+
+
+@login_required
+def journal_view(request, date=None):
+    """Loads the journal page and fetches saved data for a specific date"""
+    user = request.user
+
+    # Use today's date if none is provided
+    if date is None:
+        selected_date = datetime.now().date()
+    else:
+        try:
+            selected_date = datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError:
+            print(f"⚠️ Invalid date format received: {date}, defaulting to today.")
+            selected_date = datetime.now().date()
+
+    # Fetch the journal entry for the selected date (if it exists)
+    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
+
+    if journal_entry:
+        print(f"✅ Found Journal Entry for {selected_date}: {journal_entry}")
+    else:
+        print(f"❌ No Journal Entry Found for {selected_date}")
+
+    # Get previous and next days
+    previous_day = selected_date - timedelta(days=1)
+    next_day = selected_date + timedelta(days=1)
+
+    context = {
+        "selected_date": selected_date.strftime("%Y-%m-%d"),
+        "journal_entry": journal_entry,  # Might be None if no entry exists
+        "previous_day": previous_day.strftime("%Y-%m-%d"),
+        "next_day": next_day.strftime("%Y-%m-%d"),
+    }
+    return render(request, "users/journal.html", context)
+
+
+@csrf_exempt
+@login_required
+def save_journal_entry(request):
+    """Handles saving journal entries using JSON"""
+    if request.method == "POST":
+        try:
+            print("✅ Received POST request to save journal entry")
+
+            # Load JSON data
+            try:
+                data = json.loads(request.body)
+                print("📤 Data received:", data)  # Debugging message
+            except json.JSONDecodeError as e:
+                print("❌ JSON Decode Error:", str(e))
+                return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+
+            user = request.user
+            date_str = data.get("date", datetime.now().date().strftime("%Y-%m-%d"))
+
+            try:
+                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                print("⚠️ Invalid date format:", date_str)
+                return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
+
+            # Get or create journal entry
+            journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
+
+            # Update entry with new values
+            journal_entry.sleep_hours = data.get("sleep_hours")
+            journal_entry.coffee = data.get("coffee")
+            journal_entry.hydration = data.get("hydration")
+            journal_entry.stress = data.get("stress")
+            journal_entry.notes = data.get("notes")
+            journal_entry.save()
+
+            print("✅ Successfully saved journal entry for", entry_date)
+
+            return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
+
+        except Exception as e:
+            print("❌ Error:", str(e))
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
+
+
+
+@csrf_exempt
+@login_required
+def journal_submit(request):
+    """Handles saving journal entries using JSON."""
+    if request.method == "POST":
+        try:
+            # Debug: Print incoming data
+            print("📥 [SERVER] Received Request:", request.body)
+
+            data = json.loads(request.body.decode("utf-8"))  # Decode JSON request
+            user = request.user
+            date_str = data.get("date")
+            if not date_str:
+                return JsonResponse({"success": False, "error": "Date is required."}, status=400)
+
+            # Convert date string into the proper format (YYYY-MM-DD)
+            try:
+                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()  # Expecting "2025-03-02"
+            except ValueError:
+                return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
+
+            # Get or create journal entry
+            journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
+
+            # Update the entry with provided data
+            journal_entry.sleep_hours = data.get("sleep_hours") or None
+            journal_entry.coffee = data.get("coffee") or None
+            journal_entry.hydration = data.get("hydration") or None
+            journal_entry.stress = data.get("stress") or None
+            journal_entry.notes = data.get("notes") or None
+            journal_entry.save()
+
+            print("✅ [SERVER] Journal entry saved successfully!")
+
+            return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
+
+        except Exception as e:
+            print("❌ [SERVER ERROR]", str(e))  # Debugging
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)

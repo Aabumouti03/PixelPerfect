@@ -1,0 +1,136 @@
+/* General Page Styling */
+.journal-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+/* Header and Navigation */
+.journal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.nav-button {
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #F24505;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out;
+}
+
+.nav-button:hover {
+    background: rgba(242, 69, 5, 0.1);
+}
+
+/* Journal Form */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Journal Entry Styles */
+.journal-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.journal-entry label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+/* Input Fields */
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #F24505;
+}
+
+/* Toggle Group for Yes/No Questions */
+.toggle-group {
+    display: flex;
+    gap: 15px;
+}
+
+.toggle-group input {
+    display: none;
+}
+
+.toggle-group label {
+    cursor: pointer;
+    padding: 10px 20px;
+    background: #ddd;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+.toggle-group input:checked + label {
+    background: #F24505;
+    color: white;
+}
+
+/* Submit Button */
+.submit-btn {
+    background: #F24505;
+    color: white;
+    font-size: 1rem;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #d93800;
+}
+
+/* Success Message */
+#success-message {
+    display: none;
+    margin-top: 15px;
+    font-size: 1rem;
+    color: green;
+    font-weight: bold;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.hidden {
+    display: none;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

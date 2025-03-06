@@ -1,0 +1,78 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+
+
+    <link rel="stylesheet" href="{% static 'users/css/journal.css' %}">
+    <script src="{% static 'users/js/journal.js' %}"></script>
+
+
+{% endblock %}
+
+
+
+{% block title %}Daily Journal - ReWork{% endblock %}
+
+{% block content %}
+<div class="journal-container">
+    <div class="journal-header">
+        <a href="{% url 'journal_by_date' previous_day %}" class="nav-button">← Previous</a>
+        <h1>Daily Journal - {{ selected_date }}</h1>
+        <a href="{% url 'journal_by_date' next_day %}" class="nav-button">Next →</a>
+    </div>
+    <p>Log your daily habits and track your progress.</p>
+
+    <form id="journal-form">
+        {% csrf_token %}
+        <input type="hidden" id="journal-date" name="date" value="{{ selected_date }}">
+    
+        <div class="journal-entry">
+            <label for="sleep_hours">How many hours did you sleep?</label>
+            <input type="number" id="sleep_hours" name="sleep_hours" min="0" max="24" 
+                   value="{{ journal_entry.sleep_hours|default_if_none:'' }}" required>
+        </div>
+    
+        <div class="journal-entry">
+            <label>Did you drink coffee today?</label>
+            <div class="toggle-group">
+                <input type="radio" id="coffee_yes" name="coffee" value="yes" 
+                       {% if journal_entry and journal_entry.coffee == "yes" %}checked{% endif %}>
+                <label for="coffee_yes">Yes</label>
+                <input type="radio" id="coffee_no" name="coffee" value="no" 
+                       {% if journal_entry and journal_entry.coffee == "no" %}checked{% endif %}>
+                <label for="coffee_no">No</label>
+            </div>
+        </div>
+    
+        <div class="journal-entry">
+            <label for="hydration">Glasses of water:</label>
+            <input type="number" id="hydration" name="hydration" min="0" max="20" 
+                   value="{{ journal_entry.hydration|default_if_none:'' }}">
+        </div>
+    
+        <div class="journal-entry">
+            <label for="stress">How stressed were you today?</label>
+            <select id="stress" name="stress">
+                <option value="low" {% if journal_entry and journal_entry.stress == "low" %}selected{% endif %}>Low</option>
+                <option value="medium" {% if journal_entry and journal_entry.stress == "medium" %}selected{% endif %}>Medium</option>
+                <option value="high" {% if journal_entry and journal_entry.stress == "high" %}selected{% endif %}>High</option>
+            </select>
+        </div>
+    
+        <div class="journal-entry">
+            <label for="notes">Additional Notes:</label>
+            <textarea id="notes" name="notes" placeholder="Write about your day...">
+                {{ journal_entry.notes|default_if_none:'' }}
+            </textarea>
+        </div>
+    
+        <button type="submit" id="save-entry" class="submit-btn">Save Entry</button>
+    </form>
+    
+    <div id="success-message" class="hidden">✅ Your entry has been saved!</div>
+
+
+</div>
+
+{% endblock %}
