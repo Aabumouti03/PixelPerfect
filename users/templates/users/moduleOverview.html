@@ -44,7 +44,7 @@
                 </div>
                 <div class="progress-container">
                     <canvas id="progressChart"></canvas>
-                    <p>Progress</p>
+                   <p>Progress: <span id="progress-value">{{ progress_value }}%</span></p>
                 </div>
             </div>
 
@@ -61,14 +61,17 @@
                     {% if exercises %}
                     <ul>
                         {% for exercise in exercises %}
-                            <li>
-                                <strong>{{ exercise.title }}</strong> ({{ exercise.exercise_type }})
-                                {% if exercise.pdf_file %}
-                                    - <a href="{{ exercise.pdf_file.url }}" target="_blank">Download PDF</a>
-                                {% endif %}
-                                - <a href="{% url 'exercise_detail' exercise.id %}" class="view-exercise-link"> View Exercise
-                                </a>
-                            </li>
+                        <li>
+                            <strong>{{ exercise.title }}</strong> ({{ exercise.exercise_type }})
+                            {% if exercise.pdf_file %}
+                                - <a href="{{ exercise.pdf_file.url }}" target="_blank">Download PDF</a>
+                            {% endif %}
+                            - <a href="{% url 'exercise_detail' exercise.id %}" class="view-exercise-link"> View Exercise </a>
+                            
+                            <!-- Done Button -->
+                            <button class="done-button" data-id="{{ exercise.id }}" data-type="exercise">Done</button>
+
+                        </li>                        
                         {% endfor %}
                     </ul>
                     {% else %}
@@ -84,21 +87,25 @@
                     {% if additional_resources %}
                     <ul>
                         {% for resource in additional_resources %}
-                            <li>
-                                <strong>{{ resource.title }}</strong> ({{ resource.get_resource_type_display }})
-                                
-                                {% if resource.file %}
-                                    - <a href="{{ resource.file.url }}" target="_blank">Download PDF</a>
-                                {% endif %}
-                                
-                                {% if resource.url %}
-                                    - <a href="{{ resource.url }}" target="_blank">Visit Resource</a>
-                                {% endif %}
-            
-                                {% if resource.description %}
-                                    <p>{{ resource.description }}</p>
-                                {% endif %}
-                            </li>
+                        <li>
+                            <strong>{{ resource.title }}</strong> ({{ resource.get_resource_type_display }})
+                            
+                            {% if resource.file %}
+                                - <a href="{{ resource.file.url }}" target="_blank">Download PDF</a>
+                            {% endif %}
+                            
+                            {% if resource.url %}
+                                - <a href="{{ resource.url }}" target="_blank">Visit Resource</a>
+                            {% endif %}
+                        
+                            {% if resource.description %}
+                                <p>{{ resource.description }}</p>
+                            {% endif %}
+                        
+                            <!-- Done Button -->
+                            <button class="done-button" data-id="{{ resource.id }}" data-type="resource">Done</button>
+                        </li>
+                        
                         {% endfor %}
                     </ul>
                                     
@@ -111,27 +118,38 @@
             
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var ctx = document.getElementById('progressChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [50, 50], // Example progress
-                        backgroundColor: ['#4A90E2', '#E0E0E0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    cutout: '75%',
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        });
+    document.addEventListener("DOMContentLoaded", function () {
+    // Make sure the value is a number (in case it was passed as a string)
+    var progressValue = parseFloat("{{ progress_value }}");  // Ensure it's a number
 
-        document.addEventListener("DOMContentLoaded", function () {
+    if (isNaN(progressValue)) {
+        progressValue = 0;  // Set default if value is invalid
+    }
+
+    var ctx = document.getElementById('progressChart').getContext('2d');
+    
+    var progressChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [progressValue, 100 - progressValue],  // Update with the progress value
+                backgroundColor: ['#4A90E2', '#E0E0E0'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '75%',
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+
+
+});
+
+
+    document.addEventListener("DOMContentLoaded", function () {
     var coll = document.getElementsByClassName("collapsible");
 
     for (var i = 0; i < coll.length; i++) {
@@ -161,9 +179,9 @@ document.addEventListener("DOMContentLoaded", function () {
         stars.forEach(star => {
             let starValue = parseInt(star.getAttribute("data-value"));
             if (starValue <= rating) {
-                star.classList.add("selected"); // ✅ Highlight selected stars
+                star.classList.add("selected"); //  Highlight selected stars
             } else {
-                star.classList.remove("selected"); // ✅ Remove highlight from unselected stars
+                star.classList.remove("selected"); //  Remove highlight from unselected stars
             }
         });
     }
@@ -184,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 if (data.success) {
                     ratingValue.textContent = `(Rated: ${data.average_rating}/5)`;
-                    updateStars(data.average_rating);  // ✅ Ensure correct number type
+                    updateStars(data.average_rating);  //  Ensure correct number type
                 } else {
                     alert("Error submitting rating.");
                 }
@@ -193,11 +211,61 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // ✅ Ensure initial stars match the current rating
+    // Ensure initial stars match the current rating
     let initialRating = parseFloat("{{ module.average_rating|default:0 }}");
     updateStars(isNaN(initialRating) ? 0 : initialRating);
 });
 
+// handels the done button
+document.addEventListener("DOMContentLoaded", function () {
+    const doneButtons = document.querySelectorAll(".done-button");
+
+    doneButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const itemId = this.getAttribute("data-id");
+            const itemType = this.getAttribute("data-type");
+            const action = this.textContent.trim() === "Done" ? "done" : "undo";  // Determine action
+
+            // Send the request to mark the item as done or undone
+            fetch("{% url 'mark_done' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ id: itemId, type: itemType, action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the button's text and color
+                    if (this.textContent === "Done") {
+                        this.textContent = "Undo";  // Change text to "Undo"
+                        this.classList.add("done");   // Apply green style
+                        this.classList.remove("undo"); // Remove orange style
+                    } else {
+                        this.textContent = "Done";  // Change text to "Done"
+                        this.classList.add("undo");  // Apply orange style
+                        this.classList.remove("done"); // Remove green style
+                    }
+
+                    // Update the progress value on the frontend
+                    const updatedProgress = data.updated_progress || 0;
+                    document.getElementById("progress-value").textContent = `${updatedProgress}%`;
+
+                    // Update the doughnut chart progress
+                    var progressChart = Chart.instances[0]; // Assuming there's only one chart
+                    progressChart.data.datasets[0].data = [updatedProgress, 100 - updatedProgress];
+                    progressChart.update(); // Update the chart
+
+                } else {
+                    alert("Error marking as done.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
+});
 
 </script>
     {% endblock %}

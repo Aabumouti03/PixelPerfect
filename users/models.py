@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Exercise, AdditionalResource
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -147,17 +147,14 @@ class UserProgramProgress (models.Model):
         return f"{self.user.full_name()} - {self.program.title} ({self.status})"
     
 class UserModuleProgress(models.Model):
-
-    user = models.ForeignKey(EndUser, on_delete=models.CASCADE,related_name='module_progress')
-    module = models.ForeignKey(Module, on_delete=models.CASCADE,related_name='user_progress')
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE)
     completion_percentage = models.FloatField(default=0.0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     last_updated = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        unique_together = ('user', 'module') 
-    def __str__(self):
-        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
+        unique_together = ('user', 'module')  # Ensure progress is unique per user and item
 
 
 class UserResponse(models.Model):

@@ -52,14 +52,9 @@ def log_in(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
-            '''
-            rememebr to vgange to this after testing
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')
-           '''
-     
-
     else:
         form = LogInForm()
 
@@ -158,28 +153,140 @@ def exercise_detail(request, exercise_id):
         'diagram': diagram,  # ✅ Pass the diagram to template
     })
 
+
+
+
+@login_required
 def module_overview(request, module_id):
     """Fetch the module by ID and retrieve related exercises and additional resources."""
-
-    # ✅ Get the module object, or return 404 if not found
+    
+    # Get the module
     module = get_object_or_404(Module, id=module_id)
 
-    # ✅ Separate sections into exercises (diagram removed)
+    user = request.user
+
+    try:
+        end_user = EndUser.objects.get(user=user)
+    except EndUser.DoesNotExist:
+        end_user = EndUser.objects.create(user=user)
+
+    # Get all exercises and resources associated with the module
     exercises = []
-    additional_resources = list(module.additional_resources.all())  # ✅ Retrieve additional resources
+    additional_resources = list(module.additional_resources.all())
 
     for section in module.sections.all():
-        if section.exercises.exists():  
-            exercises.extend(section.exercises.all())  # ✅ Store exercises
+        if section.exercises.exists():
+            exercises.extend(section.exercises.all())
 
+    # Initialize the number of completed items
+    completed_items = 0
+    total_items = len(exercises) + len(additional_resources)
+
+    # Count completed exercises for the user
+    for exercise in exercises:
+        if exercise.status=='completed':
+            completed_items += 1
+
+    # Count completed additional resources for the user
+    for resource in additional_resources:
+        if resource.status=='completed':
+            completed_items += 1
+
+    # Calculate completion percentage
+    progress_value = 0
+    if total_items > 0:
+        progress_value = (completed_items / total_items) * 100
+
+    # Get or create a UserModuleProgress entry for the module
+    user_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
+    user_progress.completion_percentage = progress_value
+    user_progress.save()
+
+    # Pass progress value and related objects to the template
     context = {
         'module': module,
-        'exercises': exercises,  # ✅ Pass exercises to template
-        'additional_resources': additional_resources,  # ✅ Pass additional resources to template
-        'progress_value': 50  # ✅ Example progress value
+        'exercises': exercises,
+        'additional_resources': additional_resources,
+        'progress_value': progress_value,  # Show the updated progress
     }
-    
+
     return render(request, 'users/moduleOverview.html', context)
+
+
+@login_required
+def mark_done(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        item_id = data.get("id")
+        item_type = data.get("type")
+        action = data.get("action")  # 'done' or 'undo'
+
+        user = request.user
+        end_user = EndUser.objects.get(user=user)  # Get the EndUser instance associated with the user
+
+        if item_type == "exercise":
+            exercise = Exercise.objects.get(id=item_id)
+            if  exercise.status=='completed':
+                exercise.status='in_progress'
+            else:
+                 exercise.status = 'completed' 
+
+            exercise.save()
+            module = exercise.sections.first().modules.first()
+
+            module = exercise.sections.first().modules.first()
+        elif item_type == "resource":
+            resource = AdditionalResource.objects.get(id=item_id)
+            if  resource.status=='completed':
+                resource.status='in_progress'
+            else:
+                 resource.status = 'completed' 
+            resource.save()
+
+            module = resource.modules.first()
+
+
+        # Calculate and update progress
+        user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
+        user_module_progress.completion_percentage = calculate_progress(end_user, module)
+        user_module_progress.save()
+
+        # Return the updated progress
+        return JsonResponse({"success": True, "updated_progress": user_module_progress.completion_percentage})
+
+    return JsonResponse({"success": False})
+
+
+def calculate_progress(end_user, module):
+    # Count how many exercises are completed
+    exercises = [] 
+    for section in module.sections.all():
+        if section.exercises.exists():
+            exercises.extend(section.exercises.all())
+
+    completed_exercises = []
+
+    for exercise in exercises:
+        if exercise.status=='completed':
+            completed_exercises.append(exercise)
+
+
+    # Count how many resources are completed
+    completed_resources = module.additional_resources.filter(status='completed').count()
+
+    total_items = len(exercises)+ module.additional_resources.count()
+    completed_items = len(completed_exercises) + completed_resources
+
+    # Calculate the percentage of progress
+    if total_items > 0:
+        progress = (completed_items / total_items) * 100
+    else:
+        progress = 0
+
+    return progress
+
+
+
 
 
 
@@ -255,3 +362,25 @@ def rate_module(request, module_id):
             return JsonResponse({"success": False, "message": "Invalid JSON data"})
 
     return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
+
+'''
+def mark_done(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        item_id = data.get("id")
+        item_type = data.get("type")
+
+        # Example logic to mark item as done (modify as per your model)
+        if item_type == "exercise":
+            exercise = Exercise.objects.get(id=item_id)
+            exercise.completed = True
+            exercise.save()
+        elif item_type == "resource":
+            resource = Resource.objects.get(id=item_id)
+            resource.completed = True
+            resource.save()
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False})
+'''

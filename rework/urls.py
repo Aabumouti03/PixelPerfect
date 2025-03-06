@@ -51,7 +51,8 @@ urlpatterns = [
     path('log_out/', clientViews.log_out, name="log_out"),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
-    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program')
+    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+    path('mark_done/', usersViews.mark_done, name='mark_done'),
 ]
 
 
