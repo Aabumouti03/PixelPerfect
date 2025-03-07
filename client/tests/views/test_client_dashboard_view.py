@@ -4,8 +4,8 @@ from django.urls import reverse
 from users.models import EndUser
 
 class ClientDashboardViewTest(TestCase):
-    @patch("client.modules_statistics.get_module_enrollment_stats")
-    @patch("client.modules_statistics.get_users_last_work_time")
+    @patch("client.statistics.get_module_enrollment_stats")
+    @patch("client.statistics.get_users_last_work_time")
     @patch("users.models.EndUser.objects.all")
     def test_client_dashboard_view(self, mock_users_count, mock_last_work_time, mock_enrollment_stats):
         mock_enrollment_stats.return_value = (["Module A"], [10])
