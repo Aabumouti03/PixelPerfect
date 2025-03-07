@@ -105,7 +105,6 @@ def log_out_client(request):
     
     return redirect('/client_dashboard/')
 
-
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()

@@ -21,8 +21,6 @@ from client import views as client_views
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
 
-
-
 urlpatterns = [
 
     #Admin url
@@ -82,7 +80,6 @@ urlpatterns = [
     path('category_list/', clientViews.category_list, name='category_list'),  
     path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
     path('create_category/', clientViews.create_category, name='create_category'),
-
 
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     
