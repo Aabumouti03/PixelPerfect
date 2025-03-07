@@ -2,7 +2,6 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
 
-
 # Choices for Exercise Types
 EXERCISE_TYPES = [
     ('fill_blank', 'Fill in the Blanks'),
@@ -17,6 +16,13 @@ QUESTION_POSITIONS = [
     ('left', 'Left of the Diagram'),
     ('right', 'Right of the Diagram'),
 ]
+
+STATUS_CHOICES = [
+        ('not_started','Not Started'),
+        ('in_progress', 'In_Progress'),
+        ('completed', 'Completed')
+]
+
 
 BACKGROUND_IMAGE_CHOICES = [
     ('pattern1', 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%230148fd\' fill-opacity=\'0.18\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")'),
@@ -93,6 +99,7 @@ class Module(models.Model):
         avg_rating = self.ratings.aggregate(Avg('rating'))['rating__avg']
         return round(avg_rating, 1) if avg_rating else 0
 
+
     def __str__(self):
         return self.title
 
@@ -108,7 +115,6 @@ class ModuleRating(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} rated {self.module.title} - {self.rating}/5"
-
 
 
 class Section(models.Model):
@@ -151,7 +157,7 @@ class Exercise(models.Model):
     title = models.CharField(max_length=255)
     exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
     pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
-    questions = models.ManyToManyField('ExerciseQuestion', related_name="exercises", blank=True) 
+    questions = models.ManyToManyField('ExerciseQuestion', related_name="exercises", blank=True)  
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started') 
 
     def save(self, *args, **kwargs):

@@ -375,3 +375,4 @@ class Command(BaseCommand):
                     print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
 
         print("✅ Modules, Sections, Exercises, and Questions seeded successfully!")
+
