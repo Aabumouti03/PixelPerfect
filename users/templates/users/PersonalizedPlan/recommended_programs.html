@@ -1,0 +1,105 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
+
+    <h1>Your Personalized Learning Journey</h1>
+    <p>Select a program that best fits your goals! You can only enroll in one program at a time.</p>
+
+    {% if programs %}
+        <div id="programs-container">
+            {% for program in programs %}
+                <div class="card program-card">
+                    <h3>{{ program.title }}</h3>
+                    <p>{{ program.description }}</p>
+
+                    <div class="button-container">
+                        <button 
+                            class="enroll-button {% if program in enrolled_programs %}enrolled{% endif %}" 
+                            data-program-id="{{ program.id }}"
+                            data-enrolled="{% if program in enrolled_programs %}true{% else %}false{% endif %}"
+                        >
+                            {% if program in enrolled_programs %}Enrolled{% else %}Enroll{% endif %}
+                        </button>
+                        <button type="button" class="view-button">View</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No programs available at the moment.</p>
+    {% endif %}
+
+    <div class="nav-buttons">
+        <a href="{% url 'questionnaire' %}"><button>Back</button></a>
+        <a href="{% url 'recommended_modules' %}"><button>Skip</button></a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // For the case when the page loads, ensure the correct button states
+            document.querySelectorAll(".enroll-button").forEach(button => {
+                const isEnrolled = button.getAttribute("data-enrolled") === "true";
+
+                // Toggle the button text and class based on the enrollment status
+                if (isEnrolled) {
+                    button.textContent = "Enrolled";
+                    button.classList.add("enrolled");
+                } else {
+                    button.textContent = "Enroll";
+                    button.classList.remove("enrolled");
+                }
+
+                button.addEventListener("click", function () {
+                    const programId = this.getAttribute("data-program-id");
+                    const isEnrolled = this.getAttribute("data-enrolled") === "true";
+                    const action = isEnrolled ? "unenroll" : "enroll";
+
+                    // If the user is enrolling in a new program, unenroll from the old one
+                    document.querySelectorAll(".enroll-button").forEach(b => {
+                        if (b !== this && b.getAttribute("data-enrolled") === "true") {
+                            b.textContent = "Enroll";  // Reset old program button to "Enroll"
+                            b.setAttribute("data-enrolled", "false");
+                            b.classList.remove("enrolled");
+                        }
+                    });
+
+                    // Toggle the UI for the selected program
+                    if (isEnrolled) {
+                        this.textContent = "Enroll";
+                        this.setAttribute("data-enrolled", "false");
+                        this.classList.remove("enrolled");
+                    } else {
+                        this.textContent = "Enrolled";
+                        this.setAttribute("data-enrolled", "true");
+                        this.classList.add("enrolled");
+                    }
+
+                    // Send request to update the enrollment status
+                    fetch("{% url 'recommended_programs' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({
+                            program_id: programId,
+                            action: action
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            console.log("Enrollment updated successfully");
+                        } else {
+                            console.error("Error updating enrollment");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

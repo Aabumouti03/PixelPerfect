@@ -30,7 +30,7 @@ urlpatterns = [
     # Users Views
     path('admin/', admin.site.urls),
   
-    #userAuthentication page add-ons
+    # user authentication page add-ons
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
@@ -42,13 +42,14 @@ urlpatterns = [
     path('password_change/', PasswordChangeView.as_view(template_name='users/change_password.html'), name='change_password'),
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
-    #profile page add-ons
+    # profile page add-ons
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
 
-    #Recommended Programs page add-ons
+    # personalized page page add-ons
     path("recommended_programs/", usersViews.recommended_programs, name="recommended_programs"),
+    path("recommended_modules/", usersViews.recommended_modules, name="recommended_modules"),
 
     #
     path('programs/', clientViews.programs, name='programs'),

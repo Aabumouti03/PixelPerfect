@@ -298,32 +298,82 @@ def delete_account(request):
 
 @login_required
 def recommended_programs(request):
-    """Displays programs for users to enroll in."""
+    """Displays programs for users to enroll in and handles AJAX enrollment updates."""
     user = request.user
-    available_programs = Program.objects.all()  # Later replace with recommended logic
-    #available_programs = Program.objects.filter(recommended_for=user)  # Adjust based on actual recommendation logic
+    enrolled_programs = Program.objects.filter(enrolled_users__user=user.User_profile)
+
+    # Get the dictionary of programs categorized by category
+    categorized_programs = [] # placeholder
+
+    # Flatten the dictionary values (lists of programs) into a single list
+    all_programs = [program for program_list in categorized_programs.values() for program in program_list]
+
 
     if request.method == "POST":
-        selected_program_id = request.POST.get("program_id")
+        try:
+            data = json.loads(request.body)
+            program_id = data.get("program_id")
+            action = data.get("action")
 
-        if selected_program_id:
-            try:
-                program = Program.objects.get(id=selected_program_id)
-                UserProgramEnrollment.objects.update_or_create(
-                    user=user, defaults={"program": program}
-                )
-                return redirect("dashboard")
-            except ObjectDoesNotExist:
-                pass  # If program doesn't exist, do nothing (or handle error message)
+            program = Program.objects.get(id=program_id)
+            user_profile = user.User_profile
 
-        elif "skip" in request.POST:
-            UserProgramEnrollment.objects.update_or_create(
-                user=user, defaults={"program": None}
-            )
-            return redirect("dashboard")
+            # Unenroll the user from all programs before enrolling in the new one
+            if action == "enroll":
+                # Remove enrollment from any previously enrolled program
+                UserProgramEnrollment.objects.filter(user=user_profile).delete()
+                UserProgramEnrollment.objects.create(user=user_profile, program=program)
 
-    return render(request, "users/recommended_programs.html", {"programs": available_programs or []})  # Ensure programs is always a list
+            elif action == "unenroll":
+                UserProgramEnrollment.objects.filter(user=user_profile, program=program).delete()
 
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return render(request, "users/PersonalizedPlan/recommended_programs.html", {
+        "programs": all_programs or [],
+        "enrolled_programs": enrolled_programs
+    })
+
+
+@login_required
+def recommended_modules(request):
+    """Displays modules for users to enroll in and handles AJAX enrollment updates."""
+    user = request.user
+    enrolled_modules = Module.objects.filter(enrolled_users__user=user.User_profile)
+
+    # Get the dictionary of modules categorized by category
+    categorized_modules = [] # placeholder
+
+    # Flatten the dictionary values (lists of modules) into a single list
+    all_modules = [module for module_list in categorized_modules.values() for module in module_list]
+
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Read AJAX request body
+            module_id = data.get("module_id")
+            action = data.get("action")
+
+            module = Module.objects.get(id=module_id)
+            user_profile = user.User_profile
+
+            if action == "enroll":
+                UserModuleEnrollment.objects.get_or_create(user=user_profile, module=module)
+            elif action == "unenroll":
+                UserModuleEnrollment.objects.filter(user=user_profile, module=module).delete()
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return render(request, "users/PersonalizedPlan/recommended_modules.html", {
+        "modules": all_modules or [],
+        "enrolled_modules": enrolled_modules
+    })
 
 
 def module_overview(request, id):
