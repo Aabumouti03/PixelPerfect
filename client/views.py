@@ -5,6 +5,12 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import ProgramForm 
 from .models import Program, ProgramModule, Category
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def admin_check(user):
+    return user.is_authenticated and user.is_superuser
+
+
 # Create your views here.
 def client_dashboard(request):
     return render(request, 'client/client_dashboard.html')
@@ -38,31 +44,36 @@ def programs(request):
     programs = Program.objects.all()
     return render(request, 'client/programs.html', {'programs': programs})
 
-
+@login_required
+@user_passes_test(admin_check)
 def create_program(request):
     categories = Category.objects.all()
 
     if request.method == "POST":
-
         form = ProgramForm(request.POST)
         if form.is_valid():
-            program = form.save(commit=False)
-            program.save()
+            program_title = form.cleaned_data.get("title")
 
-            module_order = request.POST.get("module_order", "").strip()
-            module_ids = module_order.split(",") if module_order else []
+            if Program.objects.filter(title__iexact=program_title).exists():
+                form.add_error("title", "A program with this title already exists.")
+
+            else:
+                program = form.save(commit=False)
+                program.save()
 
             
-            ProgramModule.objects.filter(program=program).delete()
+                module_order = request.POST.get("module_order", "").strip()
+                if module_order:
+                    module_ids = module_order.split(",")
+                    ProgramModule.objects.filter(program=program).delete()
 
-            for index, module_id in enumerate(module_ids, start=1):
-                try:
-                    module = Module.objects.get(id=module_id)
-                    ProgramModule.objects.create(program=program, module=module, order=index)
-                except Module.DoesNotExist:
-                    print(f"Module ID {module_id} does not exist")
+                    for index, module_id in enumerate(module_ids, start=1):
+                        if module_id.isdigit(): #making sure the javascript works properly
+                            module = Module.objects.filter(id=int(module_id)).first()
+                            if module:
+                                ProgramModule.objects.create(program=program, module=module, order=index)
 
-            return redirect("programs")
+                return redirect("programs")
 
     else:
         form = ProgramForm()
@@ -72,14 +83,15 @@ def create_program(request):
         "categories": categories,
     })
 
-def log_out(request):
-    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
+@login_required
+@user_passes_test(admin_check)
+def log_out_client(request):
     if request.method == "POST":
         logout(request)
-        return redirect('users:log_in')
+        return redirect('log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+    
+    return redirect('/client_dashboard/')
 
 def program_detail(request, program_id):
     """ View details of a single program """
