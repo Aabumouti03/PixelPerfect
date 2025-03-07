@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-from .forms import UserSignUpForm, LogInForm, EndUserProfileForm, PasswordResetForm
+from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
 
 from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
