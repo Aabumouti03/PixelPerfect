@@ -15,6 +15,7 @@ from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
 from django.shortcuts import render, get_object_or_404
 from client.models import Program
 from users.models import UserProgramEnrollment, EndUser
+from django.views.decorators.csrf import csrf_exempt
 
 
 @csrf_exempt
