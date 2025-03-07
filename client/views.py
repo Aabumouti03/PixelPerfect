@@ -4,7 +4,7 @@ from client.models import Module
 from django.contrib.auth import authenticate, login, logout
 from .forms import ProgramForm 
 from .models import Program, ProgramModule, Category
-
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 def admin_check(user):
