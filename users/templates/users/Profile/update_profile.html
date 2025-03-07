@@ -1,0 +1,208 @@
+<body class="update-page">
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'users/css/profile_style.css' %}">
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <span>Edit Profile</span>
+        <div class="small-partition"></div>
+    </div>
+
+    <!-- Profile Info Section: Image + Name -->
+    <div class="profile-info">
+        <img class="profile-pic" src="{{ request.user.gravatar }}" alt="Profile Picture">
+        <div class="profile-name">
+            <h2>{{ request.user.first_name }} {{ request.user.last_name }}</h2>
+        </div>
+    </div>
+
+    <!-- Partition Line -->
+    <hr class="partition-line">
+
+    <!-- Form Start -->
+    <form method="POST" action="{% url 'update_profile' %}">
+        {% csrf_token %}
+
+        <div class="profile-details">
+            <div class="form-group">
+                <label>First Name: <span class="required">*</span></label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <small class="text-danger">{{ form.first_name.errors.0 }}</small>
+                 {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Last Name: <span class="required">*</span></label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <small class="text-danger">{{ form.last_name.errors.0 }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Username: <span class="required">*</span></label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <small class="text-danger">{{ form.username.errors.0 }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>New Password:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="new_password" name="new_password" class="input-wrapper"
+                           placeholder="Enter new password">
+                    <i class="fa fa-eye password-toggle" data-target="new_password"></i>
+                </div>
+                {% if form.new_password.errors %}
+                    <small class="text-danger">{{ form.new_password.errors.0 }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label>Confirm Password:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="confirm_password" name="confirm_password" class="input-wrapper"
+                           placeholder="Confirm new password">
+                    <i class="fa fa-eye password-toggle" data-target="confirm_password"></i>
+                </div>
+                {% if form.confirm_password.errors %}
+                    <small class="text-danger">{{ form.confirm_password.errors.0 }}</small>
+                {% endif %}
+            </div>            
+            
+
+            <div class="form-group">
+                <label>Email Address: <span class="required">*</span></label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <small class="text-danger">{{ form.email.errors.0 }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number:</label>
+                {{ form.phone_number }}
+                {% if form.phone_number.errors %}
+                    <small class="text-danger">{{ form.phone_number.errors.0 }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Age: <span class="required">*</span></label>
+                <input type="number" name="age" id="id_age"
+                       min="18" max="100" required
+                       title="Age must be between 18 and 100"
+                       class="form-control"
+                       value="{{ form.age.value|default:'' }}"> 
+                    {% if form.age.errors %}
+                       <small class="text-danger">{{ form.age.errors.0 }}</small>
+                   {% endif %} 
+            </div>
+            
+            <div class="form-group">
+                <label>Gender: <span class="required">*</span></label>
+                {{ form.gender }}
+                {% if form.gender.errors %}
+                  <small class="text-danger">{{ form.gender.errors.0 }}</small>
+                {% endif %}
+
+            </div>
+
+            <div class="form-group">
+                <label>Ethnicity:</label>
+                {{ form.ethnicity }}
+                {% if form.ethnicity.errors %}
+                    <small class="text-danger">{{ form.ethnicity.errors.0 }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Last Time Worked:  <span class="required">*</span></label>
+                {{ form.last_time_to_work }}
+                {% if form.last_time_to_work.errors %}
+                    <small class="text-danger">{{ form.last_time_to_work.errors.0 }}</small>>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Sector: <span class="required">*</span></label>
+                {{ form.sector }}
+                {% if form.sector.errors %}
+                    <small class="text-danger">{{ form.sector.errors.0 }}</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Buttons Section -->
+        <div class="profile-buttons">
+            <div class="left-buttons">
+                <button type="submit" class="btn">Save Changes</button>
+                <a href="{% url 'show_profile' %}" class="btn cancel-btn">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Password Toggle Logic
+        const toggles = document.querySelectorAll(".password-toggle");
+        
+        toggles.forEach(toggle => {
+            toggle.addEventListener("click", function() {
+                const inputField = document.getElementById(this.getAttribute("data-target"));
+    
+                if (inputField.type === "password") {
+                    inputField.type = "text";
+                    this.classList.remove("fa-eye");
+                    this.classList.add("fa-eye-slash"); // Switch to hide icon
+                } else {
+                    inputField.type = "password";
+                    this.classList.remove("fa-eye-slash");
+                    this.classList.add("fa-eye"); // Switch back to show icon
+                }
+            });
+        });
+
+    const form = document.querySelector("form");
+    const password = document.getElementById("new_password");
+    const confirmPassword = document.getElementById("confirm_password");
+
+    form.addEventListener("submit", function(event) {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity("Passwords do not match!");  // ALL ERRORS
+            event.preventDefault(); // Stops form submission
+        } else {
+            confirmPassword.setCustomValidity(""); // Clears error if valid
+        }
+    });
+    
+    const ageField = document.getElementById("id_age");
+
+    ageField.addEventListener("input", function () {
+        if (this.validity.rangeUnderflow || this.validity.rangeOverflow) {
+            this.setCustomValidity("Age must be between 18 and 100.");
+        } else {
+            this.setCustomValidity(""); // Reset the default validation
+        }
+    });
+
+    });
+</script>
+    
+    
+    
+    
+{% endblock %}
+
+</body>
+
