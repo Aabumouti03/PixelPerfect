@@ -1,0 +1,54 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block title %}{{ questionnaire.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/view_questionnaire.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="top-bar">
+        <a href="{% url 'manage_questionnaires' %}" class="btn back-btn">← Back</a>
+        <h1>{{ questionnaire.title }}</h1>
+        <div class="action-buttons">
+            <a href="{% url 'edit_questionnaire' questionnaire.id %}" class="edit-btn">Edit</a>
+            <a href="{% url 'delete_questionnaire' questionnaire.id %}" class="delete-btn">Delete</a>
+        </div>
+    </div>
+
+    <!-- Questionnaire Description -->
+    <div class="description-box">
+        <p>{{ questionnaire.description }}</p>
+    </div>
+
+    <!-- Questions & Answers -->
+    <div class="questions-container">
+        {% for question in questions %}
+        <div class="question-card">
+            <h3>{{ question.question_text }}</h3>
+            
+            <!-- Agreement Scale -->
+            {% if question.question_type == "AGREEMENT" %}
+            <ul class="choice-list">
+                <li class="choice-item">Strongly Disagree</li>
+                <li class="choice-item">Disagree</li>
+                <li class="choice-item">Neutral</li>
+                <li class="choice-item">Agree</li>
+                <li class="choice-item">Strongly Agree</li>
+            </ul>
+
+            <!-- Rating Scale -->
+            {% elif question.question_type == "RATING" %}
+            <div id="rating-scale-{{ question.id }}" class="rating-scale">
+                <label>Rating Scale: 1 - 5</label>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>No questions available for this questionnaire.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

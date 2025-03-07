@@ -121,6 +121,7 @@ class UserProgramEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} enrolled in {self.program.title}"
+    
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -130,6 +131,7 @@ class UserModuleEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
+
 
 class UserProgramProgress (models.Model):
 
@@ -177,6 +179,7 @@ class Questionnaire_UserResponse(models.Model):
     
     class Meta:
         unique_together = ['user', 'questionnaire']
+        
 
 class QuestionResponse(models.Model):
     user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
@@ -195,7 +198,6 @@ class QuestionResponse(models.Model):
             raise ValidationError('Agreement scale questions require a selection')
 
 
-
 class StickyNote(models.Model):
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='sticky_notes')
     content = models.TextField() 
@@ -204,4 +206,3 @@ class StickyNote(models.Model):
 
     def __str__(self):
         return f"StickyNote by {self.user.user.username}"
-

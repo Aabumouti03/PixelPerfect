@@ -1,20 +1,121 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
-from django.shortcuts import render, get_object_or_404
-from .models import UserModuleProgress, UserModuleEnrollment, EndUser
-from client.models import Module, BackgroundStyle
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout 
-import os
-from django.contrib import messages
-from django.conf import settings
-import random
-from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
-from django.shortcuts import render, get_object_or_404
-from client.models import Program
-from users.models import UserProgramEnrollment, EndUser
+
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render,  get_object_or_404
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hashfrom 
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
+from django.contrib.auth import logoutfrom 
+from .models import Program, Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
+import json
 from django.views.decorators.csrf import csrf_exempt
+import logging
+from django.contrib import messages
+from client.models import Module, BackgroundStyle, Program, ProgramModule
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+import os
+import random
+logger = logging.getLogger(__name__)
+
+from django.conf import settings
+
+
+# Create your views here.
+
+
+def questionnaire(request):
+    active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
+
+    if active_questionnaire:
+        questions = Question.objects.filter(questionnaire=active_questionnaire)
+        questions_data = [
+            {
+                "id": q.id,
+                "question_text": q.question_text,
+                "question_type": q.question_type  # Add question type
+            }
+            for q in questions
+        ]
+    else:
+        questions_data = []
+
+    context = {
+        "active_questionnaire": active_questionnaire,
+        "questions_json": json.dumps(questions_data),
+    }
+    return render(request, "questionnaire.html", context)
+
+@csrf_exempt
+def submit_responses(request):
+    if request.method == "POST":
+        try:
+            if not request.user.is_authenticated:
+                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
+
+            data = json.loads(request.body)
+            logger.info("Received data: %s", data)
+
+            # ✅ Ensure the user exists
+            try:
+                user = EndUser.objects.get(user=request.user)
+            except EndUser.DoesNotExist:
+                return JsonResponse({"success": False, "message": "User not found. Please sign in."})
+
+            # ✅ Ensure the questionnaire exists
+            questionnaire_id = data.get("questionnaireId")
+            if not questionnaire_id:
+                return JsonResponse({"success": False, "message": "Questionnaire ID is missing."})
+
+            try:
+                questionnaire = Questionnaire.objects.get(id=questionnaire_id)
+            except Questionnaire.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Questionnaire not found."})
+
+            responses = data.get("responses", [])
+            if not responses:
+                return JsonResponse({"success": False, "message": "No responses provided."})
+
+            # ✅ Ensure Questionnaire_UserResponse exists before adding responses
+            questionnaire_user_response, created = Questionnaire_UserResponse.objects.get_or_create(
+                user=user,
+                questionnaire=questionnaire
+            )
+
+            for response in responses:
+                question_id = response.get("questionId")
+                value = response.get("value")
+
+                if not question_id or value is None:
+                    logger.error("Missing questionId or value in response: %s", response)
+                    continue
+
+                # ✅ Ensure the question exists
+                try:
+                    question = Question.objects.get(id=question_id)
+                except Question.DoesNotExist:
+                    logger.error("Question with ID %s does not exist.", question_id)
+                    continue
+
+                # ✅ Save the QuestionResponse
+                question_response = QuestionResponse(
+                    user_response=questionnaire_user_response,
+                    question=question,
+                    rating_value=int(value) if question.question_type in ["AGREEMENT", "RATING"] else None
+                )
+
+                try:
+                    question_response.full_clean()  # Validate the model instance
+                    question_response.save()
+                except ValidationError as e:
+                    logger.error("Validation error for question response: %s", str(e))
+                    continue
+
+            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+
+        except Exception as e:
+            logger.error("Error saving responses: %s", str(e))
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request method"})
 
 
 @csrf_exempt
@@ -44,16 +145,6 @@ def get_notes(request):
         return JsonResponse({'success': True, 'content': sticky_note.content})
     except StickyNote.DoesNotExist:
         return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
-    
-from django.shortcuts import render, get_object_or_404
-from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, EndUser
-
-
-from django.shortcuts import render
-from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, UserModuleEnrollment, EndUser
-from django.shortcuts import render, get_object_or_404
-from client.models import Program, ProgramModule
-from users.models import UserProgramEnrollment, EndUser
 
 
 @login_required
@@ -161,11 +252,9 @@ def welcome_page(request):
 def modules(request):
     return render(request, 'users/modules.html')
 
+#edit back to users/profile.html later
 def profile(request):
     return render(request, 'users/profile.html')
-
-def welcome_page(request):
-    return render(request, 'users/welcome_page.html')
 
 def about(request):
     return render(request, 'users/about.html')
@@ -230,19 +319,23 @@ def sign_up_step_2(request):
 
     if request.method == "POST":
         profile_form = EndUserProfileForm(request.POST)
+        if profile_form.is_valid():
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save(commit=False)
-            user.set_password(user_form.cleaned_data["password1"])
-            user.save()
+            user_data = request.session.pop('user_form_data')
+            user_form = UserSignUpForm(data=user_data)
+            if user_form.is_valid():
+                user = user_form.save()
+                
+                  # Added to autheticate user for questionnaire process
+                authenticated_user = authenticate(username=user.username, password=user_data["password1"])
+                if authenticated_user:
+                    login(request, authenticated_user)
 
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
 
-            del request.session["user_form_data"]
-            return redirect("log_in")
-
+            return redirect('welcome')
 
     else:
         profile_form = EndUserProfileForm()
@@ -256,8 +349,85 @@ def log_out(request):
         logout(request)
         return redirect('log_in')
 
+    # if user cancels, stay on the same page
+    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 
-    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))  
+def forget_password(request):
+    return render(request, 'users/forget_password.html')
+
+def password_reset_sent(request, reset_id):
+    return render(request, 'users/password_reset_sent.html')
+
+def reset_password(request, reset_id):
+    return render(request, 'users/reset_password.html')
+
+
+@login_required 
+def show_profile(request):
+    """View to display the user profile"""
+    user = request.user
+
+    if hasattr(user, 'User_profile'):
+        return render(request, 'users/Profile/show_profile.html', {'user': user})
+    else:
+        messages.error(request, "User profile not found.")
+        return redirect('welcome_page')
+
+ 
+@login_required  
+def update_profile(request):
+    """Update user profile details."""
+    user = request.user  
+
+    if not hasattr(user, 'User_profile'):
+        messages.error(request, "Profile not found.")
+        return redirect('welcome_page')
+
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
+        if form.is_valid():
+            form.save()
+            
+            new_password = form.cleaned_data.get("new_password")
+            if new_password:
+                print("Updating password for user:", user.username)  # Debugging
+                user.set_password(new_password)
+                user.save()
+                print("Password updated successfully!")  # Debugging
+                update_session_auth_hash(request, user)
+
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('show_profile')
+
+        else:
+            print("Form is invalid! Errors:", form.errors)  # Debugging
+ 
+    else:
+        form = UserProfileForm(instance=user.User_profile, user=user)
+
+    return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
+
+
+@login_required
+def delete_account(request):
+    """Handle both confirmation page and actual account deletion."""
+    user = request.user  # Get the logged-in user
+
+    if request.method == "POST":
+        try:
+            # Delete the user account, which will cascade-delete related objects
+            user.delete()
+            logout(request)  # Log out after deletion
+            messages.success(request, "Your account has been successfully deleted.")
+            return redirect('welcome_page')  # Redirect to a safe page after deletion
+
+        except Exception as e:
+            messages.error(request, f"An error occurred while deleting your account: {e}")
+            return redirect('profile_page')  # Redirect back to the profile if deletion fails
+
+    # Confirmation before deletion
+    context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
+    return render(request, 'users/Profile/delete_account.html', context)
 
 
 def module_overview(request, id):
