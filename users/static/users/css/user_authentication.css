@@ -110,14 +110,31 @@ body {
     color: #ff440f;
 }
 
+<<<<<<< HEAD
+/* -------------------- SIGN-UP PAGE FORM STYLES -------------------- */
+
+
+/* Main Container (Rectangle 777) */
+.signup-page .main-container {
+    background: #ff440f;
+=======
 
 /* ----------------------- LOG IN PAGE --------------------------*/
 /* Ensure body has enough space below the fixed navbar */
 .log_in_body{
+>>>>>>> origin/userAuthentication
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+<<<<<<< HEAD
+    padding: 20px;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
+}
+
+=======
     min-height: 100vh;
     padding-top: 80px;
 }
@@ -706,3 +723,4 @@ textarea.contact_inputs {
     }
 }
 
+>>>>>>> origin/userAuthentication

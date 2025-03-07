@@ -83,7 +83,6 @@ class Module(models.Model):
     def __str__(self):
         return self.title
 
-
 class Section(models.Model):
     """A section that can be used across multiple modules."""
     title = models.CharField(max_length=255)
