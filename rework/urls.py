@@ -16,12 +16,61 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from users import views
+from client import views as clientViews
+from users import views as usersViews
+from django.contrib.auth import views as authenticationViews
+
 
 urlpatterns = [
+
+    #Admin url
     path('admin/', admin.site.urls),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('modules/', views.modules, name='modules'),
-    path('profile/', views.profile, name='profile'),
-    path('logout/', views.logout_view, name='logout'),
+
+    #Authentication
+    path('log_in/', usersViews.log_in, name="log_in"),
+    path('log_out/', usersViews.log_out, name="log_out"),
+    path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
+    path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
+    path('log_out_client/', clientViews.log_out_client, name="log_out_client"),
+    path('reset_password/', 
+        authenticationViews.PasswordResetView.as_view(template_name="users/reset_password.html"),
+        name="reset_password"),
+    path('reset_password_sent/',
+        authenticationViews.PasswordResetDoneView.as_view(template_name="users/password_reset_sent.html"),
+        name="password_reset_done"),
+    path('reset/<uidb64>/<token>/',
+        authenticationViews.PasswordResetConfirmView.as_view(template_name="users/password_reset_form.html"),
+        name="password_reset_confirm"),
+    path('reset_password_complete/',
+        authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_done.html"),
+        name="password_reset_complete"),
+
+    #Welcome Page
+    path('about/', usersViews.about, name='about'),
+    path('', usersViews.welcome_page, name="welcome_page"),
+    path('contact_us/', usersViews.contact_us, name='contact_us'),
+
+
+    #Program urls for the client
+    path('programs/', clientViews.programs, name='programs'),
+    path('create_program/', clientViews.create_program, name='create_program'),
+    path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
+    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+
+    #Dashboard details for the client
+    path('users_management/', clientViews.users_management, name='users_management'),
+    path('modules_management/', clientViews.modules_management, name='modules_management'),
+    path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+    path('users_management/', clientViews.users_management, name='users_management'),
+
+    #User urls for modules
+    path('userModules/', usersViews.user_modules, name='userModules'),
+    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('all_modules/', usersViews.all_modules, name='all_modules'),
+
+    # User dashboard details
+    path('dashboard/', usersViews.dashboard, name='dashboard'),
+    path('profile/', usersViews.profile, name='profile'),
+
+
 ]
