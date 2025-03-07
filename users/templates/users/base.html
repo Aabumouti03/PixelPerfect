@@ -11,15 +11,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ReWork{% endblock %}</title>
-</head>
-<body>
 
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{% static 'client/css/styles.css' %}">
+    {% block extra_css %} {% endblock %}
+    
+</head>
+
+<body>
     {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
+
+</body>
+</html>
    
     <div id="logout-modal" class="modal">
         <div class="modal-content">

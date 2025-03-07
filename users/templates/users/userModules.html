@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
 {% load static %}
 
 {% block content %}
@@ -42,7 +42,7 @@
         }
 
         .module-card {
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: #68c0ff;
             background-size: cover;
             background-position: center;
             padding: 20px;
@@ -169,7 +169,7 @@
 
         <div class="module-grid">
             {% for item in module_data %}
-            <div class="module-card" style="background-image: url('{% static item.background_image %}');">
+            <div class="module-card">
                 <h5>{{ item.title }}</h5>
                 <p>{{ item.description }}</p>
                 <div class="progress-bar-container">
@@ -185,7 +185,7 @@
             <div class="view-all-container">
                 <a href="{% url 'all_modules' %}" class="view-all-button">View all modules</a>
             </div>
-        </div>
+        </div>    
               
     </main>
 
@@ -208,5 +208,7 @@
 
             moduleGrid.classList.toggle('one-item', count === 1);
         }
+
+        
     </script>
 {% endblock %}

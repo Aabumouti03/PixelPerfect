@@ -1,8 +1,8 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
 from django.conf import settings
 
 #Choices used in more than one model
