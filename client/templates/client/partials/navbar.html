@@ -6,7 +6,7 @@
     </div>
     <ul class="nav-links">
         <li>
-            <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/client_dashboard/' %}active{% endif %}">
+            <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
                 <img src="{% static 'client/img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
@@ -37,8 +37,9 @@
         </div>
     </ul>
 
-    <div class="toggle">
-        <img src="{% static 'client/img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
-    </div>
-
+    <!--
+        <div class="toggle">
+            <img src="{% static 'client/img/toggle.svg' %}" alt="Toggle Menu" class="toggleIcon">
+        </div>
+    -->
 </div>

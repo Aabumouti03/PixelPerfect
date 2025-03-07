@@ -15,16 +15,6 @@
 
 <body>
     {% include 'users/partials/navbar.html' %}
-    <!-- Link to your CSS file -->
-    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ReWork{% endblock %}</title>
-</head>
-<body>
-
-    {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
@@ -33,7 +23,6 @@
 
 </body>
 </html>
-
    
     <div id="logout-modal" class="modal">
         <div class="modal-content">

@@ -6,10 +6,14 @@ from .forms import ProgramForm
 from .models import Program, ProgramModule
 from .models import Program
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Max
+from django.http import JsonResponse
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 
 # Create your views here.
 def client_dashboard(request):
-    return render(request, 'client/client_dashboard.html')
     return render(request, 'client/client_dashboard.html')
 
 def users_management(request):
@@ -29,22 +33,17 @@ def modules_management(request):
         modules_list.append(module_data)
 
     return render(request, "client/modules_management.html", {"modules": modules_list})
-    return render(request, "client/modules_management.html", {"modules": modules_list})
-    return render(request, "client/modules_management.html", {"modules": modules_list})
 
 def users_management(request):
     users = User.objects.all()
-    return render(request, 'client/users_management.html', {'users': users})
-    return render(request, 'client/users_management.html', {'users': users})
-    
+    return render(request, 'client/users_management.html', {'users': users})  
 
 def programs(request):
-    programs = Program.objects.all()
+    programs = Program.objects.prefetch_related('program_modules__module').all()
     return render(request, 'client/programs.html', {'programs': programs})
 
 def logout_view(request):
     return render(request, 'client/logout.html')
-    return render(request, 'client/programs.html', {'programs': programs})
 
 def create_program(request):
     if request.method == "POST":
@@ -58,7 +57,6 @@ def create_program(request):
 
             program.program_modules.all().delete()
 
-            # Add modules in the correct order
             for index, module_id in enumerate(module_ids, start=1):
                 try:
                     module = Module.objects.get(id=module_id)
@@ -69,11 +67,7 @@ def create_program(request):
             return redirect("programs")
     else:
         form = ProgramForm()
-
-    return render(request, "client/create_program.html", {"form": form})
-    
     return render(request, 'client/create_program.html', {'form': form})
-
 
 def log_out(request):
     """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
@@ -81,50 +75,41 @@ def log_out(request):
         logout(request)
         return redirect('users:log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
     return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
 
-def program_detail(request, program_id):
+
+def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
-    # This is a QuerySet of UserProgramEnrollment
+    program_modules = program.program_modules.all()  
+    program_module_ids = list(program_modules.values_list('module_id', flat=True)) 
+
     enrolled_users = program.enrolled_users.all()
     enrolled_user_ids = set(enrollment.user_id for enrollment in enrolled_users)
 
-    
     if request.method == "POST":
-
-        # 1) Remove a module
         if "remove_module" in request.POST:
             module_id = request.POST.get("remove_module")
-            module_obj = get_object_or_404(Module, id=module_id)
-            # Because program.modules is a real ManyToManyField, we can do:
-            program.modules.remove(module_obj)
+            program_module = ProgramModule.objects.filter(program=program, module_id=module_id).first()
+            if program_module:
+                program_module.delete()
             return redirect("program_detail", program_id=program.id)
-
-        # 2) Add modules
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
-            for m_id in modules_to_add:
+            max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
+            for index, m_id in enumerate(modules_to_add, start=1):
                 module_obj = get_object_or_404(Module, id=m_id)
-                program.modules.add(module_obj)
+                ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
             return redirect("program_detail", program_id=program.id)
-
-        # 3) Remove a user
         if "remove_user" in request.POST:
             user_id = request.POST.get("remove_user")
-            # Find the enrollment row and delete it
             enrollment = enrolled_users.filter(user_id=user_id).first()
             if enrollment:
                 enrollment.delete()
             return redirect("program_detail", program_id=program.id)
-
-        # 4) Add users
         if "add_users" in request.POST:
             users_to_add = request.POST.getlist("users_to_add")
             for enduser_id in users_to_add:
-                # Only create if not already enrolled
                 if not enrolled_users.filter(user_id=enduser_id).exists():
                     UserProgramEnrollment.objects.create(
                         user_id=enduser_id,
@@ -135,13 +120,37 @@ def program_detail(request, program_id):
     context = {
         "program": program,
         "all_modules": all_modules,
-        "enrolled_users": enrolled_users,  # QuerySet of UserProgramEnrollment
+        "program_modules": program_modules,  
+        "program_module_ids": program_module_ids, 
+        "enrolled_users": enrolled_users,
         "all_users": EndUser.objects.all(),
-        "enrolled_user_ids": enrolled_user_ids,  # <--- pass this
+        "enrolled_user_ids": enrolled_user_ids,
     }
 
     return render(request, "client/program_detail.html", context)
 
+@csrf_exempt
+def update_module_order(request, program_id):
+    """Handles module reordering in a program while preventing UNIQUE constraint errors."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            program = get_object_or_404(Program, id=program_id)
+            order_mapping = {int(item["id"]): index + 1 for index, item in enumerate(data["order"])}
+
+            with transaction.atomic():
+                temp_order = 1000  
+                for module_id in order_mapping.keys():
+                    ProgramModule.objects.filter(id=module_id, program=program).update(order=temp_order)
+                    temp_order += 1 
+
+                for module_id, new_order in order_mapping.items():
+                    ProgramModule.objects.filter(id=module_id, program=program).update(order=new_order)
+
+            return JsonResponse({"success": True})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 def delete_program(request, program_id):
     """ Delete a program and redirect to the programs list """
