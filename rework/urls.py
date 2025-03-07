@@ -47,9 +47,6 @@ urlpatterns = [
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
 
-    #Recommended Programs page add-ons
-    path("recommended_programs/", usersViews.recommended_programs, name="recommended_programs"),
-
     #
     path('programs/', clientViews.programs, name='programs'),
     path('logout/', clientViews.logout_view, name='logout'),

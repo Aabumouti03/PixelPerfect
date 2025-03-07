@@ -296,36 +296,6 @@ def delete_account(request):
     return render(request, 'users/Profile/delete_account.html', context)
 
 
-@login_required
-def recommended_programs(request):
-    """Displays programs for users to enroll in."""
-    user = request.user
-    available_programs = Program.objects.all()  # Later replace with recommended logic
-    #available_programs = Program.objects.filter(recommended_for=user)  # Adjust based on actual recommendation logic
-
-    if request.method == "POST":
-        selected_program_id = request.POST.get("program_id")
-
-        if selected_program_id:
-            try:
-                program = Program.objects.get(id=selected_program_id)
-                UserProgramEnrollment.objects.update_or_create(
-                    user=user, defaults={"program": program}
-                )
-                return redirect("dashboard")
-            except ObjectDoesNotExist:
-                pass  # If program doesn't exist, do nothing (or handle error message)
-
-        elif "skip" in request.POST:
-            UserProgramEnrollment.objects.update_or_create(
-                user=user, defaults={"program": None}
-            )
-            return redirect("dashboard")
-
-    return render(request, "users/recommended_programs.html", {"programs": available_programs or []})  # Ensure programs is always a list
-
-
-
 def module_overview(request, id):
     module = get_object_or_404(Module, id=id)
 
