@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from .models import User, EndUser
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import get_user_model
+
 
 class UserSignUpForm(UserCreationForm):
     """Form for creating a new user account with custom placeholders and password validation."""
@@ -118,3 +120,4 @@ class LogInForm(AuthenticationForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
+

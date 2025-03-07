@@ -1,15 +1,18 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
+from .forms import UserSignUpForm, LogInForm, EndUserProfileForm, PasswordResetForm
 from django.shortcuts import render, get_object_or_404
-from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser, User
+
+from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout 
 import os
+from django.contrib import messages
 from django.conf import settings
 import random
-from django.core.mail import send_mail
+
+from django.contrib.auth import get_user_model
 
 # Create your views here.
 
