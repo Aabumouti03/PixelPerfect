@@ -129,6 +129,7 @@ class UserModuleEnrollment(models.Model):
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
+    last_accessed = models.DateTimeField(auto_now=True) 
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"

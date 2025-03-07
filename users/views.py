@@ -98,11 +98,15 @@ def dashboard(request):
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
     outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
+    # Get recently accessed modules (order by latest)
+    recent_modules = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:3]
+
     context = {
         'user': user,
         'program': program,
         'program_modules': program_modules,
         'outside_modules': outside_modules,  # Only enrolled modules outside the program
+        'recent_modules': recent_modules,
     }
     return render(request, 'users/dashboard.html', context)
 

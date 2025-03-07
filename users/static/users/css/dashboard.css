@@ -216,7 +216,7 @@ body {
     border-radius: 12px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     min-height: 220px;
-    max-width: 280px;
+    width: 200px;
     text-align: center;
 }
 
@@ -425,3 +425,60 @@ body {
     text-align: center;
     margin-top: 10px;
 }
+
+/* ✅ Recently Accessed Modules Box */
+.recently-accessed {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 250px;
+    padding: 15px;
+    background: #f5f5f5; /* Light grey background */
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+/* ✅ Title Styling */
+.recently-accessed h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* ✅ List Styling */
+.recent-modules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ✅ Module Items */
+.recent-module-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* ✅ Last Item (Remove Border) */
+.recent-module-item:last-child {
+    border-bottom: none;
+}
+
+/* ✅ Module Links */
+.recent-module-item a {
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: #333;
+    transition: color 0.2s ease-in-out;
+}
+
+.recent-module-item a:hover {
+    color: #007bff; /* Blue highlight */
+}
+
+/* ✅ No Modules Message */
+.no-modules {
+    font-size: 0.85rem;
+    color: #888;
+}
+
