@@ -316,133 +316,83 @@ def all_modules(request):
 def logout_view(request):
     return render(request, 'users/logout.html')
 
-@login_required
-def journal(request):
-    return render(request, 'users/journal.html')
-
 
 @login_required
 def journal_view(request, date=None):
-    """Loads the journal page and fetches saved data for a specific date"""
+    """Loads the journal page and fetches saved data for a specific date."""
     user = request.user
 
     # Use today's date if none is provided
     if date is None:
-        selected_date = datetime.now().date()
+        selected_date = now().date()
     else:
         try:
             selected_date = datetime.strptime(date, "%Y-%m-%d").date()
         except ValueError:
-            print(f"⚠️ Invalid date format received: {date}, defaulting to today.")
-            selected_date = datetime.now().date()
+            selected_date = now().date()
 
     # Fetch the journal entry for the selected date (if it exists)
     journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
 
+    print(f"📖 [DEBUG] Rendering Journal for {selected_date}")
     if journal_entry:
-        print(f"✅ Found Journal Entry for {selected_date}: {journal_entry}")
+        print(f"   Sleep Hours: {journal_entry.sleep_hours}")
+        print(f"   Caffeine: {journal_entry.caffeine}")
+        print(f"   Hydration: {journal_entry.hydration}")
+        print(f"   Stress: {journal_entry.stress}")
+        print(f"   Goal Progress: {journal_entry.goal_progress}")
+        print(f"   Notes: {journal_entry.notes}")
     else:
-        print(f"❌ No Journal Entry Found for {selected_date}")
-
-    # Get previous and next days
-    previous_day = selected_date - timedelta(days=1)
-    next_day = selected_date + timedelta(days=1)
+        print("❌ No journal entry found for this date.")
 
     context = {
-        "selected_date": selected_date.strftime("%Y-%m-%d"),
-        "journal_entry": journal_entry,  # Might be None if no entry exists
-        "previous_day": previous_day.strftime("%Y-%m-%d"),
-        "next_day": next_day.strftime("%Y-%m-%d"),
+        "selected_date": selected_date,
+        "journal_entry": journal_entry,
+        "previous_day": (selected_date - timedelta(days=1)).strftime("%Y-%m-%d"),
+        "next_day": (selected_date + timedelta(days=1)).strftime("%Y-%m-%d"),
     }
-    return render(request, "users/journal.html", context)
+    
+    return render(request, "users/journal.html", context)  # ✅ Returns HTML, not JSON!
 
 
-@csrf_exempt
 @login_required
+@csrf_exempt
 def save_journal_entry(request):
-    """Handles saving journal entries using JSON"""
-    if request.method == "POST":
-        try:
-            print("✅ Received POST request to save journal entry")
-
-            # Load JSON data
-            try:
-                data = json.loads(request.body)
-                print("📤 Data received:", data)  # Debugging message
-            except json.JSONDecodeError as e:
-                print("❌ JSON Decode Error:", str(e))
-                return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-
-            user = request.user
-            date_str = data.get("date", datetime.now().date().strftime("%Y-%m-%d"))
-
-            try:
-                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            except ValueError:
-                print("⚠️ Invalid date format:", date_str)
-                return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
-
-            # Get or create journal entry
-            journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
-
-            # Update entry with new values
-            journal_entry.sleep_hours = data.get("sleep_hours")
-            journal_entry.coffee = data.get("coffee")
-            journal_entry.hydration = data.get("hydration")
-            journal_entry.stress = data.get("stress")
-            journal_entry.notes = data.get("notes")
-            journal_entry.save()
-
-            print("✅ Successfully saved journal entry for", entry_date)
-
-            return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
-
-        except Exception as e:
-            print("❌ Error:", str(e))
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
-
-
-
-@csrf_exempt
-@login_required
-def journal_submit(request):
     """Handles saving journal entries using JSON."""
     if request.method == "POST":
         try:
-            # Debug: Print incoming data
-            print("📥 [SERVER] Received Request:", request.body)
-
-            data = json.loads(request.body.decode("utf-8"))  # Decode JSON request
+            data = json.loads(request.body)  # Load JSON data
             user = request.user
             date_str = data.get("date")
+
             if not date_str:
                 return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
-            # Convert date string into the proper format (YYYY-MM-DD)
+            # Convert string date to date object
             try:
-                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()  # Expecting "2025-03-02"
+                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
             except ValueError:
                 return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
 
             # Get or create journal entry
             journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
 
+            # Debugging: Print before updating
+            print(f"🔹 BEFORE UPDATE: {journal_entry}")
+
             # Update the entry with provided data
-            journal_entry.sleep_hours = data.get("sleep_hours") or None
-            journal_entry.coffee = data.get("coffee") or None
-            journal_entry.hydration = data.get("hydration") or None
+            journal_entry.sleep_hours = int(data.get("sleep_hours", 0)) if data.get("sleep_hours") else None
+            journal_entry.caffeine = data.get("caffeine") or None
+            journal_entry.hydration = int(data.get("hydration", 0)) if data.get("hydration") else None
             journal_entry.stress = data.get("stress") or None
+            journal_entry.goal_progress = data.get("goal_progress") or None
             journal_entry.notes = data.get("notes") or None
             journal_entry.save()
 
-            print("✅ [SERVER] Journal entry saved successfully!")
+            # Debugging: Print after updating
+            print(f"✅ AFTER UPDATE: {journal_entry}")
 
             return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
-
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
         except Exception as e:
             print("❌ [SERVER ERROR]", str(e))  # Debugging

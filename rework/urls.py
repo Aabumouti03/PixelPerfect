@@ -50,7 +50,6 @@ urlpatterns = [
     path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
     path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
     path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
-    path("journal/submit/", usersViews.journal_submit, name="journal_submit"),  # Save journal entries
-
+    path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
 
 ]

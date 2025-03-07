@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ReWork{% endblock %}</title>
 </head>
+
 <body>
 
     {% include 'users/partials/navbar.html' %}
@@ -20,6 +21,7 @@
         {% endblock %}
     </div>
    
+    <!-- Logout Modal -->
     <div id="logout-modal" class="modal">
         <div class="modal-content">
             <h2>Are you sure you want to log out?</h2>
@@ -31,9 +33,11 @@
         </div>
     </div>
 
-    
+    <!-- JavaScript files -->
     <script src="{% static 'users/js/log_out.js' %}"></script>
 
+    <!-- Extra JavaScript Block (Ensures JavaScript in Other Templates Works) -->
+    {% block extra_js %}{% endblock %}
 
 </body>
 </html>

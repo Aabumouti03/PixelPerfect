@@ -4,55 +4,63 @@ function getFormattedDate(date) {
     return d.toISOString().split("T")[0];  // Extracts YYYY-MM-DD format
 }
 
-// Function to fetch journal data for a specific date
+// Function to fetch journal entry for a specific date
 function fetchJournalEntry(date) {
+    console.log(`📥 Fetching journal entry for ${date}`);
+
     fetch(`/journal/${date}/`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data) {
+                console.log("✅ Data retrieved:", data.data);
+
+                // Populate form fields with saved data
                 document.getElementById("sleep_hours").value = data.data.sleep_hours || "";
                 document.getElementById("hydration").value = data.data.hydration || "";
                 document.getElementById("stress").value = data.data.stress || "";
-
-                if (data.data.coffee === "yes") {
-                    document.getElementById("coffee_yes").checked = true;
-                } else if (data.data.coffee === "no") {
-                    document.getElementById("coffee_no").checked = true;
-                }
-
+                document.getElementById("goal_progress").value = data.data.goal_progress || "low";
                 document.getElementById("notes").value = data.data.notes || "";
+
+                document.querySelector(`[name="connected_with_family"][value="${data.data.connected_with_family}"]`)?.checked === true;
+                document.querySelector(`[name="expressed_gratitude"][value="${data.data.expressed_gratitude}"]`)?.checked === true;
+                document.querySelector(`[name="caffeine"][value="${data.data.caffeine}"]`)?.checked === true;
+                document.querySelector(`[name="outdoors"][value="${data.data.outdoors}"]`)?.checked === true;
+                document.querySelector(`[name="sunset"][value="${data.data.sunset}"]`)?.checked === true;
             } else {
-                // Clear inputs if no previous entry exists
+                console.warn("❌ No previous journal entry found for this date.");
+
+                // Clear the form fields if no entry is found
                 document.getElementById("sleep_hours").value = "";
                 document.getElementById("hydration").value = "";
-                document.getElementById("stress").value = "low";  // Default to "low"
-                document.getElementById("coffee_yes").checked = false;
-                document.getElementById("coffee_no").checked = false;
+                document.getElementById("stress").value = "low";
+                document.getElementById("goal_progress").value = "low";
                 document.getElementById("notes").value = "";
+
+                document.querySelectorAll('[name="connected_with_family"]').forEach(el => el.checked = false);
+                document.querySelectorAll('[name="expressed_gratitude"]').forEach(el => el.checked = false);
+                document.querySelectorAll('[name="caffeine"]').forEach(el => el.checked = false);
+                document.querySelectorAll('[name="outdoors"]').forEach(el => el.checked = false);
+                document.querySelectorAll('[name="sunset"]').forEach(el => el.checked = false);
             }
         })
-        .catch(error => console.error("Error fetching journal entry:", error));
+        .catch(error => console.error("❌ Error fetching journal entry:", error));
 }
-
-
-// Function to save journal entry via AJAX
 function saveJournalEntry(event) {
     event.preventDefault();  // Prevent default form submission
 
-    const journalForm = document.getElementById("journal-form");
-    const successMessage = document.getElementById("success-message");
-    const journalDate = document.getElementById("journal-date").value;
-
     const formData = {
-        date: journalDate,
-        sleep_hours: document.getElementById("sleep_hours").value,
-        coffee: document.querySelector('input[name="coffee"]:checked') ? document.querySelector('input[name="coffee"]:checked').value : null,
-        hydration: document.getElementById("hydration").value,
-        stress: document.getElementById("stress").value,
-        notes: document.getElementById("notes").value,
+        date: document.getElementById("journal-date").value,
+        sleep_hours: document.getElementById("sleep_hours").value || null,
+        caffeine: document.querySelector('input[name="caffeine"]:checked') ? document.querySelector('input[name="caffeine"]:checked').value : null,
+        hydration: document.getElementById("hydration").value || null,
+        stress: document.getElementById("stress").value || null,
+        goal_progress: document.getElementById("goal_progress").value || null,
+        notes: document.getElementById("notes").value || null
     };
 
-    fetch("/journal/submit/", {
+    console.log("📤 Sending Data to Server:", formData); // Debugging
+
+    fetch("/journal/save/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -62,60 +70,38 @@ function saveJournalEntry(event) {
     })
     .then(response => response.json())
     .then(data => {
+        console.log("📥 Response from Server:", data); // Debugging
+
         if (data.success) {
-            successMessage.classList.remove("hidden");
-            successMessage.textContent = "✅ Your entry has been saved!";
-            setTimeout(() => successMessage.classList.add("hidden"), 3000);  // Hide message after 3 seconds
+            alert("✅ Your entry has been saved!");
         } else {
-            alert("Error saving entry: " + data.error);
+            alert("❌ Error saving entry: " + data.error);
         }
     })
-    .catch(error => console.error("Error saving journal entry:", error));
+    .catch(error => console.error("❌ Network error:", error));
 }
 
+// Attach event listener
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("journal-form").addEventListener("submit", saveJournalEntry);
+});
 
 
-document.addEventListener("DOMContentLoaded", function() {
-    const journalForm = document.getElementById("journal-form");
-    const successMessage = document.getElementById("success-message");
 
-    journalForm.addEventListener("submit", function(event) {
-        event.preventDefault(); // Stop default form submission
 
-        const formData = {
-            date: document.getElementById("journal-date").value, // Ensure it's formatted properly
-            sleep_hours: document.getElementById("sleep_hours").value || null,
-            coffee: document.querySelector("input[name='coffee']:checked") ? document.querySelector("input[name='coffee']:checked").value : null,
-            hydration: document.getElementById("hydration").value || null,
-            stress: document.getElementById("stress").value || null,
-            notes: document.getElementById("notes").value.trim() || null
-        };
+// Ensure JavaScript runs when the page is loaded
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("✅ Journal.js loaded successfully");
 
-        console.log("📤 [DEBUG] Sending Data to Server:", formData);
+    // Attach form submit event listener
+    const form = document.getElementById("journal-form");
+    if (form) {
+        form.addEventListener("submit", saveJournalEntry);
+    } else {
+        console.error("❌ Journal form not found.");
+    }
 
-        fetch("/journal/submit/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())  // Expect JSON response
-        .then(data => {
-            console.log("🔄 [DEBUG] Server Response:", data);
-            if (data.success) {
-                successMessage.classList.remove("hidden");
-                successMessage.innerText = "✅ Your entry has been saved!";
-                setTimeout(() => {
-                    successMessage.classList.add("hidden");
-                }, 3000);
-            } else {
-                console.error("❌ [ERROR] Failed to save entry:", data.error);
-            }
-        })
-        .catch(error => {
-            console.error("⚠️ [NETWORK ERROR]:", error);
-        });
-    });
+    // Fetch journal entry for the current date
+    const currentDate = document.getElementById("journal-date").value;
+    fetchJournalEntry(currentDate);
 });
