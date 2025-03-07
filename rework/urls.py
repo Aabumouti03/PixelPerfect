@@ -51,4 +51,5 @@ urlpatterns = [
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+    
 ]
