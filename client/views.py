@@ -94,6 +94,7 @@ def program_detail(request, program_id):
             if program_module:
                 program_module.delete()
             return redirect("program_detail", program_id=program.id)
+
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
             max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
@@ -101,30 +102,13 @@ def program_detail(request, program_id):
                 module_obj = get_object_or_404(Module, id=m_id)
                 ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
             return redirect("program_detail", program_id=program.id)
-        if "remove_user" in request.POST:
-            user_id = request.POST.get("remove_user")
-            enrollment = enrolled_users.filter(user_id=user_id).first()
-            if enrollment:
-                enrollment.delete()
-            return redirect("program_detail", program_id=program.id)
-        if "add_users" in request.POST:
-            users_to_add = request.POST.getlist("users_to_add")
-            for enduser_id in users_to_add:
-                if not enrolled_users.filter(user_id=enduser_id).exists():
-                    UserProgramEnrollment.objects.create(
-                        user_id=enduser_id,
-                        program=program
-                    )
-            return redirect("program_detail", program_id=program.id)
 
     context = {
         "program": program,
         "all_modules": all_modules,
         "program_modules": program_modules,  
-        "program_module_ids": program_module_ids, 
+        "program_module_ids": program_module_ids,
         "enrolled_users": enrolled_users,
-        "all_users": EndUser.objects.all(),
-        "enrolled_user_ids": enrolled_user_ids,
     }
 
     return render(request, "client/program_detail.html", context)
