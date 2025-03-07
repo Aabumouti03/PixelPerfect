@@ -46,7 +46,7 @@ def manage_questionnaires(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'Manage_Questionnaires.html', {
+    return render(request, 'client/Manage_Questionnaires.html', {
         'questionnaires_data': page_obj,
         'page_obj': page_obj,
         'is_active_filter': is_active_filter,
@@ -71,7 +71,7 @@ def view_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
 
-    return render(request, 'view_questionnaire.html', {
+    return render(request, 'client/view_questionnaire.html', {
         'questionnaire': questionnaire,
         'questions': questions
     })
@@ -94,7 +94,7 @@ def view_responders(request, questionnaire_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'view_responders.html', {
+    return render(request, 'client/view_responders.html', {
         'questionnaire': questionnaire,
         'responders': page_obj.object_list,
         'page_obj':page_obj
@@ -105,7 +105,7 @@ def view_user_response(request, user_response_id):
     user_response = get_object_or_404(Questionnaire_UserResponse, id=user_response_id)
     responses = QuestionResponse.objects.filter(user_response=user_response_id).select_related('question')
 
-    return render(request, 'view_user_response.html', {
+    return render(request, 'client/view_user_response.html', {
         'user_response': user_response,
         'responses': responses,
     })
@@ -141,7 +141,7 @@ def create_questionnaire(request):
         messages.success(request, "Questionnaire created successfully!")
         return redirect("manage_questionnaires")
 
-    return render(request, "create_questionnaire.html", {
+    return render(request, "client/create_questionnaire.html", {
         "categories": categories,
         "sentiment_choices": sentiment_choices,  
     })
@@ -180,7 +180,7 @@ def edit_questionnaire(request, questionnaire_id):
 
         return redirect("view_questionnaire", questionnaire_id=questionnaire.id)
 
-    return render(request, "edit_questionnaire.html", {
+    return render(request, "client/edit_questionnaire.html", {
         "questionnaire": questionnaire,
         "questions": questions,
         "categories": categories,

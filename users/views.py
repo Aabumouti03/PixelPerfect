@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def welcome_view(request):
-    return render(request, 'welcome.html')
+    return render(request, 'users/welcome.html')
 
 @login_required
 def questionnaire(request):
@@ -45,7 +45,7 @@ def questionnaire(request):
         "active_questionnaire": active_questionnaire,
         "questions_json": json.dumps(questions_data),
     }
-    return render(request, "questionnaire.html", context)
+    return render(request, "users/questionnaire.html", context)
 
 @csrf_exempt
 @login_required

@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Response by {{ user_response.user.user.first_name }}</title>
-    <link rel="stylesheet" href="{% static 'css/view_user_response.css' %}">
+    <link rel="stylesheet" href="{% static 'client/css/view_user_response.css' %}">
 </head>
 <body>
 
     <div class="content">
         <div class="top-bar">
-            <a href="{% url 'view_responders' %}" class="back-btn">← Back</a>
+            <a href="{% url 'view_responders' user_response.questionnaire.id %}" class="back-btn">← Back</a>
             <h1>Response by {{ user_response.user.user.full_name }}</h1>
         </div>
 
