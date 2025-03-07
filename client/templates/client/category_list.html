@@ -1,0 +1,36 @@
+{% extends 'client/client_base.html' %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'client/css/category_list.css' %}">
+<body class="container">
+
+    <div class="top-bar">
+        <h1>Available Categories</h1>
+
+        <div class="export-buttons">
+            <a href="{% url 'create_category' %}" class="custom-btn">
+                Add category
+            </a>
+        </div>
+
+    </div>
+
+    <main class="category-grid">
+        {% for category in categories %}
+        <div class="category-card">
+            <h2>{{ category.name }}</h2>
+            <p>{{ category.description|truncatewords:20 }}</p>
+        
+            <div class="buttons">
+                <a href="{% url 'category_detail' category.id %}" class="view-btn">View</a>
+            </div>
+        </div>
+        {% empty %}
+            <p>No categories available.</p>
+        {% endfor %}
+    </main>
+</body>
+
+{% endblock %}
