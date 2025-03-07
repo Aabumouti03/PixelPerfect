@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
+from django.db.models import Avg
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -16,6 +17,13 @@ QUESTION_POSITIONS = [
     ('left', 'Left of the Diagram'),
     ('right', 'Right of the Diagram'),
 ]
+
+STATUS_CHOICES = [
+        ('not_started','Not Started'),
+        ('in_progress', 'In_Progress'),
+        ('completed', 'Completed')
+]
+
 
 BACKGROUND_IMAGE_CHOICES = [
     ('pattern1', 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%230148fd\' fill-opacity=\'0.18\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")'),
@@ -34,8 +42,9 @@ class Category(models.Model):
 class Program(models.Model):
     """A program that consists of multiple modules (Reusable)."""
     title = models.CharField(max_length=255)
+    categories = models.ManyToManyField(Category, related_name="programs")
     description = models.TextField(blank=True, null=True)
-    # modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
+    modules = models.ManyToManyField('Module',through='ProgramModule', related_name="programs")  
 
     def __str__(self):
         return self.title
@@ -80,8 +89,27 @@ class Module(models.Model):
     sections = models.ManyToManyField('Section', related_name="modules")  
     additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
     background_style = models.ForeignKey(BackgroundStyle, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def average_rating(self):
+        avg_rating = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
+
+
     def __str__(self):
         return self.title
+
+
+class ModuleRating(models.Model):
+    """Tracks user ratings for a module."""
+    module = models.ForeignKey("client.Module", related_name="ratings", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('module', 'user')  # Ensures a user can rate a module only once.
+
+    def __str__(self):
+        return f"{self.user.user.username} rated {self.module.title} - {self.rating}/5"
 
 
 class Section(models.Model):
@@ -112,6 +140,7 @@ class AdditionalResource(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to='resources/', blank=True, null=True)  # For PDFs
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     url = models.URLField(blank=True, null=True)  # For external links
     
     def __str__(self):
@@ -124,6 +153,7 @@ class Exercise(models.Model):
     exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
     pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
     questions = models.ManyToManyField('ExerciseQuestion', related_name="exercises", blank=True)  
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started') 
 
     def save(self, *args, **kwargs):
         """Auto-set exercise_type based on questions if not set."""
@@ -173,26 +203,28 @@ class Questionnaire (models.Model):
 
 class Question (models.Model):
     QUESTION_TYPES = [
-        ('MULTIPLE_CHOICE', 'Multiple Choice'),
+        ('AGREEMENT', 'Agreement Scale'),
         ('RATING', 'Rating Scale'),
+    ]
+    SENTIMENT_CHOICES = [
+        (1, 'Positive'),
+        (-1, 'Negative'),
     ]
     questionnaire = models.ForeignKey(Questionnaire, related_name='questions', on_delete=models.CASCADE)
     question_text = models.TextField(blank=False)
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
     is_required = models.BooleanField(default=True)
 
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  # 🆕 Added for categorization
+    sentiment = models.IntegerField(choices=SENTIMENT_CHOICES, default=1)  # +1 for positive, -1 for negative
+
     # For rating questions
-    min_rating = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
-    max_rating = models.IntegerField(null=True, blank=True, validators=[MaxValueValidator(10)])
+    #FIXED RATING SCALE (1 to 5)
+    FIXED_MIN_RATING = 1
+    FIXED_MAX_RATING = 5
 
     def __str__(self):
         return f"{self.questionnaire.title} - {self.question_text[:30]}"
     
-class Choice(models.Model):
-    question = models.ForeignKey(Question, related_name='choices', on_delete=models.CASCADE)
-    text = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return self.text
-    
+
 

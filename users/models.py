@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Choice 
+from client.models import Program, Module, ExerciseQuestion
 from django.conf import settings
 
 #Choices used in more than one model
@@ -19,7 +19,7 @@ class User(AbstractUser):
         unique=True,
         validators=[RegexValidator(
             regex=r'^\w{3,}$',
-            message='Username must consist at least three alphanumericals'
+            message='Username must consist of @ followed by at least three alphanumericals'
         )]
     )
     first_name = models.CharField(max_length=50, blank=False)
@@ -157,10 +157,11 @@ class UserModuleProgress(models.Model):
     def __str__(self):
         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
-class UserResponse(models.Model):
+
+class ExerciseResponse(models.Model):
     """Stores user answers for exercises."""
-    user = models.ForeignKey(EndUser, on_delete=models.CASCADE) 
-    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE, related_name="responses")  
+    user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
+    question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
     response_text = models.TextField(blank=True, null=True)
 
     def __str__(self):
