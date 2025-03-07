@@ -168,4 +168,40 @@ class ExerciseResponse(models.Model):
         return f"Response by {self.user.user.username} for {self.question}"
 
 
+# Questionnaire-related models
+class Questionnaire_UserResponse(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ['user', 'questionnaire']
+
+class QuestionResponse(models.Model):
+    user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    rating_value = models.IntegerField(
+    null=True, 
+    blank=True, 
+    validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    def clean(self):
+        if self.question.question_type == 'RATING' and self.rating_value is None:
+            raise ValidationError('Rating scale questions require a rating value')
+
+        if self.question.question_type == 'AGREEMENT' and self.rating_value is None:
+            raise ValidationError('Agreement scale questions require a selection')
+
+
+
+class StickyNote(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='sticky_notes')
+    content = models.TextField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    def __str__(self):
+        return f"StickyNote by {self.user.user.username}"
 

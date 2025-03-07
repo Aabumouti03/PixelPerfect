@@ -1,0 +1,434 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Manrope', sans-serif;
+    display: flex;
+}
+
+.sidebar {
+    width: 60px; /* Initially, a small width */
+    height: 100vh;
+    background-color: #F24505;
+    color: white;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-top-right-radius: 15px; /* Rounds the top-left corner */
+    border-bottom-right-radius: 15px; /* Rounds the bottom-left corner */
+    overflow: hidden; /* Hide content initially */
+    transition: width 0.3s ease-in-out;
+}
+
+.sidebar:hover {
+    width: 250px; /* Expand when hovered */
+}
+
+.logo {
+    font-size: 35px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    padding-top: 20px;
+    gap: 10px; /* distance to logo */
+    opacity: 0; /* Hide menu items */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar:hover .logo {
+    opacity: 1; /* Show menu items on hover */
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin-top: 40px;
+    padding-left: 15px;
+    opacity: 0; /* Hide menu items */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar:hover .nav-links {
+    opacity: 1; /* Show menu items on hover */
+}
+
+.nav-links li {
+    margin: 20px 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    padding: 15px 0px;
+}
+
+.nav-links a.active {
+    font-weight: bolder;
+    color: white;
+}
+
+
+.nav-links a:hover {
+    width: 225px;
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    opacity: 1;
+    padding: 15px 0px;
+    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
+    border-radius: 8px; /* Soft rounded corners */
+}
+
+.logout {
+    list-style: none;
+    position: absolute;  /* Positions it relative to the sidebar */
+    bottom: 20px;
+    padding: 0;
+    left: 15px; /* Aligns it properly */
+    margin-top: 250px;
+    padding-left: 0px;
+    opacity: 0; /* Hide item */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar:hover .logout {
+    opacity: 1; /* Show item on hover */
+}
+
+.logout a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.logout a:hover {
+    width: 225px;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    opacity: 1;
+    padding: 15px 0px;
+    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
+    border-radius: 8px; /* Soft rounded corners */
+}
+
+.icon {
+    font-size: 20px;
+}
+
+
+
+/* Dashboard */
+
+
+/* Program header */
+.programs-header {
+    display: flex;
+    align-items: center;  /* Align items vertically */
+    justify-content: space-between; /* Push text to left, button to right */
+    width: 100%;
+    margin-bottom: 20px; /* Add spacing below the header */
+}
+
+/* Program info */
+.program-text {
+    display: flex;
+    flex-direction: column; /* Stack title and description */
+    align-items: flex-start; /* Align them to the left */
+}
+
+.program-text h2 {
+    font-size: 1.5rem; /* Adjust font size */
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px; /* Space between title and description */
+}
+
+.program-text p {
+    font-size: 1rem; /* Description font size */
+    color: #666;
+    margin: 0; /* Remove extra margin */
+}
+
+.dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+/* Containers */
+/* Maintain the same design */
+.programs-container, 
+.modules-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+    backdrop-filter: blur(10px);
+    margin-top: 20px;
+}
+
+.programs-header, 
+.modules-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Module List */
+/* Both program and modules container */
+.module-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Module Card */
+/* Both program and modules container */
+.module-card {
+    border-radius: 20px;
+    box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
+    width: 250px; /* Fixed width */
+    height: 283px; /* Fixed height */
+    flex-shrink: 0;
+    padding: 20px;
+    border-left: 5px solid #1d3c5337;
+    box-sizing: border-box; /* Ensure padding is included in the width/height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 220px;
+    max-width: 280px;
+    text-align: center;
+}
+
+/* Alternate colors for adjacent cards */
+/* Both program and modules container */
+.module-card:nth-child(odd) {
+    background: #73C4FD;
+}
+
+/* Alternate colors for adjacent cards */
+/* Both program and modules container */
+.module-card:nth-child(even) {
+    background: #0148FD;
+}
+
+/* Alternate colors for adjacent cards */
+/* Locked */
+.module-card:nth-child(even) p {
+    color: #d0cfcf;
+}
+
+/* Module Title */
+/* Both program and modules container */
+.module-card h3 {
+    padding-top: 80px;
+    margin: 10px 0;
+    color: #e9e6e6;
+}
+
+/* Module Description */
+/* Both program and modules container */
+
+.module-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* View All Buttons */
+/* Both program and modules container */
+.view-all-button, 
+.view-program-button {
+    font-size: 12px;
+    padding: 6px 10px;
+    background-color: #F24505;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.view-all-button:hover, 
+.view-program-button:hover {
+    background-color: #f24405a5;
+}
+
+
+/* Progress Container */
+/* Both program and modules container */
+.progress-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%; /* Ensures the same width for all progress bars */
+    height: 10px;
+    overflow: hidden;
+    background: transparent;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+/* Progress Bar */
+/* Both program and modules container */
+.progress-bar {
+    width: 100%;  /* Ensures full width inside container */
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Progress Fill */
+/* Both program and modules container */
+.progress-fill {
+    height: 100%;
+    background: #F24505;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Progress Text */
+/* Both program and modules container */
+.progress-text {
+    margin-left: 10px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    min-width: 50px;
+    background: transparent;
+    text-align: right;
+}
+
+/* Locked Module */
+.module-card.locked {
+    background: #e6e6e6;
+    color: #999;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* Locked Module Title */
+.module-card.locked h3 {
+    color: #555;
+    font-size: 1rem;
+}
+
+/* Locked Module Description */
+.module-card.locked p {
+    color: #777;
+    font-size: 0.9rem;
+}
+
+/* Locked Module Progress */
+.module-card.locked .progress-container {
+    width: 90%;
+    background-color: #d6d6d6;
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.module-card.locked .progress-fill {
+    background: #aaa;
+}
+
+/* Locked Message */
+.module-card.locked .locked-message {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Start Module Button */
+/* Both program and modules container */
+.view-module-button {
+    display: inline-block;
+    background: white;
+    color: #F24505;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;
+}
+
+/* Start Module Button hover */
+/* Both program and modules container */
+.view-module-button:hover {
+    background: #F24505;
+    color: white;
+}
+
+
+/* Locked module styling */
+.module-card.locked {
+    background: #e6e6e6 !important; /* Ensure it's a gray background */
+    color: #999;
+    pointer-events: none;
+    opacity: 0.8; /* Slight fade effect */
+}
+
+/* Locked module title */
+.module-card.locked h3 {
+    color: #555;
+}
+
+/* Locked module description */
+.module-card.locked p {
+    color: #777;
+}
+
+/* Locked progress bar */
+.module-card.locked .progress-container {
+    background-color: #d6d6d6;
+}
+
+/* Locked progress fill */
+.module-card.locked .progress-fill {
+    background: #aaa; /* Dimmed progress bar */
+}
+
+/* Locked module message */
+.module-card.locked .locked-message {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
