@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from client import views as clientViews
+from client import views as client_views
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
+
 
 
 urlpatterns = [
@@ -71,5 +73,17 @@ urlpatterns = [
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('profile/', usersViews.profile, name='profile'),
+    path('reports/', clientViews.reports, name='reports'),
+    path('userStatistics/', clientViews.userStatistics, name='userStatistics'),    
+    path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
+    path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
+    path('export/modules_statistics/', clientViews.export_modules_statistics_csv, name='export_modules_statistics_csv'),
+    path('export/programs_statistics/', clientViews.export_programs_statistics_csv, name='export_programs_statistics_csv'),
+    path('category_list/', clientViews.category_list, name='category_list'),  
+    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
+    path('create_category/', clientViews.create_category, name='create_category'),
 
+
+    path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
+    
 ]

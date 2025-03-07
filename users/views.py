@@ -305,7 +305,5 @@ def user_modules(request):
 
 def all_modules(request):
     modules = Module.objects.all()
-
     return render(request, 'users/all_modules.html', {'modules': modules})
-
 
