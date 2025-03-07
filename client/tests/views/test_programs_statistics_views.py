@@ -4,7 +4,7 @@ from django.db.models import Avg, Count
 
 from users.models import EndUser, UserProgramEnrollment, UserProgramProgress
 from client.models import Program
-from client.programs_statistics import (
+from client.statistics import (
     get_program_enrollment_stats,
     get_program_completion_stats,
     get_average_program_completion_percentage,

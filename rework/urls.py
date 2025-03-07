@@ -49,17 +49,17 @@ urlpatterns = [
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-    path('reports/', reports_views.reports, name='reports'),
+    path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', reports_views.userStatistics, name='userStatistics'),    
-    path('modules_statistics/', reports_views.modules_statistics, name='modules_statistics'),
-    path('programs_statistics/', reports_views.programs_statistics, name='programs_statistics'),
-    path('export/modules_statistics/', reports_views.export_modules_statistics_csv, name='export_modules_statistics_csv'),
-    path('export/programs_statistics/', reports_views.export_programs_statistics_csv, name='export_programs_statistics_csv'),
+    path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
+    path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
+    path('export/modules_statistics/', clientViews.export_modules_statistics_csv, name='export_modules_statistics_csv'),
+    path('export/programs_statistics/', clientViews.export_programs_statistics_csv, name='export_programs_statistics_csv'),
     path('category_list/', clientViews.category_list, name='category_list'),  
     path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
     path('create_category/', clientViews.create_category, name='create_category'),
 
 
-    path('export/users_statistics/', reports_views.export_user_statistics_csv, name='export_user_statistics_csv'),
+    path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     
 ]
