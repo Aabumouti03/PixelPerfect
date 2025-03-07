@@ -101,6 +101,7 @@
             }
 
             const defaultColors = ['#007bff', '#F24505'];
+            const genderColors = ['#0048FF', '#FF5400', '#4076FF', '#FD7402'];
             const sectorColors = ['#0048FF', '#FF5400', '#4076FF', '#FD7402', '#6EA8FE', '#FFA500', '#B0C4DE'];
             const ethnicityColors = ['#0048FF', '#FF5400', '#4076FF', '#FD7402', '#6EA8FE', '#FFA500', '#B0C4DE'];
 
@@ -130,11 +131,12 @@
 
                 // Gender Distribution Chart
                 createPieChart(
-                    "genderChart",
-                    Object.keys(statsData.gender_distribution || {}),
-                    Object.values(statsData.gender_distribution || {}),
-                    defaultColors
-                );
+                "genderChart",
+                Object.keys(statsData.gender_distribution || {}),
+                Object.values(statsData.gender_distribution || {}),
+                genderColors  // Use the genderColors array for this chart
+               );
+
 
                 // Ethnicity Distribution Chart
                 createPieChart(
