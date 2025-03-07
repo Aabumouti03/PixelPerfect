@@ -5,189 +5,15 @@ from .models import Questionnaire, Question, Module,  Program, ProgramModule
 from users.models import Questionnaire_UserResponse, QuestionResponse, User
 from django.core.paginator import Paginator
 from .forms import ProgramForm 
+from .models import Program, ProgramModule, Category
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def admin_check(user):
+    return user.is_authenticated and user.is_superuser
 
 
-
-def manage_questionnaires(request):
-    is_active_filter = request.GET.get('is_active')
-    sort_order = request.GET.get('sort', 'desc')  # Default to descending order
-
-    questionnaires = Questionnaire.objects.all()
-
-    # Apply active filter
-    if is_active_filter == 'true':
-        questionnaires = questionnaires.filter(is_active=True)
-
-    # Apply sorting
-    if sort_order == 'asc':
-        questionnaires = questionnaires.order_by('created_at')
-    else:
-        questionnaires = questionnaires.order_by('-created_at')
-
-    # Get response count
-    questionnaires_data = [
-        {
-            "questionnaire": q,
-            "response_count": Questionnaire_UserResponse.objects.filter(questionnaire=q).count()
-        }
-        for q in questionnaires
-    ]
-
-    # Paginate (10 per page)
-    paginator = Paginator(questionnaires_data, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, 'Manage_Questionnaires.html', {
-        'questionnaires_data': page_obj,
-        'page_obj': page_obj,
-        'is_active_filter': is_active_filter,
-        'sort_order': sort_order
-    })
-
-
-
-
-def activate_questionnaire(request, questionnaire_id):
-    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-
-    # Ensure only one questionnaire is active
-    Questionnaire.objects.all().update(is_active=False)
-    questionnaire.is_active = True
-    questionnaire.save()
-    
-    messages.success(request, f'Activated: {questionnaire.title}')
-    return redirect('manage_questionnaires')
-
-
-def view_questionnaire(request, questionnaire_id):
-    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    questions = Question.objects.filter(questionnaire=questionnaire)
-
-    return render(request, 'view_questionnaire.html', {
-        'questionnaire': questionnaire,
-        'questions': questions
-    })
-
-
-def view_responders(request, questionnaire_id):
-    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    search_query = request.GET.get('search', '')  # ✅ Get search query
-    responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
-    
-    if search_query:
-        responders = responders.filter(
-            user__user__first_name__icontains=search_query
-        ) | responders.filter(
-            user__user__last_name__icontains=search_query
-        )
-    
-    # set 10 requests per page
-    paginator = Paginator(responders, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, 'view_responders.html', {
-        'questionnaire': questionnaire,
-        'responders': page_obj.object_list,
-        'page_obj':page_obj
-    })
-
-
-def view_user_response(request, user_response_id):
-    user_response = get_object_or_404(Questionnaire_UserResponse, id=user_response_id)
-    responses = QuestionResponse.objects.filter(user_response=user_response_id).select_related('question')
-
-    return render(request, 'view_user_response.html', {
-        'user_response': user_response,
-        'responses': responses,
-    })
-
-def create_questionnaire(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-
-        # Create new questionnaire
-        questionnaire = Questionnaire.objects.create(title=title, description=description)
-
-        # Retrieve all questions
-        question_index = 0
-        while f"question_text_{question_index}" in request.POST:
-            question_text = request.POST.get(f"question_text_{question_index}")
-            question_type = request.POST.get(f"question_type_{question_index}")
-            sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  # Default positive
-
-            # Create the question
-            Question.objects.create(
-                questionnaire=questionnaire,
-                question_text=question_text,
-                question_type=question_type,
-                sentiment=sentiment
-            )
-
-            question_index += 1  # Move to next question
-
-        messages.success(request, "Questionnaire created successfully!")
-        return redirect("manage_questionnaires")
-
-    return render(request, "create_questionnaire.html")
-
-def edit_questionnaire(request, questionnaire_id):
-    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    questions = Question.objects.filter(questionnaire=questionnaire)
-
-    if request.method == "POST":
-        # Update questionnaire title and description
-        questionnaire.title = request.POST.get("title")
-        questionnaire.description = request.POST.get("description")
-        questionnaire.save()
-
-        # Update existing questions
-        for question in questions:
-            question_text = request.POST.get(f"question_text_{question.id}")
-            question_type = request.POST.get(f"question_type_{question.id}")  # ✅ Get question type from form
-
-            if question_text:
-                question.question_text = question_text
-
-            if question_type:  # ✅ Update question type
-                question.question_type = question_type
-
-            question.save()
-
-        return redirect("view_questionnaire",  questionnaire_id=questionnaire.id)
-
-    return render(request, "edit_questionnaire.html", {
-        "questionnaire": questionnaire,
-        "questions": questions
-    })
-
-def delete_questionnaire(request, questionnaire_id):
-    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    questionnaire.delete()
-    return redirect("manage_questionnaires")
-
-def delete_question(request, question_id):
-    question = get_object_or_404(Question, id=question_id)
-    questionnaire_id = question.questionnaire.id
-    question.delete()
-    return redirect("edit_questionnaire", questionnaire_id=questionnaire_id)
-
-
-def add_question(request, questionnaire_id):
-    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    
-    # Default to Agreement Scale when creating a new question
-    new_question = Question.objects.create(
-        questionnaire=questionnaire,
-        question_text="New Question",
-        question_type="AGREEMENT",
-        is_required=True
-    )
-    
-    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
-
+# Create your views here.
 def client_dashboard(request):
     return render(request, 'client/client_dashboard.html')
 
@@ -220,44 +46,54 @@ def programs(request):
     programs = Program.objects.all()
     return render(request, 'client/programs.html', {'programs': programs})
 
-def logout_view(request):
-    return render(request, 'client/logout.html')
-
+@login_required
+@user_passes_test(admin_check)
 def create_program(request):
+    categories = Category.objects.all()
+
     if request.method == "POST":
         form = ProgramForm(request.POST)
         if form.is_valid():
-            program = form.save(commit=False)
-            program.save()
+            program_title = form.cleaned_data.get("title")
 
-            module_order = request.POST.get("module_order", "")
-            module_ids = module_order.split(",") if module_order else []
+            if Program.objects.filter(title__iexact=program_title).exists():
+                form.add_error("title", "A program with this title already exists.")
 
-            program.program_modules.all().delete()
+            else:
+                program = form.save(commit=False)
+                program.save()
 
-            # Add modules in the correct order
-            for index, module_id in enumerate(module_ids, start=1):
-                try:
-                    module = Module.objects.get(id=module_id)
-                    ProgramModule.objects.create(program=program, module=module, order=index)
-                except Module.DoesNotExist:
-                    pass
+            
+                module_order = request.POST.get("module_order", "").strip()
+                if module_order:
+                    module_ids = module_order.split(",")
+                    ProgramModule.objects.filter(program=program).delete()
 
-            return redirect("programs")
+                    for index, module_id in enumerate(module_ids, start=1):
+                        if module_id.isdigit(): #making sure the javascript works properly
+                            module = Module.objects.filter(id=int(module_id)).first()
+                            if module:
+                                ProgramModule.objects.create(program=program, module=module, order=index)
+
+                return redirect("programs")
+
     else:
         form = ProgramForm()
 
-    return render(request, "client/create_program.html", {"form": form})
+    return render(request, "client/create_program.html", {
+        "form": form,
+        "categories": categories,
+    })
 
-
-def log_out(request):
-    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
+@login_required
+@user_passes_test(admin_check)
+def log_out_client(request):
     if request.method == "POST":
         logout(request)
-        return redirect('users:log_in')
+        return redirect('log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'client/client_dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
+    
+    return redirect('/client_dashboard/')
 
 def program_detail(request, program_id):
     """ View details of a single program """

@@ -12,7 +12,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout 
-from django.contrib.auth.models import User  
 import os
 import random
 logger = logging.getLogger(__name__)
@@ -125,8 +124,11 @@ def submit_responses(request):
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
+    """Welcome page view."""
     return render(request, 'users/welcome_page.html')
 
+
+@login_required(login_url='log_in')
 def dashboard(request):
     return render(request, 'users/dashboard.html')
 
@@ -143,8 +145,12 @@ def about(request):
 def contact_us(request):
     return render(request, 'users/contact_us.html')
 
+ADMIN_USERNAME = "SuperUser"
+
+
 def log_in(request):
     """Log in page view function"""
+
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
@@ -154,35 +160,45 @@ def log_in(request):
 
             if user is not None:
                 login(request, user)
+
+                if user.username == ADMIN_USERNAME and user.is_superuser:
+                    return redirect('client_dashboard')
+
                 return redirect('dashboard')
-     
 
     else:
         form = LogInForm()
 
-    return render(request, 'users/log_in.html', {'form': form})
+    return render(request, "users/log_in.html", {"form": form})
 
 
-#A function for displaying a sign up page
 def sign_up_step_1(request):
     """Handles Step 1: User Account Details"""
     if request.method == "POST":
         user_form = UserSignUpForm(request.POST)
         if user_form.is_valid():
+            request.session["user_form_data"] = user_form.cleaned_data
+            return redirect("sign_up_step_2")
 
-            request.session['user_form_data'] = user_form.cleaned_data
-            return redirect('sign_up_step_2')
-    
+
     else:
-        user_form_data = request.session.get('user_form_data', {})
-        user_form = UserSignUpForm(initial=user_form_data) 
+        user_form_data = request.session.get("user_form_data", {})
+        user_form = UserSignUpForm(initial=user_form_data)
 
-    return render(request, 'users/sign_up_step_1.html', {'user_form': user_form})
+    return render(request, "users/sign_up_step_1.html", {"user_form": user_form})
 
 def sign_up_step_2(request):
     """Handles Step 2: Profile Details"""
-    if 'user_form_data' not in request.session:
-        return redirect('sign_up_step_1')
+    user_data = request.session.get("user_form_data")
+
+    
+    if not user_data:
+        return redirect("sign_up_step_1")
+
+   
+    user_form = UserSignUpForm(data=user_data)
+    if not user_form.is_valid():
+        return redirect("sign_up_step_1")
 
     if request.method == "POST":
         profile_form = EndUserProfileForm(request.POST)
@@ -198,19 +214,20 @@ def sign_up_step_2(request):
                 if authenticated_user:
                     login(request, authenticated_user)
 
-                profile = profile_form.save(commit=False)
-                profile.user = user
-                profile.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
 
-                return redirect('welcome')
+            return redirect('welcome')
 
     else:
         profile_form = EndUserProfileForm()
 
-    return render(request, 'users/sign_up_step_2.html', {'profile_form': profile_form})
+    return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
+
 
 def log_out(request):
-    """Confirm logout. If confirmed, redirect to log in. Otherwise, stay."""
+    """Handles logout only if the user confirms via modal."""
     if request.method == "POST":
         logout(request)
         return redirect('log_in')

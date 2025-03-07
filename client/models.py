@@ -97,7 +97,6 @@ class Module(models.Model):
     def __str__(self):
         return self.title
 
-<<<<<<< HEAD
 
 class ModuleRating(models.Model):
     """Tracks user ratings for a module."""
@@ -112,8 +111,6 @@ class ModuleRating(models.Model):
         return f"{self.user.user.username} rated {self.module.title} - {self.rating}/5"
 
 
-=======
->>>>>>> profilePage
 class Section(models.Model):
     """A section that can be used across multiple modules."""
     title = models.CharField(max_length=255)

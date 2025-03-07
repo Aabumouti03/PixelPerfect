@@ -1,65 +1,86 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Create Program</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-        <link rel="stylesheet" href="{% static 'client/css/create_program.css' %}">
-    
-    </head>
-    <body class="create_program">
-        {% include 'client/client_base.html' %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Program</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <link rel="stylesheet" href="{% static 'client/css/create_program.css' %}">
+</head>
+<body class="create_program">
+    {% include 'client/client_base.html' %}
 
-        <div class="container mt-5">
-            <h2 class="mb-4">Create a New Program</h2>
-    
-            <form method="post" class="card p-4 shadow-sm">
-                {% csrf_token %}
-                
-                <div class="mb-3">
-                    <label for="{{ form.title.id_for_label }}" class="form-label">Program Title:</label>
-                    {{ form.title }}
-                </div>
-                
-                <div class="mb-3">
-                    <label for="{{ form.description.id_for_label }}" class="form-label description">Description:</label>
-                    {{ form.description }}
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Select Modules:</label>
-                    <input type="hidden" name="module_order" id="module_order">
-                
-    
-                    <div class="module-box p-3">
-                        <ul class="list-unstyled" id="availableModules">
-                            {% for checkbox in form.modules %}
-                                <li class="d-flex align-items-center">
-                                    {{ checkbox.tag }}
-                                    <label class="ms-2">{{ checkbox.choice_label }}</label>
-                                </li>
-                            {% endfor %}
-                        </ul>
+    <div class="container mt-5">
+        
+        <h2 class="mb-4">Create a New Program</h2>
+
+        <form method="post" class="card p-4 shadow-sm">
+            {% csrf_token %}
+            <input type="hidden" name="module_order" id="module_order">
+        
+            <div class="mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">1. Title:</label>
+                {{ form.title }}
+            </div>
+        
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label description">2. Description:</label>
+                {{ form.description }}
+            </div>
+        
+            <!-- Filter Section -->
+            <div class="mb-3 d-flex align-items-center justify-content-between">
+                <label class="form-label">3. Select Modules within the program:</label>
+
+                <!-- Dropdown Filter Button -->
+                <div class="dropdown ms-auto">
+                    <button class="btn btn-secondary dropdown-toggle filterButton" type="button" data-bs-toggle="dropdown">
+                        Filter Modules by Category
+                    </button>
+                    <div class="dropdown-menu p-3">
+                        <!-- Select All Option -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAllCategories">
+                            <label class="form-check-label fw-bold" for="selectAllCategories">Select All</label>
+                        </div>
+                        <hr>
+                        {% for category in categories %}
+                            <div class="form-check">
+                                <input class="form-check-input category-checkbox" type="checkbox"
+                                    value="{{ category.name|lower }}" id="cat{{ category.id }}">
+                                <label class="form-check-label" for="cat{{ category.id }}">{{ category.name }}</label>
+                            </div>
+                        {% endfor %}
+                        <button type="button" class="btn btn-primary mt-2" id="applyFilter">Apply</button>
                     </div>
-                
-    
-                    <label class="form-label mt-3">Arrange Selected Modules</label>
-                    <ul class="list-unstyled sortable-list" id="sortableModules"></ul>
                 </div>
-                
-    
-                <button type="submit" class="btn btn-primary">Save Program</button>
-                <a href="{% url 'programs' %}" class="btn btn-secondary mt-3">Cancel</a>
-            </form>
-            
-    
-        </div>
-    
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="{% static 'client/js/module_order.js' %}"></script>
-    
-    </body>
+            </div>
+
+        
+            <!-- Available Modules -->
+            <div class="module-box p-3">
+                <ul class="list-unstyled" id="availableModules">
+                    {% for module in form.modules.field.queryset %}
+                        <li class="d-flex align-items-center"
+                            data-categories="{% for cat in module.categories.all %}{{ cat.name|lower }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                            <input type="checkbox" name="modules" value="{{ module.id }}">
+                            <label class="ms-2">{{ module.title }}</label>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        
+            <label class="form-label mt-3">4. Arrange Selected Modules: </label>
+            <ul class="list-unstyled sortable-list" id="sortableModules"></ul>
+        
+            <button type="submit" class="btn btn-primary saveProgram">Save Program</button>
+            <a href="{% url 'programs' %}" class="btn btn-secondary mt-3">Cancel</a>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'client/js/module_order_and_filter_categories.js' %}"></script>
+</body>
 </html>
