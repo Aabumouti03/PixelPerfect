@@ -21,7 +21,6 @@ class SectionAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     ordering = ('title',)
     list_filter = ('text_position_from_diagram',)  
-    filter_horizontal = ('additional_resources',)  # ✅ Allow multiple resources
     readonly_fields = ('diagram_preview',)  
 
     def diagram_preview(self, obj):
