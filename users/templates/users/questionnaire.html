@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onboarding Questionnaire</title>
     <link rel="stylesheet" href="{% static 'css/questionnaire.css' %}">
-    {% csrf_token %}
     <meta name="csrf-token" content="{{ csrf_token }}">
 </head>
 <body>
@@ -71,7 +70,7 @@
         const questions = JSON.parse(document.getElementById("questions-data").textContent);
     
         let currentQuestionIndex = 0;
-        let selectedAnswers = {};
+        let selectedAnswers = {};  // Store user-selected answers
     
         function updateQuestion() {
             if (questions.length === 0) {
@@ -92,10 +91,12 @@
             document.getElementById("answer-options").style.display = "none";
             document.getElementById("rating-options").style.display = "none";
     
-            // Check question type
+            // Get the previously selected answer (if exists)
+            let selectedValue = selectedAnswers[currentQuestionIndex]?.value || null;
+    
+            // Generate answer buttons based on question type
             if (currentQuestion.question_type === "AGREEMENT") {
                 document.getElementById("answer-options").style.display = "block";
-    
                 let choicesHtml = `
                    <button class="answer-btn" data-value="5">Strongly Agree</button>
                    <button class="answer-btn" data-value="4">Agree</button>
@@ -107,7 +108,6 @@
             } 
             else if (currentQuestion.question_type === "RATING") {
                 document.getElementById("rating-options").style.display = "block";
-    
                 let ratingHtml = `
                     <button class="rating-btn" data-value="1">1</button>
                     <button class="rating-btn" data-value="2">2</button>
@@ -118,28 +118,37 @@
                 document.getElementById("rating-options").innerHTML = ratingHtml;
             }
     
+            // **Automatically highlight the previously selected answer**
+            if (selectedValue !== null) {
+                document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => {
+                    if (parseInt(btn.dataset.value) === selectedValue) {
+                        btn.classList.add("selected");
+                    }
+                });
+            }
+
             // Update progress bar
             let progress = ((currentQuestionIndex + 1) / questions.length) * 100;
             document.getElementById("progress-bar").style.width = progress + "%";
             document.getElementById("progress-bar").innerText = Math.round(progress) + "%";
-    
+
             // Enable/disable navigation buttons
             document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
             document.getElementById("next-btn").disabled = !selectedAnswers[currentQuestionIndex];
-    
+
             // Add event listeners for answer selection
             document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     const value = parseInt(e.target.dataset.value);
                     selectedAnswers[currentQuestionIndex] = {
-                        questionId: questions[currentQuestionIndex].id,
+                        questionId: currentQuestion.id,
                         value: value,
                     };
-    
-                    // Remove selected class from all buttons
+
+                    // Remove "selected" class from all buttons
                     document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => btn.classList.remove("selected"));
                     e.target.classList.add("selected");
-    
+
                     document.getElementById("next-btn").disabled = false;
                 });
             });
@@ -151,7 +160,6 @@
                 currentQuestionIndex++;
                 updateQuestion();
             } else {
-                console.log("Submitting responses...");  
                 submitResponses();
             }
         });
@@ -162,17 +170,14 @@
                 updateQuestion();
             }
         });
-    
-        // Initialize on page load
-        window.onload = updateQuestion;
-    
-        // Function to submit responses
+
+        // Submit responses
         function submitResponses() {
             const responseData = {
                 "questionnaireId": "{{ active_questionnaire.id }}",
                 "responses": Object.values(selectedAnswers)
             };
-    
+
             fetch("{% url 'submit_responses' %}", {
                 method: "POST",
                 headers: {
@@ -184,14 +189,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert("Responses saved successfully!");
-                    window.location.href = "/dashboard/";
+                    window.location.href = data.redirect_url;  // ✅ Redirect to recommended programs
                 } else {
                     alert("Error: " + data.message);
                 }
             })
             .catch(error => console.error("Error:", error));
         }
+
+        // Initialize on page load
+        window.onload = updateQuestion;
     </script>    
 </body>
 </html>

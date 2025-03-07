@@ -17,6 +17,8 @@ from django.contrib.auth.models import User
 import os
 import random
 from collections import defaultdict
+from django.urls import reverse
+
 
 logger = logging.getLogger(__name__)
 
@@ -116,15 +118,16 @@ def submit_responses(request):
                     logger.error("Validation error for question response: %s", str(e))
                     continue
 
-            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
-
+            
+            return JsonResponse({"success": True, "redirect_url": reverse("recommended_programs")})
+        
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
-def assess_user_responses(user):
+def assess_user_responses_programs(user):
     """
     Evaluates the user's latest questionnaire responses, calculates scores for each category, 
     and suggests programs based on negative scores.
@@ -169,7 +172,50 @@ def assess_user_responses(user):
 
     return suggested_programs
 
+def assess_user_responses_modules(user):
+    """
+    Evaluates the user's latest questionnaire responses, calculates scores for each category, 
+    and suggests programs based on negative scores.
 
+    Args:
+        user (EndUser): The user whose responses will be assessed.
+
+    Returns:
+        dict: A dictionary where keys are category names and values are lists of suggested programs.
+    """
+
+    # Step 1: Get the latest questionnaire response for the user
+    latest_response = Questionnaire_UserResponse.objects.filter(user=user).order_by('-started_at').first()
+
+    if not latest_response:
+        return {}  # No responses, return empty recommendations
+
+    # Step 2: Fetch all responses from the latest questionnaire submission
+    user_responses = QuestionResponse.objects.filter(user_response=latest_response).select_related('question__category')
+
+    # Step 3: Reset category scores for this new response
+    category_scores = defaultdict(int)
+
+    # Step 4: Calculate scores for each category
+    for response in user_responses:
+        question = response.question  # Get the related question
+        category = question.category  # Get the category
+
+        if category:  # Ensure question has a category
+            adjusted_score = response.rating_value * question.sentiment  # Multiply response by sentiment
+            category_scores[category.id] += adjusted_score  # Update category score
+
+    # Step 5: Find categories with negative scores
+    low_score_categories = [category_id for category_id, score in category_scores.items() if score < 0]
+
+    # Step 6: Fetch programs from the negatively scored categories
+    suggested_modules = {}
+    for category_id in low_score_categories:
+        category = get_object_or_404(Category, id=category_id)
+        modules = Module.objects.filter(categories=category)  
+        suggested_modules[category.name] = list(modules)  # Convert queryset to list
+
+    return suggested_modules
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
@@ -348,8 +394,10 @@ def recommended_programs(request):
     user = request.user
     enrolled_programs = Program.objects.filter(enrolled_users__user=user.User_profile)
 
+    end_user = EndUser.objects.get(user=user)
+
     # Get the dictionary of programs categorized by category
-    categorized_programs = [] # placeholder
+    categorized_programs = assess_user_responses_programs(end_user)
 
     # Flatten the dictionary values (lists of programs) into a single list
     all_programs = [program for program_list in categorized_programs.values() for program in program_list]
@@ -390,8 +438,10 @@ def recommended_modules(request):
     user = request.user
     enrolled_modules = Module.objects.filter(enrolled_users__user=user.User_profile)
 
+    end_user = EndUser.objects.get(user=user)
+
     # Get the dictionary of modules categorized by category
-    categorized_modules = [] # placeholder
+    categorized_modules = assess_user_responses_modules(end_user)
 
     # Flatten the dictionary values (lists of modules) into a single list
     all_modules = [module for module_list in categorized_modules.values() for module in module_list]
