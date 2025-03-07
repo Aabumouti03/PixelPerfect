@@ -278,17 +278,19 @@ canvas#progressChart {
 }
 
 .done-button {
-    background-color: #FFA500;  /* Default to orange */
+    background-color: #FF6600;  /* Default to orange */
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 5px 10px;  /* Reduce padding for smaller size */
+    font-size: 12px;  /* Smaller font size */
     cursor: pointer;
     transition: background-color 0.3s ease;
+    border-radius: 3px;  /* Optional: Adds a rounded border */
 }
 
 /* Style for "Done" state (orange) */
 .done-button.undo {
-    background-color: orange;
+    background-color: #FF6600;
     color: white;
 }
 
@@ -297,7 +299,6 @@ canvas#progressChart {
     background-color: green;
     color: white;
 }
-
 
 .done-button:disabled {
     background-color: #d3d3d3;  /* Gray when disabled */

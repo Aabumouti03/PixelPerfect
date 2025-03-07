@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
 from client.models import Module,  ModuleRating, Exercise, AdditionalResource, Section
-from users.models import UserModuleProgress, UserModuleEnrollment, EndUser, UserResponse
+from users.models import UserModuleProgress, UserModuleEnrollment, EndUser
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db.models import Avg
 
-# Create your views here.
+
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
@@ -256,8 +256,6 @@ def mark_done(request):
     return JsonResponse({"success": False})
 
 
-
-
 def calculate_progress(end_user, module):
     # Get all exercises in the module
     exercises = []
@@ -319,14 +317,14 @@ def user_modules(request):
             "background_image": f'img/backgrounds/{background_image}' 
         })
 
-    return render(request, 'userModules.html', {"module_data": module_data})
+    return render(request, 'users/userModules.html', {"module_data": module_data})
 
 
 
 def all_modules(request):
     modules = Module.objects.all()
 
-    return render(request, 'all_modules.html', {'modules': modules})
+    return render(request, 'users/all_modules.html', {'modules': modules})
 
 @csrf_exempt  # Remove this if you're using CSRF protection in JS
 def rate_module(request, module_id):

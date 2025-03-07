@@ -12,18 +12,11 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
+            <a href="{% url 'all_modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
                 <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
-        </li>
-
-        <li>
-            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
-                <i class="fa-regular fa-pen-to-square icon"></i>
-                <span>Response</span>
-            </a>
-        </li>        
+        </li>     
 
         <li>
             <a href="{% url 'profile' %}" class="{%if request.path == '/profile/' %}active{% endif %}">
