@@ -1,0 +1,190 @@
+h1 {
+    font-size: 26px;
+    color: #333;
+    margin-bottom: 40px;
+    margin-top: 30px;
+}
+
+.container {
+    width: 100%;
+    max-width: 2000px;
+    margin: auto;
+    padding: 20px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);  /* Default for larger screens */
+    column-gap: 30px;  /* Gap between columns */
+    row-gap: 40px;     /* Gap between rows */
+    justify-content: center;
+    align-items: stretch;
+}
+
+.category-card {
+    background: #3A88F6;
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease-in-out;
+    min-width: 280px;  /* Minimum width of category card */
+    max-width: 350px;  /* Maximum width of category card */
+    height: 300px;     /* Height of the category card */
+    box-sizing: border-box;  /* Ensure padding does not affect width */
+}
+
+.add-card {
+    background: #d8e4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    font-weight: bold;
+    color: #3A88F6;
+    cursor: pointer;
+    height: 220px;
+    width: 100%;
+    text-decoration: none;
+    border-radius: 10px;  /* Add border radius to match category card */
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+}
+
+.category-card h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.category-card p {
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.buttons {
+    display: flex;
+    gap: 7px;
+    margin-top: 15px;
+}
+
+.view-btn {
+    flex: 2;
+    padding: 4px 6px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.view-btn {
+    background: white;
+    color: #3A88F6;
+}
+
+.view-btn:hover {
+    background: #f0f0f0;
+}
+
+.add-card:hover {
+    background: #94BFF8;
+}
+
+.export-buttons {
+    position: absolute;
+    right: 5px;
+    margin-right: 55px;
+}
+
+.custom-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 30px;
+    background-color: #F24505;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+    background-color: #bc3200;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: #F24505;
+}
+
+/* Mobile responsiveness: Adjustments for smaller screens */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 20px;  /* Slightly smaller font size for mobile */
+        margin-bottom: 30px;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);  /* Two columns for smaller screens */
+        column-gap: 20px;  /* Smaller gap between columns */
+        row-gap: 30px;     /* Smaller gap between rows */
+    }
+
+    .category-card {
+        min-width: 250px;  /* Reduce the minimum width of category card */
+        max-width: 300px;  /* Reduce the maximum width of category card */
+        height: 250px;     /* Adjust the height of the category card */
+    }
+
+    .add-card {
+        height: 180px;  /* Adjust the height of the add card */
+    }
+
+    .category-card h2 {
+        font-size: 20px;  /* Smaller title font for mobile */
+    }
+
+    .category-card p {
+        font-size: 12px;  /* Smaller text for descriptions */
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 18px;  /* Further reduce font size on smaller screens */
+        margin-bottom: 20px;
+    }
+
+    .category-grid {
+        grid-template-columns: 1fr;  /* One column for very small screens */
+        column-gap: 15px;  /* Even smaller gap */
+        row-gap: 20px;
+    }
+
+    .category-card {
+        min-width: 200px;  /* Even smaller category card width */
+        max-width: 250px;
+        height: 220px;     /* Further adjust card height */
+    }
+
+    .add-card {
+        height: 160px;  /* Smaller add card on very small screens */
+    }
+
+    .category-card h2 {
+        font-size: 18px;  /* Even smaller title font */
+    }
+
+    .category-card p {
+        font-size: 10px;  /* Smallest font size for descriptions */
+    }
+}

@@ -30,12 +30,26 @@
             </a>
         </li>
         <li>
+<<<<<<< HEAD
             <a href="{% url 'manage_questionnaires' %}" class="{% if request.path == '/manage_qstionnaires/' %}active{% endif %}">
                 <img src="{% static 'client/img/modules.svg' %}" alt="Users" class="icon">
                 <span>Questionnaires</span>
             </a>
         </li>
         
+=======
+            <a href="{% url 'reports' %}" class="{%if request.path == '/reports/' %}active{% endif %}">
+                <img src="{% static 'client/img/reports.svg' %}" alt="Reports" class="icon">
+                <span>Reports</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'category_list' %}" class="{%if request.path == '/category_list/' %}active{% endif %}">
+                <img src="{% static 'client/img/reports.svg' %}" alt="Categories" class="icon">
+                <span>Categories</span>
+            </a>
+        </li>
+>>>>>>> b93e45957a7a44500223dddf4ab2434e45fcdad7
         <div class="logout">
             <a href="#" id="logout-link">
                 <img src="{% static 'client/img/logout.svg' %}" alt="Logout" class="icon">
