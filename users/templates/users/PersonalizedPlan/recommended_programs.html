@@ -22,7 +22,9 @@
                         >
                             {% if program in enrolled_programs %}Enrolled{% else %}Enroll{% endif %}
                         </button>
-                        <button type="button" class="view-button">View</button>
+                        <a href="{% url 'view_program' module.id %}">
+                          <button type="button" class="view-button">View</button>
+                      </a>
                     </div>
                 </div>
             {% endfor %}

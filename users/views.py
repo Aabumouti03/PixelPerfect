@@ -376,6 +376,7 @@ def recommended_modules(request):
     })
 
 
+
 def module_overview(request, id):
     module = get_object_or_404(Module, id=id)
 
