@@ -15,7 +15,7 @@ from django.core.management.base import BaseCommand
 from client.models import BACKGROUND_IMAGE_CHOICES
 
 User = get_user_model()
-
+# 
 # User Data
 USERS = [
     {"username": f"EndUser{i}", "email": f"enduser{i}@example.com", "is_staff": False, "is_superuser": False}
@@ -255,7 +255,7 @@ class Command(BaseCommand):
                     user=user,
                     age=random_age,
                     gender=random_gender,
-                    last_time_to_work=random_last_time_to_work,
+                    last_time_to_Work=random_last_time_to_work,
                     sector=random_sector
                 )
 
@@ -375,4 +375,3 @@ class Command(BaseCommand):
                     print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
 
         print("✅ Modules, Sections, Exercises, and Questions seeded successfully!")
-
