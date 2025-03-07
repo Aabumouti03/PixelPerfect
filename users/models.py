@@ -206,5 +206,3 @@ class StickyNote(models.Model):
 
     def __str__(self):
         return f"StickyNote by {self.user.user.username}"
-
-
