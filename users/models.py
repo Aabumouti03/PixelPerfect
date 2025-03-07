@@ -119,8 +119,14 @@ class UserProgramEnrollment(models.Model):
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
 
+    # def __str__(self):
+    #     return f"{self.user.user.username} enrolled in {self.program.title}"
+    
+    #(for testing - temporary)
     def __str__(self):
-        return f"{self.user.user.username} enrolled in {self.program.title}"
+        if self.program:
+            return f"{self.user.user.username} enrolled in {self.program.title}"
+        return f"{self.user.user.username} skipped program selection"
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -128,8 +134,15 @@ class UserModuleEnrollment(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
 
+    # def __str__(self):
+    #     return f"{self.user.user.username} started {self.module.title}"
+
+    #(for testing - temporary)
     def __str__(self):
-        return f"{self.user.user.username} started {self.module.title}"
+        if self.module:
+            return f"{self.user.user.username} enrolled in {self.module.title}"
+        return f"{self.user.user.username} skipped module selection"
+
 
 class UserProgramProgress (models.Model):
 
@@ -175,8 +188,7 @@ class Questionnaire_UserResponse(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
-    class Meta:
-        unique_together = ['user', 'questionnaire']
+        
 
 class QuestionResponse(models.Model):
     user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)

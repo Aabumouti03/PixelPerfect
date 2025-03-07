@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+
 from client import views as clientViews
 from client import views as client_views
 from users import views as usersViews
@@ -64,6 +65,26 @@ urlpatterns = [
     path('modules_management/', clientViews.modules_management, name='modules_management'),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
     path('users_management/', clientViews.users_management, name='users_management'),
+    path('programs/', clientViews.programs, name='programs'),
+    path('create_program/', clientViews.create_program, name='create_program'),
+    path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
+    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+
+
+    #
+    path('welcome/', usersViews.welcome_view, name='welcome'),
+    path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
+    path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
+    path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),
+    path("manage_questionnaires/create_questionnaire/", clientViews.create_questionnaire, name="create_questionnaire"),
+    path('manage_questionnaires/<int:questionnaire_id>/', clientViews.view_questionnaire, name='view_questionnaire'),
+    path('manage_questionnaires/<int:questionnaire_id>/delete/', clientViews.delete_questionnaire, name='delete_questionnaire'),
+    path('manage_questionnaires/<int:questionnaire_id>/responders/', clientViews.view_responders, name='view_responders'),
+    path('manage_questionnaires/edit/<int:questionnaire_id>/', clientViews.edit_questionnaire, name='edit_questionnaire'),
+    path('manage_questionnaires/delete_question/<int:question_id>/', clientViews.delete_question, name='delete_question'),
+    path('manage_questionnaires/add_question/<int:questionnaire_id>/', clientViews.add_question, name='add_question'),
+    path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
+    path('manage_questionnaires/activate/<int:questionnaire_id>/', clientViews.activate_questionnaire, name='activate_questionnaire'),
 
     #User urls for modules
     path('userModules/', usersViews.user_modules, name='userModules'),

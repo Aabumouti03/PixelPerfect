@@ -1,0 +1,113 @@
+/* General styles for cards (applies to both programs and modules) */
+.card {
+    background: #ffffff;
+    border: 2px solid #ddd;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Program-specific styles */
+.program-card {
+    border-left: 6px solid #ff6600;
+}
+
+.program-card h3 {
+    color: #ff6600;
+}
+
+/* Module-specific styles */
+.module-card {
+    border-left: 6px solid #0077cc;
+}
+
+.module-card h3 {
+    color: #0077cc;
+}
+
+/* Button styling */
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+button {
+    background-color: #ff6600;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #e65c00;
+    transform: scale(1.05);
+}
+
+/* View button for modules */
+.module-card .view-button {
+    background-color: #0077cc;
+}
+
+.module-card .view-button:hover {
+    background-color: #005fa3;
+}
+
+/* Enrollment button styles */
+.enroll-button {
+    background-color: #ff6600;
+}
+
+.enroll-button:hover {
+    background-color: #e65c00;
+}
+
+.enroll-button.enrolled {
+    background-color: #28a745; /* Green */
+}
+
+.enroll-button.enrolled:hover {
+    background-color: #218838; /* Darker Green */
+}
+
+/* Enrolled state */
+.enrolled {
+    background-color: #4CAF50 !important; /* Green for enrolled */
+    cursor: default;
+}
+
+.enrolled:hover {
+    background-color: #4CAF50 !important; /* No hover effect for enrolled */
+    transform: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        padding: 15px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+
+

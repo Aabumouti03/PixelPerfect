@@ -1,0 +1,72 @@
+<body class="profile-page">
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'users/css/profile_style.css' %}">
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <span>User Profile</span>
+        <div class="small-partition"></div>
+    </div>
+
+    <!-- Profile Info Section: Image + Name -->
+    <div class="profile-info">
+        <img class="profile-pic" src="{{ user.gravatar }}" alt="Profile Picture">
+        <div class="profile-name">
+            <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+        </div>
+    </div>
+
+    <!-- Partition Line -->
+    <hr class="partition-line">
+
+    <!-- Profile Details -->
+    <div class="profile-details">
+        <label>First Name: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.first_name|default:'N/A' }}" disabled>
+
+        <label>Last Name: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.last_name|default:'N/A' }}" disabled>
+
+        <label>Username: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.username|default:'N/A' }}" disabled>
+
+        <label>Email Address: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.email|default:'N/A' }}" disabled>
+
+        <label>Phone Number:</label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.phone_number|default:'N/A' }}" disabled>
+
+        <label>Age: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.age|default:'N/A' }}" disabled>
+
+        <label>Gender: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.gender|default:'N/A' }}" disabled>
+
+        <label>Ethnicity:</label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.ethnicity|default:'N/A' }}" disabled>
+
+        <label>Last Time Worked: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.last_time_to_work|default:'N/A' }}" disabled>
+
+        <label>Sector: <span class="required">*</span></label>
+        <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.User_profile.sector|default:'N/A' }}" disabled>
+    </div>
+
+    <!-- Buttons Section -->
+    <div class="profile-buttons">
+        <div class="left-buttons">
+            <a href="{% url 'update_profile' %}" class="btn">Edit Profile</a>
+        </div>
+        <a href="{% url 'delete_account' %}" class="btn btn-danger">Delete Account</a>
+    </div>
+</div>
+    
+
+{% endblock %}
+</body>

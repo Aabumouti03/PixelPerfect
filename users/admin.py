@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment ,ExerciseResponse
+from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment ,ExerciseResponse, StickyNote
 from client.models import Program, Module
 
 @admin.register(User)
@@ -76,3 +76,17 @@ class ExerciseResponseAdmin(admin.ModelAdmin):
     list_filter = ('user',)
     search_fields = ('user__user__username', 'question__question_text', 'response_text')
     ordering = ('user',)
+
+
+@admin.register(StickyNote)
+class StickyNoteAdmin(admin.ModelAdmin):
+    """Admin panel for managing sticky notes."""
+    list_display = ('user', 'content', 'created_at', 'updated_at')  # Adjust the fields as needed
+    search_fields = ('user__username', 'content')  # Allow searching by the username and content
+    list_filter = ('created_at', 'user')  # Optionally filter by created_at and user
+    ordering = ('-created_at',)  # Optionally order by created_at in descending order
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field

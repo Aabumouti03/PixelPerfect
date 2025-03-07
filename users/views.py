@@ -1,12 +1,21 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
-from django.shortcuts import render, get_object_or_404
-from .models import UserModuleProgress, UserModuleEnrollment, EndUser
+
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render,  get_object_or_404
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
+from django.contrib.auth import logout
+from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
+from client.models import Category, Program
+import json
+from django.views.decorators.csrf import csrf_exempt
+import logging
+from django.contrib import messages
 from client.models import Module, BackgroundStyle
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout 
 import os
+
+
 from django.contrib import messages
 from django.conf import settings
 import random
@@ -157,15 +166,17 @@ def view_program(request, program_id):
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
 
+def welcome_view(request):
+    return render(request, 'users/welcome.html')
 
 def modules(request):
     return render(request, 'users/modules.html')
 
+#edit back to users/profile.html later
 def profile(request):
     return render(request, 'users/profile.html')
 
-def welcome_page(request):
-    return render(request, 'users/welcome_page.html')
+
 
 def about(request):
     return render(request, 'users/about.html')
@@ -260,6 +271,158 @@ def log_out(request):
     return redirect(request.META.get('HTTP_REFERER', 'dashboard'))  
 
 
+@login_required 
+def show_profile(request):
+    """View to display the user profile"""
+    user = request.user
+
+    if hasattr(user, 'User_profile'):
+        return render(request, 'users/Profile/show_profile.html', {'user': user})
+    else:
+        messages.error(request, "User profile not found.")
+        return redirect('welcome_page')
+
+ 
+@login_required  
+def update_profile(request):
+    """Update user profile details."""
+    user = request.user  
+
+    if not hasattr(user, 'User_profile'):
+        messages.error(request, "Profile not found.")
+        return redirect('welcome_page')
+
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
+        if form.is_valid():
+            form.save()
+            
+            new_password = form.cleaned_data.get("new_password")
+            if new_password:
+                print("Updating password for user:", user.username)  # Debugging
+                user.set_password(new_password)
+                user.save()
+                print("Password updated successfully!")  # Debugging
+                update_session_auth_hash(request, user)
+
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('show_profile')
+
+        else:
+            print("Form is invalid! Errors:", form.errors)  # Debugging
+ 
+    else:
+        form = UserProfileForm(instance=user.User_profile, user=user)
+
+    return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
+
+
+@login_required
+def delete_account(request):
+    """Handle both confirmation page and actual account deletion."""
+    user = request.user  # Get the logged-in user
+
+    if request.method == "POST":
+        try:
+            # Delete the user account, which will cascade-delete related objects
+            user.delete()
+            logout(request)  # Log out after deletion
+            messages.success(request, "Your account has been successfully deleted.")
+            return redirect('welcome_page')  # Redirect to a safe page after deletion
+
+        except Exception as e:
+            messages.error(request, f"An error occurred while deleting your account: {e}")
+            return redirect('profile_page')  # Redirect back to the profile if deletion fails
+
+    # Confirmation before deletion
+    context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
+    return render(request, 'users/Profile/delete_account.html', context)
+
+
+@login_required
+def recommended_programs(request):
+    """Displays programs for users to enroll in and handles AJAX enrollment updates."""
+    user = request.user
+    enrolled_programs = Program.objects.filter(enrolled_users__user=user.User_profile)
+
+    end_user = EndUser.objects.get(user=user)
+
+    # Get the dictionary of programs categorized by category
+    categorized_programs = assess_user_responses_programs(end_user)
+
+    # Flatten the dictionary values (lists of programs) into a single list
+    all_programs = [program for program_list in categorized_programs.values() for program in program_list]
+
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            program_id = data.get("program_id")
+            action = data.get("action")
+
+            program = Program.objects.get(id=program_id)
+            user_profile = user.User_profile
+
+            # Unenroll the user from all programs before enrolling in the new one
+            if action == "enroll":
+                # Remove enrollment from any previously enrolled program
+                UserProgramEnrollment.objects.filter(user=user_profile).delete()
+                UserProgramEnrollment.objects.create(user=user_profile, program=program)
+
+            elif action == "unenroll":
+                UserProgramEnrollment.objects.filter(user=user_profile, program=program).delete()
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return render(request, "users/PersonalizedPlan/recommended_programs.html", {
+        "programs": all_programs or [],
+        "enrolled_programs": enrolled_programs
+    })
+
+
+@login_required
+def recommended_modules(request):
+    """Displays modules for users to enroll in and handles AJAX enrollment updates."""
+    user = request.user
+    enrolled_modules = Module.objects.filter(enrolled_users__user=user.User_profile)
+
+    end_user = EndUser.objects.get(user=user)
+
+    # Get the dictionary of modules categorized by category
+    categorized_modules = assess_user_responses_modules(end_user)
+
+    # Flatten the dictionary values (lists of modules) into a single list
+    all_modules = [module for module_list in categorized_modules.values() for module in module_list]
+
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Read AJAX request body
+            module_id = data.get("module_id")
+            action = data.get("action")
+
+            module = Module.objects.get(id=module_id)
+            user_profile = user.User_profile
+
+            if action == "enroll":
+                UserModuleEnrollment.objects.get_or_create(user=user_profile, module=module)
+            elif action == "unenroll":
+                UserModuleEnrollment.objects.filter(user=user_profile, module=module).delete()
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return render(request, "users/PersonalizedPlan/recommended_modules.html", {
+        "modules": all_modules or [],
+        "enrolled_modules": enrolled_modules
+    })
+
+
 def module_overview(request, id):
     module = get_object_or_404(Module, id=id)
 
@@ -299,7 +462,7 @@ def user_modules(request):
             "background_image": background_style.get_background_image_url() if background_style else "none",
         })
 
-    return render(request, 'users/userModules.html', {"module_data": module_data})
+    return render(request, 'userModules.html', {"module_data": module_data})
 
 
 
