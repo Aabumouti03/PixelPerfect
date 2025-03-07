@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -15,6 +16,13 @@ QUESTION_POSITIONS = [
     ('left', 'Left of the Diagram'),
     ('right', 'Right of the Diagram'),
 ]
+
+STATUS_CHOICES = [
+        ('not_started','Not Started'),
+        ('in_progress', 'In_Progress'),
+        ('completed', 'Completed')
+]
+
 
 BACKGROUND_IMAGE_CHOICES = [
     ('pattern1', 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%230148fd\' fill-opacity=\'0.18\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")'),
@@ -80,8 +88,27 @@ class Module(models.Model):
     sections = models.ManyToManyField('Section', related_name="modules")  
     additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
     background_style = models.ForeignKey(BackgroundStyle, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def average_rating(self):
+        avg_rating = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
+
+
     def __str__(self):
         return self.title
+
+
+class ModuleRating(models.Model):
+    """Tracks user ratings for a module."""
+    module = models.ForeignKey("client.Module", related_name="ratings", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('module', 'user')  # Ensures a user can rate a module only once.
+
+    def __str__(self):
+        return f"{self.user.user.username} rated {self.module.title} - {self.rating}/5"
 
 
 class Section(models.Model):
@@ -112,6 +139,7 @@ class AdditionalResource(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to='resources/', blank=True, null=True)  # For PDFs
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     url = models.URLField(blank=True, null=True)  # For external links
     
     def __str__(self):
@@ -124,6 +152,7 @@ class Exercise(models.Model):
     exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
     pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
     questions = models.ManyToManyField('ExerciseQuestion', related_name="exercises", blank=True)  
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started') 
 
     def save(self, *args, **kwargs):
         """Auto-set exercise_type based on questions if not set."""
