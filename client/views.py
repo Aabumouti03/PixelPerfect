@@ -6,20 +6,19 @@ from .forms import ProgramForm
 from .models import Program
 from django.contrib.auth.decorators import user_passes_test
 
-# Create your views here.
 def client_dashboard(request):
     return render(request, 'client/client_dashboard.html')
 
 def users_management(request):
     users = User.objects.all().select_related('User_profile')
     return render(request, 'client/users_management.html', {'users': users})
-#####################
+
 def module_overview(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     return render(request, "client/moduleOverview.html", {"module": module})
 
 def client_modules(request):
-    modules = Module.objects.all().values("id", "title", "description")  # ✅ Include "description"
+    modules = Module.objects.all().values("id", "title", "description") 
     module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
     
     modules_list = []
@@ -27,7 +26,7 @@ def client_modules(request):
         module_data = {
             "id": module["id"],
             "title": module["title"],
-            "description": module["description"],  # ✅ Pass description to the template
+            "description": module["description"],  
             "color_class": module_colors[index % len(module_colors)]
         }
         modules_list.append(module_data)
@@ -54,9 +53,6 @@ def delete_module(request, module_id):
     module.delete()
     return redirect("client_modules")
 
-def add_module(request):
-    return render(request, 'client/add_module.html')  # Create this template for module creation
-
 
 def add_module(request):
     if request.method == "POST":
@@ -67,11 +63,9 @@ def add_module(request):
             new_module = Module.objects.create(title=title, description=description)
             new_module.save()
             return redirect("client_modules")  # Redirect to the Client Modules page
-        
     return render(request, "client/add_module.html")
 
 
-#####################
 def users_management(request):
     users = User.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
@@ -91,7 +85,6 @@ def create_program(request):
         form = ProgramForm()
     
     return render(request, 'client/create_program.html', {'form': form})
-
 
 def log_out(request):
     """Confirm logout. If confirmed, redirect to welcome page. Otherwise, stay."""
