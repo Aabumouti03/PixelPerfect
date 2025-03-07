@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path
 
 from client import views as clientViews
-from client import views as client_views
 from users import views as usersViews
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import PasswordChangeView
@@ -67,7 +66,6 @@ urlpatterns = [
 
     #
     path('programs/', clientViews.programs, name='programs'),
-    path('logout/', clientViews.logout_view, name='logout'),
 
     #Program urls for the client
     path('programs/', clientViews.programs, name='programs'),
@@ -101,7 +99,7 @@ urlpatterns = [
     path('create_category/', clientViews.create_category, name='create_category'),
 
     #
-    path('welcome/', usersViews.welcome_view, name='welcome'),
+    # path('welcome/', usersViews.welcome_view, name='welcome'),
     path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
     path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
     path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),

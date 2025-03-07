@@ -1,9 +1,9 @@
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render,  get_object_or_404
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hashfrom 
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
-from django.contrib.auth import logoutfrom 
+from django.contrib.auth import logout
 from .models import Program, Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
 import json
 from django.views.decorators.csrf import csrf_exempt
