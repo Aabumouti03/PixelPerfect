@@ -50,12 +50,12 @@ urlpatterns = [
     path('', usersViews.welcome_page, name="welcome_page"),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
 
-
     #Program urls for the client
     path('programs/', clientViews.programs, name='programs'),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+    path('programs/<int:program_id>/update_order/', clientViews.update_module_order, name="update_module_order"),
 
     #Dashboard details for the client
     path('users_management/', clientViews.users_management, name='users_management'),
@@ -65,12 +65,11 @@ urlpatterns = [
 
     #User urls for modules
     path('userModules/', usersViews.user_modules, name='userModules'),
-    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('module_overview/<int:id>/', usersViews.module_overview, name='module_overview'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('profile/', usersViews.profile, name='profile'),
-
 
 ]
