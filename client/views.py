@@ -19,14 +19,15 @@ def module_overview(request, module_id):
     return render(request, "client/moduleOverview.html", {"module": module})
 
 def client_modules(request):
-    modules = Module.objects.all().values("id", "title")  # Include "id"
+    modules = Module.objects.all().values("id", "title", "description")  # ✅ Include "description"
     module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
     
     modules_list = []
     for index, module in enumerate(modules):
         module_data = {
-            "id": module["id"],  # Add "id"
+            "id": module["id"],
             "title": module["title"],
+            "description": module["description"],  # ✅ Pass description to the template
             "color_class": module_colors[index % len(module_colors)]
         }
         modules_list.append(module_data)
@@ -52,6 +53,23 @@ def delete_module(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     module.delete()
     return redirect("client_modules")
+
+def add_module(request):
+    return render(request, 'client/add_module.html')  # Create this template for module creation
+
+
+def add_module(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        
+        if title and description:  # Ensure both fields are filled
+            new_module = Module.objects.create(title=title, description=description)
+            new_module.save()
+            return redirect("client_modules")  # Redirect to the Client Modules page
+        
+    return render(request, "client/add_module.html")
+
 
 #####################
 def users_management(request):

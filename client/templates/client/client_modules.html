@@ -124,15 +124,22 @@
             background-color: #73C4FD;
         }
 
-        /* Edit Button (Pin Icon) */
-        .edit-button {
+        /* Icons container to align both icons */
+        .icons-container {
             position: absolute;
             top: 10px;
             right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Edit Button (Pencil Icon) */
+        .edit-button, .delete-button {
             background-color: rgba(255, 255, 255, 0.3);
+            border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -144,11 +151,18 @@
             background-color: rgba(255, 255, 255, 0.5);
         }
 
-        .edit-button ion-icon {
+        .delete-button {
+            background-color: rgba(255, 99, 71, 0.5);
+        }
+
+        .delete-button:hover {
+            background-color: rgba(255, 99, 71, 0.8);
+        }
+
+        .edit-button ion-icon, .delete-button ion-icon {
             font-size: 18px;
             color: white;
         }
-
     </style>
 
     <div class="content">
@@ -166,21 +180,25 @@
         <div class="modules-container">
             <div class="module-grid">
                 {% for module in modules %}
-                    <div class="module-card">
-                        <!-- Edit Button -->
+                <div class="module-card">
+                    <div class="icons-container">
                         <div class="edit-button" onclick="window.location.href='{% url 'module_overview' module.id %}'">
                             <ion-icon name="pencil"></ion-icon>
                         </div>
-                        <h5>{{ module.title }}</h5>
-                        <p>{{ module.description }}</p>
+                        <form action="{% url 'delete_module' module.id %}" method="POST" class="delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </button>
+                        </form>
                     </div>
-                {% empty %}
-                    <p style="text-align: center; color: #555;">No modules found.</p>
+                    <h5>{{ module.title }}</h5>
+                    <p>{{ module.description }}</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
-
     <script>
         function searchModules(event) {
             const query = event.target.value.toLowerCase();

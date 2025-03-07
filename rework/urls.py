@@ -46,7 +46,9 @@ urlpatterns = [
     #
     path("client_modules/", views.client_modules, name="client_modules"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  # ADD THIS
+    path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
+    
 
     
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
