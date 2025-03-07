@@ -163,6 +163,29 @@
             font-size: 18px;
             color: white;
         }
+        /* Add Module Card */
+        .add-module-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e0e0e0;
+            color: #555;
+            border-radius: 10px;
+            cursor: pointer;
+            height: 220px;
+            width: 100%;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .add-module-card:hover {
+            transform: scale(1.05);
+        }
+
+        .add-module-card ion-icon {
+            font-size: 50px;
+            color: #555;
+        }
+
     </style>
 
     <div class="content">
@@ -180,23 +203,34 @@
         <div class="modules-container">
             <div class="module-grid">
                 {% for module in modules %}
-                <div class="module-card">
-                    <div class="icons-container">
-                        <div class="edit-button" onclick="window.location.href='{% url 'module_overview' module.id %}'">
-                            <ion-icon name="pencil"></ion-icon>
+                    <div class="module-card">
+                        <!-- Icons Container -->
+                        <div class="icons-container">
+                            <!-- Edit Button -->
+                            <div class="edit-button" onclick="window.location.href='{% url 'module_overview' module.id %}'">
+                                <ion-icon name="pencil"></ion-icon>
+                            </div>
+                            <!-- Delete Button -->
+                            <form action="{% url 'delete_module' module.id %}" method="POST" class="delete-form">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-button">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </button>
+                            </form>
                         </div>
-                        <form action="{% url 'delete_module' module.id %}" method="POST" class="delete-form">
-                            {% csrf_token %}
-                            <button type="submit" class="delete-button">
-                                <ion-icon name="trash-outline"></ion-icon>
-                            </button>
-                        </form>
+                        <h5>{{ module.title }}</h5>
+                        <p>{{ module.description }}</p>
                     </div>
-                    <h5>{{ module.title }}</h5>
-                    <p>{{ module.description }}</p>
-                </div>
+                {% empty %}
+                    <p style="text-align: center; color: #555;">No modules found.</p>
                 {% endfor %}
+            
+                <!-- Add Module Card -->
+                <div class="add-module-card" onclick="window.location.href='{% url 'add_module' %}'">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                </div>
             </div>
+            
         </div>
     </div>
     <script>
