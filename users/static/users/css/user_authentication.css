@@ -130,7 +130,7 @@ body {
     width: 100%;
 }
 
-/* Style the login box */
+
 .card {
     background: #ffffff;
     border-radius: 30px;
@@ -146,7 +146,7 @@ body {
     align-items: center;
 }
 
-/* Ensure form elements remain aligned */
+
 .card form {
     width: 100%;
     display: flex;
@@ -245,20 +245,80 @@ button[type="submit"]:hover {
     margin-bottom: 10px;
 }
 
-/* Responsive adjustments */
+
+.password-container {
+    position: relative;
+    width: 700px;
+}
+
+
+.toggle-password {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 20px;
+    color: #ff440f; 
+}
+
+
+.password-container input {
+    width: 100%;
+    padding-right: 50px;
+}
+
+
 @media (max-width: 768px) {
     .card {
         width: 90%;
         padding: 30px;
     }
-    
-    input[type="text"], 
-    input[type="email"], 
-    input[type="password"], 
-    button[type="submit"] {
-        width: 100%;
+
+    .quote {
+        font-size: 22px;
+        text-align: center;
+    }
+
+   
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    button[type="submit"],
+    .password-container {
+        width: 90%;
+    }
+
+    .toggle-password {
+        right: 12px;
     }
 }
+
+@media (max-width: 480px) {
+    .card {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .quote {
+        font-size: 18px;
+    }
+
+   
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    button[type="submit"],
+    .password-container {
+        width: 100%;
+    }
+
+    .toggle-password {
+        right: 8px;
+    }
+   
+}
+
 /* -------------------- SIGN-UP PAGE -------------------- */
 
 .sign_up_body {
@@ -278,7 +338,7 @@ button[type="submit"]:hover {
     width: 100%;
 }
 
-/* Style the sign-up box */
+
 .sign_up_card {
     background: #ffffff;
     border-radius: 30px;
@@ -294,7 +354,7 @@ button[type="submit"]:hover {
     align-items: center;
 }
 
-/* Ensure form elements remain aligned */
+
 .sign_up_card form {
     width: 100%;
     display: flex;
@@ -325,17 +385,19 @@ button[type="submit"]:hover {
     color: #ff440f !important;
 }
 
-/* Dropdown Styling with Arrow Position */
+
 .sign_up_card select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    padding-right: 5%; /* Moves arrow to the right */
+    padding-right: 5%; 
     
-    /* Custom Dropdown Arrow */
+    
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff440f'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    
     background-repeat: no-repeat;
     background-position: right 15px center; 
+    
     background-size: 30px;
 }
 
@@ -461,7 +523,7 @@ button[type="submit"]:hover,
     color: #ff440f;
 }
 
-/* Responsive Adjustments */
+
 @media (max-width: 768px) {
     .sign_up_card {
         width: 90%;
@@ -757,3 +819,4 @@ textarea.contact_inputs {
     }
 }
 
+/*------------------------------Password-----------------------*/
