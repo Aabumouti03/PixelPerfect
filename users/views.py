@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-
 from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
-
 from .models import UserModuleProgress, UserModuleEnrollment, EndUser
 from client.models import Module, BackgroundStyle
 from django.contrib.auth.decorators import login_required
