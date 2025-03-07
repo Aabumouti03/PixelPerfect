@@ -39,6 +39,11 @@
 <div class="content">
     <div class="top-bar">
         <h1>User Statistics 📊</h1>
+        <div class="export-buttons">
+            <a href="{% url 'export_user_statistics_csv' %}" class="custom-btn">
+                Generate Report (CSV)
+            </a>
+        </div>
     </div>
 
     <!-- CHARTS CONTAINER -->
