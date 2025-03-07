@@ -1,13 +1,12 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
+from users.models import User  
 from client.models import Module, Exercise, AdditionalResource, Section
 from users.models import EndUser
 
 class ModuleOverviewViewTest(TestCase):
-
     def setUp(self):
-        # Create a user
+        # Create a user using the custom User model
         self.user = User.objects.create_user(username="testuser", password="testpassword")
 
         # Create a Module
@@ -77,4 +76,5 @@ class ModuleOverviewViewTest(TestCase):
         
         # Check if the calculation matches
         self.assertEqual(expected_progress_value, 50)
+
 
