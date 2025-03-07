@@ -4,7 +4,8 @@ from django.http import HttpResponse
 from .forms import UserSignUpForm, LogInForm, EndUserProfileForm
 from django.shortcuts import render, get_object_or_404
 
-from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
+from .models import UserModuleProgress, UserModuleEnrollment, EndUser
+from client.models import Module, BackgroundStyle
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout 
 import os
@@ -58,6 +59,10 @@ def log_in(request):
             if user is not None:
                 login(request, user)
 
+                if user.is_superuser:
+                    return redirect('client_dashboard')
+                else:
+    
                 if user.username == ADMIN_USERNAME and user.is_superuser:
                     return redirect('client_dashboard')
 
@@ -140,24 +145,16 @@ def module_overview(request, id):
     progress = UserModuleProgress.objects.filter(module=module, user=end_user).first()
     progress_value = progress.completion_percentage if progress else 0
 
-    return render(request, 'moduleOverview2.html', {'module': module, 'progress_value': progress_value})
+    return render(request, 'users/moduleOverview2.html', {'module': module, 'progress_value': progress_value})
 
 
 @login_required
 def user_modules(request):
     user = request.user
-
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
+    end_user, created = EndUser.objects.get_or_create(user=user)
 
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
 
-    background_folder = os.path.join(settings.BASE_DIR, 'static/img/backgrounds')
-    
-    background_images = os.listdir(background_folder)
-    
     module_data = []
 
     for enrollment in enrolled_modules:
@@ -165,23 +162,23 @@ def user_modules(request):
         progress = UserModuleProgress.objects.filter(user=end_user, module=module).first()
 
         progress_percentage = progress.completion_percentage if progress else 0
-
-        background_image = random.choice(background_images)
+        background_style = module.background_style  # Get BackgroundStyle object
 
         module_data.append({
             "id": module.id,
             "title": module.title,
             "description": module.description,
             "progress": progress_percentage,
-            "background_image": f'img/backgrounds/{background_image}' 
+            "background_color": background_style.background_color if background_style else "#ffffff",
+            "background_image": background_style.get_background_image_url() if background_style else "none",
         })
 
-    return render(request, 'userModules.html', {"module_data": module_data})
+    return render(request, 'users/userModules.html', {"module_data": module_data})
 
 
 
 def all_modules(request):
     modules = Module.objects.all()
 
-    return render(request, 'all_modules.html', {'modules': modules})
+    return render(request, 'users/all_modules.html', {'modules': modules})
 
