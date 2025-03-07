@@ -60,4 +60,6 @@ urlpatterns = [
     path('create_category/', clientViews.create_category, name='create_category'),
 
 
+    path('export/users_statistics/', reports_views.export_user_statistics_csv, name='export_user_statistics_csv'),
+    
 ]
