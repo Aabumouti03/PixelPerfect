@@ -16,7 +16,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db.models import Avg
-from .helpers import calculate_progress  
+from users.helperFunctions import calculate_progress  
 
 
 
