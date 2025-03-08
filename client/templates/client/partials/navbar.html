@@ -30,6 +30,14 @@
             </a>
         </li>
         <li>
+<<<<<<< HEAD
+            <a href="{% url 'manage_questionnaires' %}" class="{% if request.path == '/manage_qstionnaires/' %}active{% endif %}">
+                <img src="{% static 'client/img/modules.svg' %}" alt="Users" class="icon">
+                <span>Questionnaires</span>
+            </a>
+        </li>
+        
+=======
             <a href="{% url 'reports' %}" class="{%if request.path == '/reports/' %}active{% endif %}">
                 <img src="{% static 'client/img/reports.svg' %}" alt="Reports" class="icon">
                 <span>Reports</span>
@@ -41,6 +49,7 @@
                 <span>Categories</span>
             </a>
         </li>
+>>>>>>>>> Temporary merge branch 2
         <div class="logout">
             <a href="#" id="logout-link">
                 <img src="{% static 'client/img/logout.svg' %}" alt="Logout" class="icon">
