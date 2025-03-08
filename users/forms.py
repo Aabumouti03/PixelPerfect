@@ -294,3 +294,4 @@ class UserProfileForm(forms.ModelForm):
             end_user.save()  
 
         return end_user  
+

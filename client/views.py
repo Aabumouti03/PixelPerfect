@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User, EndUser, UserProgramEnrollment
 from client.models import Module, Category
@@ -6,6 +7,23 @@ import json
 from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from .models import Questionnaire, Question, Module,  Program, ProgramModule
+from users.models import Questionnaire_UserResponse, QuestionResponse, User
+from django.core.paginator import Paginator
+from .forms import ProgramForm, CategoryForm
+from .models import Program, ProgramModule, Category
+from client.statistics import * 
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import HttpResponse
+import csv
+
+def admin_check(user):
+    return user.is_authenticated and user.is_superuser
+
+
+# Create your views here.
 from django.contrib import messages
 from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
 from users.models import Questionnaire_UserResponse, QuestionResponse, User

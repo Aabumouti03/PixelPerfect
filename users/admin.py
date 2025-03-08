@@ -69,6 +69,7 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'user__user__email', 'module__title')
     ordering = ('user__user__last_name', 'user__user__first_name')
 
+
 @admin.register(ExerciseResponse)
 class ExerciseResponseAdmin(admin.ModelAdmin):
     """Admin panel for managing User Responses."""
@@ -77,7 +78,7 @@ class ExerciseResponseAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'question__question_text', 'response_text')
     ordering = ('user',)
 
-
+    
 @admin.register(StickyNote)
 class StickyNoteAdmin(admin.ModelAdmin):
     """Admin panel for managing sticky notes."""
@@ -90,3 +91,12 @@ class StickyNoteAdmin(admin.ModelAdmin):
         """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
+=========
+@admin.register(ExerciseResponse)
+class ExerciseResponseAdmin(admin.ModelAdmin):
+    """Admin panel for managing User Responses."""
+    list_display = ('user', 'question', 'response_text')
+    list_filter = ('user',)
+    search_fields = ('user__user__username', 'question__question_text', 'response_text')
+    ordering = ('user',)
+>>>>>>>>> Temporary merge branch 2
