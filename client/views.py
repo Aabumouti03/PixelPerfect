@@ -334,7 +334,6 @@ def log_out_client(request):
         logout(request)
         return redirect('log_in')
 
-    
     return redirect('/client_dashboard/')
 
 
