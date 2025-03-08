@@ -12,33 +12,16 @@
             </a>
         </li>
         <li>
-<<<<<<< HEAD
-<<<<<<< HEAD
-            <a href="{% url 'userModules' %}" class="{%if request.path == '/userModules/' %}active{% endif %}">
+
+
+            <a href="{% url 'userModules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
                 <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
+ 
 
-        <li>
-            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
-                <i class="fa-regular fa-pen-to-square icon"></i>
-                <span>Response</span>
-            </a>
-        </li>        
 
-=======
-=======
->>>>>>> 6aa4287965c632de82dd98c4f9905f2dbac0a9a0
-            <a href="{% url 'userModules' %}" class="{%if request.path == '/userModules/' %}active{% endif %}">
-                <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
-                <span>Modules</span>
-            </a>
-        </li>
-<<<<<<< HEAD
->>>>>>> profilePage
-=======
->>>>>>> 6aa4287965c632de82dd98c4f9905f2dbac0a9a0
         <li>
             <a href="{% url 'profile' %}" class="{%if request.path == '/profile/' %}active{% endif %}">
                 <img src="{% static 'users/img/profile.svg' %}" alt="Profile" class="icon">
@@ -46,26 +29,19 @@
             </a>
         </li>
         <div class="logout">
-<<<<<<< HEAD
-<<<<<<< HEAD
+
             <a href="{% url 'log_out' %}" class="{%if request.path == '/log_out/' %}active{% endif %}">
             <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
             <span>Logout</span>
             </a>
         </div>
-=======
-=======
->>>>>>> 6aa4287965c632de82dd98c4f9905f2dbac0a9a0
+
             <a href="#" id="logout-link">
                 <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
                 <span>Logout</span>
             </a>
         </div>       
-        
-<<<<<<< HEAD
->>>>>>> profilePage
-=======
->>>>>>> 6aa4287965c632de82dd98c4f9905f2dbac0a9a0
+
     </ul>
 
 </div>

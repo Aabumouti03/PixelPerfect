@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
 
 from client import views as clientViews
 from users import views as usersViews
@@ -78,10 +80,14 @@ urlpatterns = [
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
     path('users_management/', clientViews.users_management, name='users_management'),
     path('programs/', clientViews.programs, name='programs'),
-    # path('log_out/', clientViews.log_out, name="log_out"),
+    path('log_out/', clientViews.log_out_client, name="log_out"),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+
+    # personalized page page add-ons
+    path("recommended_programs/", usersViews.recommended_programs, name="recommended_programs"),
+    path("recommended_modules/", usersViews.recommended_modules, name="recommended_modules"),
 
 
     #
@@ -102,8 +108,11 @@ urlpatterns = [
 
     #User urls for modules
     path('userModules/', usersViews.user_modules, name='userModules'),
-    path('module_overview/<int:id>/', usersViews.module_overview, name='module_overview'),
+    path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
+    path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
+    path('mark_done/', usersViews.mark_done, name='mark_done'),
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
@@ -135,3 +144,5 @@ urlpatterns = [
     # path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
