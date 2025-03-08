@@ -43,42 +43,51 @@
     </div>
 
     <script>
-        document.getElementById('add-question-btn').addEventListener('click', function() {
-            let questionIndex = document.querySelectorAll('.question-card').length;
+        document.addEventListener("DOMContentLoaded", function () {
+            let questionIndex = 0;
 
-            let newQuestionHTML = `
-                <div class="question-card">
-                    <label>Question Text:</label>
-                    <input type="text" name="question_text_${questionIndex}" required>
+            document.getElementById('add-question-btn').addEventListener("click", function () {
+                let newQuestionHTML = `
+                    <div class="question-card">
+                        <label>Question Text:</label>
+                        <input type="text" name="question_text_${questionIndex}" required>
 
-                    <label>Question Type:</label>
-                    <select name="question_type_${questionIndex}" class="question-type-select">
-                        <option value="AGREEMENT">Agreement Scale</option>
-                        <option value="RATING">Rating Scale</option>
-                    </select>
+                        <label>Question Type:</label>
+                        <select name="question_type_${questionIndex}" class="question-type-select">
+                            <option value="AGREEMENT">Agreement Scale</option>
+                            <option value="RATING">Rating Scale</option>
+                        </select>
 
-                    <label>Sentiment:</label>
-                    <select name="sentiment_${questionIndex}" class="question-type-select">
-                        {% for value, label in sentiment_choices %}
-                            <option value="{{ value }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                        <label>Sentiment:</label>
+                        <select name="sentiment_${questionIndex}" class="question-type-select">
+                            {% for value, label in sentiment_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
 
-                    <label>Category:</label>
-                    <select name="category_${questionIndex}" class="question-type-select">
-                        <option value="">Select a category</option>
-                        {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
+                        <label>Category:</label>
+                        <select name="category_${questionIndex}" class="question-type-select">
+                            <option value="">Select a category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
 
-                    <div class="question-actions">
-                        <button type="button" class="btn delete-btn" onclick="this.parentElement.remove()">Delete</button>
+                        <div class="question-actions">
+                            <button type="button" class="btn delete-btn">Delete</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            document.getElementById('questions-container').insertAdjacentHTML('beforeend', newQuestionHTML);
+                document.getElementById('questions-container').insertAdjacentHTML('beforeend', newQuestionHTML);
+                questionIndex++;
+            });
+
+            document.getElementById('questions-container').addEventListener("click", function (event) {
+                if (event.target.classList.contains("delete-btn")) {
+                    event.target.closest(".question-card").remove();
+                }
+            });
         });
     </script>
 

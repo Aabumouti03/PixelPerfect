@@ -2,7 +2,9 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
+from django.contrib.auth import logout
 from django.contrib.auth import logout
 from .models import Program, Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
 from django.contrib.auth import logout
@@ -21,20 +23,20 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 import os
 import random
+from django.urls import reverse
 from django.db.models import Avg
 from users.helpers_modules import calculate_progress
 logger = logging.getLogger(__name__)
-
 from collections import defaultdict
 from django.contrib import messages
 from django.conf import settings
-import random
-from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
-from django.shortcuts import render, get_object_or_404
-from client.models import Program
-from users.models import UserProgramEnrollment, EndUser
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
+
+
+
+
+
+
+
 
 
 # Create your views here.
@@ -275,6 +277,7 @@ def profile(request):
     return render(request, 'users/profile.html')
 
 
+
 def welcome_page(request):
     return render(request, 'users/welcome_page.html')
 
@@ -348,12 +351,12 @@ def sign_up_step_2(request):
             user.set_password(user_form.cleaned_data["password1"])
             user.save()
 
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.save()
 
-            del request.session["user_form_data"]
-            return redirect("log_in")
+                del request.session["user_form_data"]
+                return redirect("log_in")
 
 
     else:

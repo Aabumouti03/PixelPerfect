@@ -78,6 +78,10 @@ urlpatterns = [
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
 
+    # personalized page page add-ons
+    path("recommended_programs/", usersViews.recommended_programs, name="recommended_programs"),
+    path("recommended_modules/", usersViews.recommended_modules, name="recommended_modules"),
+
 
     #
     path('welcome/', usersViews.welcome_view, name='welcome'),

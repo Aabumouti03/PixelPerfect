@@ -70,6 +70,7 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     ordering = ('user__user__last_name', 'user__user__first_name')
 
     
+    
 @admin.register(StickyNote)
 class StickyNoteAdmin(admin.ModelAdmin):
     """Admin panel for managing sticky notes."""
@@ -82,6 +83,7 @@ class StickyNoteAdmin(admin.ModelAdmin):
         """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
+
 
 @admin.register(ExerciseResponse)
 class ExerciseResponseAdmin(admin.ModelAdmin):
