@@ -1,38 +1,23 @@
 
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render,  get_object_or_404
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-
-from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
-from django.contrib.auth import logout
-from .models import Program, Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
-from django.contrib.auth import logout
-from .models import Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
-from client.models import Category, Program,ModuleRating,Exercise
-import json
-from django.views.decorators.csrf import csrf_exempt
-import logging
-from django.contrib import messages
-from client.models import Module, BackgroundStyle
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout 
-from client.models import Module, BackgroundStyle, Program, ProgramModule
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 import os
+import json
 import random
+import logging
 from django.urls import reverse
 from django.db.models import Avg
+from django.contrib import messages
+from django.forms import ValidationError
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from users.helpers_modules import calculate_progress
+from django.contrib.auth.decorators import login_required 
+from client.models import Category, Program,ModuleRating,Exercise
+from django.shortcuts import redirect, render,  get_object_or_404
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
+from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module
 logger = logging.getLogger(__name__)
 from collections import defaultdict
-from django.contrib import messages
-from django.conf import settings
-
-
-
-# Create your views here.
 
 
 def questionnaire(request):
@@ -257,8 +242,9 @@ def view_program(request, program_id):
     return render(request, 'users/view_program.html', context)
 
 
-#A function for displaying a page that welcomes users
+
 def welcome_page(request):
+    '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
 
 
@@ -362,16 +348,6 @@ def log_out(request):
 
     # if user cancels, stay on the same page
     return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
-
-    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))  
-def forget_password(request):
-    return render(request, 'users/forget_password.html')
-
-def password_reset_sent(request, reset_id):
-    return render(request, 'users/password_reset_sent.html')
-
-def reset_password(request, reset_id):
-    return render(request, 'users/reset_password.html')
 
 
 @login_required 

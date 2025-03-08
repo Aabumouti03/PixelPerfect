@@ -42,16 +42,16 @@ urlpatterns = [
     path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('log_out_client/', clientViews.log_out_client, name="log_out_client"),
     path('reset_password/', 
-        authenticationViews.PasswordResetView.as_view(template_name="users/reset_password.html"),
-        name="reset_password"),
+        authenticationViews.PasswordResetView.as_view(template_name="users/password_reset_form.html"),
+        name="password_reset_form"),
     path('reset_password_sent/',
-        authenticationViews.PasswordResetDoneView.as_view(template_name="users/password_reset_sent.html"),
+        authenticationViews.PasswordResetDoneView.as_view(template_name="users/password_reset_done.html"),
         name="password_reset_done"),
     path('reset/<uidb64>/<token>/',
-        authenticationViews.PasswordResetConfirmView.as_view(template_name="users/password_reset_form.html"),
+        authenticationViews.PasswordResetConfirmView.as_view(template_name="users/password_reset_confirm.html"),
         name="password_reset_confirm"),
     path('reset_password_complete/',
-        authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_done.html"),
+        authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
 
     #Welcome Page
@@ -66,6 +66,10 @@ urlpatterns = [
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
+
+    #
+    path('programs/', clientViews.programs, name='programs'),
+    path('logout/', clientViews.log_out_client, name='logout'),
 
     #Program urls for the client
     path('programs/', clientViews.programs, name='programs'),
