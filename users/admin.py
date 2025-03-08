@@ -92,3 +92,4 @@ class StickyNoteAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
 
+

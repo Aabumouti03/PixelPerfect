@@ -207,7 +207,6 @@ class Question (models.Model):
     ]
     SENTIMENT_CHOICES = [
         (1, 'Positive'),
-        (0, 'Neutral'),
         (-1, 'Negative'),
     ]
     questionnaire = models.ForeignKey(Questionnaire, related_name='questions', on_delete=models.CASCADE)

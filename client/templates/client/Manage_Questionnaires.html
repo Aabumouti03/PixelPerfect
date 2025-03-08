@@ -4,7 +4,7 @@
 {% block title %}Manage Questionnaires{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/Manage_Questionnaires.css' %}">
+    <link rel="stylesheet" href="{% static 'client/css/Manage_Questionnaires.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -21,6 +21,11 @@
         <form method="GET" class="search-form">
             <input type="text" name="search" placeholder="Search by title..." value="{{ search_query }}" class="search-input">
             <button type="submit" class="btn search-btn">Search</button>
+
+            <!-- Preserve Filters when Searching -->
+            {% if is_active_filter %}
+                <input type="hidden" name="is_active" value="{{ is_active_filter }}">
+            {% endif %}
         </form>
 
         <!-- Filter Toggle -->

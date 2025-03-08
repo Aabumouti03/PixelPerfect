@@ -1,13 +1,14 @@
-{% extends 'client/base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Questionnaire - {{ questionnaire.title }}</title>
+    <link rel="stylesheet" href="{% static 'client/css/edit_questionnaire.css' %}">
+</head>
+<body>
 
-{% block title %}Edit Questionnaire - {{ questionnaire.title }}{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/edit_questionnaire.css' %}">
-{% endblock %}
-
-{% block content %}
     <div class="content">
         <div class="top-bar">
             <a href="{% url 'view_questionnaire' questionnaire.id %}" class="btn back-btn">← Back</a>
@@ -37,26 +38,27 @@
 
                     <!-- Question Type Selector -->
                     <label>Question Type:</label>
-                    <select name="question_type_{{ question.id }}" class="question-type-select" data-question-id="{{ question.id }}">
+                    <select name="question_type_{{ question.id }}" class="question-type-select">
                         <option value="AGREEMENT" {% if question.question_type == "AGREEMENT" %}selected{% endif %}>Agreement Scale</option>
                         <option value="RATING" {% if question.question_type == "RATING" %}selected{% endif %}>Rating Scale</option>
                     </select>
 
-                    <!-- Agreement Scale (Fixed Choices) -->
-                    <div id="agreement-scale-{{ question.id }}" class="agreement-scale {% if question.question_type != 'AGREEMENT' %}hidden{% endif %}">
-                        <ul class="choice-list">
-                            <li class="choice-item">Strongly Disagree</li>
-                            <li class="choice-item">Disagree</li>
-                            <li class="choice-item">Neutral</li>
-                            <li class="choice-item">Agree</li>
-                            <li class="choice-item">Strongly Agree</li>
-                        </ul>
-                    </div>
+                    <!-- Sentiment Selector -->
+                    <label>Sentiment:</label>
+                    <select name="sentiment_{{ question.id }}" class="question-type-select">
+                        {% for value, label in sentiment_choices %}
+                            <option value="{{ value }}" {% if question.sentiment == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
 
-                    <!-- Fixed Rating Scale -->
-                    <div id="rating-scale-{{ question.id }}" class="rating-scale {% if question.question_type != 'RATING' %}hidden{% endif %}">
-                        <label>Rating Scale: 1 - 5</label>
-                    </div>
+                    <!-- Category Selector -->
+                    <label>Category:</label>
+                    <select name="category_{{ question.id }}" class="question-type-select">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if question.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
 
                     <!-- Edit/Delete Question Buttons -->
                     <div class="question-actions">
@@ -73,27 +75,8 @@
                 <a href="{% url 'add_question' questionnaire.id %}" class="btn add-btn">+ Add Question</a>
             </div>
         </form>
+
     </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll('.question-type-select').forEach(select => {
-            select.addEventListener('change', function() {
-                let questionId = this.getAttribute('data-question-id');
-                let agreementScale = document.getElementById('agreement-scale-' + questionId);
-                let ratingScale = document.getElementById('rating-scale-' + questionId);
-
-                if (this.value === "AGREEMENT") {
-                    agreementScale.classList.remove("hidden");
-                    ratingScale.classList.add("hidden");
-                } else {
-                    agreementScale.classList.add("hidden");
-                    ratingScale.classList.remove("hidden");
-                }
-            });
-        });
-    });
-</script>
-{% endblock %}
+</body>
+</html>

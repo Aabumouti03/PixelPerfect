@@ -1,0 +1,87 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
+
+    <h1>Your Personalized Learning Journey</h1>
+    <p> Pick the modules that match your interests! You can enroll in as many as you like.</p>
+
+    {% if modules %}
+        <div id="modules-container">
+            {% for module in modules %}
+                <div class="card module-card">
+                    <h3>{{ module.title }}</h3>
+                    <p>{{ module.description }}</p>
+
+                    <div class="button-container">
+                        <button 
+                        class="enroll-button {% if module in enrolled_modules %}enrolled{% endif %}" 
+                        data-module-id="{{ module.id }}"
+                    >
+                        {% if module in enrolled_modules %}Enrolled{% else %}Enroll{% endif %}
+                    </button>
+                    <a href="{% url 'module_overview' module.id %}">
+                        <button type="button" class="view-button">View</button>
+                    </a>
+                    
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No modules available at the moment.</p>
+    {% endif %}
+
+    <div class="nav-buttons">
+        <a href="{% url 'recommended_programs' %}"><button>Back</button></a>
+        <a href="{% url 'dashboard' %}"><button>Skip</button></a>
+    </div>
+    
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".enroll-button").forEach(button => {
+                button.addEventListener("click", function () {
+                    const moduleId = this.getAttribute("data-module-id");
+                    const isEnrolled = this.getAttribute("data-enrolled") === "true";
+                    const action = isEnrolled ? "unenroll" : "enroll";
+    
+                    // Toggle the UI immediately
+                    if (isEnrolled) {
+                        this.textContent = "Enroll";
+                        this.setAttribute("data-enrolled", "false");
+                        this.classList.remove("enrolled");
+                    } else {
+                        this.textContent = "Enrolled";
+                        this.setAttribute("data-enrolled", "true");
+                        this.classList.add("enrolled");
+                    }
+    
+                    // Send request to update enrollment status
+                    fetch("{% url 'recommended_modules' %}", {  // Use the existing view URL
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({
+                            module_id: moduleId,
+                            action: action
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            console.log("Enrollment updated successfully");
+                        } else {
+                            console.error("Error updating enrollment");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
+    
+{% endblock %}

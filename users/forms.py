@@ -6,7 +6,9 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
-from django.forms.widgets import Select, TextInput, EmailInput, PasswordInput
+
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from .models import User, EndUser
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
@@ -125,6 +127,7 @@ class LogInForm(AuthenticationForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
+
 
 class UserProfileForm(forms.ModelForm):
 

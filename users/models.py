@@ -177,8 +177,6 @@ class Questionnaire_UserResponse(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
-    class Meta:
-        unique_together = ['user', 'questionnaire']
         
 
 class QuestionResponse(models.Model):
