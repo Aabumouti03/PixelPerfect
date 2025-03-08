@@ -134,8 +134,6 @@ def exercise_detail(request, exercise_id):
 
     user, created = EndUser.objects.get_or_create(user=request.user)
 
-    
-
     # Find a **single** diagram from sections linked to this exercise
     diagram = None
     for section in exercise.sections.all():
@@ -249,6 +247,7 @@ def mark_done(request):
         user_module_progress.completion_percentage = calculate_progress(end_user, module)
         user_module_progress.save()
 
+
         # Return the updated progress as JSON
         return JsonResponse({
             "success": True,
@@ -256,10 +255,6 @@ def mark_done(request):
         })
 
     return JsonResponse({"success": False})
-
-
-
-
 
 
 @login_required

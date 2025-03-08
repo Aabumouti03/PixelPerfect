@@ -1,3 +1,10 @@
+import json
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from client.models import Exercise, AdditionalResource, Module
+from users.models import EndUser, UserModuleProgress
+
+
 def calculate_progress(end_user, module):
     # Get all exercises in the module
     exercises = []
