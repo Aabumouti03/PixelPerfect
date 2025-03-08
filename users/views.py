@@ -83,32 +83,45 @@ def dashboard(request):
 
     # Mark only the first module as accessible
     previous_module_completed = True  # The first module is always accessible
+    unlocked_modules = set()
+
     for program_module in program_modules:
         module = program_module.module
         module.progress_value = user_progress.get(module.id, 0)
 
         if previous_module_completed:
             module.is_unlocked = True  # Unlock if it's the first or previous is completed
+            unlocked_modules.add(module.id)  # Store unlocked module IDs
         else:
             module.is_unlocked = False  # Keep locked
 
         previous_module_completed = module.progress_value == 100  # Update for next iteration
 
-    # Get modules outside the program that the user is enrolled in
+    # Get modules outside the program that the user is enrolled in (standalone modules are always unlocked)
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
     outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
-    # Get recently accessed modules (order by latest)
-    recent_modules = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:3]
+    # Get recently accessed modules **EXCLUDING LOCKED ONES**
+    recent_enrollments = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:5]
+
+    # Ensure only unlocked modules appear in recently accessed
+    recent_modules = [
+        enrollment.module for enrollment in recent_enrollments
+        if enrollment.module.id and (
+            enrollment.module.id in unlocked_modules or  # Module is unlocked in a program
+            enrollment.module in outside_modules  # Standalone modules are always unlocked
+        )
+    ]
 
     context = {
         'user': user,
         'program': program,
         'program_modules': program_modules,
         'outside_modules': outside_modules,  # Only enrolled modules outside the program
-        'recent_modules': recent_modules,
+        'recent_modules': recent_modules,  # Excludes locked modules
     }
     return render(request, 'users/dashboard.html', context)
+
 
 
 @login_required
