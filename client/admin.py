@@ -1,8 +1,17 @@
 from django.contrib import admin
 from .models import (
     Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,
-    Category, ProgramModule, BackgroundStyle, ModuleRating, Questionnaire, Question
+    Category, ProgramModule, BackgroundStyle, ModuleRating, Questionnaire, Question,
+    Questionnaire, Question, ProgramModule, Category, BackgroundStyle    
 )
+
+
+class ProgramModuleInline(admin.TabularInline):
+    model = ProgramModule
+    extra = 1  # Allows adding modules inline
+    ordering = ['order']  # Ensures modules appear in correct order
+    autocomplete_fields = ['module']  # Enables search for modules
+    fields = ('module', 'order')  # Display only relevant fields
 
 
 @admin.register(Program)
@@ -10,6 +19,7 @@ class ProgramAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title', 'description')
     ordering = ('title',)
+    inlines = [ProgramModuleInline]  # 🔹 ADDED: Allows managing module order within a program
     filter_horizontal = ('categories',)  # Allow selection of multiple modules/categories
 
 
@@ -36,7 +46,6 @@ class SectionAdmin(admin.ModelAdmin):
     readonly_fields = ('diagram_preview',)
 
     def diagram_preview(self, obj):
-        """Show preview if a diagram is uploaded."""
         if obj.diagram:
             return f"✅ Diagram Uploaded"
         return "❌ No Diagram"
@@ -82,7 +91,7 @@ class ExerciseQuestionAdmin(admin.ModelAdmin):
     search_fields = ('question_text',)
     fieldsets = (
         (None, {'fields': ('question_text',)}),
-        ('Fill-in-the-Blanks', {'fields': ('has_blank', 'text_before_blank', 'text_after_blank')}),
+        ('Fill-in-the-Blanks', {'fields': ('has_blank', 'text_before_blank', 'text_after_blank')}),  
     )
 
     def question_preview(self, obj):

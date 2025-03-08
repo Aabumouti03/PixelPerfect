@@ -3,10 +3,30 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
     UserProgramEnrollment, UserModuleEnrollment, 
-    Questionnaire_UserResponse, QuestionResponse, StickyNote,ExerciseResponse, JournalEntry  # ✅ Updated model name
+    Questionnaire_UserResponse, QuestionResponse, StickyNote, UserResponse, JournalEntry  # ✅ Updated model name
 )
 from client.models import Program, Module
 
+
+@admin.register(Questionnaire_UserResponse)
+class QuestionnaireUserResponseAdmin(admin.ModelAdmin):
+    """Admin panel for managing user responses to questionnaires."""
+    list_display = ('user', 'questionnaire', 'started_at', 'completed_at')
+    search_fields = ('user__username', 'questionnaire__title')
+    list_filter = ('questionnaire', 'completed_at')
+    ordering = ('-started_at',)
+
+
+@admin.register(QuestionResponse)
+class QuestionResponseAdmin(admin.ModelAdmin):
+    """Admin panel for managing user responses to individual questions."""
+    list_display = ('user_response', 'question', 'rating_value')
+    search_fields = ('user_response__user__username', 'question__questionnaire__title', 'question__question_type')
+    list_filter = ('question__question_type',)
+    ordering = ('user_response',)
+
+
+# ✅ Your existing admin classes remain unchanged  
 @admin.register(User)
 class CustomUserAdmin(admin.ModelAdmin):
     """Admin panel for managing users."""
@@ -27,11 +47,13 @@ class CustomUserAdmin(admin.ModelAdmin):
         }),
     )
 
+
 @admin.register(Admin)
 class AdminProfileAdmin(admin.ModelAdmin):
     """Admin panel for managing Admin profiles."""
     list_display = ('user',)
     search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name')
+
 
 @admin.register(EndUser)
 class EndUserAdmin(admin.ModelAdmin):
@@ -41,6 +63,7 @@ class EndUserAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'phone_number')
     ordering = ('user__last_name', 'user__first_name')
 
+
 @admin.register(UserProgramEnrollment)
 class UserProgramEnrollmentAdmin(admin.ModelAdmin):
     """Admin panel for tracking user enrollments in programs."""
@@ -48,6 +71,7 @@ class UserProgramEnrollmentAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'program__title')
     list_filter = ('program',)
     ordering = ('-enrolled_on',)
+
 
 @admin.register(UserModuleEnrollment)
 class UserModuleEnrollmentAdmin(admin.ModelAdmin):
@@ -57,6 +81,7 @@ class UserModuleEnrollmentAdmin(admin.ModelAdmin):
     list_filter = ('module',)
     ordering = ('-enrolled_on',)
 
+
 @admin.register(UserProgramProgress)
 class UserProgramProgressAdmin(admin.ModelAdmin):
     """Admin panel for tracking program progress."""
@@ -64,6 +89,7 @@ class UserProgramProgressAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('user__user__username', 'user__user__email', 'program__title')
     ordering = ('user__user__last_name', 'user__user__first_name')
+
 
 @admin.register(UserModuleProgress)
 class UserModuleProgressAdmin(admin.ModelAdmin):
@@ -73,7 +99,17 @@ class UserModuleProgressAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'user__user__email', 'module__title')
     ordering = ('user__user__last_name', 'user__user__first_name')
 
-    
+
+@admin.register(UserResponse)
+class UserResponseAdmin(admin.ModelAdmin):
+    list_display = ("user", "question", "response_text")
+    search_fields = ("user__user__username", "question__question_text")
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Ensure all EndUsers appear in the admin dropdown."""
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['user'].queryset = EndUser.objects.all()  
+        return form
     
 @admin.register(StickyNote)
 class StickyNoteAdmin(admin.ModelAdmin):
@@ -87,19 +123,7 @@ class StickyNoteAdmin(admin.ModelAdmin):
         """Ensure all EndUsers appear in the admin dropdown for StickyNote."""
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['user'].queryset = EndUser.objects.all()  # Customize queryset for 'user' field
-
-
-@admin.register(ExerciseResponse)
-class ExerciseResponseAdmin(admin.ModelAdmin):
-    """Admin panel for managing User Responses."""
-    list_display = ('user', 'question', 'response_text')
-    list_filter = ('user',)
-    search_fields = ('user__user__username', 'question__question_text', 'response_text')
-    ordering = ('user',)
-
-
-    
-    
+        return form
 
 
 # Unregister first to prevent duplicate registration error

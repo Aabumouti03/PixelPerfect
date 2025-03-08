@@ -16,8 +16,10 @@ from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import csv
+from django.db import transaction 
+from django.db.models import Max
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
@@ -284,6 +286,32 @@ def modules_management(request):
 
     return render(request, "client/modules_management.html", {"modules": modules_list})
 
+def user_detail_view(request, user_id):
+    user_profile = get_object_or_404(EndUser, user__id=user_id)
+
+    # Get enrolled programs & modules
+    enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
+
+    user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
+        user=user_profile
+    ).prefetch_related("questionnaire", "question_responses__question")
+
+    # Group responses by questionnaire
+    questionnaires_with_responses = {}
+    for user_response in user_questionnaire_responses:
+        if user_response.questionnaire not in questionnaires_with_responses:
+            questionnaires_with_responses[user_response.questionnaire] = []
+        for response in user_response.question_responses.all():
+            questionnaires_with_responses[user_response.questionnaire].append(response)
+
+    context = {
+        'user': user_profile,
+        'enrolled_programs': enrolled_programs,
+        'enrolled_modules': enrolled_modules,
+        'questionnaires_with_responses': questionnaires_with_responses,  # 👈 Fixed context structure
+    }
+    return render(request, 'client/user_detail.html', context)
 def programs(request):
     programs = Program.objects.prefetch_related('program_modules__module').all()
     return render(request, 'client/programs.html', {'programs': programs})

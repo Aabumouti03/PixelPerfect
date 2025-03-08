@@ -3,7 +3,10 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
 from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from django.core.exceptions import ValidationError 
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
@@ -25,7 +28,7 @@ class User(AbstractUser):
         unique=True,
         validators=[RegexValidator(
             regex=r'^\w{3,}$',
-            message='Username must consist of @ followed by at least three alphanumericals'
+            message='Username must consist at least three alphanumericals'
         )]
     )
     first_name = models.CharField(max_length=50, blank=False)
@@ -166,7 +169,7 @@ class UserModuleProgress(models.Model):
         return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
 
 
-class ExerciseResponse(models.Model):
+class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
     question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
@@ -210,8 +213,6 @@ class StickyNote(models.Model):
 
     def __str__(self):
         return f"StickyNote by {self.user.user.username}"
-    
-
 
 
 class JournalEntry(models.Model):

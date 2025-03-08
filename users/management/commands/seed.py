@@ -37,6 +37,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Where are you now?",
+                        "title": "Where are you now?",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What are you putting up with at the moment?",
@@ -52,6 +53,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Visualize and plan your ideal professional future.",
                 "exercises": [
                     {
+                        "title": " Your best possible self",
                         "title": " Your best possible self",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -76,6 +78,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Know your values",
+                        "title": "Know your values",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What do my core values mean to me?",
@@ -90,6 +93,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Define what you want to achieve in life and career.",
                 "exercises": [
                     {
+                        "title": "Be, do and have exercise",
                         "title": "Be, do and have exercise",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -112,6 +116,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Discover your natural talents and skills.",
                 "exercises": [
                     {
+                        "title": "Finding your strengths",
                         "title": "Finding your strengths",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -153,6 +158,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Where do you want to go",
+                        "title": "Where do you want to go",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What does your career look like?",
@@ -178,6 +184,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Identify barriers and strategies to overcome them.",
                 "exercises": [
                     {
+                        "title": "What is getting in the way",
                         "title": "What is getting in the way",
                         "exercise_type": "short_answer",
                         "questions": [
