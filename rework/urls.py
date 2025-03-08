@@ -132,3 +132,14 @@ urlpatterns = [
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('programs/', clientViews.programs, name='programs'),
+    path('log_out/', clientViews.log_out, name="log_out"),
+    path('create_program/', clientViews.create_program, name='create_program'),
+    path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
+    path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+    path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
+    path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+    path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
+
+]

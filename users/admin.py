@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Admin, EndUser, UserProgramProgress, UserModuleProgress,UserProgramEnrollment, UserModuleEnrollment ,ExerciseResponse, StickyNote
+from .models import (
+    User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
+    UserProgramEnrollment, UserModuleEnrollment, UserResponse, 
+    Questionnaire_UserResponse, QuestionResponse, StickyNote,ExerciseResponse, JournalEntry  # ✅ Updated model name
+)
 from client.models import Program, Module
 
 @admin.register(User)
@@ -93,3 +97,22 @@ class ExerciseResponseAdmin(admin.ModelAdmin):
     search_fields = ('user__user__username', 'question__question_text', 'response_text')
     ordering = ('user',)
 
+
+    
+    
+
+
+# Unregister first to prevent duplicate registration error
+if admin.site.is_registered(JournalEntry):
+    admin.site.unregister(JournalEntry)
+
+class JournalEntryAdmin(admin.ModelAdmin):
+    """Customize how JournalEntry appears in the Django admin panel."""
+    
+    list_display = ('user', 'date', 'sleep_hours', 'caffeine', 'hydration', 'stress', 'goal_progress', 'notes')
+    list_filter = ('date', 'user', 'caffeine', 'goal_progress', 'stress')
+    search_fields = ('user__username', 'date', 'notes')  # Enable searching by username, date, or notes
+    ordering = ('-date',)  # Show the most recent entries first
+    list_per_page = 20  # Paginate results in the admin panel
+
+admin.site.register(JournalEntry, JournalEntryAdmin)  # Register the model with the admin site
