@@ -9,7 +9,6 @@ body {
     margin-top: 100px;
 }
 
-/* Welcome page navbar */
 .navbar {
     background-color: #ff440f;
     padding: 10px 20px;
@@ -819,8 +818,158 @@ textarea.contact_inputs {
     }
 }
 
-<<<<<<<<< Temporary merge branch 1
->>>>>>> origin/userAuthentication
-=========
 /*------------------------------Password-----------------------*/
->>>>>>>>> Temporary merge branch 2
+
+.password-reset-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: 80px;
+    background-color: #fff6f3;
+}
+
+.password-reset-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px);
+    width: 100%;
+}
+
+.password-reset-card {
+    background: #ffffff;
+    border-radius: 30px;
+    padding: 50px;
+    width: 800px;
+    height: auto;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    background-color: #ff5733;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.password-reset-card h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.password-reset-card form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.password-reset-card input {
+    width: 600px;
+    padding: 12px;
+    border-radius: 30px;
+    border: none;
+    background-color: #f9f9f9;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    color: #ff440f;
+}
+
+.password-reset-container p{
+    color: white;
+}
+
+.password-reset-card input:focus {
+    background-color: rgb(255, 210, 180);
+}
+
+.password-reset-card button {
+    border-radius: 30px;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: rgb(255, 255, 180);
+    color:  #ff5733; 
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 600px;
+}
+
+.password-reset-card button:hover {
+    background-color: #ecef68;
+}
+
+.password-reset-card a {
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+    text-decoration: none;
+}
+
+.password-reset-card a:hover {
+    color: #ffe66d;
+}
+
+@media (max-width: 768px) {
+    .password-reset-card {
+        width: 90%;
+        padding: 30px;
+    }
+
+    .password-reset-card input,
+    .password-reset-card button {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .password-reset-card {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .password-reset-card h1 {
+        font-size: 22px;
+    }
+
+    .password-reset-card input,
+    .password-reset-card button {
+        width: 100%;
+    }
+}
+
+.password-reset-btn {
+    background-color: rgb(255, 255, 180);
+    color: #ff5733 !important;
+    font-weight: bold;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    text-decoration: none;
+    display: inline-block;
+    width: 250px;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.password-reset-btn:hover {
+    background-color: #ecef68;
+    color: #ff5733;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 20px;
+    color: #ff5733;
+}
