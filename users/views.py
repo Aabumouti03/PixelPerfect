@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
 from django.contrib.auth import logout
 from django.contrib.auth import logout
 from .models import Program, Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment
@@ -351,12 +351,12 @@ def sign_up_step_2(request):
             user.set_password(user_form.cleaned_data["password1"])
             user.save()
 
-                profile = profile_form.save(commit=False)
-                profile.user = user
-                profile.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
 
-                del request.session["user_form_data"]
-                return redirect("log_in")
+            del request.session["user_form_data"]
+            return redirect("log_in")
 
 
     else:
