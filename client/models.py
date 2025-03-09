@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
+from django.core.exceptions import ValidationError
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -116,7 +118,7 @@ class Section(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     exercises = models.ManyToManyField('Exercise', related_name="sections")  
-    #diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
+    diagram = models.ImageField(upload_to='diagrams/', blank=True, null=True)  
     text_position_from_diagram = models.CharField(
         max_length=10, choices=QUESTION_POSITIONS, default='below' 
     )

@@ -1,9 +1,18 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from django.core.exceptions import ValidationError 
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.timezone import now  # ✅ Fix: Import now
+from django.core.exceptions import ValidationError
+
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -19,7 +28,7 @@ class User(AbstractUser):
         unique=True,
         validators=[RegexValidator(
             regex=r'^\w{3,}$',
-            message='Username must consist of @ followed by at least three alphanumericals'
+            message='Username must consist at least three alphanumericals'
         )]
     )
     first_name = models.CharField(max_length=50, blank=False)
@@ -121,6 +130,7 @@ class UserProgramEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} enrolled in {self.program.title}"
+    
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -130,6 +140,7 @@ class UserModuleEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
+
 
 class UserProgramProgress (models.Model):
 
@@ -155,10 +166,10 @@ class UserModuleProgress(models.Model):
     class Meta:
         unique_together = ('user', 'module') 
     def __str__(self):
-        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
+        return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
 
 
-class ExerciseResponse(models.Model):
+class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
     question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
@@ -168,4 +179,60 @@ class ExerciseResponse(models.Model):
         return f"Response by {self.user.user.username} for {self.question}"
 
 
+# Questionnaire-related models
+class Questionnaire_UserResponse(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+        
 
+class QuestionResponse(models.Model):
+    user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    rating_value = models.IntegerField(
+    null=True, 
+    blank=True, 
+    validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    def clean(self):
+        if self.question.question_type == 'RATING' and self.rating_value is None:
+            raise ValidationError('Rating scale questions require a rating value')
+
+        if self.question.question_type == 'AGREEMENT' and self.rating_value is None:
+            raise ValidationError('Agreement scale questions require a selection')
+
+
+class StickyNote(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='sticky_notes')
+    content = models.TextField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    def __str__(self):
+        return f"StickyNote by {self.user.user.username}"
+
+
+class JournalEntry(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Correct user reference
+    date = models.DateField(default=now)  # Ensures each entry belongs to a specific day
+
+    # New Fields:
+    connected_with_family = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    expressed_gratitude = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    caffeine = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    hydration = models.PositiveIntegerField(blank=True, null=True)
+    goal_progress = models.CharField(max_length=10, choices=[("low", "Low"), ("moderate", "Moderate"), ("high", "High")], blank=True, null=True)
+    outdoors = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    sunset = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    stress = models.CharField(max_length=10, choices=[("low", "Low"), ("medium", "Medium"), ("high", "High")], blank=True, null=True)
+    sleep_hours = models.PositiveIntegerField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('user', 'date')  # Ensure only one entry per day per user
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"
