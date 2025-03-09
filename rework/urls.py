@@ -100,7 +100,7 @@ urlpatterns = [
     # Other
     path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
-    path('users_management/', clientViews.users_management, name='users_management'),
+    path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
 ]
 
 # Debug settings (corrected)

@@ -312,6 +312,7 @@ def user_detail_view(request, user_id):
         'questionnaires_with_responses': questionnaires_with_responses,  # 👈 Fixed context structure
     }
     return render(request, 'client/user_detail.html', context)
+
 def programs(request):
     programs = Program.objects.prefetch_related('program_modules__module').all()
     return render(request, 'client/programs.html', {'programs': programs})

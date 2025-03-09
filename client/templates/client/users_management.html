@@ -36,7 +36,7 @@
         </thead>
         <tbody>
             {% for user in users %}
-            <tr onclick="window.location.href='{% url 'user_detail' user.id %}'" style="cursor: pointer;">
+            <tr onclick="window.location.href='{% url 'user_detail_view' user.id %}'" style="cursor: pointer;">
                 <td>{{ user.id }}</td>
                 <td>{{ user.full_name }}</td>
                 <td>{{ user.user.email }}</td>

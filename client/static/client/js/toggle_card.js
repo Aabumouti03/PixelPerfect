@@ -1,21 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
     const toggleButton = document.getElementById("toggleModules");
-    const moduleList = document.getElementById("moduleList");
+    const moduleList = document.getElementById("moduleList");  // Main module container
     const hiddenModules = document.querySelectorAll(".hidden-module");
+
+    if (!toggleButton || !moduleList) {
+        return;  // Stop execution if elements don't exist
+    }
+
     let isExpanded = false;
 
-    if (toggleButton) {
-        toggleButton.addEventListener("click", function () {
-            isExpanded = !isExpanded;
+    toggleButton.addEventListener("click", function () {
+        isExpanded = !isExpanded;
 
-            hiddenModules.forEach(module => {
-                module.style.display = isExpanded ? "flex" : "none";
-            });
-
-            toggleButton.textContent = isExpanded ? "View Less" : "View All";
+        hiddenModules.forEach(module => {
+            module.style.display = isExpanded ? "flex" : "none";  // Ensure flex layout
         });
-    }
+
+        toggleButton.textContent = isExpanded ? "View Less" : "View All";
+    });
 });
+
 
 function toggleAnswers(questionnaireId) {
     let answersContainer = document.getElementById(`answers-${questionnaireId}`);
