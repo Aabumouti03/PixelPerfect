@@ -118,6 +118,16 @@ class EndUserProfileForm(forms.ModelForm):
             'ethnicity': forms.Select(attrs={'class': 'form-control'}, choices=EndUser.ETHNICITY_CHOICES),
             'last_time_to_work': forms.Select(attrs={'class': 'form-control'}, choices=EndUser.TIME_DURATION_CHOICES),
         }
+    
+    def __init__(self, *args, **kwargs):
+        """Convert choices to a list before modifying them."""
+        super().__init__(*args, **kwargs)
+
+        self.fields['gender'].choices = [("", "Select Gender:")] + [choice for choice in self.fields['gender'].choices if choice[0] != '']
+        self.fields['sector'].choices = [("", "Select Sector:")] + [choice for choice in self.fields['sector'].choices if choice[0] != '']
+        self.fields['ethnicity'].choices = [("", "Select Ethnicity:")] + [choice for choice in self.fields['ethnicity'].choices if choice[0] != '']
+        self.fields['last_time_to_work'].choices = [("", "Select Time Since Last Work:")] + [choice for choice in self.fields['last_time_to_work'].choices if choice[0] != '']
+
 
 class LogInForm(AuthenticationForm):
     """Form for user log in."""
@@ -128,9 +138,8 @@ class LogInForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
 
-
 class UserProfileForm(forms.ModelForm):
-
+    """This is for the user's profile section in the dashboard."""
     #  User fields related to User model
     first_name = forms.CharField(max_length=50, required=True)
     last_name = forms.CharField(max_length=50, required=True)
