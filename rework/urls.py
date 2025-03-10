@@ -6,6 +6,9 @@ from django.conf import settings
 from client import views as clientViews
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
+from client import views
+from client.views import delete_module
+from users.views import enroll_module, unenroll_module 
 
 urlpatterns = [
     # Admin URL
@@ -47,20 +50,11 @@ urlpatterns = [
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-    
-    
-    #Modules urls for the client#######
-    path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  
-    path('add_module/', views.add_module, name='add_module'),#####
-    path("delete_module/<int:module_id>/", delete_module, name="delete_module"),####
-    path("client_modules/", views.client_modules, name="client_modules"), #/////
-
     path('programs/<int:program_id>/update_order/', clientViews.update_module_order, name="update_module_order"),
 
     # Dashboard
     path('users_management/', clientViews.users_management, name='users_management'),
-    path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
-
+    
     # Categories
     path('create_category/', clientViews.create_category, name='create_category'),
     path('category_list/', clientViews.category_list, name='category_list'),  
@@ -82,7 +76,6 @@ urlpatterns = [
     path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
     path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
-    path('all_modules/', usersViews.all_modules, name='all_modules'),
     path('mark_done/', usersViews.mark_done, name='mark_done'),
 
     # User dashboard details
@@ -108,6 +101,20 @@ urlpatterns = [
     path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
+    
+    # Modules
+    path("enroll-module/", enroll_module, name="enroll_module"),
+    path("unenroll-module/", unenroll_module, name="unenroll_module"), 
+    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('all_modules/', usersViews.all_modules, name='all_modules'),
+    
+    # Client Modules
+    path("client_modules/", views.client_modules, name="client_modules"),
+    path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  
+    path('add_module/', views.add_module, name='add_module'),
+    path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
+    path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+    
 ]
 
 # Debug settings (corrected)

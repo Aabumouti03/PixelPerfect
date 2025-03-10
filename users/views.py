@@ -666,12 +666,17 @@ def user_modules(request):
     user = request.user
     end_user, created = EndUser.objects.get_or_create(user=user)
 
-    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
+    # enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
+    
+    # Fetch enrolled modules
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).select_related('module')
 
     module_data = []
+
     for enrollment in enrolled_modules:
         module = enrollment.module
         progress = UserModuleProgress.objects.filter(user=end_user, module=module).first()
+
         progress_percentage = progress.completion_percentage if progress else 0
         background_style = module.background_style  # Get BackgroundStyle object
 
@@ -681,7 +686,8 @@ def user_modules(request):
             "description": module.description,
             "progress": progress_percentage,
             "background_color": background_style.background_color if background_style else "#ffffff",
-            "background_image": background_style.get_background_image_url() if background_style else "none",
+            "background_image": f'img/backgrounds/{module.id}.jpg'  # Change based on actual background path
+
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})
@@ -834,10 +840,88 @@ def mark_done(request):
 
     return JsonResponse({"success": False})
 
+
+@login_required
+def unenroll_module(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            module_title = data.get("title")
+
+            # Find the module
+            module = Module.objects.filter(title=module_title).first()
+            if not module:
+                return JsonResponse({"success": False, "error": "Module not found"}, status=404)
+
+            user = request.user
+            try:
+                end_user = EndUser.objects.get(user=user)
+            except EndUser.DoesNotExist:
+                return JsonResponse({"success": False, "error": "User not found"}, status=400)
+
+            # Check if the user is enrolled
+            enrollment = UserModuleEnrollment.objects.filter(user=end_user, module=module)
+            if not enrollment.exists():
+                return JsonResponse({"success": False, "error": "Not enrolled"}, status=400)
+
+            # Delete the enrollment
+            enrollment.delete()
+
+            return JsonResponse({"success": True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
+@login_required
+def enroll_module(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            module_title = data.get("title")
+            if not module_title:
+                return JsonResponse({"success": False, "error": "Missing module title"}, status=400)
+
+            # Check if the module exists
+            module = Module.objects.filter(title=module_title).first()
+            if not module:
+                return JsonResponse({"success": False, "error": "Module not found"}, status=404)
+
+            user = request.user
+            end_user, created = EndUser.objects.get_or_create(user=user)
+
+            # Check if the user is already enrolled
+            if UserModuleEnrollment.objects.filter(user=end_user, module=module).exists():
+                return JsonResponse({"success": False, "error": "Already enrolled"}, status=400)
+
+            # Enroll the user
+            UserModuleEnrollment.objects.create(user=end_user, module=module)
+
+            return JsonResponse({"success": True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 @login_required
 def all_modules(request):
-    modules = Module.objects.all()
-    return render(request, 'users/all_modules.html', {'modules': modules})
+    allModules = Module.objects.all()  # Fetch all modules
+    user = request.user
+
+    # Get the current user's enrolled modules
+    try:
+        end_user = EndUser.objects.get(user=user)
+        enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module__title', flat=True)
+    except EndUser.DoesNotExist:
+        enrolled_modules = []
+
+    return render(request, 'users/all_modules.html', {
+        'all_modules': allModules,
+        'enrolled_modules': list(enrolled_modules)  # Convert QuerySet to list
+    })
 
 @login_required
 def welcome_view(request):
