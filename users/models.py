@@ -4,10 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
 from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
 from django.core.exceptions import ValidationError 
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
 from django.conf import settings
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now  # ✅ Fix: Import now
@@ -35,6 +32,9 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
 
+    # Fields for email change verification
+    new_email = models.EmailField(unique=True, blank=True, null=True)
+    email_verified = models.BooleanField(default=False)
 
     class Meta:
         """Model options."""
