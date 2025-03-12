@@ -140,9 +140,14 @@ LOGIN_URL = '/log_in/'
 LOGIN_REDIRECT_URL = '' 
 LOGOUT_REDIRECT_URL = 'log_in'
 
+
 # Email verifications set up
 env = environ.Env()
-environ.Env.read_env()  # This will read the .env file
+env_file = BASE_DIR / '.env'
+
+# Read the .env file
+environ.Env.read_env(env_file)
+
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
