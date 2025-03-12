@@ -22,7 +22,7 @@ from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from users.helpers_modules import calculate_progress
+from users.helpers_modules import calculate_progress, update_user_program_progress
 from django.contrib.auth.decorators import login_required 
 from client.models import Category, Program,ModuleRating,Exercise
 from django.shortcuts import redirect, render,  get_object_or_404
@@ -369,6 +369,9 @@ def view_program(request, program_id):
 
     program = user_program_enrollment.program
     program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
+    
+    # Update progress
+    update_user_program_progress(end_user, program)
 
     # Fetch user progress for each module
     user_progress = {
@@ -835,6 +838,18 @@ def mark_done(request):
         })
 
     return JsonResponse({"success": False})
+
+@login_required
+def program_progress(request):
+    program = Program.objects.get(id=program_id)
+    end_user, created = EndUser.objects.get_or_create(user=request.user)
+    
+    # Update progress
+    update_user_program_progress(end_user, program)
+
+    # Render the response
+    return render(request, 'some_template.html', {'program': program})
+
 
 
 def all_modules(request):
