@@ -18,7 +18,6 @@ import random
 import logging
 from django.urls import reverse
 from django.db.models import Avg
-from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -31,6 +30,12 @@ from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileFor
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module
 logger = logging.getLogger(__name__)
 from collections import defaultdict
+
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
 
 
 def questionnaire(request):
@@ -413,7 +418,6 @@ def modules(request):
 #edit back to users/profile.html later
 def profile(request):
     return render(request, 'users/profile.html')
-    return render(request, 'users/profile.html')
 
 
 def about(request):
@@ -515,8 +519,18 @@ def show_profile(request):
     """View to display the user profile"""
     user = request.user
 
+    # Check if the session variable exists
+    if 'profile_update_popup' in request.session:
+        # If the session variable is set, show the pop-up message
+        profile_update_popup = request.session['profile_update_popup']
+
+        # Remove the session variable after showing the message
+        del request.session['profile_update_popup']
+    else:
+        profile_update_popup = None
+
     if hasattr(user, 'User_profile'):
-        return render(request, 'users/Profile/show_profile.html', {'user': user})
+        return render(request, 'users/Profile/show_profile.html', {'user': user, 'profile_update_popup': profile_update_popup})
     else:
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
@@ -524,7 +538,7 @@ def show_profile(request):
  
 @login_required  
 def update_profile(request):
-    """Update user profile details."""
+    """Update user profile details, including email verification."""
     user = request.user  
 
     if not hasattr(user, 'User_profile'):
@@ -535,25 +549,80 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
-            
+
+            # Handle email change verification
+            new_email = form.cleaned_data.get("new_email")
+            if new_email:
+                new_email = new_email.strip().lower()  # Convert to lowercase
+                
+                # Only proceed if the email has actually changed
+                if new_email != user.email.lower():  # Ensure case-insensitive comparison
+                    # Save the new email for verification
+                    user.new_email = new_email
+                    user.save()
+
+                    # Generate email verification token
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = default_token_generator.make_token(user)
+
+                    # Create verification link
+                    verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
+
+                    # Send verification email
+                    send_mail(
+                        "Confirm Your Email Change",
+                        f"Click the link to confirm your email change: {verification_link}",
+                        "noreply@example.com",
+                        [new_email],
+                        fail_silently=False,
+                    )
+
+                    request.session['profile_update_popup'] = 'verification_sent'
+                else:
+                    # If the email hasn't changed, just don't do anything with the email
+                    user.new_email = None
+                    user.save()
+
+            # Handle password update
             new_password = form.cleaned_data.get("new_password")
             if new_password:
-                print("Updating password for user:", user.username)  # Debugging
                 user.set_password(new_password)
                 user.save()
-                print("Password updated successfully!")  # Debugging
                 update_session_auth_hash(request, user)
 
-            messages.success(request, "Your profile has been updated successfully!")
             return redirect('show_profile')
 
         else:
-            print("Form is invalid! Errors:", form.errors)  # Debugging
- 
+            messages.error(request, "There were errors in the form.")
+
     else:
         form = UserProfileForm(instance=user.User_profile, user=user)
 
     return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
+
+
+def verify_email(request, uidb64, token):
+    try:
+        # Decode user id
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        User = get_user_model()
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return HttpResponse("Invalid verification link.")
+    
+    # Check token validity
+    if default_token_generator.check_token(user, token):
+        if user.new_email:  # Ensure there's a new email to set
+            user.email = user.new_email 
+            user.new_email = None  
+            user.email_verified = True  
+            user.save()
+            
+            request.session['profile_update_popup'] = 'profile_updated'
+            # login(request, user)  # Log the user back in after email change
+            return redirect('log_in')
+
+    return HttpResponse("Invalid or expired token.")
 
 
 @login_required

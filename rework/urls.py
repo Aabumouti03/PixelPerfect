@@ -43,6 +43,8 @@ urlpatterns = [
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
+    path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
+
 
     # Program-related URLs
     path('programs/', clientViews.programs, name='programs'),

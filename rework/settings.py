@@ -139,4 +139,10 @@ LOGIN_URL = '/log_in/'
 LOGIN_REDIRECT_URL = '' 
 LOGOUT_REDIRECT_URL = 'log_in'
 
-
+# Email verifications set up
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "re.work.website2025@gmail.com"
+EMAIL_HOST_PASSWORD = "ojba fwnx qkzf dzaw"  # Paste the App Password here
