@@ -10,6 +10,7 @@ class MarkDoneViewTest(TestCase):
 
     def setUp(self):
         # Create a user
+        #
         self.user = User.objects.create_user(username="testuser", password="testpassword")
 
         # Create a Module

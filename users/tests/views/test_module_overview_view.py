@@ -7,6 +7,7 @@ from users.models import EndUser
 class ModuleOverviewViewTest(TestCase):
     def setUp(self):
         # Create a user using the custom User model
+        #
         self.user = User.objects.create_user(username="testuser", password="testpassword")
 
         # Create a Module
