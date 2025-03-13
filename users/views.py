@@ -1,3 +1,16 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import StickyNote, EndUser, Program
+import json
+from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth.models import User  
 
 import os
 import json
@@ -5,7 +18,6 @@ import random
 import logging
 from django.urls import reverse
 from django.db.models import Avg
-from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -18,6 +30,12 @@ from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileFor
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module
 logger = logging.getLogger(__name__)
 from collections import defaultdict
+
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
 
 
 def questionnaire(request):
@@ -243,6 +261,152 @@ def view_program(request, program_id):
 
 
 
+from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
+from django.shortcuts import render, get_object_or_404
+from client.models import Program
+from users.models import UserProgramEnrollment, EndUser, JournalEntry
+from django.utils.timezone import now
+from datetime import datetime, timedelta
+
+
+
+@csrf_exempt
+@login_required
+def save_notes(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        content = data.get('content')
+
+        # Get the EndUser instance for the logged-in user
+        end_user = EndUser.objects.get(user=request.user)
+
+        # Get or create the sticky note for the current user
+        sticky_note, created = StickyNote.objects.get_or_create(user=end_user)
+        sticky_note.content = content
+        sticky_note.save()
+
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@login_required
+def get_notes(request):
+    try:
+        # Get the EndUser instance for the logged-in user
+        end_user = EndUser.objects.get(user=request.user)
+        sticky_note = StickyNote.objects.get(user=end_user)
+        return JsonResponse({'success': True, 'content': sticky_note.content})
+    except StickyNote.DoesNotExist:
+        return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
+    
+from django.shortcuts import render, get_object_or_404
+from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, EndUser
+
+
+from django.shortcuts import render
+from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, UserModuleEnrollment, EndUser
+from django.shortcuts import render, get_object_or_404
+from client.models import Program, ProgramModule
+from users.models import UserProgramEnrollment, EndUser
+
+
+@login_required
+def dashboard(request):
+    user = request.user
+
+    try:
+        end_user = EndUser.objects.get(user=user)
+    except EndUser.DoesNotExist:
+        end_user = EndUser.objects.create(user=user)
+
+    # Fetch the program the user is enrolled in (if any)
+    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
+    program = user_program_enrollment.program if user_program_enrollment else None
+
+    # Fetch program modules if the user is enrolled, sorted by order
+    program_modules = program.program_modules.all().order_by("order") if program else []
+
+    # Get user progress for each module
+    user_progress = {
+        progress.module.id: progress.completion_percentage
+        for progress in UserModuleProgress.objects.filter(user=end_user)
+    }
+
+    # Mark only the first module as accessible
+    previous_module_completed = True  # The first module is always accessible
+    for program_module in program_modules:
+        module = program_module.module
+        module.progress_value = user_progress.get(module.id, 0)
+
+        if previous_module_completed:
+            module.is_unlocked = True  # Unlock if it's the first or previous is completed
+        else:
+            module.is_unlocked = False  # Keep locked
+
+        previous_module_completed = module.progress_value == 100  # Update for next iteration
+
+    # Get modules outside the program that the user is enrolled in
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
+    outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
+
+    context = {
+        'user': user,
+        'program': program,
+        'program_modules': program_modules,
+        'outside_modules': outside_modules,  # Only enrolled modules outside the program
+    }
+    return render(request, 'users/dashboard.html', context)
+
+
+@login_required
+def view_program(request, program_id):
+    user = request.user
+
+    try:
+        end_user = EndUser.objects.get(user=user)
+    except EndUser.DoesNotExist:
+        return render(request, 'users/program_not_found.html')
+
+    # Get the user's enrolled program
+    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user, program_id=program_id).first()
+    
+    if not user_program_enrollment:
+        return render(request, 'users/program_not_found.html')
+
+    program = user_program_enrollment.program
+    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
+
+    # Fetch user progress for each module
+    user_progress = {
+        progress.module.id: progress.completion_percentage
+        for progress in UserModuleProgress.objects.filter(user=end_user)
+    }
+
+    # Assign progress values and determine if a module is locked
+    previous_completed = True  # First module should be unlocked
+    for index, program_module in enumerate(program_modules):
+        module = program_module.module
+        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
+        module.module_order = index + 1  # Assign order number
+
+        # Lock modules that are not the first and depend on previous completion
+        if previous_completed:
+            module.locked = False
+        else:
+            module.locked = True
+
+        # Update `previous_completed` for the next iteration
+        previous_completed = module.progress_value == 100
+
+    context = {
+        'user': user,
+        'program': program,
+        'program_modules': program_modules,
+    }
+    
+    return render(request, 'users/view_program.html', context)
+
+
+#A function for displaying a page that welcomes users
 def welcome_page(request):
     '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
@@ -355,8 +519,18 @@ def show_profile(request):
     """View to display the user profile"""
     user = request.user
 
+    # Check if the session variable exists
+    if 'profile_update_popup' in request.session:
+        # If the session variable is set, show the pop-up message
+        profile_update_popup = request.session['profile_update_popup']
+
+        # Remove the session variable after showing the message
+        del request.session['profile_update_popup']
+    else:
+        profile_update_popup = None
+
     if hasattr(user, 'User_profile'):
-        return render(request, 'users/Profile/show_profile.html', {'user': user})
+        return render(request, 'users/Profile/show_profile.html', {'user': user, 'profile_update_popup': profile_update_popup})
     else:
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
@@ -364,7 +538,7 @@ def show_profile(request):
  
 @login_required  
 def update_profile(request):
-    """Update user profile details."""
+    """Update user profile details, including email verification."""
     user = request.user  
 
     if not hasattr(user, 'User_profile'):
@@ -375,25 +549,80 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
-            
+
+            # Handle email change verification
+            new_email = form.cleaned_data.get("new_email")
+            if new_email:
+                new_email = new_email.strip().lower()  # Convert to lowercase
+                
+                # Only proceed if the email has actually changed
+                if new_email != user.email.lower():  # Ensure case-insensitive comparison
+                    # Save the new email for verification
+                    user.new_email = new_email
+                    user.save()
+
+                    # Generate email verification token
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = default_token_generator.make_token(user)
+
+                    # Create verification link
+                    verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
+
+                    # Send verification email
+                    send_mail(
+                        "Confirm Your Email Change",
+                        f"Click the link to confirm your email change: {verification_link}",
+                        "noreply@example.com",
+                        [new_email],
+                        fail_silently=False,
+                    )
+
+                    request.session['profile_update_popup'] = 'verification_sent'
+                else:
+                    # If the email hasn't changed, just don't do anything with the email
+                    user.new_email = None
+                    user.save()
+
+            # Handle password update
             new_password = form.cleaned_data.get("new_password")
             if new_password:
-                print("Updating password for user:", user.username)  # Debugging
                 user.set_password(new_password)
                 user.save()
-                print("Password updated successfully!")  # Debugging
                 update_session_auth_hash(request, user)
 
-            messages.success(request, "Your profile has been updated successfully!")
             return redirect('show_profile')
 
         else:
-            print("Form is invalid! Errors:", form.errors)  # Debugging
- 
+            messages.error(request, "There were errors in the form.")
+
     else:
         form = UserProfileForm(instance=user.User_profile, user=user)
 
     return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
+
+
+def verify_email(request, uidb64, token):
+    try:
+        # Decode user id
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        User = get_user_model()
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return HttpResponse("Invalid verification link.")
+    
+    # Check token validity
+    if default_token_generator.check_token(user, token):
+        if user.new_email:  # Ensure there's a new email to set
+            user.email = user.new_email 
+            user.new_email = None  
+            user.email_verified = True  
+            user.save()
+            
+            request.session['profile_update_popup'] = 'profile_updated'
+            # login(request, user)  # Log the user back in after email change
+            return redirect('log_in')
+
+    return HttpResponse("Invalid or expired token.")
 
 
 @login_required
@@ -506,7 +735,10 @@ def user_modules(request):
     user = request.user
     end_user, created = EndUser.objects.get_or_create(user=user)
 
-    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
+    # enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
+    
+    # Fetch enrolled modules
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).select_related('module')
 
     module_data = []
 
@@ -523,7 +755,8 @@ def user_modules(request):
             "description": module.description,
             "progress": progress_percentage,
             "background_color": background_style.background_color if background_style else "#ffffff",
-            "background_image": background_style.get_background_image_url() if background_style else "none",
+            "background_image": f'img/backgrounds/{module.id}.jpg'  # Change based on actual background path
+
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})
@@ -677,9 +910,87 @@ def mark_done(request):
     return JsonResponse({"success": False})
 
 
+@login_required
+def unenroll_module(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            module_title = data.get("title")
+
+            # Find the module
+            module = Module.objects.filter(title=module_title).first()
+            if not module:
+                return JsonResponse({"success": False, "error": "Module not found"}, status=404)
+
+            user = request.user
+            try:
+                end_user = EndUser.objects.get(user=user)
+            except EndUser.DoesNotExist:
+                return JsonResponse({"success": False, "error": "User not found"}, status=400)
+
+            # Check if the user is enrolled
+            enrollment = UserModuleEnrollment.objects.filter(user=end_user, module=module)
+            if not enrollment.exists():
+                return JsonResponse({"success": False, "error": "Not enrolled"}, status=400)
+
+            # Delete the enrollment
+            enrollment.delete()
+
+            return JsonResponse({"success": True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
+@login_required
+def enroll_module(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            module_title = data.get("title")
+            if not module_title:
+                return JsonResponse({"success": False, "error": "Missing module title"}, status=400)
+
+            # Check if the module exists
+            module = Module.objects.filter(title=module_title).first()
+            if not module:
+                return JsonResponse({"success": False, "error": "Module not found"}, status=404)
+
+            user = request.user
+            end_user, created = EndUser.objects.get_or_create(user=user)
+
+            # Check if the user is already enrolled
+            if UserModuleEnrollment.objects.filter(user=end_user, module=module).exists():
+                return JsonResponse({"success": False, "error": "Already enrolled"}, status=400)
+
+            # Enroll the user
+            UserModuleEnrollment.objects.create(user=end_user, module=module)
+
+            return JsonResponse({"success": True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@login_required
 def all_modules(request):
-    modules = Module.objects.all()
-    return render(request, 'users/all_modules.html', {'modules': modules})
+    allModules = Module.objects.all()  # Fetch all modules
+    user = request.user
+
+    # Get the current user's enrolled modules
+    try:
+        end_user = EndUser.objects.get(user=user)
+        enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module__title', flat=True)
+    except EndUser.DoesNotExist:
+        enrolled_modules = []
+
+    return render(request, 'users/all_modules.html', {
+        'all_modules': allModules,
+        'enrolled_modules': list(enrolled_modules)  # Convert QuerySet to list
+    })
 
 @login_required
 def welcome_view(request):
@@ -872,3 +1183,88 @@ def assess_user_responses_modules(user):
         suggested_modules[category.name] = list(modules)  # Convert queryset to list
 
     return suggested_modules
+
+
+
+@login_required
+def journal_view(request, date=None):
+    """Loads the journal page and fetches saved data for a specific date."""
+    user = request.user
+
+    # Use today's date if none is provided
+    if date is None:
+        selected_date = now().date()
+    else:
+        try:
+            selected_date = datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError:
+            selected_date = now().date()
+
+    # Fetch the journal entry for the selected date (if it exists)
+    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
+
+    print(f"📖 [DEBUG] Rendering Journal for {selected_date}")
+    if journal_entry:
+        print(f"   Sleep Hours: {journal_entry.sleep_hours}")
+        print(f"   Caffeine: {journal_entry.caffeine}")
+        print(f"   Hydration: {journal_entry.hydration}")
+        print(f"   Stress: {journal_entry.stress}")
+        print(f"   Goal Progress: {journal_entry.goal_progress}")
+        print(f"   Notes: {journal_entry.notes}")
+    else:
+        print("❌ No journal entry found for this date.")
+
+    context = {
+        "selected_date": selected_date,
+        "journal_entry": journal_entry,
+        "previous_day": (selected_date - timedelta(days=1)).strftime("%Y-%m-%d"),
+        "next_day": (selected_date + timedelta(days=1)).strftime("%Y-%m-%d"),
+    }
+    
+    return render(request, "users/journal.html", context)  # ✅ Returns HTML, not JSON!
+
+
+@login_required
+@csrf_exempt
+def save_journal_entry(request):
+    """Handles saving journal entries using JSON."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Load JSON data
+            user = request.user
+            date_str = data.get("date")
+
+            if not date_str:
+                return JsonResponse({"success": False, "error": "Date is required."}, status=400)
+
+            # Convert string date to date object
+            try:
+                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
+
+            # Get or create journal entry
+            journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
+
+            # Debugging: Print before updating
+            print(f"🔹 BEFORE UPDATE: {journal_entry}")
+
+            # Update the entry with provided data
+            journal_entry.sleep_hours = int(data.get("sleep_hours", 0)) if data.get("sleep_hours") else None
+            journal_entry.caffeine = data.get("caffeine") or None
+            journal_entry.hydration = int(data.get("hydration", 0)) if data.get("hydration") else None
+            journal_entry.stress = data.get("stress") or None
+            journal_entry.goal_progress = data.get("goal_progress") or None
+            journal_entry.notes = data.get("notes") or None
+            journal_entry.save()
+
+            # Debugging: Print after updating
+            print(f"✅ AFTER UPDATE: {journal_entry}")
+
+            return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
+
+        except Exception as e:
+            print("❌ [SERVER ERROR]", str(e))  # Debugging
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)

@@ -16,8 +16,20 @@ from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import csv
+from django.db import transaction 
+from django.db.models import Max
+from client import views as clientViews
+from users import views as usersViews
+from users.views import enroll_module, unenroll_module 
+
+
+
+
+
+
+
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
@@ -270,19 +282,32 @@ def users_management(request):
     users = EndUser.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
 
-def modules_management(request):
-    modules = Module.objects.all().values("title")
-    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
-    
-    modules_list = []
-    for index, module in enumerate(modules):
-        module_data = {
-            "title": module["title"],
-            "color_class": module_colors[index % len(module_colors)]
-        }
-        modules_list.append(module_data)
+def user_detail_view(request, user_id):
+    user_profile = get_object_or_404(EndUser, user__id=user_id)
 
-    return render(request, "client/modules_management.html", {"modules": modules_list})
+    # Get enrolled programs & modules
+    enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
+
+    user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
+        user=user_profile
+    ).prefetch_related("questionnaire", "question_responses__question")
+
+    # Group responses by questionnaire
+    questionnaires_with_responses = {}
+    for user_response in user_questionnaire_responses:
+        if user_response.questionnaire not in questionnaires_with_responses:
+            questionnaires_with_responses[user_response.questionnaire] = []
+        for response in user_response.question_responses.all():
+            questionnaires_with_responses[user_response.questionnaire].append(response)
+
+    context = {
+        'user': user_profile,
+        'enrolled_programs': enrolled_programs,
+        'enrolled_modules': enrolled_modules,
+        'questionnaires_with_responses': questionnaires_with_responses,  # 👈 Fixed context structure
+    }
+    return render(request, 'client/user_detail.html', context)
 
 def programs(request):
     programs = Program.objects.prefetch_related('program_modules__module').all()
@@ -631,3 +656,58 @@ def export_user_statistics_csv(request):
         writer.writerow([f"Sector - {sector}", count])
 
     return response
+
+# Client Modules Views
+
+def module_overview(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    return render(request, "client/moduleOverview.html", {"module": module})
+
+def client_modules(request):
+    modules = Module.objects.all().values("id", "title", "description") 
+    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
+    
+    modules_list = []
+    for index, module in enumerate(modules):
+        module_data = {
+            "id": module["id"],
+            "title": module["title"],
+            "description": module["description"],  
+            "color_class": module_colors[index % len(module_colors)]
+        }
+        modules_list.append(module_data)
+
+    return render(request, "client/client_modules.html", {"modules": modules_list})
+
+
+def edit_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    
+    if request.method == "POST":
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            form.save()
+            return redirect('client_modules')  # Redirect back to module management
+    
+    else:
+        form = ModuleForm(instance=module)
+
+    return render(request, 'client/edit_module.html', {'form': form, 'module': module})
+
+def delete_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    module.delete()
+    return redirect("client_modules")
+
+
+def add_module(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        
+        if title and description:  # Ensure both fields are filled
+            new_module = Module.objects.create(title=title, description=description)
+            new_module.save()
+            return redirect("client_modules")  # Redirect to the Client Modules page
+    return render(request, "client/add_module.html")
+

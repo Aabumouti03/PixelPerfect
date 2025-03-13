@@ -3,7 +3,13 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
 from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from django.core.exceptions import ValidationError 
 from django.conf import settings
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.timezone import now  # ✅ Fix: Import now
+from django.core.exceptions import ValidationError
+
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -19,13 +25,16 @@ class User(AbstractUser):
         unique=True,
         validators=[RegexValidator(
             regex=r'^\w{3,}$',
-            message='Username must consist of @ followed by at least three alphanumericals'
+            message='Username must consist at least three alphanumericals'
         )]
     )
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
 
+    # Fields for email change verification
+    new_email = models.EmailField(unique=True, blank=True, null=True)
+    email_verified = models.BooleanField(default=False)
 
     class Meta:
         """Model options."""
@@ -160,7 +169,7 @@ class UserModuleProgress(models.Model):
         return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
 
 
-class ExerciseResponse(models.Model):
+class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
     question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
@@ -204,3 +213,26 @@ class StickyNote(models.Model):
 
     def __str__(self):
         return f"StickyNote by {self.user.user.username}"
+
+
+class JournalEntry(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Correct user reference
+    date = models.DateField(default=now)  # Ensures each entry belongs to a specific day
+
+    # New Fields:
+    connected_with_family = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    expressed_gratitude = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    caffeine = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    hydration = models.PositiveIntegerField(blank=True, null=True)
+    goal_progress = models.CharField(max_length=10, choices=[("low", "Low"), ("moderate", "Moderate"), ("high", "High")], blank=True, null=True)
+    outdoors = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    sunset = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
+    stress = models.CharField(max_length=10, choices=[("low", "Low"), ("medium", "Medium"), ("high", "High")], blank=True, null=True)
+    sleep_hours = models.PositiveIntegerField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('user', 'date')  # Ensure only one entry per day per user
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"

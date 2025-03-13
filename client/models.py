@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
+from django.core.exceptions import ValidationError
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [

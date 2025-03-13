@@ -1,0 +1,147 @@
+/* General Page Styling */
+.journal-container {
+    max-width: 900px; /* Increase the width */
+    margin: 20px auto; /* Center it */
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+/* Header and Navigation */
+.journal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.journal-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 25px; /* Increase spacing */
+}
+
+.journal-entry label {
+    font-weight: bold;
+    font-size: 18px; /* Make text larger */
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.nav-button {
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #F24505;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out;
+}
+
+.nav-button:hover {
+    background: rgba(242, 69, 5, 0.1);
+}
+
+/* Journal Form */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+.journal-entry input,
+.journal-entry select,
+.journal-entry textarea {
+    width: 100%; /* Keep full width */
+    height: 40px; /* Reduce height */
+    font-size: 16px; /* Adjust font size for better readability */
+    padding: 10px; /* Adjust padding */
+    border: 2px solid #ccc;
+    border-radius: 8px; /* Slightly rounded edges */
+    box-sizing: border-box;
+}
+
+textarea {
+    min-height: 100px; /* Reduce the height of the text area */
+    resize: vertical; /* Allow resizing but keep it compact */
+}
+
+
+
+input:focus, select:focus, textarea:focus {
+    border-color: #F24505;
+}
+
+/* Toggle Group for Yes/No Questions */
+.toggle-group {
+    display: flex;
+    gap: 15px;
+}
+
+.toggle-group input {
+    display: none;
+}
+
+.toggle-group label {
+    cursor: pointer;
+    padding: 10px 20px;
+    background: #ddd;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+.toggle-group input:checked + label {
+    background: #F24505;
+    color: white;
+}
+
+/* Submit Button */
+.submit-btn {
+    background: #F24505;
+    color: white;
+    font-size: 1rem;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #d93800;
+}
+
+/* Success Message */
+#success-message {
+    display: none; /* Hide initially */
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#success-message.hidden {
+    display: none;
+}
+
+.hidden {
+    display: none;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -118,6 +118,16 @@ class EndUserProfileForm(forms.ModelForm):
             'ethnicity': forms.Select(attrs={'class': 'form-control'}, choices=EndUser.ETHNICITY_CHOICES),
             'last_time_to_work': forms.Select(attrs={'class': 'form-control'}, choices=EndUser.TIME_DURATION_CHOICES),
         }
+    
+    def __init__(self, *args, **kwargs):
+        """Convert choices to a list before modifying them."""
+        super().__init__(*args, **kwargs)
+
+        self.fields['gender'].choices = [("", "Select Gender:")] + [choice for choice in self.fields['gender'].choices if choice[0] != '']
+        self.fields['sector'].choices = [("", "Select Sector:")] + [choice for choice in self.fields['sector'].choices if choice[0] != '']
+        self.fields['ethnicity'].choices = [("", "Select Ethnicity:")] + [choice for choice in self.fields['ethnicity'].choices if choice[0] != '']
+        self.fields['last_time_to_work'].choices = [("", "Select Time Since Last Work:")] + [choice for choice in self.fields['last_time_to_work'].choices if choice[0] != '']
+
 
 class LogInForm(AuthenticationForm):
     """Form for user log in."""
@@ -128,14 +138,15 @@ class LogInForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
 
-
 class UserProfileForm(forms.ModelForm):
-
+    """This is for the user's profile section in the Profile Page."""
     #  User fields related to User model
     first_name = forms.CharField(max_length=50, required=True)
     last_name = forms.CharField(max_length=50, required=True)
     username = forms.CharField(max_length=30, required=True)
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=False, disabled=True)
+    new_email = forms.EmailField(required=False)  # New email field
+
 
     new_password = forms.CharField(
         required=False,
@@ -170,6 +181,7 @@ class UserProfileForm(forms.ModelForm):
             self.fields['last_name'].initial = user.last_name
             self.fields['username'].initial = user.username
             self.fields['email'].initial = user.email
+            self.fields['new_email'].initial = user.email
 
             if hasattr(user, 'User_profile'):
                 end_user = user.User_profile
@@ -259,6 +271,23 @@ class UserProfileForm(forms.ModelForm):
         # Normalize email to lowercase before saving
         self.cleaned_data['email'] = email
         return email  
+    
+    def clean_new_email(self):
+        """Ensure new email is unique, case-insensitive, and properly formatted before verification."""
+        new_email = self.cleaned_data.get('new_email')
+
+        if new_email:
+            new_email = new_email.strip().lower()  # Convert to lowercase
+            user_id = self.instance.user.id if hasattr(self.instance, 'user') else None  # Get the current User ID
+
+            # Ensure new email is unique and not the same as the current user's email
+            if User.objects.exclude(id=user_id).filter(email=new_email).exists():
+                self.add_error('new_email', "A user with this email already exists.")
+
+
+        return new_email
+
+
 
 
     def clean(self):
