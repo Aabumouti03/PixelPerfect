@@ -2,24 +2,29 @@
 html, body {
     font-family: Arial, sans-serif;
     background-color: #f8f8f8;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    flex-direction: column;
-    overflow-y: auto;
+    display: block; /* Remove flex so scrolling works */
+    overflow-y: auto; /* Ensure vertical scrolling */
 }
+
 
 .content {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
     min-height: 100vh;
     padding: 50px 0;
+    overflow: visible; /* Ensure content is scrollable */
+    overflow-y: auto; /* Ensure vertical scrolling */
+    height: auto; /* Allow content to expand */
+    display: block !important; /* Override base.css */
+    margin-left: 60px !important; /* Keep consistent spacing */
+    transition: none !important; /* Prevent unwanted shifts */
 }
+
 
 .profile-container {
     display: flex;
@@ -33,8 +38,10 @@ html, body {
     min-width: 500px;
     align-items: flex-start;
     gap: 15px;
-    margin: 0 auto;
+    position: static !important; /* Prevent sticking */
+    margin: 20px auto 50px !important; /* Top margin to push it up */
 }
+
 
 /* Profile Header */
 .profile-header {
@@ -102,7 +109,8 @@ html, body {
 .profile-details input,
 .profile-details select,
 .profile-details textarea {
-    width: 100%;
+    width: 100% !important; /* Ensure full width */
+    max-width: none !important; /* Override any max width */
     height: 50px;
     padding: 14px 18px;
     font-size: 16px;
@@ -111,6 +119,7 @@ html, body {
     background-color: #FBFCF5;
     box-sizing: border-box;
 }
+
 
 /* Password Wrapper with Eye Inside */
 .password-wrapper {
