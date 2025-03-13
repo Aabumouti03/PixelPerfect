@@ -375,7 +375,7 @@ def view_program(request, program_id):
     program = user_program_enrollment.program
     program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
     
-    # Update progress
+    # Update user's program progress
     update_user_program_progress(end_user, program)
 
     # Fetch user progress for each module
