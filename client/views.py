@@ -1,7 +1,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404, redirect, get_object_or_404
 from client.models import Program, Module
-from django.shortcuts import render, get_object_or_404, EndUser, UserProgramEnrollment
+from django.shortcuts import render, get_object_or_404
 from client.models import Module, Category
 from collections import Counter
 import json

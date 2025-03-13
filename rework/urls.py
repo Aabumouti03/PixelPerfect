@@ -61,11 +61,7 @@ urlpatterns = [
     path('sections/add/', clientViews.add_section, name='add_section'),
     path('sections/get_all/', clientViews.get_sections, name='get_sections'),
     path('exercises/add/', clientViews.add_exercise, name='add_exercise'), 
-    path('questions/add/', clientViews.add_question, name='add_question'),  # ✅ Ensure this path exists
-
-
-   
-]
+    path('questions/add/', clientViews.add_question, name='add_question'),  
 
 
     # Profile management
