@@ -1,0 +1,374 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+/* ✅ Main Layout: User Details on Left, Cards on Right */
+.user-detail-container {
+    display: flex;
+    justify-content: space-between; /* Keeps sections apart */
+    align-items: flex-start;
+    gap: 30px; /* Adjust spacing */
+    width: 100%;
+    padding: 20px;
+}
+
+/* ✅ General Card Styling for Consistency */
+.card {
+    width: 100%;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* ✅ Ensure Titles Are Left-Aligned */
+.card h2 {
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* ✅ Default smaller height when the card is empty */
+.empty-card {
+    min-height: 50px !important;  /* Smaller size when empty */
+    display: flex;
+    justify-content: center;
+}
+
+/* ✅ Ensure normal height when content is present */
+.card:not(.empty-card) {
+    min-height: 150px; /* Normal height when filled */
+}
+
+/* ✅ Style for text inside empty cards */
+.empty-card p {
+    font-size: 14px;
+    color: #777;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ✅ User Info Box - Now Styled as a Card */
+.user-info-box {
+    width: 350px; /* Fixed width */
+    min-height: 370px; /* Keeps consistent height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ✅ Right Section - Ensures Cards are Visible */
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+/* ✅ Program, Modules & Questionnaire Cards */
+.programs-container, 
+.modules-container, 
+.questionnaire-container {
+    position: relative;
+    width: 800px;
+    min-height: 100px; /* Keeps consistent size */
+}
+
+/* ✅ Module List - Keeps Modules Aligned */
+.module-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 10px;
+}
+
+/* ✅ **Larger Program Card with Proper Content Fit** */
+.program-card {
+    width: 100%;
+    max-width: 300px; /* Bigger card */
+    height: 100px; /* Fixed height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center content */
+    padding: 10px;
+    background: #FFA726; /* Warm yellow */
+    border-radius: 12px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative; /* Required to position progress text correctly */
+}
+
+/* ✅ **Bigger Title for Program Card Only** */
+.program-card h3 {
+    font-size: 1.2rem; /* Adjusted for better fit */
+    font-weight: bold;
+    margin: 0; /* Removes extra spacing */
+    color: #333; /* Darker text */
+}
+
+/* ✅ **Fixed Height & Layout for Module Cards** */
+.module-card {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative; /* Allows absolute positioning inside */
+}
+
+/* ✅ Fix: Ensure Right Section Cards Are Visible */
+.right-section .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 160px;
+}
+
+/* ✅ Alternate Colors for Modules */
+.module-card:nth-child(odd) {
+    background: #73C4FD;
+}
+.module-card:nth-child(even) {
+    background: #0148FD;
+}
+
+/* ✅ Title Consistency in Module Cards (Kept Smaller) */
+.module-card h3 {
+    font-size: 0.85rem; /* Default module title size */
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ✅ **Different Progress Bar Sizes for Program & Modules** */
+.program-card .progress-container {
+    width: 100%; /* Bigger progress bar */
+    height: 12px;
+    background: #E0E0E0; /* Light gray background */
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+/* ✅ **Keep Progress Bar Fixed at Bottom** */
+.module-card .progress-container {
+    width: 80%;
+    height: 6px;
+    background: #E0E0E0;
+    border-radius: 5px;
+    position: absolute; /* 🔥 Keeps the progress bar in the same spot */
+    bottom: 30px; /* 🔥 Ensures it stays in place */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* ✅ Progress Fill */
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3); /* Blue gradient */
+    border-radius: 6px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* ✅ Progress Percentage Text */
+.progress-text {
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+    color: #333;
+}
+
+/* ✅ Back Button Container - Fixed to Top Left */
+.back-button-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000; /* Ensures it stays on top */
+}
+
+/* ✅ Compact Back Button */
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px; /* Small gap between icon & text */
+    font-size: 14px;  /* Smaller font */
+    font-weight: bold;
+    padding: 6px 10px;  /* Compact padding */
+    background-color: #F24505; /* Primary color */
+    color: white;
+    text-decoration: none;
+    border-radius: 18px; /* Soft rounded edges */
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.15);
+    width: auto; /* Prevents stretching */
+}
+
+/* ✅ Arrow Icon */
+.back-button::before {
+    content: "←";
+    font-size: 20px; /* Smaller arrow */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* ✅ Hover Effect */
+.back-button:hover {
+    background-color: #c9301c; /* Darker shade */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+/* ✅ Hover Arrow Animation */
+.back-button:hover::before {
+    transform: translateX(-2px);
+}
+
+/* ✅ Initially hide extra modules */
+.hidden-module {
+    display: none; /* Extra modules are hidden */
+}
+
+/* ✅ Adjust module container height when expanded */
+.modules-container.expanded {
+    height: auto;
+}
+
+/* ✅ Style for the View All button */
+.view-all-button {
+    position: absolute;
+    bottom: 10px; /* 🔥 Pushes the button to the bottom */
+    right: 10px;
+    width: 85px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background-color: #F24505;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Manrope', sans-serif; /* 🔥 Ensures the same font is used */
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.view-all-button:hover {
+    background-color: #c9301c;
+}
+
+/* ✅ Style the questionnaire list */
+.questionnaire-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ✅ Style individual questionnaire responses */
+.questionnaire-item {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+}
+
+/* ✅ Style for agreement scale */
+.choice-list {
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    padding: 0;
+}
+
+.choice-item {
+    padding: 5px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    margin: 2px 0;
+}
+
+/* ✅ Highlight selected choice */
+.selected-choice {
+    background: #f24405;
+    color: white;
+    font-weight: bold;
+}
+
+/* ✅ Style for rating scale */
+.rating-scale {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.highlighted-rating {
+    font-weight: bold;
+    color: #000000;
+}
+
+/* ✅ Style for Questionnaire Header */
+.questionnaire-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+/* ✅ Hide Answers by Default */
+.hidden {
+    display: none;
+}
+
+/* ✅ Button Style */
+.view-answers-btn {
+    background-color: #F24505;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.view-answers-btn:hover {
+    background-color: #c9301c;
+}
+
+/* ✅ Responsive Adjustments */
+@media (max-width: 1024px) {
+    .user-detail-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-info-box, 
+    .right-section {
+        width: 90%;
+        max-width: none;
+    }
+
+    .module-card, 
+    .program-card {
+        width: 120px;
+        height: 120px;
+    }
+
+    .progress-container {
+        height: 5px;
+    }
+
+    .back-button {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .back-button::before {
+        font-size: 12px;
+    }
+}

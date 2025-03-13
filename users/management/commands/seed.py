@@ -1,13 +1,12 @@
 import django
 import os
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings")  
 django.setup()
 
 import random
 from django.contrib.auth import get_user_model
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, ProgramModule
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category
 from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment
 from client.models import Module, Section, Exercise, ExerciseQuestion, Program, BackgroundStyle
 from django.db import transaction
@@ -15,7 +14,7 @@ from django.core.management.base import BaseCommand
 from client.models import BACKGROUND_IMAGE_CHOICES
 
 User = get_user_model()
-
+# 
 # User Data
 USERS = [
     {"username": f"EndUser{i}", "email": f"enduser{i}@example.com", "is_staff": False, "is_superuser": False}
@@ -38,6 +37,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Where are you now?",
+                        "title": "Where are you now?",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What are you putting up with at the moment?",
@@ -53,6 +53,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Visualize and plan your ideal professional future.",
                 "exercises": [
                     {
+                        "title": " Your best possible self",
                         "title": " Your best possible self",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -77,6 +78,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Know your values",
+                        "title": "Know your values",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What do my core values mean to me?",
@@ -91,6 +93,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Define what you want to achieve in life and career.",
                 "exercises": [
                     {
+                        "title": "Be, do and have exercise",
                         "title": "Be, do and have exercise",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -113,6 +116,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Discover your natural talents and skills.",
                 "exercises": [
                     {
+                        "title": "Finding your strengths",
                         "title": "Finding your strengths",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -154,6 +158,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Where do you want to go",
+                        "title": "Where do you want to go",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What does your career look like?",
@@ -179,6 +184,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Identify barriers and strategies to overcome them.",
                 "exercises": [
                     {
+                        "title": "What is getting in the way",
                         "title": "What is getting in the way",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -222,8 +228,9 @@ class Command(BaseCommand):
         self.stdout.write("🚀 Starting database seeding...")
 
         with transaction.atomic():
-            self.seed_users()
+            
             self.seed_data()
+            self.seed_users()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
 
@@ -302,76 +309,72 @@ class Command(BaseCommand):
 
 
     def seed_data(self):
-        """Seeds the database with modules, sections, exercises, and questions."""
-        with transaction.atomic(): 
+            """Seeds the database with modules, categories, sections, exercises, and questions."""
+            with transaction.atomic(): 
 
-            background_styles = []
-            for pattern_key, pattern_url in BACKGROUND_IMAGE_CHOICES:
-                background_style, created = BackgroundStyle.objects.get_or_create(
-                    background_color="#73c4fd",  
-                    background_image=pattern_key,  
-                )
-                background_styles.append(background_style)
-                print(f"✅ Created BackgroundStyle: {background_style.background_image}")
+                # ✅ Step 1: Create Categories
+                categories = {
+                    "Career Development": None,
+                    "Personal Growth": None,
+                    "Professional Skills": None
+                }
 
-            for module_title, module_data in MODULES_AND_SECTIONS.items():
-                module, created = Module.objects.get_or_create(
-                    title=module_title,
-                    defaults={"description": module_data["description"]}
-                )
+                for category_name in categories.keys():
+                    category, created = Category.objects.get_or_create(name=category_name)
+                    categories[category_name] = category
+                    print(f"✅ Created/Updated Category: {category.name}")
 
-                random_background_style = random.choice(background_styles)
-                module.background_style = random_background_style
-                module.save()
-
-                print(f"✅ Created/Updated Module: {module.title} | Background: {random_background_style.background_image}")
-
-                for section_data in module_data["sections"]:
-                    section, created = Section.objects.get_or_create(
-                        title=section_data["title"],
-                        defaults={"description": section_data["description"]}
+                # ✅ Step 2: Create Background Styles
+                background_styles = []
+                for pattern_key, pattern_url in BACKGROUND_IMAGE_CHOICES:
+                    background_style, created = BackgroundStyle.objects.get_or_create(
+                        background_color="#73c4fd",  
+                        background_image=pattern_key,  
                     )
-                    
-                    if section.title == "Personal SWOT":
-                        section.diagram = "diagrams/swot_diagram.png"  # Path in media folder
-                        section.save()
-                        print(f"✅ Added SWOT Diagram to Section: {section.title}")
+                    background_styles.append(background_style)
+                    print(f"✅ Created BackgroundStyle: {background_style.background_image}")
 
-                    module.sections.add(section)
+                # ✅ Step 3: Create Modules and Assign Categories
+                for module_title, module_data in MODULES_AND_SECTIONS.items():
+                    module, created = Module.objects.get_or_create(
+                        title=module_title,
+                        defaults={"description": module_data["description"]}
+                    )
 
-                    for exercise_data in section_data["exercises"]:
-                        exercise, created = Exercise.objects.get_or_create(
-                            title=exercise_data["title"],
-                            defaults={"exercise_type": exercise_data["exercise_type"]}
+                    # Assign a random background style
+                    module.background_style = random.choice(background_styles)
+                    module.save()
+
+                    # Assign a category randomly
+                    random_category = random.choice(list(categories.values()))
+                    module.categories.add(random_category)
+
+                    print(f"✅ Created/Updated Module: {module.title} | Category: {random_category.name} | Background: {module.background_style.background_image}")
+
+                    # ✅ Step 4: Create Sections for Each Module
+                    for section_data in module_data["sections"]:
+                        section, created = Section.objects.get_or_create(
+                            title=section_data["title"],
+                            defaults={"description": section_data["description"]}
                         )
                         
-                        section.exercises.add(exercise)
+                        module.sections.add(section)
 
-                        for question_text in exercise_data["questions"]:
-                            question, created = ExerciseQuestion.objects.get_or_create(
-                                question_text=question_text,
-                                defaults={"has_blank": False}
+                        # ✅ Step 5: Create Exercises and Questions
+                        for exercise_data in section_data["exercises"]:
+                            exercise, created = Exercise.objects.get_or_create(
+                                title=exercise_data["title"],
+                                defaults={"exercise_type": exercise_data["exercise_type"]}
                             )
                             
-                            exercise.questions.add(question)
+                            section.exercises.add(exercise)
 
-            program, created = Program.objects.get_or_create(
-                title="Next Step",
-                defaults={"description": "Figuring your next steps."}
-            )
-            
-            modules_to_add = [
-                ("Exploring opportunities", 1),
-                ("Exploring your work identity", 2),
-                ("Planning what's next", 3)
-            ]
+                            for question_text in exercise_data["questions"]:
+                                question, created = ExerciseQuestion.objects.get_or_create(
+                                    question_text=question_text,
+                                    defaults={"has_blank": False}
+                                )
+                                
+                                exercise.questions.add(question)
 
-            for module_title, order in modules_to_add:
-                module = Module.objects.filter(title=module_title).first()
-                if module and not ProgramModule.objects.filter(program=program, module=module).exists():  
-                    ProgramModule.objects.create(program=program, module=module, order=order)  
-                    print(f"✅ Added {module_title} to Program 'Next Step' at order {order}.")
-                else:
-                    print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
-
-        print("✅ Modules, Sections, Exercises, and Questions seeded successfully!")
+                print("✅ Modules, Categories, Sections, Exercises, and Questions seeded successfully!")

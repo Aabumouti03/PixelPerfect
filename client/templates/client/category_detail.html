@@ -1,0 +1,44 @@
+{% extends 'client/client_base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'client/css/category_detail.css' %}">
+    <div class="container">
+        <div class="category-detail-header">
+            <h2>{{ category.name }}</h2>
+            <p>{{ category.description }}</p>
+        </div>
+
+        <!-- Modules Section -->
+        <div class="module-section">
+            <h3>Modules</h3>
+            <div class="module-row">
+                {% for module in category.modules.all %}
+                    <div class="module-card">
+                        <h4>{{ module.title }}</h4>
+                        <p>{{ module.description|truncatewords:10 }}</p>
+                    </div>
+                {% empty %}
+                    <p>No modules available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Programs Section -->
+        <div class="program-section">
+            <h3>Programs</h3>
+            <div class="program-row">
+                {% for program in category.programs.all %}
+                    <div class="program-card">
+                        <h4>{{ program.title }}</h4>
+                        <p>{{ program.description|truncatewords:10 }}</p>
+                    </div>
+                {% empty %}
+                    <p>No programs available.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

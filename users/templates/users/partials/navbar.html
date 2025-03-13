@@ -6,17 +6,20 @@
     </div>
     <ul class="nav-links">
         <li>
-            <a href="{% url 'dashboard' %}" class="{%if request.path == '/dashboard/' %}active{% endif %}">
+            <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">
                 <img src="{% static 'users/img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
         </li>
         <li>
-            <a href="{% url 'modules' %}" class="{%if request.path == '/modules/' %}active{% endif %}">
-                <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
+
+
+            <a href="{% url 'userModules' %}" class="{% if request.path == '/modules/' %}active{% endif %}">
+                <img src="{% static 'users/users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
+<<<<<<< HEAD
 
         <li>
             <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
@@ -27,16 +30,46 @@
 
         <li>
             <a href="{% url 'profile' %}" class="{%if request.path == '/profile/' %}active{% endif %}">
+=======
+ 
+
+
+        <li>
+            <a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">
+>>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
                 <img src="{% static 'users/img/profile.svg' %}" alt="Profile" class="icon">
                 <span>Profile</span>
             </a>
         </li>
+<<<<<<< HEAD
         <div class="logout">
+=======
+        <li> 
+            <a href="{% url 'journal_page' %}" class="{% if request.path == '/journal/' %}active{% endif %}">
+                <img src="{% static 'users/img/journal.svg' %}" alt="Journal" class="icon">
+                <span>Journal</span>
+            </a>
+        </li>
+        <div class="logout">
+
+>>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
             <a href="{% url 'log_out' %}" class="{%if request.path == '/log_out/' %}active{% endif %}">
             <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
             <span>Logout</span>
             </a>
         </div>
+<<<<<<< HEAD
+=======
+
+            <a href="#" id="logout-link">
+                <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
+                <span>Logout</span>
+            </a>
+        </div>
+        
+          
+        
+>>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
     </ul>
 
     <div class="toggle">

@@ -1,0 +1,139 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'users/css/journal.css' %}">
+{% endblock %}
+
+{% block title %}Daily Journal - ReWork{% endblock %}
+
+{% block content %}
+<div class="journal-container">
+    <div class="journal-header">
+        <a href="{% url 'journal_by_date' previous_day %}" class="nav-button">← Previous</a>
+        <h1>Daily Journal - {{ selected_date }}</h1>
+        <a href="{% url 'journal_by_date' next_day %}" class="nav-button">Next →</a>
+    </div>
+    <p>Log your daily habits and track your progress.</p>
+
+    <form id="journal-form">
+        {% csrf_token %}
+        <input type="hidden" id="journal-date" name="date" value="{{ selected_date }}">
+
+        <!-- Connected with Family -->
+        <div class="journal-entry">
+            <label>Connected with family and friends?</label>
+            <div class="toggle-group">
+                <input type="radio" id="connected_yes" name="connected_with_family" value="yes" {% if journal_entry and journal_entry.connected_with_family == "yes" %}checked{% endif %}>
+                <label for="connected_yes">Yes</label>
+                <input type="radio" id="connected_no" name="connected_with_family" value="no" {% if journal_entry and journal_entry.connected_with_family == "no" %}checked{% endif %}>
+                <label for="connected_no">No</label>
+            </div>
+        </div>
+
+        <!-- Expressed Gratitude -->
+        <div class="journal-entry">
+            <label>Expressed gratitude?</label>
+            <div class="toggle-group">
+                <input type="radio" id="gratitude_yes" name="expressed_gratitude" value="yes" {% if journal_entry and journal_entry.expressed_gratitude == "yes" %}checked{% endif %}>
+                <label for="gratitude_yes">Yes</label>
+                <input type="radio" id="gratitude_no" name="expressed_gratitude" value="no" {% if journal_entry and journal_entry.expressed_gratitude == "no" %}checked{% endif %}>
+                <label for="gratitude_no">No</label>
+            </div>
+        </div>
+
+
+        <!-- Had Caffeine -->
+        <div class="journal-entry">
+            <label>Had caffeine?</label>
+            <div class="toggle-group">
+                <input type="radio" id="caffeine_yes" name="caffeine" value="yes" {% if journal_entry and journal_entry.caffeine == "yes" %}checked{% endif %}>
+                <label for="caffeine_yes">Yes</label>
+                <input type="radio" id="caffeine_no" name="caffeine" value="no" {% if journal_entry and journal_entry.caffeine == "no" %}checked{% endif %}>
+                <label for="caffeine_no">No</label>
+            </div>
+        </div>
+
+
+        <!-- Hydration -->
+        <div class="journal-entry">
+            <label>How many liters of water?</label>
+            <input type="number" name="hydration" min="0" max="20" value="{{ journal_entry.hydration|default_if_none:'' }}">
+        </div>
+
+
+        <!-- Goal Progress -->
+        <div class="journal-entry">
+            <label>Made progress on an important goal?</label>
+            <select name="goal_progress">
+                <option value="low" {% if journal_entry and journal_entry.goal_progress == "low" %}selected{% endif %}>Low</option>
+                <option value="moderate" {% if journal_entry and journal_entry.goal_progress == "moderate" %}selected{% endif %}>Moderate</option>
+                <option value="high" {% if journal_entry and journal_entry.goal_progress == "high" %}selected{% endif %}>High</option>
+            </select>
+        </div>
+
+        <!-- Spent Time Outdoors -->
+        <div class="journal-entry">
+            <label>Spent time outdoors?</label>
+            <div class="toggle-group">
+                <input type="radio" id="outdoors_yes" name="spent_time_outdoors" value="yes" {% if journal_entry and journal_entry.spent_time_outdoors == "yes" %}checked{% endif %}>
+                <label for="outdoors_yes">Yes</label>
+                <input type="radio" id="outdoors_no" name="spent_time_outdoors" value="no" {% if journal_entry and journal_entry.spent_time_outdoors == "no" %}checked{% endif %}>
+                <label for="outdoors_no">No</label>
+            </div>
+        </div>
+
+
+        <!-- Watched Sunset -->
+        <div class="journal-entry">
+            <label>Watched the sunset?</label>
+            <div class="toggle-group">
+                <input type="radio" id="sunset_yes" name="watched_sunset" value="yes" {% if journal_entry and journal_entry.watched_sunset == "yes" %}checked{% endif %}>
+                <label for="sunset_yes">Yes</label>
+                <input type="radio" id="sunset_no" name="watched_sunset" value="no" {% if journal_entry and journal_entry.watched_sunset == "no" %}checked{% endif %}>
+                <label for="sunset_no">No</label>
+            </div>
+        </div>
+
+
+        <!-- Stress Levels -->
+        <div class="journal-entry">
+            <label for="stress">How stressed were you today?</label>
+            <select id="stress" name="stress">
+                <option value="low" {% if journal_entry and journal_entry.stress == "low" %}selected{% endif %}>Low</option>
+                <option value="medium" {% if journal_entry and journal_entry.stress == "medium" %}selected{% endif %}>Medium</option>
+                <option value="high" {% if journal_entry and journal_entry.stress == "high" %}selected{% endif %}>High</option>
+            </select>
+        </div>
+
+        <!-- Sleep Hours -->
+        <div class="journal-entry">
+            <label for="sleep_hours">How many hours did you sleep?</label>
+            <input type="number" id="sleep_hours" name="sleep_hours" min="0" max="24" 
+                   value="{{ journal_entry.sleep_hours|default_if_none:'' }}" required>
+        </div>
+
+        
+        <!-- Notes -->
+        <div class="journal-entry">
+            <label for="notes">Additional Notes:</label>
+            <textarea id="notes" name="notes" placeholder="Write about your day...">{{ journal_entry.notes|default_if_none:'' }}</textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="save-entry" class="submit-btn">Save Entry</button>
+    </form>
+
+    <div id="success-message" class="hidden">✅ Your entry has been saved!</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'users/js/journal.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("✅ Journal.js loaded successfully");
+        });
+    </script>
+{% endblock %}

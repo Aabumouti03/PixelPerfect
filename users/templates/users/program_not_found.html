@@ -1,0 +1,34 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Program Not Found{% endblock %}
+
+{% block content %}
+<div class="not-found-container">
+    <h1>Program Not Found</h1>
+    <p>Sorry, you are not enrolled in this program or it does not exist.</p>
+    <a href="{% url 'dashboard' %}" class="back-button">Go to Dashboard</a>
+</div>
+
+<style>
+    .not-found-container {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+    .back-button {
+        display: inline-block;
+        background-color: #F24505;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .back-button:hover {
+        background-color: #d33b00;
+    }
+</style>
+{% endblock %}

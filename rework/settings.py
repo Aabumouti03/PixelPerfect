@@ -11,11 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 import os
-import os
+import environ
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -57,7 +57,7 @@ ROOT_URLCONF = 'rework.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -104,7 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # User model for authentication and login purposes
 AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
+LOGIN_URL = "/log_in/"  # Change this to match your actual login URL
 
 
 # Internationalization
@@ -123,22 +125,33 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Define the specific static directories you want Django to use
 STATICFILES_DIRS = [
-    # BASE_DIR / 'static',
     BASE_DIR / "client" / "static",
     BASE_DIR / "users" / "static" / "users",
-    os.path.join(BASE_DIR, "client", "static"),
-    os.path.join(BASE_DIR, "users", "static"),
-    
 ]
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
 LOGIN_REDIRECT_URL = '' 
 LOGOUT_REDIRECT_URL = 'log_in'
-LOGIN_URL = '/log_in/' 
+
+
+# Email verifications set up
+env = environ.Env()
+env_file = BASE_DIR / '.env'
+
+# Read the .env file
+environ.Env.read_env(env_file)
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "re.work.website2025@gmail.com"
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+

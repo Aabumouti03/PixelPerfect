@@ -7,21 +7,48 @@
     <title>ReWork - About</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'users/css/user_authentication.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/contact_us_and_about.css' %}">
 </head>
 <body class="about_body">
 
     {% include 'users/welcome_page_navbar.html' %}
+
     <div class="about_container">
         <div class="about_inner_box">
-            <div class="about_image">
-                <img src="{% static 'users/img/person.png' %}" alt="person">
-            </div>
+            
             <div class="about_text">
-                <p>
-                    ReWork is ReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWork
-                    ReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWorkReWork
+                <h1 class="about_title">
+                    <span class="title-background"> ABOUT <span class="highlight">REWORK</span></span>
+                </h1>
+                
+                <p class="about_description">
+                    Returning to work after a break—whether due to personal reasons, health challenges, or life changes—can feel overwhelming. 
+                    <strong class="strong_personalization">ReWork</strong> is here to simplify that transition, offering 
+                    <strong class="strong_personalization">personalized guidance, structured learning, and flexible tools</strong>
+                     to help you regain confidence and prepare for a successful return.
                 </p>
-               
+
+                <p class="about_description">
+                    Our platform <strong class="strong_personalization">analyzes your readiness</strong> through a short assessment, providing <strong class="strong_personalization">custom-tailored recommendations</strong>. You have the freedom to
+                    <strong class="strong_personalization">choose the modules</strong> that resonate most with you, covering key topics like confidence-building, stress management, reskilling, and workplace adaptation.
+                </p>
+
+                <p class="about_description">
+                    Each module includes engaging <strong class="strong_personalization">exercises, videos, and interactive content</strong> to ensure hands-on learning. With our 
+                    <strong class="strong_personalization">built-in note-taking feature</strong>, you can jot down key insights, track your progress, and revisit your reflections anytime.
+                </p>
+
+                <p class="about_description">
+                    With structured guidance and complete flexibility, <strong class="strong_personalization">ReWork</strong> empowers you to return to work on your own terms—helping you not just 
+                    <strong class="strong_personalization">restart your career, but thrive</strong>.  
+                </p>
+
+                <p class="about_description"></p>
+                <span class="start_journey">Start your journey today! 🚀</span>
+                </p>
+                
+
+                <a href="{% url 'sign_up_step_1' %}" class="cta-button">Get Started!</a>
             </div>
         </div>
     </div>
