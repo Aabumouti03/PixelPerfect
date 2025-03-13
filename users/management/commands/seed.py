@@ -6,7 +6,7 @@ django.setup()
 
 import random
 from django.contrib.auth import get_user_model
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule
 from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment
 from client.models import Module, Section, Exercise, ExerciseQuestion, Program, BackgroundStyle
 from django.db import transaction
@@ -376,5 +376,23 @@ class Command(BaseCommand):
                                 )
                                 
                                 exercise.questions.add(question)
+                program, created = Program.objects.get_or_create(
+                    title="Next Step",
+                    defaults={"description": "Figuring your next steps."}
+                )
+                
+                modules_to_add = [
+                    ("Exploring opportunities", 1),
+                    ("Exploring your work identity", 2),
+                    ("Planning what's next", 3)
+                ]
+
+                for module_title, order in modules_to_add:
+                    module = Module.objects.filter(title=module_title).first()
+                    if module and not ProgramModule.objects.filter(program=program, module=module).exists():  
+                        ProgramModule.objects.create(program=program, module=module, order=order)  
+                        print(f"✅ Added {module_title} to Program 'Next Step' at order {order}.")
+                    else:
+                        print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
 
                 print("✅ Modules, Categories, Sections, Exercises, and Questions seeded successfully!")
