@@ -5,7 +5,7 @@ from django.db import transaction, connection
 from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 from client.models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
-from users.models import EndUser, User, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress, ExerciseResponse
+from users.models import EndUser, User, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress, UserResponse
 
 class Command(BaseCommand):
     help = "Deletes all seeded data except Admins and their users"
@@ -21,7 +21,7 @@ class Command(BaseCommand):
                 cursor.execute("PRAGMA foreign_keys = OFF;")
 
             models_to_delete = [
-                ExerciseResponse,
+                UserResponse,
                 ExerciseQuestion,
                 Exercise,
                 Section,

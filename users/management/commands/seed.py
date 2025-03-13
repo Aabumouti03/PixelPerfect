@@ -228,8 +228,9 @@ class Command(BaseCommand):
         self.stdout.write("🚀 Starting database seeding...")
 
         with transaction.atomic():
-            self.seed_users()
+            
             self.seed_data()
+            self.seed_users()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
 
