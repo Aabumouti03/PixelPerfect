@@ -1,25 +1,15 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import StickyNote, EndUser, Program
-import json
-from .models import Module, UserModuleProgress, UserModuleEnrollment, EndUser
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login, logout 
-from django.contrib.auth.models import User  
-
 import os
 import json
 import random
 import logging
+from collections import defaultdict
+from datetime import datetime, timedelta
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.db.models import Avg
 from django.forms import ValidationError
-from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from users.helpers_modules import calculate_progress, update_user_program_progress
 from django.contrib.auth.decorators import login_required 
@@ -34,8 +24,30 @@ from collections import defaultdict
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.utils.timezone import now
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import get_user_model
+
+from users.helpers_modules import calculate_progress
+from users.models import (
+    EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
+    UserProgramEnrollment, JournalEntry
+)
+from client.models import (
+    Program, Module, ProgramModule, ModuleRating, Exercise, Category
+)
+from users.forms import LogInForm, EndUserProfileForm, UserSignUpForm, UserProfileForm, ExerciseAnswerForm
+from users.models import (
+    Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
+)
+
+# Logger setup
+logger = logging.getLogger(__name__)
+
 
 
 def questionnaire(request):
@@ -260,16 +272,6 @@ def view_program(request, program_id):
     return render(request, 'users/view_program.html', context)
 
 
-
-from .forms import LogInForm, EndUserProfileForm, UserSignUpForm
-from django.shortcuts import render, get_object_or_404
-from client.models import Program
-from users.models import UserProgramEnrollment, EndUser, JournalEntry
-from django.utils.timezone import now
-from datetime import datetime, timedelta
-
-
-
 @csrf_exempt
 @login_required
 def save_notes(request):
@@ -297,16 +299,6 @@ def get_notes(request):
         return JsonResponse({'success': True, 'content': sticky_note.content})
     except StickyNote.DoesNotExist:
         return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
-    
-from django.shortcuts import render, get_object_or_404
-from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, EndUser
-
-
-from django.shortcuts import render
-from .models import Program, Module, UserProgramEnrollment, UserModuleProgress, UserModuleEnrollment, EndUser
-from django.shortcuts import render, get_object_or_404
-from client.models import Program, ProgramModule
-from users.models import UserProgramEnrollment, EndUser
 
 
 @login_required
@@ -663,7 +655,6 @@ def recommended_programs(request):
 
     # Flatten the dictionary values (lists of programs) into a single list
     all_programs = [program for program_list in categorized_programs.values() for program in program_list]
-
 
     if request.method == "POST":
         try:

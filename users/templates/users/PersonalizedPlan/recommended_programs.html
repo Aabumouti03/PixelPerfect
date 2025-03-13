@@ -3,17 +3,20 @@
 
 {% block content %}
     <link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
 
     <h1>Your Personalized Learning Journey</h1>
     <p>Select a program that best fits your goals! You can only enroll in one program at a time.</p>
 
-    {% if programs %}
-        <div id="programs-container">
-            {% for program in programs %}
-                <div class="card program-card">
-                    <h3>{{ program.title }}</h3>
-                    <p>{{ program.description }}</p>
+    <div class="nav-buttons">
+        <a href="{% url 'questionnaire' %}"><button>Back</button></a>
+        <a href="{% url 'recommended_modules' %}"><button>Skip</button></a>
+    </div>
 
+    {% if programs %}
+        <div class="programs-container">
+            {% for program in programs %}
+                <div class="program-card">
                     <div class="button-container">
                         <button 
                             class="enroll-button {% if program in enrolled_programs %}enrolled{% endif %}" 
@@ -22,9 +25,18 @@
                         >
                             {% if program in enrolled_programs %}Enrolled{% else %}Enroll{% endif %}
                         </button>
-                        <a href="{% url 'view_program' module.id %}">
-                          <button type="button" class="view-button">View</button>
-                      </a>
+                        <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
+                    </div>
+                    <h3>{{ program.title }}</h3>
+                    <p>{{ program.description }}</p>
+                    
+                    <div class="program-modules">
+                        {% for module in program.program_modules.all|slice:":3" %}
+                            <div class="module-card">
+                                <h4>{{ module.module.title }}</h4>
+                                <p>{{ module.module.description }}</p>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             {% endfor %}
@@ -33,10 +45,6 @@
         <p>No programs available at the moment.</p>
     {% endif %}
 
-    <div class="nav-buttons">
-        <a href="{% url 'questionnaire' %}"><button>Back</button></a>
-        <a href="{% url 'recommended_modules' %}"><button>Skip</button></a>
-    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
