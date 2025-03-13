@@ -1,0 +1,305 @@
+@import url('users/styles.css');
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-right {
+    flex: 1; /* ✅ Takes right space */
+    text-align: right;
+}
+
+.star-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end; /* ✅ Push stars to the right */
+}
+
+.star-rating {
+    font-size: 30px;
+    color: #ddd;
+    cursor: pointer;
+    display: flex;
+    gap: 5px;
+}
+
+.star {
+    color: #ddd;
+    transition: color 0.3s;
+}
+
+.star.selected {
+    color: #FFD700; /* ✅ Gold for selected stars */
+}
+
+.star:hover {
+    color: #FFC107; /* ✅ Highlight stars on hover */
+}
+
+
+.header-icons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.header-icons ion-icon {
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.profile-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+
+.module-overview {
+    width: 80%;
+    background-color: rgba(0, 0, 255, 0.05);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.module-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+
+.progress-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 120px;
+    padding: 20px;
+}
+
+canvas#progressChart {
+    width: 120px !important;
+    height: 120px !important;
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.collapsible {
+    background-color: white;
+    cursor: pointer;
+    border-bottom: 3px solid #4A90E2;
+    border-right: 3px solid #ffffff;
+    padding: 30px;
+    width: 100%;
+    text-align: left;
+    font-size: 15px;
+}
+
+.collapsible-content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+
+.active,
+.collapsible:hover {
+    background-color: #ccc;
+}
+
+
+.content {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    margin-left: 100px;
+    width: calc(100% - 250px);
+    display: flex;
+    flex-direction: column;
+}
+
+
+.start-btn {
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.start-btn:hover {
+    background-color: #2e6bbd;
+}
+
+.exercise-container {
+    display: flex;
+    flex-direction: row; /* Keep horizontal layout */
+    align-items: flex-start; /* Aligns items at the top */
+    justify-content: space-between; /* Pushes left and right sections apart */
+    max-width: 1000px;
+    margin-left: 100px;
+    padding: 5px;
+    gap: 60px; /* Increase space between questions and diagram */
+}
+
+/* Left Side - Questions */
+.questions-container {
+    flex: 2; /* Takes more space */
+    width: 60%; /* Ensures it stays on the left */
+    padding-left: 0;
+}
+
+.question-item {
+    margin-bottom: 20px;
+}
+
+.question-item label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.answer-field {
+    width: 100%;
+    min-height: 100px; /* Increase height */
+    min-width: 100px; /* Increase height */
+    padding: 15px; /* More padding inside */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #69b0e7; /* Light blue background */
+    resize: vertical; /* Allows user to resize */
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px; /* Bigger text */
+    color: #fffafa; /* Light text */
+    text-align: left;
+    vertical-align: top;
+    white-space: pre-wrap; /* Preserve spaces and wrap text */
+    line-height: 1.5; /* Improve readability */
+}
+
+/* Right Side - Diagram */
+.diagram-container {
+    flex: 1;  /* Smaller than questions */
+    display: flex;
+    justify-content: center; /* Centers image */
+    align-items: center;
+    margin-top: 140px; /* Add upper margin */
+}
+
+.diagram-container img {
+    max-width: 400px;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Center the title */
+.exercise-title {
+    text-align: left;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.submit-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.submit-container button {
+    background-color: #FF6600; /* Bright orange */
+    color: white; /* White text for contrast */
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.submit-container button:hover {
+    background-color: #E65C00; /* Slightly darker orange for hover effect */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.submit-container button:active {
+    background-color: #CC4E00; /* Even darker orange when clicked */
+    transform: scale(0.98); /* Slight press-in effect */
+}
+
+.exercise-diagram-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.exercises-section {
+    flex: 1;
+    max-width: 50%;
+}
+
+.diagram-section {
+    flex: 1;
+    max-width: 50%;
+    text-align: center;
+}
+
+.module-diagram {
+    width: 100%;
+    max-width: 400px; /* Adjust size */
+    border-radius: 10px;
+}
+
+.done-button {
+    background-color: #FFA500;  /* Default to orange */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Style for "Done" state (orange) */
+.done-button.undo {
+    background-color: orange;
+    color: white;
+}
+
+/* Style for "Undo" state (green) */
+.done-button.done {
+    background-color: green;
+    color: white;
+}
+
+
+.done-button:disabled {
+    background-color: #d3d3d3;  /* Gray when disabled */
+    cursor: not-allowed;
+}

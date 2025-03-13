@@ -7,6 +7,13 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'users/css/profile_style.css' %}">
 
+{% if messages %}
+    <div class="alert alert-{{ messages.0.tags }}">
+        {{ messages.0 }}
+    </div>
+{% endif %}
+
+
 <div class="profile-container">
     <!-- Profile Header -->
     <div class="profile-header">
@@ -25,8 +32,10 @@
     <!-- Partition Line -->
     <hr class="partition-line">
 
+
     <!-- Profile Details -->
     <div class="profile-details">
+        
         <label>First Name: <span class="required">*</span></label>
         <input type="text" class="input-wrapper bold-text rounded-box larger-box" value="{{ user.first_name|default:'N/A' }}" disabled>
 
@@ -67,6 +76,23 @@
     </div>
 </div>
     
+{% if profile_update_popup == 'verification_sent' %}
+    <script>
+        window.onload = function() {
+            // Show the email verification message
+            alert("A verification link has been sent to your new email. Please check your inbox to complete the process.");
+        }
+    </script>
+{% elif profile_update_popup == 'profile_updated' %}
+    <script>
+        window.onload = function() {
+            // Show the profile update message
+            alert("Your email was successfully updated!");
+        }
+    </script>
+{% endif %}
+
 
 {% endblock %}
+
 </body>
