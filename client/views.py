@@ -262,7 +262,9 @@ def admin_check(user):
     return user.is_authenticated and user.is_superuser
 
 
-# Create your views here.
+
+@login_required 
+@user_passes_test(admin_check) 
 def client_dashboard(request):
 
     # GENERAL STATISTICS IN THE DASHBOARD
@@ -278,6 +280,8 @@ def client_dashboard(request):
         'last_work_time_data': json.dumps(last_work_time_data),
     })
 
+@login_required 
+@user_passes_test(admin_check) 
 def users_management(request):
     users = EndUser.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
@@ -426,7 +430,8 @@ def delete_program(request, program_id):
     program.delete()
     return redirect('programs')
 
-
+@login_required 
+@user_passes_test(admin_check) 
 def category_list(request):
     categories = Category.objects.all()
 
@@ -436,6 +441,8 @@ def category_list(request):
     
     return render(request, 'client/category_list.html', context)
 
+@login_required 
+@user_passes_test(admin_check) 
 def category_detail(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     
@@ -450,6 +457,8 @@ def category_detail(request, category_id):
 
     return render(request, 'client/category_detail.html', context)
 
+@login_required 
+@user_passes_test(admin_check) 
 def create_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -472,6 +481,8 @@ def create_category(request):
 
     return render(request, 'client/create_category.html', context)
 
+@login_required 
+@user_passes_test(admin_check) 
 def reports(request):
     # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
     enrollment_labels, enrollment_data = get_module_enrollment_stats() # 1 for modules 
@@ -487,6 +498,8 @@ def reports(request):
             'program_data': json.dumps(program_data),
         })
 
+@login_required
+@user_passes_test(admin_check)
 def modules_statistics(request):
     """Main view function to fetch and pass module statistics."""
     enrollment_labels, enrollment_data = get_module_enrollment_stats()
@@ -505,6 +518,8 @@ def modules_statistics(request):
         'completion_time_data': json.dumps(avg_completion_data),  
     })
 
+@login_required
+@user_passes_test(admin_check)
 def programs_statistics(request):
     """Main view function to fetch and pass program statistics."""
     
@@ -560,6 +575,8 @@ def userStatistics(request):
 
 
 
+@login_required
+@user_passes_test(admin_check)
 def export_modules_statistics_csv(request):
     """Generate a CSV report of module statistics."""
     response = HttpResponse(content_type='text/csv')
@@ -587,6 +604,8 @@ def export_modules_statistics_csv(request):
 
     return response
 
+@login_required
+@user_passes_test(admin_check)
 def export_programs_statistics_csv(request):
     """Generate a CSV report of program statistics."""
     response = HttpResponse(content_type='text/csv')
@@ -614,6 +633,8 @@ def export_programs_statistics_csv(request):
 
     return response
 
+@login_required
+@user_passes_test(admin_check)
 def export_user_statistics_csv(request):
     """Generate a CSV report of user statistics."""
     response = HttpResponse(content_type='text/csv')
