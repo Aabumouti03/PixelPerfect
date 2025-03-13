@@ -2,7 +2,7 @@ from client.models import Module, Exercise, AdditionalResource  # Import models 
 from users.models import EndUser  # Import EndUser model
 
 def calculate_progress(end_user, module):
-    # Get all exercises in the module
+  
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
