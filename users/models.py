@@ -1,8 +1,8 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
 from django.conf import settings
 
 #Choices used in more than one model
@@ -121,6 +121,7 @@ class UserProgramEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} enrolled in {self.program.title}"
+    
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -130,6 +131,7 @@ class UserModuleEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
+
 
 class UserProgramProgress (models.Model):
 
@@ -155,7 +157,7 @@ class UserModuleProgress(models.Model):
     class Meta:
         unique_together = ('user', 'module') 
     def __str__(self):
-        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
+        return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
 
 
 class ExerciseResponse(models.Model):
@@ -168,4 +170,37 @@ class ExerciseResponse(models.Model):
         return f"Response by {self.user.user.username} for {self.question}"
 
 
+# Questionnaire-related models
+class Questionnaire_UserResponse(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+        
 
+class QuestionResponse(models.Model):
+    user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    rating_value = models.IntegerField(
+    null=True, 
+    blank=True, 
+    validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    def clean(self):
+        if self.question.question_type == 'RATING' and self.rating_value is None:
+            raise ValidationError('Rating scale questions require a rating value')
+
+        if self.question.question_type == 'AGREEMENT' and self.rating_value is None:
+            raise ValidationError('Agreement scale questions require a selection')
+
+
+class StickyNote(models.Model):
+    user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='sticky_notes')
+    content = models.TextField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    def __str__(self):
+        return f"StickyNote by {self.user.user.username}"

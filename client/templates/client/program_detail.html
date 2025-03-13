@@ -1,5 +1,4 @@
-{% extends 'client_base.html' %}
-
+{% extends 'client/client_base.html' %}
 {% block title %}
     {{ program.title }} - Details
 {% endblock %}
@@ -7,156 +6,304 @@
 {% block extra_css %}
 <style>
     .container {
-        width: 100%;
-        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        max-width: 1200px;
+        margin: auto;
         padding: 20px;
-        min-width: 1100px;
+        min-width: 1000px;
     }
 
     .program-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 20px;
-        width: 100%;
     }
 
-    .program-info {
-        flex: 2;
+    .sortable-list {
+        list-style: none;
+        padding: 0;
     }
 
-    .progress-chart-container {
-        flex: 1; 
-        max-width: 300px;
-        min-width: 250px;
-        height: 250px;
+    .sortable-item {
+        background: #f0f0f0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-bottom: 5px;
+        cursor: grab;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .modules-table {
+    .btn-save {
+        background-color: #75b3ff;
+        color: #ffffff;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .btn-save:hover {
+        background-color: #2f6ed3;
+    }
+
+    .modules-table, .users-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
     }
 
-    .modules-table th, .modules-table td {
+    .modules-table th, .modules-table td,
+    .users-table th, .users-table td {
         border: 1px solid #ddd;
-        padding: 12px;
+        padding: 10px;
         text-align: left;
     }
 
-    .modules-table th {
+    .modules-table th, .users-table th {
         background-color: #3A88F6;
         color: white;
-    }
-
-    .enrolled-users {
-        margin-top: 30px;
-        width: 100%;
-    }
-
-    .enrolled-users ul {
-        padding: 0;
-        list-style-type: none;
     }
 
     .back-link {
         display: inline-block;
         margin-top: 20px;
-        padding: 12px 18px;
+        padding: 10px 15px;
         background: #3A88F6;
         color: white;
         text-decoration: none;
         border-radius: 5px;
-        font-weight: bold;
-        text-align: center;
     }
 
     .back-link:hover {
         background: #2f6ed3;
     }
+
+    /* Modal styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0; top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background: #fff;
+        width: 500px;
+        max-width: 90%;
+        margin: 100px auto;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .modal-close {
+        float: right;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .checkbox-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
 </style>
 {% endblock %}
 
-
-
 {% block content %}
-    <div class="container">
-        
-        <div class="program-header">
-            <div class="program-info">
-                <h1>{{ program.title }}</h1>
-                <p>{{ program.description }}</p>
-            </div>
-            <div class="progress-chart-container">
-                <canvas id="progressChart"></canvas>
-            </div>
+<div class="container">
+    <div class="program-header">
+        <div>
+            <h1>{{ program.title }}</h1>
+            <p>{{ program.description }}</p>
         </div>
-
-        <h2>Modules in this Program:</h2>
-        <table class="modules-table">
-            <thead>
-                <tr>
-                    <th>Module Title</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for module in program.modules.all %}
-                    <tr>
-                        <td>{{ module.title }}</td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td>No modules available.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="enrolled-users">
-            <h2>Enrolled Users:</h2>
-            <ul>
-                {% for enrollment in program.enrolled_users.all %}
-                    <li>{{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }}</li>
-                {% empty %}
-                    <li>No users enrolled yet.</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <a href="{% url 'programs' %}" class="back-link">Back to Programs</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var ctx = document.getElementById('progressChart').getContext('2d');
-            
-            var completed = {{ program.progress|default:0 }};
-            var remaining = 100 - completed;
+    <h2>Modules in this Program:</h2>
+    <ul class="sortable-list" id="sortableModules">
+        {% for program_module in program_modules %}
+            <li class="sortable-item" data-id="{{ program_module.id }}">
+                <span>{{ program_module.module.title }}</span>
+                
+                <form method="POST" class="remove-module-form" onsubmit="return confirm('Are you sure you want to remove this module?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+            </li>
+        {% empty %}
+            <li>No modules available.</li>
+        {% endfor %}
+    </ul>
+    <button onclick="saveModuleOrder()" class="btn-save">Save Order</button>
 
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completed', 'Remaining'],
-                    datasets: [{
-                        data: [completed, remaining],
-                        backgroundColor: ['#3A88F6', '#E0E0E0']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
+    <button class="btn-save" onclick="openModal('moduleModal')">Add More Modules</button>
+
+    <h2>Enrolled Users:</h2>
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enrollment in enrolled_users %}
+                <tr>
+                    <td>{{ enrollment.user.user.username }}</td>
+                    <td>{{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }}</td>
+                    <td>
+                        <form method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
+                            <button type="submit" class="btn-save" style="background-color: #D9534F;">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No users enrolled yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button class="btn-save" onclick="openModal('userModal')">Add More Users</button>
+    <div id="userModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('userModal')">&times;</span>
+            <h2>Add More Users</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="add_users" value="1">
+                <div class="checkbox-list">
+                    {% for enduser in all_users %}
+                        {% if enduser.id not in enrolled_user_ids %}
+                            <label>
+                                <input type="checkbox" name="users_to_add" value="{{ enduser.id }}">
+                                {{ enduser.user.username }}
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-save">Add Selected Users</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="moduleModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('moduleModal')">&times;</span>
+            <h2>Add More Modules</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="add_modules" value="1">
+                <div class="checkbox-list">
+                    {% for module in all_modules %}
+                        {% if module.id not in program_module_ids %}
+                            <label>
+                                <input type="checkbox" name="modules_to_add" value="{{ module.id }}">
+                                {{ module.title }}
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-save">Add Selected Modules</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="{% url 'programs' %}" class="back-link">Back to Programs</a>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+    let sortable = new Sortable(document.getElementById('sortableModules'), {
+        animation: 150,
+        ghostClass: 'blue-background-class'
+    });
+
+    function saveModuleOrder() {
+        let orderData = [];
+        document.querySelectorAll('.sortable-item').forEach((item, index) => {
+            orderData.push({ id: item.dataset.id, order: index + 1 });
         });
-    </script>
 
+        fetch("{% url 'update_module_order' program.id %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ order: orderData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Module order updated successfully!");
+                location.reload();
+            } else {
+                alert("Error updating order: " + data.error);
+            }
+        })
+        .catch(error => {
+            alert("Request failed: " + error);
+        });
+    }
+
+    function openModal(modalId) {
+    let modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+    } else {
+        console.error("Modal not found:", modalId);
+    }
+    }
+
+    function closeModal(modalId) {
+        let modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    function removeModule(moduleId) {
+        if (!confirm("Are you sure you want to remove this module?")) return;
+
+        fetch("{% url 'program_detail' program.id %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: "remove_module=" + moduleId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Module removed successfully!");
+                location.reload();
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Request failed:", error));
+    }
+
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+</script>
 
 {% endblock %}
-

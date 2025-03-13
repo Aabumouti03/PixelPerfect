@@ -1,18 +1,30 @@
 from django.contrib import admin
-from .models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
+from .models import (
+    Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,
+    Category, ProgramModule, BackgroundStyle, ModuleRating, Questionnaire, Question
+)
+
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     search_fields = ('title', 'description')
     ordering = ('title',)
+    filter_horizontal = ('categories',)  # Allow selection of multiple modules/categories
 
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
+    list_display = ('title', 'description', 'average_rating')
     search_fields = ('title', 'description')
     ordering = ('title',)
+    filter_horizontal = ('sections', 'categories', 'additional_resources')
+
+    def average_rating(self, obj):
+        """Calculate the average rating of the module."""
+        return obj.average_rating()
+    
+    average_rating.short_description = "Avg Rating"
 
 
 @admin.register(Section)
@@ -20,8 +32,8 @@ class SectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'diagram_preview', 'text_position_from_diagram')
     search_fields = ('title', 'description')
     ordering = ('title',)
-    list_filter = ('text_position_from_diagram',)  
-    readonly_fields = ('diagram_preview',)  
+    list_filter = ('text_position_from_diagram',)
+    readonly_fields = ('diagram_preview',)
 
     def diagram_preview(self, obj):
         """Show preview if a diagram is uploaded."""
@@ -34,17 +46,16 @@ class SectionAdmin(admin.ModelAdmin):
 
 @admin.register(AdditionalResource)
 class AdditionalResourceAdmin(admin.ModelAdmin):
-    """Admin panel for Additional Resources like books, podcasts, surveys, and PDFs."""
-    list_display = ('title', 'resource_type', 'file_or_url')
-    list_filter = ('resource_type',)
+    list_display = ('title', 'resource_type', 'file_or_url', 'status')
+    list_filter = ('resource_type', 'status')
     search_fields = ('title', 'description')
 
     def file_or_url(self, obj):
-        """Show a file or link if available."""
+        """Show if a file or link is available."""
         if obj.file:
-            return f"📄 File Uploaded"
+            return "📄 File Uploaded"
         if obj.url:
-            return f"🔗 URL Provided"
+            return "🔗 URL Provided"
         return "❌ No Resource"
     
     file_or_url.short_description = "Resource"
@@ -52,12 +63,13 @@ class AdditionalResourceAdmin(admin.ModelAdmin):
 
 @admin.register(Exercise)
 class ExerciseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'exercise_type', 'question_count')  
-    list_filter = ('exercise_type',)
+    list_display = ('title', 'exercise_type', 'question_count', 'status')
+    list_filter = ('exercise_type', 'status')
     search_fields = ('title',)
-    filter_horizontal = ('questions',)  
+    filter_horizontal = ('questions',)
 
     def question_count(self, obj):
+        """Count number of questions in an exercise."""
         return obj.questions.count()
     
     question_count.short_description = "Number of Questions"
@@ -65,7 +77,7 @@ class ExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(ExerciseQuestion)
 class ExerciseQuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'has_blank', 'question_preview')  
+    list_display = ('question_text', 'has_blank', 'question_preview')
     list_filter = ('has_blank',)
     search_fields = ('question_text',)
     fieldsets = (
@@ -74,8 +86,48 @@ class ExerciseQuestionAdmin(admin.ModelAdmin):
     )
 
     def question_preview(self, obj):
+        """Preview the question format."""
         if obj.has_blank:
             return f"{obj.text_before_blank} ____ {obj.text_after_blank}"
         return obj.question_text
     
     question_preview.short_description = "Preview"
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+
+
+@admin.register(ProgramModule)
+class ProgramModuleAdmin(admin.ModelAdmin):
+    list_display = ('program', 'module', 'order')
+    list_filter = ('program',)
+    ordering = ('program', 'order')
+
+
+@admin.register(BackgroundStyle)
+class BackgroundStyleAdmin(admin.ModelAdmin):
+    list_display = ('background_color', 'background_image')
+    list_filter = ('background_image',)
+
+
+@admin.register(ModuleRating)
+class ModuleRatingAdmin(admin.ModelAdmin):
+    list_display = ('module', 'user', 'rating')
+    list_filter = ('module', 'rating')
+    ordering = ('module', '-rating')
+
+
+@admin.register(Questionnaire)
+class QuestionnaireAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at', 'is_active')
+    list_filter = ('is_active',)
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('questionnaire', 'question_text', 'question_type', 'category', 'sentiment')
+    list_filter = ('questionnaire', 'question_type', 'category', 'sentiment')
+    search_fields = ('question_text',)

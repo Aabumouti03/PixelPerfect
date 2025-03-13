@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Manrope', sans-serif;
+    background: #ffffff;
+}
+
+/* Full Page Layout */
+.content {
+    flex-grow: 1;
+    padding: 30px;
+    margin-left: 25px;
+}
+
+/* Header Styling */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: #F24505;
+}
+
+/* Table Styling */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 18px;
+    text-align: left;
+}
+
+.styled-table th, .styled-table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.styled-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Status Labels */
+.active-status {
+    color: green;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.inactive-status {
+    color: red;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Button Styling */
+.btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-block;
+    transition: background 0.3s, transform 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+/* Button Colors */
+.view-btn {
+    background-color: white;
+    color: #3498db;
+    border-color: #3498db;
+}
+
+.edit-btn {
+    background-color: white;
+    color: #f39c12;
+    border-color: #f39c12;
+}
+
+.activate-btn {
+    background-color: white;
+    color: #27ae60;
+    border-color: #27ae60;
+}
+.responders-btn {
+    background-color: white;
+    color:purple;
+    border-color: purple;
+}
+
+/* Hover Effects */
+.btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+}
+
+/* Grid Layout for Consistency */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .card-container {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+/* Top Bar Adjustments */
+.top-bar {
+    display: flex;
+    justify-content: space-between; /* Spread title & button */
+    align-items: center;
+    padding: 10px 20px;
+}
+
+/* Create Button - Top Right */
+.create-btn {
+    background: #f24505;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out;
+}
+
+.create-btn:hover {
+    background: #d63008;
+}
+
+.center-text {
+    text-align: center; 
+    vertical-align: middle; 
+    font-weight: bold; /* Makes the number stand out */
+}
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    padding: 10px 0;
+    gap: 8px;
+}
+
+.page-item {
+    display: inline-block;
+}
+
+.page-link {
+    display: block;
+    padding: 8px 14px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    color: #f24505;
+    border: 2px solid #f24505;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    background-color: #ffffff;
+}
+
+.page-link:hover {
+    background-color: #f24505;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Active Page Styling */
+.active .page-link {
+    background-color: #f24505;
+    color: white;
+    border: 2px solid #f24505;
+    cursor: default;
+    transform: scale(1.1);
+}
+
+/* Previous & Next Buttons */
+.prev-next {
+    font-weight: bold;
+    background-color: #f8f8f8;
+    border-color: #ddd;
+}
+
+.prev-next:hover {
+    background-color: #f24505;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-link {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+}
+
+/* Filter Container */
+.filter-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Filter Label */
+.filter-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+/* Hide Default Checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Slider (Switch UI) */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 26px;
+}
+
+/* Round Slider */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+/* Active State */
+input:checked + .slider {
+    background-color: #f24505;
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/* Search Bar */
+.search-filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 250px;
+}
+
+.search-btn {
+    background-color: #F24505;
+    color: white;
+    padding: 8px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    background-color: #f24505;
+}
+
+

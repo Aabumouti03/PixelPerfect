@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'css/questionnaire.css' %}">
+    <title>{% block title %}Welcome to ReWork{% endblock %}</title>
+</head>
+<body>
+    <section class="layout">
+        <header class="header">
+            <nav class="navbar">
+                <a href="#" class="nav-logo">
+                    <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
+                    <span class="logo-title">ReWork</span>
+                </a>
+    
+                <!-- Log Out Link -->
+                    <a href="#" class="btn">Log out</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <div class="container">
+                <h1 class="title">Welcome to ReWork</h1>
+                <p class="description">
+                    We’re glad to have you here. Our goal is to help you assess your readiness
+                    to return to work and connect you with the most relevant support.
+                </p>
+                <p class="subtext">
+                    Take a short questionnaire to get personalized mental well-being recommendations in minutes.
+                </p>
+                <div class="button-container">
+                    <a href="{% url 'questionnaire' %}" class="btn">Start Questionnaire</a>
+                    <a class="btn">Skip</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 ReWork. All Rights Reserved.</p>
+        </footer>
+    </section>
+</body>
+</html>
