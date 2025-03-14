@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User, EndUser, UserProgramEnrollment
 from client.models import Module, Category

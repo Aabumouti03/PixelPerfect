@@ -65,7 +65,7 @@ urlpatterns = [
 
     #
     path('programs/', clientViews.programs, name='programs'),
-    path('logout/', clientViews.logout_view, name='logout'),
+    path('logout/', clientViews.log_out_client, name='logout'),
 
     #Program urls for the client
     path('programs/', clientViews.programs, name='programs'),
@@ -81,7 +81,7 @@ urlpatterns = [
     path('users_management/', clientViews.users_management, name='users_management'),
 
     #User urls for modules
-    path('userModules/', usersViews.user_modules, name='userModules'),
+    path('userModules/', usersViews.user_modules, name='modules'),
     path('module_overview/<int:id>/', usersViews.module_overview, name='module_overview'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
 
@@ -99,19 +99,19 @@ urlpatterns = [
     path('create_category/', clientViews.create_category, name='create_category'),
 
     #
-    path('welcome/', usersViews.welcome_view, name='welcome'),
-    path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
-    path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
-    path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),
-    path("manage_questionnaires/create_questionnaire/", clientViews.create_questionnaire, name="create_questionnaire"),
-    path('manage_questionnaires/<int:questionnaire_id>/', clientViews.view_questionnaire, name='view_questionnaire'),
-    path('manage_questionnaires/<int:questionnaire_id>/delete/', clientViews.delete_questionnaire, name='delete_questionnaire'),
-    path('manage_questionnaires/<int:questionnaire_id>/responders/', clientViews.view_responders, name='view_responders'),
-    path('manage_questionnaires/edit/<int:questionnaire_id>/', clientViews.edit_questionnaire, name='edit_questionnaire'),
-    path('manage_questionnaires/delete_question/<int:question_id>/', clientViews.delete_question, name='delete_question'),
-    path('manage_questionnaires/add_question/<int:questionnaire_id>/', clientViews.add_question, name='add_question'),
-    path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
-    path('manage_questionnaires/activate/<int:questionnaire_id>/', clientViews.activate_questionnaire, name='activate_questionnaire'),
-    path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
+    # path('welcome/', usersViews.welcome_view, name='welcome'),
+    # path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
+    # path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
+    # path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),
+    # path("manage_questionnaires/create_questionnaire/", clientViews.create_questionnaire, name="create_questionnaire"),
+    # path('manage_questionnaires/<int:questionnaire_id>/', clientViews.view_questionnaire, name='view_questionnaire'),
+    # path('manage_questionnaires/<int:questionnaire_id>/delete/', clientViews.delete_questionnaire, name='delete_questionnaire'),
+    # path('manage_questionnaires/<int:questionnaire_id>/responders/', clientViews.view_responders, name='view_responders'),
+    # path('manage_questionnaires/edit/<int:questionnaire_id>/', clientViews.edit_questionnaire, name='edit_questionnaire'),
+    # path('manage_questionnaires/delete_question/<int:question_id>/', clientViews.delete_question, name='delete_question'),
+    # path('manage_questionnaires/add_question/<int:questionnaire_id>/', clientViews.add_question, name='add_question'),
+    # path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
+    # path('manage_questionnaires/activate/<int:questionnaire_id>/', clientViews.activate_questionnaire, name='activate_questionnaire'),
+    # path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     
 ]
