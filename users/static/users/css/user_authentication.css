@@ -9,7 +9,6 @@ body {
     margin-top: 100px;
 }
 
-/* Welcome page navbar */
 .navbar {
     background-color: #ff440f;
     padding: 10px 20px;
@@ -539,288 +538,158 @@ button[type="submit"]:hover,
     }
 }
 
+/*------------------------------Password-----------------------*/
 
-/* ---------------- ABOUT PAGE ---------------- */
-.about_body {
+.password-reset-body {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     min-height: 100vh;
     padding-top: 80px;
+    background-color: #fff6f3;
 }
 
-
-.about_container {
+.password-reset-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 85%;
-    max-width: 1200px;
-    min-height: 550px;
-    height: auto;
-    margin: auto;
-    border-radius: 20px;
-}
-
-
-.about_inner_box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
+    height: calc(100vh - 80px);
     width: 100%;
-    padding: 50px;
-    border-radius: 15px;
 }
 
-
-.about_text {
-    text-align: center;
-    max-width: 800px;
-    margin: auto;
-}
-
-
-.about_title {
-    font-size: 28px;
-    text-transform: uppercase;
-    font-weight: bold;
-    font-family: 'Poppins', sans-serif;
-    margin-bottom: 20px;
-    text-align: center;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
-.title-background {
-    display: inline-block;
-    background: #ff5722;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    letter-spacing: 1.2px;
-    width: 100%;
-    max-width: 800px;
-}
-
-
-.highlight {
-    color: #ffe082;
-    font-weight: bold;
-}
-
-/* Paragraph Styling */
-.about_description {
-    font-size: 18px;
-    color: #555;
-    line-height: 1.8;
-    margin-bottom: 15px;
-    text-align: justify;
-    width: 100%;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
-.cta-button {
-    display: block;
-    background-color: #ff440f;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    text-decoration: none;
-    padding: 12px 30px;
+.password-reset-card {
+    background: #ffffff;
     border-radius: 30px;
-    transition: all 0.3s ease-in-out;
+    padding: 50px;
+    width: 800px;
+    height: auto;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
-    margin-top: 20px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
+    background-color: #ff5733;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.cta-button:hover {
-    background-color: #d9380c;
-    transform: translateY(-2px);
-}
-
-.strong_personalization{
-    color: #ff440f;
-}
-
-.start_journey{
-    color: #ff440f;
+.password-reset-card h1 {
+    font-size: 28px;
     font-weight: bold;
-    font-size: 20px;
+    color: white;
+    margin-bottom: 20px;
 }
 
+.password-reset-card form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
+.password-reset-card input {
+    width: 600px;
+    padding: 12px;
+    border-radius: 30px;
+    border: none;
+    background-color: #f9f9f9;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    color: #ff440f;
+}
 
-@media (max-width: 992px) {
-    .about_inner_box {
-        flex-direction: column;
-        text-align: center;
+.password-reset-container p{
+    color: white;
+}
+
+.password-reset-card input:focus {
+    background-color: rgb(255, 210, 180);
+}
+
+.password-reset-card button {
+    border-radius: 30px;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: rgb(255, 255, 180);
+    color:  #ff5733; 
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 600px;
+}
+
+.password-reset-card button:hover {
+    background-color: #ecef68;
+}
+
+.password-reset-card a {
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+    text-decoration: none;
+}
+
+.password-reset-card a:hover {
+    color: #ffe66d;
+}
+
+@media (max-width: 768px) {
+    .password-reset-card {
+        width: 90%;
         padding: 30px;
     }
 
-    .about_text {
+    .password-reset-card input,
+    .password-reset-card button {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .password-reset-card {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .password-reset-card h1 {
+        font-size: 22px;
+    }
+
+    .password-reset-card input,
+    .password-reset-card button {
         width: 100%;
-        padding: 0 20px;
-    }
-
-    .title-background {
-        padding: 10px 20px;
-        font-size: 20px;
-    }
-
-    .about_description {
-        font-size: 16px;
     }
 }
 
-/*------------------------- CONTACT US ---------------------------*/
-.contact_body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding-top: 80px;
-}
-
-.contact_container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 80%;
-    height: 70%;
-    margin: auto;
-    border-radius: 30px;
-    padding: 40px;
-    overflow: hidden;
-    
-}
-
-
-.contact_left {
-    display: flex;
-    flex-direction: column; 
-    align-items: start;
-    gap: 20px; 
-    width: 50%;
-}
-
-.contact_left_title h2 {
-    font-weight: 600;
-    color: #ff440f;
-    font-size: 30px;
-    margin-bottom: 10px;
-    text-align: center;
-    padding-left: 50px;
-}
-
-.contact_inputs {
-    width: 600px;
-    height: 50px;
-    border: none;
-    outline: none;
-    padding-left: 25px;
-    font-weight: 500;
-    color: #ff440f;
-    border-radius: 50px;
-    display: block;
-    box-sizing: border-box;
-}
-
-textarea.contact_inputs {
-    height: 350px;
-    padding: 15px 25px;
-    border: 2px solid #ff440f;
-    border-radius: 20px;
-    resize: both;
-    box-sizing: border-box; 
-    min-width: 600px;
-    max-width: 100%;
-}
-
-
-.contact_body input{
-    border-radius: 50px;
-    background-color: white;
-    color: #ff440f;
-    border: 2px solid #ff440f; 
-    width: 600px;
-}
-.contact_body input:hover{
-    background-color: #ff430f26;
-}
-
-.contact_left button {
-    width: 600px;
-    height: 50px;
+.password-reset-btn {
     background-color: rgb(255, 255, 180);
-    color: #ff440f;
+    color: #ff5733 !important;
     font-weight: bold;
     border: none;
+    padding: 12px 20px;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 18px;
+    text-decoration: none;
+    display: inline-block;
+    width: 250px;
+    text-align: center;
+    margin-top: 15px;
 }
 
-.contact_left button:hover {
-    background-color: #ff440f;
-    color: white;
-}
-.contact_inputs::placeholder {
-
-    color: #ff440f;
-}
- 
-.contact_right {
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    width: 50%;
+.password-reset-btn:hover {
+    background-color: #ecef68;
+    color: #ff5733;
 }
 
-.contact_right img {
-    width: 70%;
-    max-width: 500px;
-    height: auto;
-    border-radius: 20px;
+.toggle-password {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 20px;
+    color: #ff5733;
 }
-
-
-@media (max-width: 768px) {
-    .contact_container {
-        flex-direction: column; 
-        text-align: center;
-        gap: 20px;
-    }
-
-    .contact_left, .contact_right {
-        width: 100%;
-    }
-
-    .contact_body input, 
-    .contact_body textarea{
-        width: 100%;
-    }
-
-    .contact_left button {
-        width: 100%;
-    }
-
-    .contact_right img {
-        max-width: 80%;
-    }
-}
-
-<<<<<<<<< Temporary merge branch 1
->>>>>>> origin/userAuthentication
-=========
-/*------------------------------Password-----------------------*/
->>>>>>>>> Temporary merge branch 2

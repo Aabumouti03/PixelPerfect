@@ -1,13 +1,260 @@
-{% block content %}
-    <h1>All Modules</h1>
+{% extends 'users/base.html' %}
+{% load static %}
 
-    <div class="module-grid">
-        {% for module in modules %}
-            <div class="module-card">
-                <h5>{{ module.title }}</h5>
-                <p>{{ module.description }}</p>
-                <a href="{% url 'module_overview' module.id %}" class="text-white">View →</a>
+{% block content %}
+    <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .content {
+            padding: 40px;
+            background-color: #f9f9f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        /* Header (Title + Icons + Search Bar) */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            margin-bottom: 15px;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icons ion-icon {
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        /* Profile Icon */
+        .profile-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            width: 250px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: width 0.4s ease;
+        }
+
+        .search-bar:focus {
+            width: 350px;
+            outline: none;
+            border-color: #4da6ff;
+        }
+
+        /* Modules Container */
+        .modules-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 1100px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        .module-card {
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: left;
+            position: relative;
+            height: 220px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-bottom: 15px;
+            padding-left: 15px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .module-card:nth-child(6n+1),
+        .module-card:nth-child(6n+3),
+        .module-card:nth-child(6n+5) {
+            background-color: #0148FD;
+        }
+
+        .module-card:nth-child(6n+2),
+        .module-card:nth-child(6n+4),
+        .module-card:nth-child(6n+6) {
+            background-color: #73C4FD;
+        }
+
+        /* Action Button */
+        .action-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .action-button ion-icon {
+            font-size: 18px;
+            color: white;
+        }
+
+    </style>
+
+    <div class="content">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="header-left">
+                <h1>Modules</h1>
             </div>
-        {% endfor %}
+            <div class="header-icons">
+                <!-- Search Bar -->
+                <input type="text" class="search-bar" placeholder="Search..." onkeyup="searchModules(event)">
+
+                <!-- Notification Bell -->
+                <ion-icon name="notifications-outline"></ion-icon>
+
+                <!-- Profile Picture -->
+                <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
+            </div>
+        </div>
+
+        <!-- Modules Grid -->
+        <div class="modules-container">
+            <div class="module-grid">
+                {% for module in all_modules %}
+                    <div class="module-card">
+                        <div class="action-button" onclick="toggleModule(this, '{{ module.title|escapejs }}')">
+                            {% if module.title in enrolled_modules %}
+                                <ion-icon name="remove-outline"></ion-icon>
+                            {% else %}
+                                <ion-icon name="add-outline"></ion-icon>
+                            {% endif %}
+                        </div>
+                        <h5>{{ module.title }}</h5>
+                        <p>{{ module.description }}</p>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; color: #555;">No modules found.</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.module-card').forEach(card => {
+                let icon = card.querySelector("ion-icon");
+                let title = card.querySelector("h5") ? card.querySelector("h5").innerText : "No Title";
+        
+                // ✅ Debugging - Check if the initial icons are correct
+                console.log("Module:", title, "Initial Icon:", icon.getAttribute("name"));
+            });
+        });
+        
+        function toggleModule(button, moduleTitle) {
+            moduleTitle = moduleTitle.trim(); // ✅ Trim spaces
+        
+            let icon = button.querySelector("ion-icon");
+            let isEnrolled = icon.getAttribute("name") === "remove-outline";
+            let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
+        
+            console.log("Clicked module:", `"${moduleTitle}"`, "Detected as enrolled?", isEnrolled, "Calling API:", url);
+        
+            let requestData = JSON.stringify({ title: moduleTitle });
+        
+            fetch(url, {
+                method: "POST",
+                body: requestData,
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Server response:", data);
+                if (data.success) {
+                    icon.setAttribute("name", isEnrolled ? "add-outline" : "remove-outline");
+                } else {
+                    console.error("Action failed:", data.error);
+                    alert("Failed: " + data.error);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+        
+        // Function to get CSRF token from cookies
+        function getCSRFToken() {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith("csrftoken=")) {
+                    return cookie.split("=")[1];
+                }
+            }
+            return "";
+        }
+
+        function searchModules(event) {
+            const query = event.target.value.toLowerCase();
+            const modules = document.querySelectorAll('.module-card');
+            let count = 0;
+            const moduleGrid = document.querySelector('.module-grid');
+
+            modules.forEach(module => {
+                const title = module.querySelector('h5')?.innerText.toLowerCase();
+                if (title.includes(query)) {
+                    module.style.display = '';
+                    count++;
+                } else {
+                    module.style.display = 'none';
+                }
+            });
+        }
+    </script>
 {% endblock %}

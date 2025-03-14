@@ -2,7 +2,7 @@ from django.test import TestCase
 from unittest.mock import patch
 from django.db.models import Avg, Count
 
-from client.modules_statistics import (
+from client.statistics import (
     get_module_enrollment_stats,
     get_module_completion_stats,
     get_average_completion_percentage,

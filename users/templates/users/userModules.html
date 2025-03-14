@@ -42,7 +42,7 @@
         }
 
         .module-card {
-            background-color: #68c0ff;
+            background-color: rgba(0, 0, 0, 0.5);
             background-size: cover;
             background-position: center;
             padding: 20px;
@@ -168,24 +168,26 @@
         </div>
 
         <div class="module-grid">
-            {% for item in module_data %}
-            <div class="module-card">
-                <h5>{{ item.title }}</h5>
-                <p>{{ item.description }}</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: {{ item.progress }}%;"></div>
+            {% for module in module_data %}
+                <div class="module-card" style="background-image: url('{% static module.background_image %}');">
+                    <h5>{{ module.title }}</h5>
+                    <p>{{ module.description }}</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: {{ module.progress }}%;"></div>
+                    </div>
+                    <div class="progress-container">
+                        <small>{{ module.progress }}% completed</small>
+                        <a href="{% url 'module_overview' module.id %}">View →</a>
+                    </div>
                 </div>
-                <div class="progress-container">
-                    <small>{{ item.progress }}% completed</small>
-                    <a href="{% url 'module_overview' item.id %}">View →</a>
-                </div>
-            </div>
+            {% empty %}
+                <p style="text-align: center; color: #555;">No modules enrolled yet.</p>
             {% endfor %}
         
             <div class="view-all-container">
                 <a href="{% url 'all_modules' %}" class="view-all-button">View all modules</a>
             </div>
-        </div>    
+        </div>
               
     </main>
 
@@ -208,7 +210,5 @@
 
             moduleGrid.classList.toggle('one-item', count === 1);
         }
-
-        
     </script>
 {% endblock %}

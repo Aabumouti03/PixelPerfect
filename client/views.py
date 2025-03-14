@@ -16,8 +16,15 @@ from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import csv
+from django.db import transaction 
+from django.db.models import Max, Avg
+from client import views as clientViews
+from users import views as usersViews
+from users.views import enroll_module, unenroll_module 
+
+
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
@@ -133,6 +140,7 @@ def view_user_response(request, user_response_id):
         'user_response': user_response,
         'responses': responses,
     })
+
 @login_required
 def create_questionnaire(request):
     categories = Category.objects.all()
@@ -218,6 +226,7 @@ def delete_questionnaire(request, questionnaire_id):
     questionnaire.delete()
     return redirect("manage_questionnaires")
 
+
 @login_required
 def delete_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
@@ -251,6 +260,10 @@ import csv
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
 
+
+
+@login_required 
+@user_passes_test(admin_check) 
 def client_dashboard(request):
 
     # GENERAL STATISTICS IN THE DASHBOARD
@@ -266,23 +279,38 @@ def client_dashboard(request):
         'last_work_time_data': json.dumps(last_work_time_data),
     })
 
+@login_required 
+@user_passes_test(admin_check) 
 def users_management(request):
     users = EndUser.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
 
-def modules_management(request):
-    modules = Module.objects.all().values("title")
-    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
-    
-    modules_list = []
-    for index, module in enumerate(modules):
-        module_data = {
-            "title": module["title"],
-            "color_class": module_colors[index % len(module_colors)]
-        }
-        modules_list.append(module_data)
+def user_detail_view(request, user_id):
+    user_profile = get_object_or_404(EndUser, user__id=user_id)
 
-    return render(request, "client/modules_management.html", {"modules": modules_list})
+    # Get enrolled programs & modules
+    enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
+
+    user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
+        user=user_profile
+    ).prefetch_related("questionnaire", "question_responses__question")
+
+    # Group responses by questionnaire
+    questionnaires_with_responses = {}
+    for user_response in user_questionnaire_responses:
+        if user_response.questionnaire not in questionnaires_with_responses:
+            questionnaires_with_responses[user_response.questionnaire] = []
+        for response in user_response.question_responses.all():
+            questionnaires_with_responses[user_response.questionnaire].append(response)
+
+    context = {
+        'user': user_profile,
+        'enrolled_programs': enrolled_programs,
+        'enrolled_modules': enrolled_modules,
+        'questionnaires_with_responses': questionnaires_with_responses,  # 👈 Fixed context structure
+    }
+    return render(request, 'client/user_detail.html', context)
 
 def programs(request):
     programs = Program.objects.prefetch_related('program_modules__module').all()
@@ -334,7 +362,6 @@ def log_out_client(request):
         logout(request)
         return redirect('log_in')
 
-    
     return redirect('/client_dashboard/')
 
 
@@ -402,7 +429,8 @@ def delete_program(request, program_id):
     program.delete()
     return redirect('programs')
 
-
+@login_required 
+@user_passes_test(admin_check) 
 def category_list(request):
     categories = Category.objects.all()
 
@@ -412,6 +440,8 @@ def category_list(request):
     
     return render(request, 'client/category_list.html', context)
 
+@login_required 
+@user_passes_test(admin_check) 
 def category_detail(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     
@@ -426,6 +456,8 @@ def category_detail(request, category_id):
 
     return render(request, 'client/category_detail.html', context)
 
+@login_required 
+@user_passes_test(admin_check) 
 def create_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -448,6 +480,8 @@ def create_category(request):
 
     return render(request, 'client/create_category.html', context)
 
+@login_required 
+@user_passes_test(admin_check) 
 def reports(request):
     # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
     enrollment_labels, enrollment_data = get_module_enrollment_stats() # 1 for modules 
@@ -463,12 +497,24 @@ def reports(request):
             'program_data': json.dumps(program_data),
         })
 
+@login_required
+@user_passes_test(admin_check)
 def modules_statistics(request):
     """Main view function to fetch and pass module statistics."""
     enrollment_labels, enrollment_data = get_module_enrollment_stats()
     completion_labels, completed_data, in_progress_data = get_module_completion_stats()
     avg_completion_labels, avg_completion_data = get_average_completion_percentage()
     modules_count = get_modules_count()
+
+    # fetch the average rating for each module
+    module_ratings = (
+        Module.objects.annotate(avg_rating=Avg('ratings__rating'))
+        .values('title', 'avg_rating')
+    )
+
+    rating_labels = [module['title'] for module in module_ratings]
+    rating_data = [module['avg_rating'] if module['avg_rating'] else 0 for module in module_ratings]  
+
 
     return render(request, 'client/modules_statistics.html', {
         'modules_count': modules_count,
@@ -479,8 +525,12 @@ def modules_statistics(request):
         'in_progress_data': json.dumps(in_progress_data),
         'completion_time_labels': json.dumps(avg_completion_labels),
         'completion_time_data': json.dumps(avg_completion_data),  
+        'rating_labels': json.dumps(rating_labels),  #for the average rating 
+        'rating_data': json.dumps(rating_data),  
     })
 
+@login_required
+@user_passes_test(admin_check)
 def programs_statistics(request):
     """Main view function to fetch and pass program statistics."""
     
@@ -536,6 +586,8 @@ def userStatistics(request):
 
 
 
+@login_required
+@user_passes_test(admin_check)
 def export_modules_statistics_csv(request):
     """Generate a CSV report of module statistics."""
     response = HttpResponse(content_type='text/csv')
@@ -563,6 +615,8 @@ def export_modules_statistics_csv(request):
 
     return response
 
+@login_required
+@user_passes_test(admin_check)
 def export_programs_statistics_csv(request):
     """Generate a CSV report of program statistics."""
     response = HttpResponse(content_type='text/csv')
@@ -590,6 +644,8 @@ def export_programs_statistics_csv(request):
 
     return response
 
+@login_required
+@user_passes_test(admin_check)
 def export_user_statistics_csv(request):
     """Generate a CSV report of user statistics."""
     response = HttpResponse(content_type='text/csv')
@@ -632,3 +688,58 @@ def export_user_statistics_csv(request):
         writer.writerow([f"Sector - {sector}", count])
 
     return response
+
+# Client Modules Views
+
+def module_overview(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    return render(request, "client/moduleOverview.html", {"module": module})
+
+def client_modules(request):
+    modules = Module.objects.all().values("id", "title", "description") 
+    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
+    
+    modules_list = []
+    for index, module in enumerate(modules):
+        module_data = {
+            "id": module["id"],
+            "title": module["title"],
+            "description": module["description"],  
+            "color_class": module_colors[index % len(module_colors)]
+        }
+        modules_list.append(module_data)
+
+    return render(request, "client/client_modules.html", {"modules": modules_list})
+
+
+def edit_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    
+    if request.method == "POST":
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            form.save()
+            return redirect('client_modules')  # Redirect back to module management
+    
+    else:
+        form = ModuleForm(instance=module)
+
+    return render(request, 'client/edit_module.html', {'form': form, 'module': module})
+
+def delete_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    module.delete()
+    return redirect("client_modules")
+
+
+def add_module(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        
+        if title and description:  # Ensure both fields are filled
+            new_module = Module.objects.create(title=title, description=description)
+            new_module.save()
+            return redirect("client_modules")  # Redirect to the Client Modules page
+    return render(request, "client/add_module.html")
+

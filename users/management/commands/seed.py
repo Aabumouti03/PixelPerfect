@@ -1,13 +1,12 @@
 import django
 import os
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rework.settings")  
 django.setup()
 
 import random
 from django.contrib.auth import get_user_model
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule
 from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment
 from client.models import Module, Section, Exercise, ExerciseQuestion, Program, BackgroundStyle
 from django.db import transaction
@@ -38,6 +37,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Where are you now?",
+                        "title": "Where are you now?",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What are you putting up with at the moment?",
@@ -53,6 +53,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Visualize and plan your ideal professional future.",
                 "exercises": [
                     {
+                        "title": " Your best possible self",
                         "title": " Your best possible self",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -77,6 +78,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Know your values",
+                        "title": "Know your values",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What do my core values mean to me?",
@@ -91,6 +93,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Define what you want to achieve in life and career.",
                 "exercises": [
                     {
+                        "title": "Be, do and have exercise",
                         "title": "Be, do and have exercise",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -113,6 +116,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Discover your natural talents and skills.",
                 "exercises": [
                     {
+                        "title": "Finding your strengths",
                         "title": "Finding your strengths",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -154,6 +158,7 @@ MODULES_AND_SECTIONS = {
                 "exercises": [
                     {
                         "title": "Where do you want to go",
+                        "title": "Where do you want to go",
                         "exercise_type": "short_answer",
                         "questions": [
                             "What does your career look like?",
@@ -179,6 +184,7 @@ MODULES_AND_SECTIONS = {
                 "description": "Identify barriers and strategies to overcome them.",
                 "exercises": [
                     {
+                        "title": "What is getting in the way",
                         "title": "What is getting in the way",
                         "exercise_type": "short_answer",
                         "questions": [
@@ -222,8 +228,9 @@ class Command(BaseCommand):
         self.stdout.write("🚀 Starting database seeding...")
 
         with transaction.atomic():
-            self.seed_users()
+            
             self.seed_data()
+            self.seed_users()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
 
@@ -369,5 +376,23 @@ class Command(BaseCommand):
                                 )
                                 
                                 exercise.questions.add(question)
+                program, created = Program.objects.get_or_create(
+                    title="Next Step",
+                    defaults={"description": "Figuring your next steps."}
+                )
+                
+                modules_to_add = [
+                    ("Exploring opportunities", 1),
+                    ("Exploring your work identity", 2),
+                    ("Planning what's next", 3)
+                ]
+
+                for module_title, order in modules_to_add:
+                    module = Module.objects.filter(title=module_title).first()
+                    if module and not ProgramModule.objects.filter(program=program, module=module).exists():  
+                        ProgramModule.objects.create(program=program, module=module, order=order)  
+                        print(f"✅ Added {module_title} to Program 'Next Step' at order {order}.")
+                    else:
+                        print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
 
                 print("✅ Modules, Categories, Sections, Exercises, and Questions seeded successfully!")
