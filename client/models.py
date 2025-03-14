@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
+from django.core.exceptions import ValidationError
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -207,7 +209,6 @@ class Question (models.Model):
     ]
     SENTIMENT_CHOICES = [
         (1, 'Positive'),
-        (0, 'Neutral'),
         (-1, 'Negative'),
     ]
     questionnaire = models.ForeignKey(Questionnaire, related_name='questions', on_delete=models.CASCADE)

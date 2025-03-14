@@ -1,10 +1,10 @@
-{% extends 'client/base.html' %}
+{% extends 'client/client_base.html' %}
 {% load static %}
 
 {% block title %}Responders - {{ questionnaire.title }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/view_responders.css' %}">
+    <link rel="stylesheet" href="{% static 'client/css/view_responders.css' %}">
 {% endblock %}
 
 {% block content %}

@@ -34,7 +34,9 @@
                 <label>First Name: <span class="required">*</span></label>
                 {{ form.first_name }}
                 {% if form.first_name.errors %}
-                <small class="text-danger">{{ form.first_name.errors.0 }}</small>
+                <ul class="errorlist">
+                    <li>{{ form.first_name.errors.0 }}</li>
+                </ul>
                  {% endif %}
             </div>
 
@@ -42,7 +44,9 @@
                 <label>Last Name: <span class="required">*</span></label>
                 {{ form.last_name }}
                 {% if form.last_name.errors %}
-                <small class="text-danger">{{ form.last_name.errors.0 }}</small>
+                <ul class="errorlist">
+                    <li>{{ form.last_name.errors.0 }}</li>
+                </ul>
                 {% endif %}
             </div>
 
@@ -50,8 +54,10 @@
                 <label>Username: <span class="required">*</span></label>
                 {{ form.username }}
                 {% if form.username.errors %}
-                <small class="text-danger">{{ form.username.errors.0 }}</small>
-                {% endif %}
+                <ul class="errorlist">
+                    <li>{{ form.username.errors.0 }}</li>
+                </ul>
+                 {% endif %}
             </div>
 
             <div class="form-group">
@@ -62,7 +68,9 @@
                     <i class="fa fa-eye password-toggle" data-target="new_password"></i>
                 </div>
                 {% if form.new_password.errors %}
-                    <small class="text-danger">{{ form.new_password.errors.0 }}</small>
+                    <ul class="errorlist">
+                        <li>{{ form.new_password.errors.0 }}</li>
+                    </ul>
                 {% endif %}
             </div>
             
@@ -74,16 +82,20 @@
                     <i class="fa fa-eye password-toggle" data-target="confirm_password"></i>
                 </div>
                 {% if form.confirm_password.errors %}
-                    <small class="text-danger">{{ form.confirm_password.errors.0 }}</small>
+                    <ul class="errorlist">
+                        <li>{{ form.confirm_password.errors.0 }}</li>
+                    </ul>
                 {% endif %}
-            </div>            
-            
+            </div>  
+
 
             <div class="form-group">
                 <label>Email Address: <span class="required">*</span></label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                <small class="text-danger">{{ form.email.errors.0 }}</small>
+                {{ form.new_email }}
+                {% if form.new_email.errors %}
+                <ul class="errorlist">
+                    <li>{{ form.new_email.errors.0 }}</li>
+                </ul>
                 {% endif %}
             </div>
 
@@ -91,7 +103,9 @@
                 <label>Phone Number:</label>
                 {{ form.phone_number }}
                 {% if form.phone_number.errors %}
-                    <small class="text-danger">{{ form.phone_number.errors.0 }}</small>
+                    <ul class="errorlist">
+                        <li>{{ form.phone_number.errors.0 }}</li>
+                    </ul>
                 {% endif %}
             </div>
 
@@ -103,7 +117,9 @@
                        class="form-control"
                        value="{{ form.age.value|default:'' }}"> 
                     {% if form.age.errors %}
-                       <small class="text-danger">{{ form.age.errors.0 }}</small>
+                    <ul class="errorlist">
+                        <li>{{ form.age.errors.0 }}</li>
+                    </ul>
                    {% endif %} 
             </div>
             
@@ -111,7 +127,9 @@
                 <label>Gender: <span class="required">*</span></label>
                 {{ form.gender }}
                 {% if form.gender.errors %}
-                  <small class="text-danger">{{ form.gender.errors.0 }}</small>
+                  <ul class="errorlist">
+                    <li>{{ form.gender.errors.0 }}</li>
+                </ul>
                 {% endif %}
 
             </div>
@@ -120,7 +138,9 @@
                 <label>Ethnicity:</label>
                 {{ form.ethnicity }}
                 {% if form.ethnicity.errors %}
-                    <small class="text-danger">{{ form.ethnicity.errors.0 }}</small>
+                    <ul class="errorlist">
+                        <li>{{ form.ethnicity.errors.0 }}</li>
+                    </ul>
                 {% endif %}
             </div>
 
@@ -128,7 +148,9 @@
                 <label>Last Time Worked:  <span class="required">*</span></label>
                 {{ form.last_time_to_work }}
                 {% if form.last_time_to_work.errors %}
-                    <small class="text-danger">{{ form.last_time_to_work.errors.0 }}</small>>
+                    <ul class="errorlist">
+                        <li>{{ form.last_time_to_work.errors.0 }}</li>
+                    </ul>
                 {% endif %}
             </div>
 
@@ -136,10 +158,19 @@
                 <label>Sector: <span class="required">*</span></label>
                 {{ form.sector }}
                 {% if form.sector.errors %}
-                    <small class="text-danger">{{ form.sector.errors.0 }}</small>
+                    <ul class="errorlist">
+                        <li>{{ form.sector.errors.0 }}</li>
+                    </ul>
                 {% endif %}
             </div>
         </div>
+
+        {% if messages %}
+        <div class="alert alert-{{ messages.0.tags }}">
+            {{ messages.0 }}
+        </div>
+    {% endif %}
+    
 
         <!-- Buttons Section -->
         <div class="profile-buttons">
@@ -198,8 +229,12 @@
 
     });
 </script>
-    
-    
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        window.scrollTo(0, 0);
+    });
+</script>
     
     
 {% endblock %}

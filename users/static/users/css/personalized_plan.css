@@ -1,0 +1,185 @@
+/* General styles for modules and programs matching dashboard */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Manrope', sans-serif;
+    display: flex;
+}
+
+.sidebar {
+    width: 70px;
+    transition: width 0.3s;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    background: #F24505;
+    z-index: 1000;
+}
+
+.sidebar:hover {
+    width: 250px;
+}
+
+.content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+    transition: margin-left 0.3s;
+    margin-left: 90px; /* Ensure content moves when navbar expands */
+}
+
+.sidebar:hover ~ .content {
+    margin-left: 270px;
+}
+
+/* Container for program cards - one per row */
+.programs-container {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+    backdrop-filter: blur(10px);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Program card styling to match dashboard */
+.program-card {
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    border-left: 5px solid #1d3c5337;
+    box-sizing: border-box;
+    background: #ffffff;
+    text-align: left;
+    position: relative;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.program-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Program title and description */
+.program-card h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.program-card p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Buttons positioned at the top-right corner */
+.program-card .button-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Modules inside programs styled like dashboard */
+.program-modules {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.program-modules .module-card {
+    background: #f8f8f8;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.program-modules .module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.program-modules .module-card h4 {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.program-modules .module-card p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Container for modules - 3 per row */
+.modules-container {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+    backdrop-filter: blur(10px);
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Button styling */
+button, .view-program-button {
+    background-color: #F24505;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover, .view-program-button:hover {
+    background-color: #d63d04;
+}
+
+.enroll-button.enrolled {
+    background-color: #28a745;
+}
+
+.enroll-button.enrolled:hover {
+    background-color: #218838;
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.nav-buttons a button {
+    background-color: #555;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 6px;
+}
+
+.nav-buttons a button:hover {
+    background-color: #444;
+}
