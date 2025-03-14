@@ -491,7 +491,7 @@ def modules_statistics(request):
     avg_completion_labels, avg_completion_data = get_average_completion_percentage()
     modules_count = get_modules_count()
 
-    # fetch the average rating for eahc module
+    # fetch the average rating for each module
     module_ratings = (
         Module.objects.annotate(avg_rating=Avg('ratings__rating'))
         .values('title', 'avg_rating')

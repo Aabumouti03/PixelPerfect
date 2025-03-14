@@ -7,7 +7,7 @@ from client.models import Exercise, Section, ExerciseQuestion
 
 class ExerciseDetailViewTest(TestCase):
     def setUp(self):
-        # Create a test user
+     
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
         # Create an exercise instance and SAVE it first before adding ManyToMany fields

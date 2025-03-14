@@ -809,6 +809,7 @@ def module_overview(request, module_id):
     }
 
     return render(request, 'users/moduleOverview.html', context)
+    
 
 @login_required
 def exercise_detail(request, exercise_id):
