@@ -27,6 +27,7 @@ class ExerciseDetailViewTest(TestCase):
         # URL for the test
         self.url = reverse('exercise_detail', kwargs={'exercise_id': self.exercise.id})
 
+
     def test_exercise_detail_authenticated_user(self):
         """Test that an authenticated user can access the exercise detail page."""
         self.client.login(username='testuser', password='testpassword')
@@ -38,6 +39,7 @@ class ExerciseDetailViewTest(TestCase):
         self.assertEqual(response.context['exercise'], self.exercise)
         self.assertIn('diagram', response.context)
         self.assertEqual(response.context['diagram'], self.section.diagram)
+        
 
     def test_exercise_detail_unauthenticated_user_redirect(self):
         """Test that an unauthenticated user is redirected to the login page."""

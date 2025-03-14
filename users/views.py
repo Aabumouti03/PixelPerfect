@@ -809,7 +809,7 @@ def module_overview(request, module_id):
     }
 
     return render(request, 'users/moduleOverview.html', context)
-    
+
 
 @login_required
 def exercise_detail(request, exercise_id):
@@ -836,6 +836,7 @@ def exercise_detail(request, exercise_id):
         'exercise': exercise,
         'diagram': diagram, 
     })
+
 
 @csrf_exempt  
 def rate_module(request, module_id):
