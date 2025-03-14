@@ -38,12 +38,15 @@ from users.models import (
     UserProgramEnrollment, JournalEntry
 )
 from client.models import (
-    Program, Module, ProgramModule, ModuleRating, Exercise, Category
+    Program, Module, ProgramModule, ModuleRating, Exercise, Category,
+    AdditionalResource, Exercise
 )
 from users.forms import LogInForm, EndUserProfileForm, UserSignUpForm, UserProfileForm, ExerciseAnswerForm
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
+
+
 
 # Logger setup
 logger = logging.getLogger(__name__)

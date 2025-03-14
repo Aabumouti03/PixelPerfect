@@ -19,15 +19,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, JsonResponse
 import csv
 from django.db import transaction 
-from django.db.models import Max
+from django.db.models import Max, Avg
 from client import views as clientViews
 from users import views as usersViews
 from users.views import enroll_module, unenroll_module 
-
-
-
-
-
 
 
 
@@ -145,6 +140,7 @@ def view_user_response(request, user_response_id):
         'user_response': user_response,
         'responses': responses,
     })
+
 @login_required
 def create_questionnaire(request):
     categories = Category.objects.all()
@@ -228,6 +224,7 @@ def delete_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questionnaire.delete()
     return redirect("manage_questionnaires")
+
 @login_required
 def delete_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
@@ -494,6 +491,16 @@ def modules_statistics(request):
     avg_completion_labels, avg_completion_data = get_average_completion_percentage()
     modules_count = get_modules_count()
 
+    # fetch the average rating for eahc module
+    module_ratings = (
+        Module.objects.annotate(avg_rating=Avg('ratings__rating'))
+        .values('title', 'avg_rating')
+    )
+
+    rating_labels = [module['title'] for module in module_ratings]
+    rating_data = [module['avg_rating'] if module['avg_rating'] else 0 for module in module_ratings]  
+
+
     return render(request, 'client/modules_statistics.html', {
         'modules_count': modules_count,
         'enrollment_labels': json.dumps(enrollment_labels),
@@ -503,6 +510,8 @@ def modules_statistics(request):
         'in_progress_data': json.dumps(in_progress_data),
         'completion_time_labels': json.dumps(avg_completion_labels),
         'completion_time_data': json.dumps(avg_completion_data),  
+        'rating_labels': json.dumps(rating_labels),  
+        'rating_data': json.dumps(rating_data),  
     })
 
 def programs_statistics(request):
