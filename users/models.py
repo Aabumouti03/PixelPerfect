@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.timezone import now  # ✅ Fix: Import now
+from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
 from django.core.cache import cache
@@ -240,3 +240,38 @@ class JournalEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
+    
+class Quote(models.Model):
+    text = models.TextField()
+
+    def __str__(self):
+        return f'"{self.text}"'
+
+    @staticmethod
+    def get_quote_of_the_day():
+        """Returns the same quote for the entire day and updates it once per day."""
+        today = now().date()
+
+        # Check if a quote was already selected today
+        daily_quote, created = DailyQuote.objects.get_or_create(date=today)
+
+        if not created and daily_quote.quote:
+            return daily_quote.quote.text  # Return existing quote if available
+
+        # Select a new random quote
+        count = Quote.objects.count()
+        if count == 0:
+            return "No quote available today."
+
+        new_quote = Quote.objects.order_by("?").first()
+        daily_quote.quote = new_quote
+        daily_quote.save()
+
+        return new_quote.text
+    
+class DailyQuote(models.Model):
+    date = models.DateField(unique=True)
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"Daily Quote for {self.date}: {self.quote.text if self.quote else 'None'}"

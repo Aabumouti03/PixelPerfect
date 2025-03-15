@@ -17,7 +17,7 @@ from client.models import Category, Program,ModuleRating,Exercise
 from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
-from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module
+from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
 logger = logging.getLogger(__name__)
 from collections import defaultdict
 
@@ -176,111 +176,6 @@ def get_notes(request):
     except StickyNote.DoesNotExist:
         return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
 
-QUOTES = [
-    "Success is not the key to happiness. Happiness is the key to success. — Albert Schweitzer",
-    "Your limitation—it’s only your imagination.",
-    "Do what you can, with what you have, where you are. — Theodore Roosevelt",
-    "Dream big and dare to fail. — Norman Vaughan",
-    "Opportunities don't happen. You create them. — Chris Grosser",
-    "Don't let yesterday take up too much of today. — Will Rogers",
-    "The only way to do great work is to love what you do. — Steve Jobs",
-    "Act as if what you do makes a difference. It does. — William James",
-    "Believe you can and you're halfway there. — Theodore Roosevelt",
-    "Every day may not be good, but there's something good in every day.",
-    "Keep your face always toward the sunshine—and shadows will fall behind you. — Walt Whitman",
-    "You are never too old to set another goal or to dream a new dream. — C.S. Lewis",
-    "Difficult roads often lead to beautiful destinations.",
-    "You don't have to be great to start, but you have to start to be great. — Zig Ziglar",
-    "Happiness is not something ready-made. It comes from your own actions. — Dalai Lama",
-    "Work hard in silence, let your success be your noise. — Frank Ocean",
-    "Failure is simply the opportunity to begin again, this time more intelligently. — Henry Ford",
-    "Live as if you were to die tomorrow. Learn as if you were to live forever. — Mahatma Gandhi",
-    "Start where you are. Use what you have. Do what you can. — Arthur Ashe",
-    "If you want to lift yourself up, lift up someone else. — Booker T. Washington",
-    "No one is perfect—that’s why pencils have erasers. — Wolfgang Riebe",
-    "Success is getting what you want. Happiness is wanting what you get. — Dale Carnegie",
-    "Happiness depends upon ourselves. — Aristotle",
-    "You are capable of amazing things.",
-    "Do what makes your soul shine.",
-    "What lies behind us and what lies before us are tiny matters compared to what lies within us. — Ralph Waldo Emerson",
-    "Don't watch the clock; do what it does. Keep going. — Sam Levenson",
-    "Small steps in the right direction can turn out to be the biggest step of your life.",
-    "Happiness is a direction, not a place. — Sydney J. Harris",
-    "If opportunity doesn’t knock, build a door. — Milton Berle",
-    "The best way to predict the future is to create it. — Peter Drucker",
-    "Be kind whenever possible. It is always possible. — Dalai Lama",
-    "You were born to be real, not to be perfect.",
-    "Be yourself; everyone else is already taken. — Oscar Wilde",
-    "Stay close to anything that makes you glad you are alive. — Hafiz",
-    "Enjoy the little things, for one day you may look back and realize they were the big things. — Robert Brault",
-    "Your vibe attracts your tribe.",
-    "Be strong. You never know who you are inspiring.",
-    "Turn your wounds into wisdom. — Oprah Winfrey",
-    "Be a voice, not an echo.",
-    "With the new day comes new strength and new thoughts. — Eleanor Roosevelt",
-    "You are enough just as you are.",
-    "A champion is defined not by their wins but by how they can recover when they fall. — Serena Williams",
-    "Your life only gets better when you get better.",
-    "Happiness is not by chance, but by choice. — Jim Rohn",
-    "It always seems impossible until it's done. — Nelson Mandela",
-    "Do more of what makes you happy.",
-    "Life isn’t about waiting for the storm to pass, it’s about learning to dance in the rain. — Vivian Greene",
-    "Success is falling nine times and getting up ten. — Jon Bon Jovi",
-    "You didn’t come this far to only come this far.",
-    "Some people want it to happen, some wish it would happen, others make it happen. — Michael Jordan",
-    "Let your dreams be bigger than your fears.",
-    "Doubt kills more dreams than failure ever will. — Suzy Kassem",
-    "Every day is a second chance.",
-    "The only thing standing between you and your goal is the story you keep telling yourself as to why you can't achieve it. — Jordan Belfort",
-    "You are braver than you believe, stronger than you seem, and smarter than you think. — A.A. Milne",
-    "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.",
-    "Never bend your head. Always hold it high. Look the world straight in the eye. — Helen Keller",
-    "Be the reason someone smiles today.",
-    "Success isn’t about how much money you make. It’s about the difference you make in people’s lives. — Michelle Obama",
-    "You can’t go back and change the beginning, but you can start where you are and change the ending. — C.S. Lewis",
-    "Rise above the storm and you will find the sunshine. — Mario Fernandez",
-    "Take the risk or lose the chance.",
-    "Happiness is letting go of what you think your life is supposed to look like.",
-    "A goal without a plan is just a wish. — Antoine de Saint-Exupéry",
-    "Fall seven times, stand up eight. — Japanese Proverb",
-    "Keep going. Everything you need will come to you at the perfect time.",
-    "You are stronger than you think.",
-    "Don't compare your life to others. There's no comparison between the sun and the moon, they shine when it's their time.",
-    "The only thing you can control is your own effort.",
-    "Dare to live the life you have dreamed for yourself. — Ralph Waldo Emerson",
-    "Wake up with determination, go to bed with satisfaction.",
-    "Make today so awesome that yesterday gets jealous.",
-    "Whatever you decide to do, make sure it makes you happy.",
-    "Trust the timing of your life.",
-    "Everything you can imagine is real. — Pablo Picasso",
-    "Your time is limited, so don’t waste it living someone else’s life. — Steve Jobs",
-    "Your life does not get better by chance, it gets better by change. — Jim Rohn",
-    "What consumes your mind, controls your life.",
-    "Stay positive, work hard, make it happen.",
-    "Hardships often prepare ordinary people for an extraordinary destiny. — C.S. Lewis",
-    "Kindness is a language which the deaf can hear and the blind can see. — Mark Twain",
-    "Difficulties in life are intended to make us better, not bitter. — Dan Reeves",
-    "The more you give away, the more happy you become. — Dalai Lama",
-    "Believe in yourself and all that you are. — Christian D. Larson",
-    "Light tomorrow with today. — Elizabeth Barrett Browning",
-    "Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill",
-    "Sometimes when you're in a dark place you think you've been buried, but you've actually been planted. — Christine Caine",
-    "Optimism is the faith that leads to achievement. — Helen Keller",
-    "Happiness often sneaks in through a door you didn’t know you left open. — John Barrymore",
-    "It is never too late to be what you might have been. — George Eliot",
-    "Difficulties increase the nearer we get to the goal. — Johann Wolfgang von Goethe",
-    "In the middle of every difficulty lies opportunity. — Albert Einstein",
-    "Happiness is found in doing, not merely possessing. — Napoleon Hill",
-    "You miss 100% of the shots you don’t take. — Wayne Gretzky"
-]
-
-
-def get_quote_of_the_day():
-    """Selects a quote based on the current date."""
-    today = datetime.date.today()
-    index = today.toordinal() % len(QUOTES)  # Cycles through quotes based on the day
-    return QUOTES[index]
-
 @login_required
 def dashboard(request):
     user = request.user
@@ -335,7 +230,7 @@ def dashboard(request):
         )
     ]
 
-    quote_of_the_day = get_quote_of_the_day()
+    quote_of_the_day = Quote.get_quote_of_the_day()
     
     context = {
         'user': request.user,
@@ -396,57 +291,6 @@ def view_program(request, program_id):
     }
     
     return render(request, 'users/view_program.html', context)
-
-
-    user = request.user
-
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        return render(request, 'users/program_not_found.html')
-
-    # Get the user's enrolled program
-    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user, program_id=program_id).first()
-    
-    if not user_program_enrollment:
-        return render(request, 'users/program_not_found.html')
-
-    program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
-    
-    # Update the  progress
-    update_user_program_progress(end_user, program)
-
-    # Fetch user progress for each module
-    user_progress = {
-        progress.module.id: progress.completion_percentage
-        for progress in UserModuleProgress.objects.filter(user=end_user)
-    }
-
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
-        module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
-
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
-
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
-
-    context = {
-        'user': user,
-        'program': program,
-        'program_modules': program_modules,
-    }
-    
-    return render(request, 'users/view_program.html', context)
-
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
