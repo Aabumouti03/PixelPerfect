@@ -119,6 +119,12 @@ urlpatterns = [
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
     
+
+
+    # Journal URLs (moved outside debug block)
+    path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+    path("save_journal_entry/", usersViews.save_journal_entry, name="save_journal_entry"),
 ]
 
 # Debug settings (corrected)
@@ -132,7 +138,4 @@ if settings.DEBUG:
         path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
         path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
         path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
-        path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
-        path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
-        path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
     ]
