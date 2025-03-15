@@ -1,5 +1,5 @@
-from client.models import Module, Exercise, AdditionalResource  # Import models from the 'client' app
-from users.models import EndUser  # Import EndUser model
+from client.models import Module, Exercise, AdditionalResource,ProgramModule  
+from users.models import EndUser, UserModuleProgress, UserProgramProgress
 
 def calculate_progress(end_user, module):
   

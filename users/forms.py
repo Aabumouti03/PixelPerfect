@@ -290,6 +290,7 @@ class UserProfileForm(forms.ModelForm):
 
 
 
+
     def clean(self):
         """Ensure new password and confirm password match."""
         cleaned_data = super().clean()
@@ -325,7 +326,13 @@ class UserProfileForm(forms.ModelForm):
         return end_user  
 
 class ExerciseAnswerForm(forms.Form):
-    
+    """
+    Exercise Answer Form
+    - The form takes an `exercise` object as an argument during initialization.
+    - It dynamically creates form fields corresponding to each `ExerciseQuestion` linked to the exercise.
+    - Each question field is labeled with its `question_text` and uses a `TextInput` widget.
+    """
+ 
     def __init__(self, *args, **kwargs):
         exercise = kwargs.pop('exercise')  # Get exercise object
         super().__init__(*args, **kwargs)
@@ -334,4 +341,3 @@ class ExerciseAnswerForm(forms.Form):
                 label=question.question_text, 
                 widget=forms.TextInput(attrs={'placeholder': 'Your answer here'})
             )
-
