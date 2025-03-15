@@ -398,6 +398,10 @@ class Command(BaseCommand):
                 print("✅ Modules, Categories, Sections, Exercises, and Questions seeded successfully!")
 
     def seed_quotes(self, *args, **kwargs):
+        if Quote.objects.exists(): 
+            print("⚠️ Quotes already exist. Skipping seeding.")
+            return
+    
         quotes = [
             {"text": "Success is not the key to happiness. Happiness is the key to success. — Albert Schweitzer"},
             {"text": "Your limitation—it’s only your imagination."},
