@@ -8,7 +8,7 @@ from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
 from client import views
 from client.views import delete_module
-from users.views import enroll_module, unenroll_module 
+from users.views import enroll_module, unenroll_module
 
 urlpatterns = [
     # Admin URL
@@ -84,6 +84,8 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
+    path('save-notes/', usersViews.save_notes, name='save_notes'),
+    path('get-notes/', usersViews.get_notes, name='get_notes'), 
 
     # Questionnaire
     path('welcome/', usersViews.welcome_view, name='welcome'),

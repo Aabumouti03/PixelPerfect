@@ -132,11 +132,12 @@
 
 
     <!-- Sticky Note -->
-    <div class="sticky-note">
-        <textarea placeholder="Write your note here..."></textarea>
-        <div class="note-controls">
-            <button class="bullet-btn">•</button>
-        </div>
+<div class="sticky-note">
+    <textarea id="sticky-note" placeholder="Write your note here...">{{ sticky_note.content|default:'' }}</textarea>
+    <div class="note-controls">
+        <button class="bullet-btn">•</button>
     </div>
+</div>
+
 </div>
 {% endblock %}
