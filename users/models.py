@@ -10,6 +10,9 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now  # ✅ Fix: Import now
 from django.core.exceptions import ValidationError
 
+from django.core.cache import cache
+import random
+import datetime
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -137,6 +140,7 @@ class UserModuleEnrollment(models.Model):
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
+    last_accessed = models.DateTimeField(auto_now=True) 
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
