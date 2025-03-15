@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isBulleted = false; // Track whether the text is bulleted
 
     // ✅ Fetch user's notes when page loads
-    fetch('users/get-notes/')
+    fetch('/get-notes/')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.content) {
@@ -52,36 +52,25 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
+                'X-CSRFToken': getCSRFToken()  // ✅ Fetch CSRF token from hidden input
             },
-            body: JSON.stringify({ content: content }),
+            body: JSON.stringify({ content: textarea.value }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log('Sticky note saved:', content);
+                console.log('✅ Sticky note saved successfully:', textarea.value);
             } else {
-                console.error('Error saving note:', data.error);
+                console.error('❌ Error saving note:', data.error);
             }
         })
         .catch(error => {
-            console.error('Error saving notes:', error);
+            console.error('❌ Network or server error:', error);
         });
+        
     }
-
-    // ✅ Get CSRF token from cookies
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+    
+    function getCSRFToken() {
+        return document.getElementById("csrf-token").value;
     }
 });

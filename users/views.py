@@ -148,7 +148,6 @@ def submit_responses(request):
 import random
 import datetime
 
-@csrf_exempt
 @login_required
 def save_notes(request):
     if request.method == 'POST':

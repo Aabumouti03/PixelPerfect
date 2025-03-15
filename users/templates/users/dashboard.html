@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <script src="{% static 'users/js/sticky_note.js' %}"></script>
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 
 
 {% endblock %}
