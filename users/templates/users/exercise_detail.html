@@ -5,19 +5,17 @@
 {% block title %}Exercise Details{% endblock %}
 
 {% block extra_css %}
-
-    <link rel="stylesheet" href="{% static 'users/css/moduleOverview.css' %}">
- 
+    <link rel="stylesheet" href="{% static 'users/css/exercise_detail.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="exercise-title">
     <h1>{{ exercise.title }}</h1>
-    <p><strong>Type:</strong> {{ exercise.exercise_type }}</p>
+   
 
     {% if exercise.pdf_file %}
         <div>
-            <a href="{{ exercise.pdf_file.url }}" target="_blank">Download PDF</a>
+            <a href="{{ exercise.pdf_file.url }}" target="_blank" class="download-btn">📄 Download PDF</a>
         </div>
     {% endif %}
 </div>
@@ -26,13 +24,12 @@
     <!-- Left: Questions -->
     <div class="questions-container">
         <h3>Questions</h3>
-        <form method="POST" action="{% url 'exercise_detail' exercise.id %}">
+        <form method="POST" action="{% url 'exercise_detail' exercise.id %}" id="exercise-form">
             {% csrf_token %}
             {% for question in exercise.questions.all %}
                 <div class="question-item">
                     <label>{{ question.question_text }}</label>
                     <textarea name="answer_{{ question.id }}" class="answer-field"></textarea>
-
                 </div>
             {% endfor %}
             <div class="submit-container">
@@ -43,8 +40,8 @@
 
     <!-- Right: Diagram -->
     <div class="diagram-container">
-        {% if diagram %}
-            <img src="{{ diagram.url }}" alt="Exercise Diagram">
+        {% if exercise.diagram %}
+            <img src="{{ exercise.diagram.url }}" alt="Exercise Diagram">
         {% else %}
             <p>No diagram available for this exercise.</p>
         {% endif %}
@@ -52,11 +49,22 @@
 </div>
 
 <script>
-    document.getElementById("exercise-form").addEventListener("submit", function() {
-        setTimeout(function() {
-            document.getElementById("exercise-form").reset();  // Clear form fields
-            document.body.innerHTML = "";  // Optional: Clear entire page
-        }, 100);  // Short delay to ensure request is sent
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("exercise-form");
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // Smooth Button Loading Effect
+            const submitButton = form.querySelector("button");
+            submitButton.innerHTML = "Submitting...";
+            submitButton.style.opacity = "0.7";
+            submitButton.disabled = true;
+
+            setTimeout(function () {
+                form.submit();
+            }, 1000);
+        });
     });
 </script>
+
 {% endblock %}
