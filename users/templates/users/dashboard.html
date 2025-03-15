@@ -107,19 +107,28 @@
     </div>
 
 
-    <div class="recently-accessed">
-        <h3>Recently Accessed Modules</h3>
-        <ul class="recent-modules-list">
-            {% for module in recent_modules %}
-                <li class="recent-module-item">
-                    <a href="{% url 'module_overview' module.id %}">{{ module.title }}</a>
-                </li>
-            {% empty %}
-                <li class="no-modules">No recently accessed modules.</li>
-            {% endfor %}
-        </ul>
-    </div>
+    <div class="recently-accessed-container">
+        <!-- ✅ Recently Accessed Modules Box -->
+        <div class="recently-accessed">
+            <h3>Recently Accessed Modules</h3>
+            <ul class="recent-modules-list">
+                {% for module in recent_modules %}
+                    <li class="recent-module-item">
+                        <a href="{% url 'module_overview' module.id %}">{{ module.title }}</a>
+                    </li>
+                {% empty %}
+                    <li class="no-modules">No recently accessed modules.</li>
+                {% endfor %}
+            </ul>
 
+            <h3>Quote of the Day</h3>
+            {% if quote_of_the_day %}
+                <p class="quote-text">"{{ quote_of_the_day }}"</p>
+            {% else %}
+                <p>No quote available today.</p>
+            {% endif %}
+        </div>
+    </div>
 
 
     <!-- Sticky Note -->

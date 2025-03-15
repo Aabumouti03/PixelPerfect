@@ -6,6 +6,9 @@ from client.models import Program, Module, ExerciseQuestion, Questionnaire, Ques
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.cache import cache
+import random
+import datetime
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -208,3 +211,9 @@ class StickyNote(models.Model):
     def __str__(self):
         return f"StickyNote by {self.user.user.username}"
 
+class Quote(models.Model):
+    text = models.TextField()
+    author = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f'"{self.text}" - {self.author}' if self.author else f'"{self.text}"'
