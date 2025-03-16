@@ -14,10 +14,10 @@
         <h1>Daily Journal - {{ selected_date }}</h1>
         <a href="{% url 'journal_by_date' next_day %}" class="nav-button">Next →</a>
     </div>
+    
     <p>Log your daily habits and track your progress.</p>
 
     <form id="journal-form">
-        {% csrf_token %}
         <input type="date" id="journal-date" name="date" value="{{ selected_date|date:'Y-m-d' }}" required>
 
 

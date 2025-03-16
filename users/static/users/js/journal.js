@@ -7,12 +7,34 @@ function getElement(id) {
     return element;
 }
 
+function parseDateString(dateString) {
+    if (!dateString || typeof dateString !== "string") {
+        console.error("❌ Invalid date string:", dateString);
+        return null;
+    }
+
+    const parts = dateString.split("-");
+    if (parts.length !== 3) {
+        console.error("❌ Incorrect date format:", dateString);
+        return null;
+    }
+
+    const [year, month, day] = parts.map(Number);
+
+    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        console.error("❌ Invalid date values:", dateString);
+        return null;
+    }
+
+    return new Date(year, month - 1, day);
+}
+
 // Function to format date as YYYY-MM-DD
 function getFormattedDate(dateString) {
     if (!dateString) return null;
     
-    const date = new Date(dateString);
-    if (isNaN(date)) {
+    const date = parseDateString(dateString);
+    if (!date || isNaN(date)) {
         console.error("❌ Invalid Date:", dateString);
         return null;
     }
@@ -20,13 +42,22 @@ function getFormattedDate(dateString) {
     return date.toISOString().split("T")[0];  // Convert to YYYY-MM-DD
 }
 
-
 // Function to fetch journal entry for a specific date
 function fetchJournalEntry(date) {
-    console.log(`📥 Fetching journal entry for ${date}`);
+    if (!date || typeof date !== "string" || date.trim() === "") {
+        console.error("❌ Invalid date passed to fetchJournalEntry!");
+        return;
+    }
 
-    fetch(`/journal/${date}/`)
-        .then(response => response.json())
+    console.log(`📥 Fetching journal entry for: ${date}`);
+
+    fetch(`/journal/${date}/`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success && data.data) {
                 console.log("✅ Data retrieved:", data.data);
@@ -39,26 +70,14 @@ function fetchJournalEntry(date) {
                 getElement("notes").value = data.data.notes || "";
 
                 // Ensure radio buttons are selected properly
-                document.querySelector(`[name="connected_with_family"][value="${data.data.connected_with_family}"]`)?.setAttribute("checked", true);
-                document.querySelector(`[name="expressed_gratitude"][value="${data.data.expressed_gratitude}"]`)?.setAttribute("checked", true);
-                document.querySelector(`[name="caffeine"][value="${data.data.caffeine}"]`)?.setAttribute("checked", true);
-                document.querySelector(`[name="outdoors"][value="${data.data.outdoors}"]`)?.setAttribute("checked", true);
-                document.querySelector(`[name="sunset"][value="${data.data.sunset}"]`)?.setAttribute("checked", true);
+                ["connected_with_family", "expressed_gratitude", "caffeine", "outdoors", "sunset"].forEach(field => {
+                    if (data.data[field]) {
+                        document.querySelector(`[name="${field}"][value="${data.data[field]}"]`)?.setAttribute("checked", true);
+                    }
+                });
             } else {
                 console.warn("❌ No previous journal entry found for this date.");
-
-                // Clear the form fields if no entry is found
-                getElement("sleep_hours").value = "";
-                getElement("hydration").value = "";
-                getElement("stress").value = "low";
-                getElement("goal_progress").value = "low";
-                getElement("notes").value = "";
-
-                document.querySelectorAll('[name="connected_with_family"]').forEach(el => el.checked = false);
-                document.querySelectorAll('[name="expressed_gratitude"]').forEach(el => el.checked = false);
-                document.querySelectorAll('[name="caffeine"]').forEach(el => el.checked = false);
-                document.querySelectorAll('[name="outdoors"]').forEach(el => el.checked = false);
-                document.querySelectorAll('[name="sunset"]').forEach(el => el.checked = false);
+                clearJournalForm();
             }
         })
         .catch(error => console.error("❌ Error fetching journal entry:", error));
@@ -68,9 +87,8 @@ function fetchJournalEntry(date) {
 function saveJournalEntry(event) {
     event.preventDefault();  // Prevent default form submission
 
-    // Get the date value correctly
     let rawDate = document.getElementById("journal-date")?.value;
-    let formattedDate = getFormattedDate(rawDate); // Ensure it's in YYYY-MM-DD format
+    let formattedDate = getFormattedDate(rawDate); 
 
     if (!formattedDate) {
         alert("❌ Error: Invalid date selected.");
@@ -78,7 +96,7 @@ function saveJournalEntry(event) {
     }
 
     const formData = {
-        date: formattedDate,  // Ensure date is in YYYY-MM-DD format
+        date: formattedDate,
         sleep_hours: document.getElementById("sleep_hours")?.value || null,
         caffeine: document.querySelector('input[name="caffeine"]:checked')?.value || null,
         hydration: document.getElementById("hydration")?.value || null,
@@ -87,7 +105,7 @@ function saveJournalEntry(event) {
         notes: document.getElementById("notes")?.value || null
     };
 
-    console.log("📤 Sending Data to Server:", formData); // Debugging
+    console.log("📤 Sending Data to Server:", formData);
 
     fetch("/save_journal_entry/", {  
         method: "POST",
@@ -99,7 +117,7 @@ function saveJournalEntry(event) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log("📥 Response from Server:", data); // Debugging
+        console.log("📥 Response from Server:", data);
 
         if (data.success) {
             alert("✅ Your entry has been saved!");
@@ -110,27 +128,27 @@ function saveJournalEntry(event) {
     .catch(error => console.error("❌ Network error:", error));
 }
 
-
-// Attach event listeners after page load
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ Journal.js loaded successfully");
 
-    // Correcting getElement → document.getElementById()
+    // Extract the date from the URL and handle missing date cases
+    let currentURL = window.location.pathname;
+    let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
+
+    let journalDate = dateMatch ? dateMatch[1] : new Date().toISOString().split("T")[0];
+
+    console.log("📅 Extracted Date from URL:", journalDate);
+
+    if (journalDate) {
+        fetchJournalEntry(journalDate);  
+    } else {
+        console.error("❌ No valid date found in URL!");
+    }
+
     const form = document.getElementById("journal-form");
     if (form) {
         form.addEventListener("submit", saveJournalEntry);
     } else {
         console.error("❌ Journal form not found.");
-    }
-
-    // Ensure journal date input is correctly retrieved
-    const journalDateInput = document.getElementById("journal-date");
-    if (journalDateInput) {
-        console.log("📅 Journal Date:", journalDateInput.value); // Debugging
-
-        // Fetch journal entry for the current date
-        fetchJournalEntry(journalDateInput.value);
-    } else {
-        console.error("❌ journal-date field not found!");
     }
 });

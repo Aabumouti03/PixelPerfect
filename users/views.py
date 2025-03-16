@@ -136,7 +136,6 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 import random
-import datetime
 
 @login_required
 def save_notes(request):
@@ -1057,49 +1056,66 @@ def assess_user_responses_modules(user):
     return suggested_modules
 
 
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils.timezone import now
+from datetime import datetime, timedelta
+from .models import JournalEntry
+from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def journal_view(request, date=None):
     """Loads the journal page and fetches saved data for a specific date."""
     user = request.user
 
-    # Use today's date if none is provided
+    # Validate & Parse Date
     if date is None:
         selected_date = now().date()
     else:
         try:
             selected_date = datetime.strptime(date, "%Y-%m-%d").date()
-        except ValueError:
-            selected_date = now().date()
+        except (ValueError, TypeError):
+            selected_date = now().date()  # Default to today if invalid
 
-    # Fetch the journal entry for the selected date (if it exists)
-    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first() or None
-    
+    # Fetch Journal Entry for the Selected Date
+    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
 
+    # Handle AJAX Requests (Return JSON)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if journal_entry:
+            return JsonResponse({
+                "success": True,
+                "data": {
+                    "sleep_hours": journal_entry.sleep_hours,
+                    "caffeine": journal_entry.caffeine,
+                    "hydration": journal_entry.hydration,
+                    "stress": journal_entry.stress,
+                    "goal_progress": journal_entry.goal_progress,
+                    "notes": journal_entry.notes,
+                    "connected_with_family": journal_entry.connected_with_family,
+                    "expressed_gratitude": journal_entry.expressed_gratitude,
+                    "outdoors": journal_entry.outdoors,
+                    "sunset": journal_entry.sunset,
+                }
+            })
+        return JsonResponse({"success": False, "error": "No entry found."}, status=404)
 
-    print(f"📖 [DEBUG] Rendering Journal for {selected_date}")
-    if journal_entry:
-        print(f"   Sleep Hours: {journal_entry.sleep_hours}")
-        print(f"   Caffeine: {journal_entry.caffeine}")
-        print(f"   Hydration: {journal_entry.hydration}")
-        print(f"   Stress: {journal_entry.stress}")
-        print(f"   Goal Progress: {journal_entry.goal_progress}")
-        print(f"   Notes: {journal_entry.notes}")
-    else:
-        print("❌ No journal entry found for this date.")
+    # Compute Previous & Next Day
+    previous_day = (selected_date - timedelta(days=1)).strftime("%Y-%m-%d")
+    next_day = (selected_date + timedelta(days=1)).strftime("%Y-%m-%d")
 
+    # Render HTML for Standard Page Load
     context = {
-        "selected_date": selected_date,
+        "selected_date": selected_date.strftime("%Y-%m-%d"),
         "journal_entry": journal_entry,
-        "previous_day": (selected_date - timedelta(days=1)).strftime("%Y-%m-%d"),
-        "next_day": (selected_date + timedelta(days=1)).strftime("%Y-%m-%d"),
+        "previous_day": previous_day,
+        "next_day": next_day,
     }
-    
-    return render(request, "users/journal.html", context)  # ✅ Returns HTML, not JSON!
 
+    return render(request, "users/journal.html", context)
 
 @login_required
-@csrf_exempt
 def save_journal_entry(request):
     """Handles saving/updating journal entries using JSON."""
 
@@ -1118,7 +1134,9 @@ def save_journal_entry(request):
         return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
     try:
-        entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+       entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+        
     except ValueError:
         print(f"❌ Invalid Date Received: {date_str}")  # Debugging
         return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
