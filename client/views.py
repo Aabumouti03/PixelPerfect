@@ -20,10 +20,6 @@ import csv
 from django.db import transaction 
 from django.db.models import Max, Avg
 from django.db.models import Q
-from client import views as clientViews
-from users import views as usersViews
-from users.views import enroll_module, unenroll_module 
-
 
 
 def admin_check(user):
@@ -66,6 +62,7 @@ def manage_questionnaires(request):
         'is_active_filter': is_active_filter,
         'search_query': search_query
     })
+
 @user_passes_test(admin_check)
 @login_required
 def activate_questionnaire(request, questionnaire_id):
@@ -78,6 +75,7 @@ def activate_questionnaire(request, questionnaire_id):
     
     messages.success(request, f'Activated: {questionnaire.title}')
     return redirect('manage_questionnaires')
+
 @user_passes_test(admin_check)
 @login_required
 def view_questionnaire(request, questionnaire_id):
@@ -88,6 +86,7 @@ def view_questionnaire(request, questionnaire_id):
         'questionnaire': questionnaire,
         'questions': questions
     })
+
 @user_passes_test(admin_check)
 @login_required
 def view_responders(request, questionnaire_id):
@@ -126,6 +125,7 @@ def view_user_response(request, user_response_id):
         'user_response': user_response,
         'responses': responses,
     })
+
 @user_passes_test(admin_check)
 @login_required
 def create_questionnaire(request):
@@ -164,6 +164,7 @@ def create_questionnaire(request):
         "categories": categories,
         "sentiment_choices": sentiment_choices,  
     })
+
 @user_passes_test(admin_check)
 @login_required
 def edit_questionnaire(request, questionnaire_id):
@@ -309,14 +310,25 @@ def create_program(request):
                 program = form.save(commit=False)
                 program.save()
 
-            
+                # Process selected and new categories
+                selected_categories = form.cleaned_data.get("categories")
+                new_category_name = form.cleaned_data.get("new_category", "").strip()
+
+                if new_category_name:
+                    new_category, created = Category.objects.get_or_create(name=new_category_name)
+                    program.categories.add(new_category)
+
+                if selected_categories:
+                    program.categories.add(*selected_categories)
+
+                # Process module ordering from JavaScript
                 module_order = request.POST.get("module_order", "").strip()
                 if module_order:
                     module_ids = module_order.split(",")
                     ProgramModule.objects.filter(program=program).delete()
 
                     for index, module_id in enumerate(module_ids, start=1):
-                        if module_id.isdigit(): #making sure the javascript works properly
+                        if module_id.isdigit():
                             module = Module.objects.filter(id=int(module_id)).first()
                             if module:
                                 ProgramModule.objects.create(program=program, module=module, order=index)
@@ -334,11 +346,16 @@ def create_program(request):
 @login_required
 @user_passes_test(admin_check)
 def log_out_client(request):
+    """Handles logout only if the admin confirms via modal."""
     if request.method == "POST":
         logout(request)
-        return redirect('log_in')
+        return redirect('users:log_in')
 
-    return redirect('/client_dashboard/')
+    referer_url = request.META.get('HTTP_REFERER')
+    if referer_url:
+        return redirect(referer_url)
+    
+    return redirect('client_dashboard')
 
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
