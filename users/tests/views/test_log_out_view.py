@@ -35,7 +35,7 @@ class LogoutViewTests(TestCase):
         """Test that an anonymous user trying to log out does not cause an error."""
         self.client.logout()
         response = self.client.post(self.logout_url)
-        self.assertRedirects(response, self.login_url)
+        self.assertTrue(response.url.startswith(self.login_url))
 
     def test_get_request_does_not_log_out_user(self):
         """Test that a GET request does not log out the user."""

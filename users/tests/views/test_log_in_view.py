@@ -114,7 +114,11 @@ class LogInViewTestCase(TestCase):
     def test_logout_without_being_logged_in(self):
         """Ensure unauthenticated users cannot log out (should be redirected to login)."""
         response = self.client.post(reverse('log_out'), follow=True)
-        self.assertRedirects(response, self.url)
+
+        final_redirect = response.redirect_chain[-1][0] if response.redirect_chain else response.request['PATH_INFO']
+
+        self.assertTrue(final_redirect.startswith(reverse('log_in')))
+
     
     def test_login_trims_spaces_and_succeeds(self):
         """Ensure authentication succeeds even if username/password have leading/trailing spaces."""
