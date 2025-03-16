@@ -43,15 +43,12 @@
         </li>
         <div class="logout">
 
-            <a href="{% url 'log_out' %}" class="{%if request.path == '/log_out/' %}active{% endif %}">
+            <a href="#" class="{%if request.path == '/log_out/' %}active{% endif %}" id="logout-link">
             <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
             <span>Logout</span>
             </a>
         </div>
-
-            
-        
-          
+ 
         
     </ul>
 

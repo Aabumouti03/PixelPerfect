@@ -86,9 +86,11 @@ class EndUserProfileForm(forms.ModelForm):
     """Form for additional user profile information with age and phone number validation."""
 
     phone_number = forms.CharField(
-        validators=[RegexValidator(r'^\+?[1-9]\d{6,14}$', message="Enter a valid phone number (7-15 digits, optional '+').")],
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'})
-    )
+    required=False,
+    validators=[RegexValidator(r'^\+?[1-9]\d{6,14}$', message="Enter a valid phone number (7-15 digits, optional '+').")],
+    widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'})
+)
+
 
     age = forms.IntegerField(
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age: *'}),

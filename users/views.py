@@ -7,6 +7,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.db.models import Avg
+from .models import JournalEntry
+from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from users.helpers_modules import calculate_progress, update_user_program_progress
@@ -39,6 +41,8 @@ from .helpers_questionnaire import assess_user_responses_modules, assess_user_re
 
 # Logger setup
 logger = logging.getLogger(__name__)
+
+
 
 
 def questionnaire(request):
@@ -279,7 +283,7 @@ def view_program(request, program_id):
     
     return render(request, 'users/view_program.html', context)
 
-#A function for displaying a page that welcomes users
+
 def welcome_page(request):
     '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
@@ -379,7 +383,7 @@ def sign_up_step_2(request):
 
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
-
+@login_required
 def log_out(request):
     """Handles logout only if the user confirms via modal."""
     if request.method == "POST":
@@ -970,14 +974,6 @@ def submit_responses(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
-
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.utils.timezone import now
-from datetime import datetime, timedelta
-from .models import JournalEntry
-from django.contrib.auth.decorators import login_required
-
 
 @login_required
 def journal_view(request, date=None):

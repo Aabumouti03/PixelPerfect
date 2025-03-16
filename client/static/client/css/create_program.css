@@ -134,7 +134,6 @@ body {
     color: #ff440f;
 }
 
-/* This is conencted to the description box in the page */
 textarea.form-control {
     min-height: 300px;
     max-height: 600px;
@@ -142,7 +141,6 @@ textarea.form-control {
     text-align: left;
     line-height: 1.5;
 }
-
 
 .module-box {
     border: 2px solid #ff440f;
@@ -186,3 +184,35 @@ textarea.form-control {
     background-color: #80bef5 !important;
     border-color: #80bef5 !important;
 }
+
+.category-box{
+    border:2px solid #ff440f;
+    border-radius: 10px;
+}
+
+.category-box input[type="text"] {
+    border: 2px solid #ff440f;
+    border-radius: 10px;
+    padding: 12px 15px;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+.category-box input[type="text"]:focus {
+    border-color: #cc370d;
+    box-shadow: 0 0 5px rgba(255, 68, 15, 0.5);
+}
+
+.category-box input[name="new_category"] {
+    border: 1px !important;
+    outline: none !important;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+.category-box input[name="new_category"]::placeholder {
+    color: #ff440f !important;
+    opacity: 1;
+}
+
