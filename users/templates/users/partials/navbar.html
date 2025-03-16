@@ -1,4 +1,11 @@
-{% load static %}
+{% load static %} 
+
+{% block extra_css %} 
+
+    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
+
+{% endblock %}
+
 <div class="sidebar">
     <div class="logo">
         <img src="{% static 'img/logo.svg' %}" alt="Logo" class="logoIcon">
@@ -15,7 +22,7 @@
 
 
             <a href="{% url 'userModules' %}" class="{% if request.path == '/modules/' %}active{% endif %}">
-                <img src="{% static 'users/users/img/modules.svg' %}" alt="Modules" class="icon">
+                <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
@@ -42,11 +49,7 @@
             </a>
         </div>
 
-            <a href="#" id="logout-link">
-                <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
-                <span>Logout</span>
-            </a>
-        </div>
+            
         
           
         
