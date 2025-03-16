@@ -369,7 +369,7 @@ def sign_up_step_2(request):
 
             user = authenticate(username=user.username, password=user_form.cleaned_data["password1"])
             if user:
-                login(request, user)  # Logs the user in
+                login(request, user)
 
             return redirect("questionnaire")
 
@@ -386,9 +386,11 @@ def log_out(request):
         logout(request)
         return redirect('log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
-
+    referer_url = request.META.get('HTTP_REFERER')
+    if referer_url:
+        return redirect(referer_url)
+    
+    return redirect('dashboard')
 
 @login_required 
 def show_profile(request):

@@ -9,7 +9,7 @@ class SignUpViewTestCase(TestCase):
     def setUp(self):
         self.sign_up_step_1_url = reverse("sign_up_step_1")
         self.sign_up_step_2_url = reverse("sign_up_step_2")
-        self.log_in_url = reverse("log_in")
+        self.questionnaire = reverse("questionnaire")
 
         self.valid_user_data = {
             "username": "testuser",
@@ -71,7 +71,7 @@ class SignUpViewTestCase(TestCase):
         session.save()
 
         response = self.client.post(self.sign_up_step_2_url, self.valid_profile_data, follow=True)
-        self.assertRedirects(response, self.log_in_url)
+        self.assertRedirects(response, self.questionnaire)
         self.assertTrue(User.objects.filter(username="testuser").exists())
         self.assertTrue(EndUser.objects.filter(user__username="testuser").exists())
 
