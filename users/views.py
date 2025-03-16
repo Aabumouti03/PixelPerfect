@@ -11,8 +11,12 @@ from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from users.helpers_modules import calculate_progress, update_user_program_progress
 from django.contrib.auth.decorators import login_required 
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from client.models import Category, Program,ModuleRating,Exercise
+from django.shortcuts import redirect, render,  get_object_or_404
+from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
+from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
+logger = logging.getLogger(__name__)
 from collections import defaultdict
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -131,9 +135,9 @@ def submit_responses(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
+import random
+import datetime
 
-
-@csrf_exempt
 @login_required
 def save_notes(request):
     if request.method == 'POST':
@@ -161,7 +165,6 @@ def get_notes(request):
     except StickyNote.DoesNotExist:
         return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
 
-
 @login_required
 def dashboard(request):
     user = request.user
@@ -186,28 +189,48 @@ def dashboard(request):
 
     # Mark only the first module as accessible
     previous_module_completed = True  # The first module is always accessible
+    unlocked_modules = set()
+
     for program_module in program_modules:
         module = program_module.module
         module.progress_value = user_progress.get(module.id, 0)
 
         if previous_module_completed:
             module.is_unlocked = True  # Unlock if it's the first or previous is completed
+            unlocked_modules.add(module.id)  # Store unlocked module IDs
         else:
             module.is_unlocked = False  # Keep locked
 
         previous_module_completed = module.progress_value == 100  # Update for next iteration
 
-    # Get modules outside the program that the user is enrolled in
+    # Get modules outside the program that the user is enrolled in (standalone modules are always unlocked)
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
     outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
+    # Get recently accessed modules **EXCLUDING LOCKED ONES**
+    recent_enrollments = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:3]
+
+    # Ensure only unlocked modules appear in recently accessed
+    recent_modules = [
+        enrollment.module for enrollment in recent_enrollments
+        if enrollment.module.id and (
+            enrollment.module.id in unlocked_modules or  # Module is unlocked in a program
+            enrollment.module in outside_modules  # Standalone modules are always unlocked
+        )
+    ]
+
+    quote_of_the_day = Quote.get_quote_of_the_day()
+    
     context = {
         'user': request.user,
         'program': program,
         'program_modules': program_modules,
         'outside_modules': outside_modules,  # Only enrolled modules outside the program
+        'recent_modules': recent_modules,  # Excludes locked modules
+        "quote_of_the_day": quote_of_the_day
     }
     return render(request, 'users/dashboard.html', context)
+
 
 
 @login_required
@@ -257,136 +280,6 @@ def view_program(request, program_id):
     }
     
     return render(request, 'users/view_program.html', context)
-
-
-@csrf_exempt
-@login_required
-def save_notes(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        content = data.get('content')
-
-        # Get the EndUser instance for the logged-in user
-        end_user = EndUser.objects.get(user=request.user)
-
-        # Get or create the sticky note for the current user
-        sticky_note, created = StickyNote.objects.get_or_create(user=end_user)
-        sticky_note.content = content
-        sticky_note.save()
-
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
-@login_required
-def get_notes(request):
-    try:
-        # Get the EndUser instance for the logged-in user
-        end_user = EndUser.objects.get(user=request.user)
-        sticky_note = StickyNote.objects.get(user=end_user)
-        return JsonResponse({'success': True, 'content': sticky_note.content})
-    except StickyNote.DoesNotExist:
-        return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
-
-
-@login_required
-def dashboard(request):
-    user = request.user
-
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
-
-    # Fetch the program the user is enrolled in (if any)
-    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
-    program = user_program_enrollment.program if user_program_enrollment else None
-
-    # Fetch program modules if the user is enrolled, sorted by order
-    program_modules = program.program_modules.all().order_by("order") if program else []
-
-    # Get user progress for each module
-    user_progress = {
-        progress.module.id: progress.completion_percentage
-        for progress in UserModuleProgress.objects.filter(user=end_user)
-    }
-
-    # Mark only the first module as accessible
-    previous_module_completed = True  # The first module is always accessible
-    for program_module in program_modules:
-        module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)
-
-        if previous_module_completed:
-            module.is_unlocked = True  # Unlock if it's the first or previous is completed
-        else:
-            module.is_unlocked = False  # Keep locked
-
-        previous_module_completed = module.progress_value == 100  # Update for next iteration
-
-    # Get modules outside the program that the user is enrolled in
-    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
-    outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
-
-    context = {
-        'user': user,
-        'program': program,
-        'program_modules': program_modules,
-        'outside_modules': outside_modules,  # Only enrolled modules outside the program
-    }
-    return render(request, 'users/dashboard.html', context)
-
-
-@login_required
-def view_program(request, program_id):
-    user = request.user
-
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        return render(request, 'users/program_not_found.html')
-
-    # Get the user's enrolled program
-    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user, program_id=program_id).first()
-    
-    if not user_program_enrollment:
-        return render(request, 'users/program_not_found.html')
-
-    program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
-    
-    # Update the  progress
-    update_user_program_progress(end_user, program)
-
-    # Fetch user progress for each module
-    user_progress = {
-        progress.module.id: progress.completion_percentage
-        for progress in UserModuleProgress.objects.filter(user=end_user)
-    }
-
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
-        module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
-
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
-
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
-
-    context = {
-        'user': user,
-        'program': program,
-        'program_modules': program_modules,
-    }
-    
-    return render(request, 'users/view_program.html', context)
-
 
 #A function for displaying a page that welcomes users
 def welcome_page(request):
@@ -814,33 +707,38 @@ def exercise_detail(request, exercise_id):
 
 
 @csrf_exempt  
+@login_required
 def rate_module(request, module_id):
     """Handles AJAX-based user rating for a module."""
-    if request.method == "POST" and request.user.is_authenticated:
-        module = get_object_or_404(Module, id=module_id)
+    
+    module = get_object_or_404(Module, id=module_id)
+
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
             rating_value = int(data.get("rating", 0))
 
-            if 1 <= rating_value <= 5:
-             
-                end_user = request.user.User_profile 
+            # reject invalid ratigs
+            if not (1 <= rating_value <= 5):
+                return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-                rating_obj, created = ModuleRating.objects.update_or_create(
-                    user=end_user,  
-                    module=module,
-                    defaults={'rating': rating_value}
-                )
+            end_user, created = EndUser.objects.get_or_create(user=request.user)
 
-                average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-                average_rating = round(average_rating, 1) if average_rating else 0
-
-                return JsonResponse({"success": True, "average_rating": average_rating})
+            # update or create the rating
+            rating_obj, created = ModuleRating.objects.update_or_create(
+                user=end_user,  
+                module=module,
+                defaults={'rating': rating_value}
+            )
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": "Invalid JSON data"})
 
-    return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
+    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+    average_rating = round(average_rating, 1) if average_rating else 0
+
+    return JsonResponse({"success": True, "average_rating": average_rating})
+
 
 @login_required
 def mark_done(request):
@@ -882,17 +780,6 @@ def mark_done(request):
         })
 
     return JsonResponse({"success": False})
-
-@login_required
-def program_progress(request):
-    program = Program.objects.get(id=program_id)
-    end_user, created = EndUser.objects.get_or_create(user=request.user)
-    
-    # Update progress
-    update_user_program_progress(end_user, program)
-
-    # Render the response
-    return render(request, 'some_template.html', {'program': program})
 
 
 @login_required
@@ -1186,7 +1073,9 @@ def journal_view(request, date=None):
             selected_date = now().date()
 
     # Fetch the journal entry for the selected date (if it exists)
-    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
+    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first() or None
+    
+
 
     print(f"📖 [DEBUG] Rendering Journal for {selected_date}")
     if journal_entry:
@@ -1212,44 +1101,27 @@ def journal_view(request, date=None):
 @login_required
 @csrf_exempt
 def save_journal_entry(request):
-    """Handles saving journal entries using JSON."""
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)  # Load JSON data
-            user = request.user
-            date_str = data.get("date")
+    """Handles saving/updating journal entries using JSON."""
 
-            if not date_str:
-                return JsonResponse({"success": False, "error": "Date is required."}, status=400)
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
 
-            # Convert string date to date object
-            try:
-                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            except ValueError:
-                return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
+    try:
+        data = json.loads(request.body)
+        print("📥 Received Data:", data)  # Debugging
 
-            # Get or create journal entry
-            journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
-            # Debugging: Print before updating
-            print(f"🔹 BEFORE UPDATE: {journal_entry}")
+    date_str = data.get("date")
+    if not date_str:
+        return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
-            # Update the entry with provided data
-            journal_entry.sleep_hours = int(data.get("sleep_hours", 0)) if data.get("sleep_hours") else None
-            journal_entry.caffeine = data.get("caffeine") or None
-            journal_entry.hydration = int(data.get("hydration", 0)) if data.get("hydration") else None
-            journal_entry.stress = data.get("stress") or None
-            journal_entry.goal_progress = data.get("goal_progress") or None
-            journal_entry.notes = data.get("notes") or None
-            journal_entry.save()
+    try:
+        entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"❌ Invalid Date Received: {date_str}")  # Debugging
+        return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
-            # Debugging: Print after updating
-            print(f"✅ AFTER UPDATE: {journal_entry}")
-
-            return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
-
-        except Exception as e:
-            print("❌ [SERVER ERROR]", str(e))  # Debugging
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+    # Save the journal entry
+    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)

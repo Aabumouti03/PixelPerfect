@@ -1,28 +1,21 @@
 import re
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
-
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from .models import User, EndUser
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model
 
 
 class UserSignUpForm(UserCreationForm):
     """Form for creating a new user account with custom placeholders and password validation."""
     
     password1 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password: *'}),
         label=""
     )
     password2 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Re-enter password'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Re-enter password: *'}),
         label=""
     )
 
@@ -83,10 +76,10 @@ class UserSignUpForm(UserCreationForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username: *'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name: *'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name: *'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email: *'}),
         }
 
 class EndUserProfileForm(forms.ModelForm):
@@ -98,7 +91,7 @@ class EndUserProfileForm(forms.ModelForm):
     )
 
     age = forms.IntegerField(
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age'}),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age: *'}),
         required=True
     )
 
@@ -123,11 +116,10 @@ class EndUserProfileForm(forms.ModelForm):
         """Convert choices to a list before modifying them."""
         super().__init__(*args, **kwargs)
 
-        self.fields['gender'].choices = [("", "Select Gender:")] + [choice for choice in self.fields['gender'].choices if choice[0] != '']
-        self.fields['sector'].choices = [("", "Select Sector:")] + [choice for choice in self.fields['sector'].choices if choice[0] != '']
+        self.fields['gender'].choices = [("", "Select Gender: *")] + [choice for choice in self.fields['gender'].choices if choice[0] != '']
+        self.fields['sector'].choices = [("", "Select Sector: *")] + [choice for choice in self.fields['sector'].choices if choice[0] != '']
         self.fields['ethnicity'].choices = [("", "Select Ethnicity:")] + [choice for choice in self.fields['ethnicity'].choices if choice[0] != '']
-        self.fields['last_time_to_work'].choices = [("", "Select Time Since Last Work:")] + [choice for choice in self.fields['last_time_to_work'].choices if choice[0] != '']
-
+        self.fields['last_time_to_work'].choices = [("", "Select Time Since Last Work: *")] + [choice for choice in self.fields['last_time_to_work'].choices if choice[0] != '']
 
 class LogInForm(AuthenticationForm):
     """Form for user log in."""
@@ -290,6 +282,7 @@ class UserProfileForm(forms.ModelForm):
 
 
 
+
     def clean(self):
         """Ensure new password and confirm password match."""
         cleaned_data = super().clean()
@@ -325,7 +318,13 @@ class UserProfileForm(forms.ModelForm):
         return end_user  
 
 class ExerciseAnswerForm(forms.Form):
-    
+    """
+    Exercise Answer Form
+    - The form takes an `exercise` object as an argument during initialization.
+    - It dynamically creates form fields corresponding to each `ExerciseQuestion` linked to the exercise.
+    - Each question field is labeled with its `question_text` and uses a `TextInput` widget.
+    """
+ 
     def __init__(self, *args, **kwargs):
         exercise = kwargs.pop('exercise')  # Get exercise object
         super().__init__(*args, **kwargs)
@@ -334,4 +333,3 @@ class ExerciseAnswerForm(forms.Form):
                 label=question.question_text, 
                 widget=forms.TextInput(attrs={'placeholder': 'Your answer here'})
             )
-

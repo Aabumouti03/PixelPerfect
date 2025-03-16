@@ -155,6 +155,7 @@ def create_questionnaire(request):
             question_type = request.POST.get(f"question_type_{question_index}")
             sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  
             category_id = request.POST.get(f"category_{question_index}")
+            
             category = Category.objects.get(id=category_id) if category_id else None  
 
             Question.objects.create(
@@ -221,6 +222,7 @@ def delete_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questionnaire.delete()
     return redirect("manage_questionnaires")
+
 
 @login_required
 def delete_question(request, question_id):

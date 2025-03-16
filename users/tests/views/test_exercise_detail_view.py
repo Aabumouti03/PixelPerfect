@@ -7,7 +7,6 @@ from client.models import Exercise, Section, ExerciseQuestion
 
 class ExerciseDetailViewTest(TestCase):
     def setUp(self):
-     
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
         # Create an exercise instance and SAVE it first before adding ManyToMany fields
@@ -39,13 +38,13 @@ class ExerciseDetailViewTest(TestCase):
         self.assertEqual(response.context['exercise'], self.exercise)
         self.assertIn('diagram', response.context)
         self.assertEqual(response.context['diagram'], self.section.diagram)
-        
 
     def test_exercise_detail_unauthenticated_user_redirect(self):
         """Test that an unauthenticated user is redirected to the login page."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)  # Redirect to login
-        self.assertTrue(response.url.startswith('/accounts/login/'))  # Default login URL
+        self.assertTrue(response.url.startswith('/log_in'))
+
 
     def test_exercise_detail_post_request(self):
         """Test that a POST request redirects back to the same page."""

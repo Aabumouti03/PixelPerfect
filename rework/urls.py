@@ -8,7 +8,7 @@ from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
 from client import views
 from client.views import delete_module
-from users.views import enroll_module, unenroll_module 
+from users.views import enroll_module, unenroll_module
 
 urlpatterns = [
     # Admin URL
@@ -89,6 +89,13 @@ urlpatterns = [
     path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
     path('mark_done/', usersViews.mark_done, name='mark_done'),
 
+    # User dashboard details
+    path('dashboard/', usersViews.dashboard, name='dashboard'),
+    path('profile/', usersViews.profile, name='profile'),
+    path('reports/', clientViews.reports, name='reports'),
+    path('save-notes/', usersViews.save_notes, name='save_notes'),
+    path('get-notes/', usersViews.get_notes, name='get_notes'), 
+
     # Questionnaire
     path('welcome/', usersViews.welcome_view, name='welcome'),
     path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
@@ -120,11 +127,13 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
-
-    path("journal/", usersViews.journal_view, name="journal_page"),
-    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),
-    path("journal/save/", usersViews.save_journal_entry, name="journal_save"), 
     
+
+
+    # Journal URLs (moved outside debug block)
+    path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+    path("save_journal_entry/", usersViews.save_journal_entry, name="save_journal_entry"),
 ]
 
 # Debug settings (corrected)
@@ -137,20 +146,7 @@ if settings.DEBUG:
         path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
         path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
         path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
+        path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
+        path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
+        path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
     ]
-    #
-    # path('welcome/', usersViews.welcome_view, name='welcome'),
-    # path('questionnaire/', usersViews.questionnaire, name='questionnaire'),
-    # path("submit-responses/", usersViews.submit_responses, name="submit_responses"),
-    # path('manage_questionnaires/', clientViews.manage_questionnaires, name='manage_questionnaires'),
-    # path("manage_questionnaires/create_questionnaire/", clientViews.create_questionnaire, name="create_questionnaire"),
-    # path('manage_questionnaires/<int:questionnaire_id>/', clientViews.view_questionnaire, name='view_questionnaire'),
-    # path('manage_questionnaires/<int:questionnaire_id>/delete/', clientViews.delete_questionnaire, name='delete_questionnaire'),
-    # path('manage_questionnaires/<int:questionnaire_id>/responders/', clientViews.view_responders, name='view_responders'),
-    # path('manage_questionnaires/edit/<int:questionnaire_id>/', clientViews.edit_questionnaire, name='edit_questionnaire'),
-    # path('manage_questionnaires/delete_question/<int:question_id>/', clientViews.delete_question, name='delete_question'),
-    # path('manage_questionnaires/add_question/<int:questionnaire_id>/', clientViews.add_question, name='add_question'),
-    # path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
-    # path('manage_questionnaires/activate/<int:questionnaire_id>/', clientViews.activate_questionnaire, name='activate_questionnaire'),
-    # path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
-    

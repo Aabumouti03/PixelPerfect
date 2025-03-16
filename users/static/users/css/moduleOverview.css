@@ -278,7 +278,7 @@ canvas#progressChart {
 }
 
 .done-button {
-    background-color: #FFA500;  /* Default to orange */
+    background-color: #CC4E00;  /* Default to orange */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -287,19 +287,28 @@ canvas#progressChart {
 }
 
 /* Style for "Done" state (orange) */
-.done-button.undo {
-    background-color: orange;
+.done-button {
+    background-color: #CC4E00;  /* Default to orange */
     color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left: 15px; /* ✅ Adds spacing to move it right */
+}
+
+/* Style for "Done" state (orange) */
+.done-button.undo {
+    background-color: #CC4E00;
+    color: white;
+    padding: 10px 20px;
+    margin-left: 15px; /* ✅ Adds spacing to move it right */
 }
 
 /* Style for "Undo" state (green) */
 .done-button.done {
     background-color: green;
     color: white;
-}
-
-
-.done-button:disabled {
-    background-color: #d3d3d3;  /* Gray when disabled */
-    cursor: not-allowed;
+    padding: 10px 20px;
+    margin-left: 15px; /* ✅ Adds spacing to move it right */
 }
