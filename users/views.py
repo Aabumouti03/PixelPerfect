@@ -726,33 +726,38 @@ def exercise_detail(request, exercise_id):
 
 
 @csrf_exempt  
+@login_required
 def rate_module(request, module_id):
     """Handles AJAX-based user rating for a module."""
-    if request.method == "POST" and request.user.is_authenticated:
-        module = get_object_or_404(Module, id=module_id)
+    
+    module = get_object_or_404(Module, id=module_id)
+
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
             rating_value = int(data.get("rating", 0))
 
-            if 1 <= rating_value <= 5:
-             
-                end_user = request.user.User_profile 
+            # reject invalid ratigs
+            if not (1 <= rating_value <= 5):
+                return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-                rating_obj, created = ModuleRating.objects.update_or_create(
-                    user=end_user,  
-                    module=module,
-                    defaults={'rating': rating_value}
-                )
+            end_user, created = EndUser.objects.get_or_create(user=request.user)
 
-                average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-                average_rating = round(average_rating, 1) if average_rating else 0
-
-                return JsonResponse({"success": True, "average_rating": average_rating})
+            # update or create the rating
+            rating_obj, created = ModuleRating.objects.update_or_create(
+                user=end_user,  
+                module=module,
+                defaults={'rating': rating_value}
+            )
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": "Invalid JSON data"})
 
-    return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
+    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+    average_rating = round(average_rating, 1) if average_rating else 0
+
+    return JsonResponse({"success": True, "average_rating": average_rating})
+
 
 @login_required
 def mark_done(request):
@@ -794,17 +799,6 @@ def mark_done(request):
         })
 
     return JsonResponse({"success": False})
-
-@login_required
-def program_progress(request):
-    program = Program.objects.get(id=program_id)
-    end_user, created = EndUser.objects.get_or_create(user=request.user)
-    
-    # Update progress
-    update_user_program_progress(end_user, program)
-
-    # Render the response
-    return render(request, 'some_template.html', {'program': program})
 
 
 
