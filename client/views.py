@@ -500,6 +500,27 @@ def create_category(request):
 
 @login_required 
 @user_passes_test(admin_check) 
+def edit_category(request, category_id):
+    """View to edit a category's modules and programs."""
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == 'POST':
+
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            category = form.save()
+            category.modules.set(form.cleaned_data['modules'])
+            category.programs.set(form.cleaned_data['programs'])
+            return redirect('category_list')  
+            
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(request, 'client/edit_category.html', {'form': form, 'category': category})
+
+
+@login_required 
+@user_passes_test(admin_check) 
 def reports(request):
     # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
     enrollment_labels, enrollment_data = get_module_enrollment_stats() # 1 for modules 

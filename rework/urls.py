@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-
+from django.views.generic import TemplateView
 from client import views as clientViews
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
@@ -34,6 +34,10 @@ urlpatterns = [
     path('reset_password_complete/',
         authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
+    
+    path("verify-email/<uidb64>/<token>/", usersViews.verify_email, name="verify_email"),
+    path("email-verification-pending/", TemplateView.as_view(template_name="users/email_verification_pending.html"), name="email_verification_pending"),
+    path("email-verified-success/", TemplateView.as_view(template_name="users/email_verified_success.html"), name="email_verified_success"),
 
     # Home page
     path('about/', usersViews.about, name='about'),
@@ -59,7 +63,8 @@ urlpatterns = [
     # Categories
     path('create_category/', clientViews.create_category, name='create_category'),
     path('category_list/', clientViews.category_list, name='category_list'),  
-    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
+    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'), 
+    path('categories/<int:category_id>/edit/', clientViews.edit_category, name='edit_category'),   
 
     # Statistics
 
