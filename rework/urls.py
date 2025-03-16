@@ -45,10 +45,6 @@ urlpatterns = [
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
     path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
 
-    #
-    path('programs/', clientViews.programs, name='programs'),
-    path('logout/', clientViews.log_out_client, name='logout'),
-
     # Program-related URLs
     path('programs/', clientViews.programs, name='programs'),
     path('logout/', clientViews.log_out_client, name='logout'),
@@ -69,7 +65,7 @@ urlpatterns = [
 
     #User urls for modules
     path('userModules/', usersViews.user_modules, name='modules'),
-    path('module_overview/<int:id>/', usersViews.module_overview, name='module_overview'),
+    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
 
     # User dashboard details
@@ -92,11 +88,6 @@ urlpatterns = [
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
     path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
     path('mark_done/', usersViews.mark_done, name='mark_done'),
-
-    # User dashboard details
-    path('dashboard/', usersViews.dashboard, name='dashboard'),
-    path('profile/', usersViews.profile, name='profile'),
-    path('reports/', clientViews.reports, name='reports'),
 
     # Questionnaire
     path('welcome/', usersViews.welcome_view, name='welcome'),
@@ -129,6 +120,10 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+
+    path("journal/", usersViews.journal_view, name="journal_page"),
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),
+    path("journal/save/", usersViews.save_journal_entry, name="journal_save"), 
     
 ]
 
@@ -137,12 +132,8 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     urlpatterns += [
-        path('programs/', clientViews.programs, name='programs'),
         path('log_out/', clientViews.log_out_client, name="log_out"),
         path('create_program/', clientViews.create_program, name='create_program'),
-        path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
-        path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-        path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
         path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
         path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
         path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
