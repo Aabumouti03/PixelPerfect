@@ -86,6 +86,7 @@ urlpatterns = [
     path('reports/', clientViews.reports, name='reports'),
     path('save-notes/', usersViews.save_notes, name='save_notes'),
     path('get-notes/', usersViews.get_notes, name='get_notes'), 
+    path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
 
     # Questionnaire
     path('welcome/', usersViews.welcome_view, name='welcome'),
@@ -137,5 +138,4 @@ if settings.DEBUG:
         path('create_program/', clientViews.create_program, name='create_program'),
         path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
         path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-        path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
     ]

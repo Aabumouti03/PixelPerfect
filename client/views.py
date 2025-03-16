@@ -285,6 +285,7 @@ def users_management(request):
     users = EndUser.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
 
+@login_required
 def user_detail_view(request, user_id):
     user_profile = get_object_or_404(EndUser, user__id=user_id)
 
