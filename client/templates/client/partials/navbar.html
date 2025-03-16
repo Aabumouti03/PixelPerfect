@@ -31,9 +31,17 @@
         </li>
         
         <li>
+       
+        
             <a href="{% url 'reports' %}" class="{%if request.path == '/reports/' %}active{% endif %}">
                 <img src="{% static 'img/reports.svg' %}" alt="Reports" class="icon">
                 <span>Reports</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'category_list' %}" class="{%if request.path == '/category_list/' %}active{% endif %}">
+                <img src="{% static 'client/img/reports.svg' %}" alt="Categories" class="icon">
+                <span>Categories</span>
             </a>
         </li>
         <div class="logout">

@@ -2,9 +2,7 @@ import os
 import json
 import random
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
@@ -20,17 +18,13 @@ from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileFor
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
 logger = logging.getLogger(__name__)
 from collections import defaultdict
-
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.utils.timezone import now
-from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
-
-from users.helpers_modules import calculate_progress
 from users.models import (
     EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
     UserProgramEnrollment, JournalEntry
@@ -39,16 +33,12 @@ from client.models import (
     Program, Module, ProgramModule, ModuleRating, Exercise, Category,
     AdditionalResource, Exercise
 )
-from users.forms import LogInForm, EndUserProfileForm, UserSignUpForm, UserProfileForm, ExerciseAnswerForm
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
 
-
-
 # Logger setup
 logger = logging.getLogger(__name__)
-
 
 
 def questionnaire(request):
@@ -296,7 +286,6 @@ def welcome_page(request):
     '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
 
-
 def modules(request):
     return render(request, 'users/modules.html')
 
@@ -312,7 +301,6 @@ def contact_us(request):
     return render(request, 'users/contact_us.html')
 
 ADMIN_USERNAME = "SuperUser"
-
 
 def log_in(request):
     """Log in page view function"""
@@ -618,8 +606,6 @@ def recommended_modules(request):
 def user_modules(request):
     user = request.user
     end_user, created = EndUser.objects.get_or_create(user=user)
-
-    # enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
     
     # Fetch enrolled modules
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).select_related('module')
@@ -631,24 +617,19 @@ def user_modules(request):
         progress = UserModuleProgress.objects.filter(user=end_user, module=module).first()
 
         progress_percentage = progress.completion_percentage if progress else 0
-        background_style = module.background_style  # Get BackgroundStyle object
 
         module_data.append({
             "id": module.id,
             "title": module.title,
             "description": module.description,
             "progress": progress_percentage,
-            "background_color": background_style.background_color if background_style else "#ffffff",
-            "background_image": f'img/backgrounds/{module.id}.jpg'  # Change based on actual background path
-
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})
 
 @login_required
 def module_overview(request, module_id):
-    """Fetch the module by ID and retrieve related exercises and additional resources."""
-    
+    """Fetch the module by ID and retrieve related exercises and additional resources.""" 
     
     module = get_object_or_404(Module, id=module_id)
 
@@ -726,33 +707,38 @@ def exercise_detail(request, exercise_id):
 
 
 @csrf_exempt  
+@login_required
 def rate_module(request, module_id):
     """Handles AJAX-based user rating for a module."""
-    if request.method == "POST" and request.user.is_authenticated:
-        module = get_object_or_404(Module, id=module_id)
+    
+    module = get_object_or_404(Module, id=module_id)
+
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
             rating_value = int(data.get("rating", 0))
 
-            if 1 <= rating_value <= 5:
-             
-                end_user = request.user.User_profile 
+            # reject invalid ratigs
+            if not (1 <= rating_value <= 5):
+                return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-                rating_obj, created = ModuleRating.objects.update_or_create(
-                    user=end_user,  
-                    module=module,
-                    defaults={'rating': rating_value}
-                )
+            end_user, created = EndUser.objects.get_or_create(user=request.user)
 
-                average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-                average_rating = round(average_rating, 1) if average_rating else 0
-
-                return JsonResponse({"success": True, "average_rating": average_rating})
+            # update or create the rating
+            rating_obj, created = ModuleRating.objects.update_or_create(
+                user=end_user,  
+                module=module,
+                defaults={'rating': rating_value}
+            )
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": "Invalid JSON data"})
 
-    return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
+    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+    average_rating = round(average_rating, 1) if average_rating else 0
+
+    return JsonResponse({"success": True, "average_rating": average_rating})
+
 
 @login_required
 def mark_done(request):
@@ -794,18 +780,6 @@ def mark_done(request):
         })
 
     return JsonResponse({"success": False})
-
-@login_required
-def program_progress(request):
-    program = Program.objects.get(id=program_id)
-    end_user, created = EndUser.objects.get_or_create(user=request.user)
-    
-    # Update progress
-    update_user_program_progress(end_user, program)
-
-    # Render the response
-    return render(request, 'some_template.html', {'program': program})
-
 
 
 @login_required

@@ -45,7 +45,6 @@ urlpatterns = [
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
     path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
 
-
     # Program-related URLs
     path('programs/', clientViews.programs, name='programs'),
     path('logout/', clientViews.log_out_client, name='logout'),
@@ -63,6 +62,16 @@ urlpatterns = [
     path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
 
     # Statistics
+
+    #User urls for modules
+    path('userModules/', usersViews.user_modules, name='modules'),
+    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('all_modules/', usersViews.all_modules, name='all_modules'),
+
+    # User dashboard details
+    path('dashboard/', usersViews.dashboard, name='dashboard'),
+    path('profile/', usersViews.profile, name='profile'),
+    path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', clientViews.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
     path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
@@ -133,9 +142,11 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     urlpatterns += [
-        path('programs/', clientViews.programs, name='programs'),
         path('log_out/', clientViews.log_out_client, name="log_out"),
         path('create_program/', clientViews.create_program, name='create_program'),
+        path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+        path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+        path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
         path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
         path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
     ]

@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User, EndUser, UserProgramEnrollment
 from client.models import Module, Category
@@ -16,28 +15,26 @@ from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
 import csv
 from django.db import transaction 
 from django.db.models import Max, Avg
 from client import views as clientViews
 from users import views as usersViews
 from users.views import enroll_module, unenroll_module 
-
-
-
-def admin_check(user):
-    return user.is_authenticated and user.is_superuser
-
-
 # Create your views here.
-from django.contrib import messages
 from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
 from users.models import Questionnaire_UserResponse, QuestionResponse, User
 from django.core.paginator import Paginator
 from .forms import ProgramForm 
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
+
+
+
+def admin_check(user):
+    return user.is_authenticated and user.is_superuser
 
 
 @login_required
@@ -248,19 +245,6 @@ def add_question(request, questionnaire_id):
     
     return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
-from .forms import ProgramForm, CategoryForm
-from .models import Program, ProgramModule, Module
-import json
-from client.statistics import * 
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse
-import csv
-
-def admin_check(user):
-    return user.is_authenticated and user.is_superuser
-
-
 
 @login_required 
 @user_passes_test(admin_check) 
@@ -365,7 +349,6 @@ def log_out_client(request):
 
     return redirect('/client_dashboard/')
 
-
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
@@ -374,6 +357,7 @@ def program_detail(request, program_id):
 
     enrolled_users = program.enrolled_users.all()
     enrolled_user_ids = set(enrollment.user_id for enrollment in enrolled_users)
+    all_users = EndUser.objects.all()
 
     if request.method == "POST":
         if "remove_module" in request.POST:
@@ -381,19 +365,61 @@ def program_detail(request, program_id):
             program_module = ProgramModule.objects.filter(program=program, module_id=module_id).first()
             if program_module:
                 program_module.delete()
+            else:
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    'all_users': all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,  
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "Module not found."
+                })
             return redirect("program_detail", program_id=program.id)
 
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
             max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
             for index, m_id in enumerate(modules_to_add, start=1):
-                module_obj = get_object_or_404(Module, id=m_id)
-                ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
+                for m_id in modules_to_add:
+                    try:
+                        module_obj = Module.objects.get(id=m_id)  
+                    except Module.DoesNotExist:
+                        return HttpResponseNotFound("Module not found.")
+                    if ProgramModule.objects.filter(program=program, module=module_obj).exists():
+                        url = reverse("program_detail", args=[program.id]) + f"?error_message=Duplicate module added."
+                        return HttpResponseRedirect(url)
+                    
+                    ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
+
+            return redirect("program_detail", program_id=program.id)
+
+        if "add_users" in request.POST:
+            users_to_add = request.POST.getlist("users_to_add")
+            for user_id in users_to_add:
+                user_obj = get_object_or_404(EndUser, user_id=user_id)
+                UserProgramEnrollment.objects.create(program=program, user=user_obj)
+            return redirect("program_detail", program_id=program.id)
+        
+        if "remove_user" in request.POST:
+            user_id = request.POST.get("remove_user")
+            enrollment = UserProgramEnrollment.objects.filter(program=program, user_id=user_id).first()
+            if enrollment:
+                enrollment.delete()
+            return redirect("program_detail", program_id=program.id)
+
+        if "update_program" in request.POST:
+            program.title = request.POST.get("title", program.title)
+            program.description = request.POST.get("description", program.description)
+            program.save()
             return redirect("program_detail", program_id=program.id)
 
     context = {
         "program": program,
         "all_modules": all_modules,
+        'all_users': all_users,
+        "enrolled_user_ids": enrolled_user_ids,
         "program_modules": program_modules,  
         "program_module_ids": program_module_ids,
         "enrolled_users": enrolled_users,
