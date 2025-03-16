@@ -8,7 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.db.models import Avg
 from django.forms import ValidationError
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from users.helpers_modules import calculate_progress, update_user_program_progress
 from django.contrib.auth.decorators import login_required 
 from client.models import Category, Program,ModuleRating,Exercise
@@ -63,13 +63,11 @@ def questionnaire(request):
     }
     return render(request, "questionnaire.html", context)
 
-@csrf_exempt
+@csrf_protect
+@login_required
 def submit_responses(request):
     if request.method == "POST":
         try:
-            if not request.user.is_authenticated:
-                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
-
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
@@ -127,7 +125,7 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-
+            redirect('recommended_programs')
             return JsonResponse({"success": True, "message": "Responses saved successfully!"})
 
         except Exception as e:
@@ -367,7 +365,12 @@ def sign_up_step_2(request):
             profile.save()
 
             del request.session["user_form_data"]
-            return redirect("log_in")
+
+            user = authenticate(username=user.username, password=user_form.cleaned_data["password1"])
+            if user:
+                login(request, user)  # Logs the user in
+
+            return redirect("questionnaire")
 
 
     else:
