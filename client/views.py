@@ -154,6 +154,7 @@ def remove_section_from_module(request, module_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+
 def edit_exercise(request, exercise_id):
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == "POST":
@@ -211,23 +212,34 @@ def add_exercise_to_section(request, section_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
-
 @csrf_exempt
 def remove_exercise_from_section(request, section_id):
     """Handles removing exercises from a section via AJAX."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            exercise_ids = data.get("exercise_ids", [])
+            exercise_ids = data.get("exercise_ids", [])  # ✅ Ensure it's a list
 
             section = get_object_or_404(Section, id=section_id)
+
+            print(f"🔍 Received request to remove exercises: {exercise_ids}")  # Debugging
+            print(f"📌 Current exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
+
+            if not exercise_ids:
+                return JsonResponse({"success": False, "error": "No exercise IDs received."}, status=400)
+
+            # ✅ Remove exercises
             section.exercises.remove(*exercise_ids)
+
+            print(f"✅ Updated exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
 
             return JsonResponse({"success": True, "message": "Exercises removed successfully!"})
         except Exception as e:
+            print(f"❌ Error: {e}")  # Debugging
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 
 
 def add_module(request):

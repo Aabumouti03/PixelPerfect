@@ -44,12 +44,15 @@
             </div>
 
             <!-- Exercise List -->
+            <!-- ✅ Ensure each exercise-card has a data attribute -->
             <div class="exercises">
                 {% for exercise in section.exercises.all %}
-                    <div class="exercise-card">
+                    <div class="exercise-card" data-exercise-id="{{ exercise.id }}">
                         <div class="exercise-header">
                             <h4>{{ exercise.title }}</h4>
-                            <button class="remove-btn" onclick="removeExercise('{{ section.id }}', '{{ exercise.id }}')">❌ Remove</button>
+                            <button class="remove-btn" onclick="removeExercise('{{ section.id }}', '{{ exercise.id }}')">
+                                ❌ Remove
+                            </button>
                         </div>
 
                         <!-- ✅ Display Exercise Questions Directly -->
@@ -67,7 +70,8 @@
                 {% empty %}
                     <p>No exercises available.</p>
                 {% endfor %}
-            </div>
+             </div>
+
         </div>
     </div>
 
@@ -139,26 +143,39 @@
         }
 
         // ✅ Remove Exercise from Section
+        // ✅ Remove Selected Exercises from Section
+        // ✅ Remove a single exercise from the section
         function removeExercise(sectionId, exerciseId) {
+            console.log("Removing Exercise:", exerciseId);  // Debugging
+
             fetch(`/remove_exercise_from_section/${sectionId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify({ exercise_id: exerciseId })
+                body: JSON.stringify({ exercise_ids: [exerciseId] }) // ✅ Send as an array
             })
             .then(response => response.json())
             .then(data => {
+                console.log("📥 Response received:", data);  // Debugging
+
                 if (data.success) {
-                    alert("Exercise removed successfully!");
-                    location.reload();
+                    alert("✅ Exercise removed successfully!");
+
+                    // ✅ Remove the exercise from the DOM without reloading
+                    let exerciseCard = document.querySelector(`.exercise-card[data-exercise-id="${exerciseId}"]`);
+                    if (exerciseCard) {
+                        exerciseCard.remove();
+                    }
                 } else {
-                    alert("Error removing exercise.");
+                    alert("❌ Error removing exercise.");
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => console.error("⚠️ Error:", error));
         }
+
+
     </script>
 
 {% endblock %}
