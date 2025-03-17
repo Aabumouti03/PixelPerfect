@@ -1,6 +1,6 @@
 .content {
     padding: 20px;
-    max-width: 800px;
+    max-width: px;
     margin: auto;
     background: #fff;
     border-radius: 10px;
@@ -96,4 +96,65 @@ h3 {
 
 .question-card ul {
     padding-left: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.edit-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+}
+
+.editing {
+    border: 1px solid #007bff;
+    background: #f8f9fa;
+    padding: 5px;
+}
+
+.hidden {
+    display: none;
+}
+
+.edit-btn, .save-btn, .add-btn, .remove-btn {
+    margin-top: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+    color: white;
+}
+
+.edit-btn { background: #007bff; }
+.save-btn { background: #28a745; }
+.add-btn { background: #17a2b8; }
+.remove-btn { background: #dc3545; }
+
+.exercise-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f9f9f9;
+}
+
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-questions-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.question-card {
+    background: #fff;
+    border-left: 4px solid #007bff;
+    padding: 5px;
+    margin-top: 5px;
 }

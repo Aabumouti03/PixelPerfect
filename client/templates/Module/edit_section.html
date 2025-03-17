@@ -43,27 +43,42 @@
                 <button class="add-btn" onclick="addExercise('{{ section.id }}')">Add Exercise</button>
             </div>
 
-            <!-- Exercise List with Checkboxes -->
-            <form id="remove-exercise-form">
+            <!-- Exercise List -->
+            <div class="exercises">
                 {% for exercise in section.exercises.all %}
                     <div class="exercise-card">
-                        <input type="checkbox" name="remove_exercise" value="{{ exercise.id }}">
                         <div class="exercise-header">
                             <h4>{{ exercise.title }}</h4>
-                            <a href="{% url 'edit_exercise' exercise.id %}" class="edit-btn">Edit</a>
+                            <button class="toggle-questions-btn" onclick="toggleQuestions('{{ exercise.id }}')">
+                                <i class="fas fa-chevron-down" id="toggle-icon-{{ exercise.id }}"></i>
+                            </button>
                         </div>
-                        <p>Type: {{ exercise.get_exercise_type_display }}</p>
+
+                        <!-- Questions List (Initially Hidden) -->
+                        <div id="exercise-questions-{{ exercise.id }}" class="exercise-questions hidden">
+                            {% for question in exercise.questions.all %}
+                                <div class="question-card">
+                                    <p>🔹 {{ question.question_text }}</p>
+                                </div>
+                            {% empty %}
+                                <p>No questions available.</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Remove Exercise Button -->
+                        <button class="remove-btn" onclick="removeExercise('{{ section.id }}', '{{ exercise.id }}')">
+                            ❌ Remove Exercise
+                        </button>
                     </div>
                 {% empty %}
                     <p>No exercises available.</p>
                 {% endfor %}
-                <button type="button" class="remove-btn" onclick="removeExercises('{{ section.id }}')">Remove Selected Exercises</button>
-            </form>
+            </div>
         </div>
     </div>
 
     <script>
-        // ✅ Toggle Edit Mode for Section Title and Description
+        // ✅ Toggle Edit Mode for Section Title & Description
         function toggleEdit(fieldId, editButton) {
             const inputField = document.getElementById(fieldId);
             const saveButton = editButton.nextElementSibling;
@@ -92,12 +107,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Section updated successfully!");
-                    const inputField = document.getElementById(field === 'title' ? 'section-title' : 'section-description');
-                    inputField.readOnly = true;
-                    inputField.classList.remove('editing');
-                    const saveButton = document.querySelector(`button[onclick="saveSectionData('${sectionId}', '${field}')"]`);
-                    saveButton.classList.add('hidden');
-                    saveButton.previousElementSibling.style.display = 'inline-block';
+                    location.reload();
                 } else {
                     alert("Error updating section.");
                 }
@@ -134,66 +144,42 @@
             .catch(error => console.error("Error:", error));
         }
 
-        // ✅ Remove Selected Exercises from Section
-        function removeExercises(sectionId) {
-            let selectedExercises = Array.from(document.querySelectorAll('input[name="remove_exercise"]:checked'))
-                .map(el => el.value);
-
-            if (selectedExercises.length === 0) {
-                alert("Please select at least one exercise to remove.");
-                return;
-            }
-
+        // ✅ Remove Exercise from Section
+        function removeExercise(sectionId, exerciseId) {
             fetch(`/remove_exercise_from_section/${sectionId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify({ exercise_ids: selectedExercises })
+                body: JSON.stringify({ exercise_id: exerciseId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert("Exercises removed successfully!");
+                    alert("Exercise removed successfully!");
                     location.reload();
                 } else {
-                    alert("Error removing exercises.");
+                    alert("Error removing exercise.");
                 }
             })
             .catch(error => console.error("Error:", error));
         }
+
+        // ✅ Toggle Questions for an Exercise
+        function toggleQuestions(exerciseId) {
+            const questionDiv = document.getElementById(`exercise-questions-${exerciseId}`);
+            const icon = document.getElementById(`toggle-icon-${exerciseId}`);
+
+            questionDiv.classList.toggle("hidden");
+
+            if (questionDiv.classList.contains("hidden")) {
+                icon.classList.remove("fa-chevron-up");
+                icon.classList.add("fa-chevron-down");
+            } else {
+                icon.classList.remove("fa-chevron-down");
+                icon.classList.add("fa-chevron-up");
+            }
+        }
     </script>
-
-    <style>
-        .edit-input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-        }
-
-        .editing {
-            border: 1px solid #007bff;
-            background: #f8f9fa;
-            padding: 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .edit-btn, .save-btn, .add-btn, .remove-btn {
-            margin-top: 5px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border: none;
-            color: white;
-        }
-
-        .edit-btn { background: #007bff; }
-        .save-btn { background: #28a745; }
-        .add-btn { background: #17a2b8; }
-        .remove-btn { background: #dc3545; }
-    </style>
 {% endblock %}
