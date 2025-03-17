@@ -431,6 +431,8 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
+            user.User_profile.save()  #  Explicitly save the profile
+            user.refresh_from_db()  #  Ensure data in tests matches DB state
 
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
@@ -451,7 +453,7 @@ def update_profile(request):
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
                     # Send verification email
-                    send_mail(
+                    send_mail_status = send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
                         "noreply@example.com",
@@ -460,6 +462,7 @@ def update_profile(request):
                     )
 
                     request.session['profile_update_popup'] = 'verification_sent'
+                    request.session.save()  # Ensure session data is persisted before redirecting
                 else:
                     # If the email hasn't changed, just don't do anything with the email
                     user.new_email = None
@@ -472,13 +475,11 @@ def update_profile(request):
                 user.save()
                 update_session_auth_hash(request, user)
 
-            user.refresh_from_db()  # 🔥 Ensures all updates are reflected in the next database query
 
             return redirect('show_profile')
 
         else:
             messages.error(request, "There were errors in the form.")
-            print(form.errors)  # 🔥 Debugging: Print form errors if test fails
 
     else:
         form = UserProfileForm(instance=user.User_profile, user=user)
@@ -505,7 +506,6 @@ def verify_email(request, uidb64, token):
             user.save()
             
             request.session['profile_update_popup'] = 'profile_updated'
-            # login(request, user)  # Log the user back in after email change
             return redirect('log_in')
 
     return HttpResponse("Invalid or expired token.")
