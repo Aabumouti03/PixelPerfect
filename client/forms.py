@@ -3,8 +3,9 @@ from .models import Module, Section, Exercise, Question, ExerciseQuestion
 from .models import Program, Module, Category
 
 class ModuleForm(forms.ModelForm):
+    """Form to edit modules."""
     sections = forms.ModelMultipleChoiceField(
-        queryset=Section.objects.all(),  # ✅ Show all sections
+        queryset=Section.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -38,7 +39,7 @@ class ExerciseForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-
+  
     class Meta:
         model = Exercise
         fields = ['title', 'exercise_type', 'questions']

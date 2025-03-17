@@ -151,7 +151,7 @@ class AdditionalResource(models.Model):
 class Exercise(models.Model):
     """An exercise within a section (Reusable)."""
     title = models.CharField(max_length=255)
-    exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES)
+    exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPES, default='short_answer' )
     pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
     questions = models.ManyToManyField('ExerciseQuestion', related_name="exercises", blank=True)  
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started') 

@@ -24,13 +24,12 @@ from django.db.models import Max
 from client import views as clientViews
 from users import views as usersViews
 from users.views import enroll_module, unenroll_module 
-
-
-
-
-
-
-
+from django.contrib import messages
+from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
+from users.models import Questionnaire_UserResponse, QuestionResponse, User
+from django.core.paginator import Paginator
+from .forms import ProgramForm 
+from django.contrib.auth.decorators import login_required
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
@@ -46,9 +45,116 @@ def CreateModule(request):
     modules = Module.objects.prefetch_related("sections__exercises__questions").all()
     return render(request, "Module/Edit_Add_Module.html", {"modules": modules})
 
-def EditModule(request, module_id):
+def edit_module(request, module_id):
+    """Handles editing an existing module."""
     module = get_object_or_404(Module, id=module_id)
-    return render(request, "Module/edit_module.html", {"module": module})
+
+    # Get sections **NOT** already in this module
+    all_sections = Section.objects.exclude(id__in=module.sections.values_list('id', flat=True))
+
+    if request.method == "POST":
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Module updated successfully!")
+            return redirect('client_modules')  # Redirect to module list
+        else:
+            messages.error(request, "Error updating module. Please check the form.")
+    else:
+        form = ModuleForm(instance=module)
+
+    return render(request, 'Module/edit_module.html', {
+        'form': form,
+        'module': module,
+        'all_sections': all_sections  # ✅ Pass sections to template
+    })
+
+def edit_section(request, section_id):
+    section = get_object_or_404(Section, id=section_id)
+    if request.method == "POST":
+        form = SectionForm(request.POST, instance=section)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Section updated successfully!")
+            return redirect('edit_module', section.modules.first().id)
+    else:
+        form = SectionForm(instance=section)
+    return render(request, 'Module/edit_section.html', {'form': form, 'section': section})
+
+@csrf_exempt
+def update_module(request, module_id):
+    """Updates the module title or description based on AJAX request."""
+    if request.method == 'POST':
+        module = get_object_or_404(Module, id=module_id)
+        try:
+            data = json.loads(request.body)
+            field = data.get('field')
+            value = data.get('value')
+
+            if field == 'title':
+                module.title = value
+            elif field == 'description':
+                module.description = value
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid field'}, status=400)
+
+            module.save()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+
+@csrf_exempt
+def add_section_to_module(request, module_id):
+    """Handles adding a section to a module via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            section_id = data.get("section_id")
+
+            module = get_object_or_404(Module, id=module_id)
+            section = get_object_or_404(Section, id=section_id)
+
+            module.sections.add(section)
+
+            return JsonResponse({"success": True, "message": "Section added successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
+@csrf_exempt
+def remove_section_from_module(request, module_id):
+    """Handles removing sections from a module via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            section_ids = data.get("section_ids", [])
+
+            module = get_object_or_404(Module, id=module_id)
+            module.sections.remove(*section_ids)
+
+            return JsonResponse({"success": True, "message": "Sections removed successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+def edit_exercise(request, exercise_id):
+    exercise = get_object_or_404(Exercise, id=exercise_id)
+    if request.method == "POST":
+        form = ExerciseForm(request.POST, instance=exercise)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Exercise updated successfully!")
+            return redirect('edit_section', exercise.sections.first().id)
+    else:
+        form = ExerciseForm(instance=exercise)
+    return render(request, 'Module/edit_exercise.html', {'form': form, 'exercise': exercise})
+
 
 def add_module(request):
     """Handles adding a module with multiple sections."""
@@ -94,9 +200,9 @@ def add_exercise(request):
 
     questions = ExerciseQuestion.objects.all()  # ✅ Fetch all questions
     return render(request, 'Module/add_exercise.html', {'form': form, 'questions': questions})
+  
 
-
-def add_question(request):
+def add_Equestion(request):
     """Handles adding a new question with only the required fields."""
     form = ExerciseQuestionForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -104,14 +210,6 @@ def add_question(request):
         return redirect('add_exercise')  # ✅ Redirect back to add exercise page
 
     return render(request, 'Module/add_question.html', {'form': form})
-
-from django.contrib import messages
-from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
-from users.models import Questionnaire_UserResponse, QuestionResponse, User
-from django.core.paginator import Paginator
-from .forms import ProgramForm 
-from django.contrib.auth.decorators import login_required
-
 
 
 @login_required
@@ -749,19 +847,19 @@ def client_modules(request):
     return render(request, "client/client_modules.html", {"modules": modules_list})
 
 
-def edit_module(request, module_id):
-    module = get_object_or_404(Module, id=module_id)
+# def edit_module(request, module_id):
+#     module = get_object_or_404(Module, id=module_id)
     
-    if request.method == "POST":
-        form = ModuleForm(request.POST, instance=module)
-        if form.is_valid():
-            form.save()
-            return redirect('client_modules')  # Redirect back to module management
+#     if request.method == "POST":
+#         form = ModuleForm(request.POST, instance=module)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('client_modules')  # Redirect back to module management
     
-    else:
-        form = ModuleForm(instance=module)
+#     else:
+#         form = ModuleForm(instance=module)
 
-    return render(request, 'client/edit_module.html', {'form': form, 'module': module})
+#     return render(request, 'client/edit_module.html', {'form': form, 'module': module})
 
 def delete_module(request, module_id):
     module = get_object_or_404(Module, id=module_id)
@@ -769,14 +867,14 @@ def delete_module(request, module_id):
     return redirect("client_modules")
 
 
-def add_module(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
+# def add_module(request):
+#     if request.method == "POST":
+#         title = request.POST.get("title")
+#         description = request.POST.get("description")
         
-        if title and description:  # Ensure both fields are filled
-            new_module = Module.objects.create(title=title, description=description)
-            new_module.save()
-            return redirect("client_modules")  # Redirect to the Client Modules page
-    return render(request, "client/add_module.html")
+#         if title and description:  # Ensure both fields are filled
+#             new_module = Module.objects.create(title=title, description=description)
+#             new_module.save()
+#             return redirect("client_modules")  # Redirect to the Client Modules page
+#     return render(request, "client/add_module.html")
 

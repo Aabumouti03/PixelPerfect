@@ -50,8 +50,12 @@ urlpatterns = [
 
     # Modules (Client)
     path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
-    path("modules/edit/<int:module_id>/", clientViews.EditModule, name="edit_module"),
-    # path("modules/add/", clientViews.AddModule, name="add_module"),
+    path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),
+    path('edit_section/<int:section_id>/', clientViews.edit_section, name='edit_section'),
+    path('edit_exercise/<int:exercise_id>/', clientViews.edit_exercise, name='edit_exercise'),
+    path('update_module/<int:module_id>/', clientViews.update_module, name='update_module'),
+    path('add_section_to_module/<int:module_id>/', clientViews.add_section_to_module, name='add_section_to_module'),
+    path('remove_section_from_module/<int:module_id>/', clientViews.remove_section_from_module, name='remove_section_from_module'),
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
@@ -61,9 +65,9 @@ urlpatterns = [
     path('sections/add/', clientViews.add_section, name='add_section'),
     path('sections/get_all/', clientViews.get_sections, name='get_sections'),
     path('exercises/add/', clientViews.add_exercise, name='add_exercise'), 
-    path('questions/add/', clientViews.add_question, name='add_question'),  
+    path('questions/add/', clientViews.add_Equestion, name='add_question'),  
 
-
+ 
     # Profile management
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  

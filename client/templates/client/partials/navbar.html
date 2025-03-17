@@ -7,13 +7,8 @@
     <ul class="nav-links">
         <li>
             <a href="{% url 'client_dashboard' %}" class="{%if request.path == '/client_dashboard/' %}active{% endif %}">
-<<<<<<< HEAD
-                <img src="{% static 'client/img/dashboard.svg' %}" alt="Dashboard" class="icon">
-                <span>Dashboard</span> 
-=======
                 <img src="{% static 'img/dashboard.svg' %}" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
             </a>
         </li>
         <li>
@@ -26,6 +21,12 @@
             <a href="{% url 'programs' %}" class="{%if request.path == '/programs/' %}active{% endif %}">
                 <img src="{% static 'img/programs.svg' %}" alt="Programs" class="icon">
                 <span>Programs</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'edit_add_module' %}" class="{%if request.path == '/edit_add/' %}active{% endif %}">
+                <img src="{% static 'img/programs.svg' %}" alt="Programs" class="icon">
+                <span>Manage Modules</span>
             </a>
         </li>
         <li></li>
