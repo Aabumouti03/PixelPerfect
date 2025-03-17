@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from users.models import EndUser, UserModuleEnrollment, Module
-from unittest.mock import patch  # ✅ Mocking the function
+from unittest.mock import patch  #  Mocking the function
 import json
 
 User = get_user_model()
@@ -44,11 +44,10 @@ class RecommendedModulesViewTest(TestCase):
         self.client.force_login(self.user)
         self.recommended_modules_url = reverse("recommended_modules")
 
-    @patch("users.views.assess_user_responses_modules")  # ✅ Mock the function
+    @patch("users.views.assess_user_responses_modules")  #  Mock the function
     def test_authenticated_user_access(self, mock_assess_function):
         """Ensure authenticated users can access the recommended modules page with mocked recommendations."""
 
-        # ✅ Fake recommendations dictionary
         mock_assess_function.return_value = {
             "Confidence": [self.module1],
             "Anxiety": [self.module2]
@@ -56,8 +55,8 @@ class RecommendedModulesViewTest(TestCase):
 
         response = self.client.get(self.recommended_modules_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Rebuilding Confidence for Work")  # ✅ Mocked module
-        self.assertContains(response, "Managing Workplace Anxiety")  # ✅ Mocked module
+        self.assertContains(response, "Rebuilding Confidence for Work")  
+        self.assertContains(response, "Managing Workplace Anxiety")  
 
     def test_unauthenticated_user_redirect(self):
         """Ensure unauthenticated users are redirected to the login page."""
