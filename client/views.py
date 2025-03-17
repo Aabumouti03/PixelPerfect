@@ -155,6 +155,31 @@ def edit_exercise(request, exercise_id):
         form = ExerciseForm(instance=exercise)
     return render(request, 'Module/edit_exercise.html', {'form': form, 'exercise': exercise})
 
+@csrf_exempt
+def update_section(request, section_id):
+    """Updates the section title or description via AJAX request."""
+    if request.method == 'POST':
+        section = get_object_or_404(Section, id=section_id)
+        
+        try:
+            data = json.loads(request.body)
+            field = data.get('field')
+            value = data.get('value')
+
+            if field == 'title':
+                section.title = value
+            elif field == 'description':
+                section.description = value
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid field'}, status=400)
+
+            section.save()
+            return JsonResponse({'success': True})
+        
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 def add_module(request):
     """Handles adding a module with multiple sections."""

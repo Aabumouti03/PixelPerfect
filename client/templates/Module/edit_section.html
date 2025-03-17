@@ -1,0 +1,111 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <h2 class="page-title">Edit Section</h2>
+        <link rel="stylesheet" href="{% static 'client/css/edit_section_style.css' %}">
+
+        <!-- Section Title -->
+        <div class="section-section">
+            <h3>Section Title</h3>
+            <div class="editable-field">
+                <input type="text" id="section-title" value="{{ section.title }}" class="edit-input" readonly>
+                <button class="edit-btn" onclick="toggleEdit('section-title', this)">Edit</button>
+                <button class="save-btn hidden" onclick="saveSectionData('{{ section.id }}', 'title')">Save</button>
+            </div>
+        </div>
+
+        <!-- Section Description -->
+        <div class="section-section">
+            <h3>Description</h3>
+            <div class="editable-field">
+                <textarea id="section-description" class="edit-input" readonly>{{ section.description }}</textarea>
+                <button class="edit-btn" onclick="toggleEdit('section-description', this)">Edit</button>
+                <button class="save-btn hidden" onclick="saveSectionData('{{ section.id }}', 'description')">Save</button>
+            </div>
+        </div>
+
+        <!-- Exercises in the Section -->
+        <div class="section-section">
+            <h3>Exercises</h3>
+
+            {% for exercise in section.exercises.all %}
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <h4>{{ exercise.title }}</h4>
+                        <a href="{% url 'edit_exercise' exercise.id %}" class="edit-btn">Edit</a>
+                    </div>
+
+                    <p><strong>Type:</strong> {{ exercise.get_exercise_type_display }}</p>
+
+                    <!-- Exercise Responses -->
+                    <div class="exercise-responses">
+                        <h5>Responses:</h5>
+                        {% for question in exercise.questions.all %}
+                            <div class="question-card">
+                                <p><strong>Question:</strong> {{ question.question_text }}</p>
+                                <ul>
+                                    {% for response in question.questionresponse_set.all %}
+                                        <li>{{ response.response_text }}</li>
+                                    {% empty %}
+                                        <li>No responses yet.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% empty %}
+                            <p>No questions available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>No exercises available in this section.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // ✅ Toggle Edit Mode for Section Title and Description
+        function toggleEdit(fieldId, editButton) {
+            const inputField = document.getElementById(fieldId);
+            const saveButton = editButton.nextElementSibling;
+
+            if (inputField.readOnly) {
+                inputField.readOnly = false;
+                inputField.classList.add('editing');
+                editButton.style.display = 'none';
+                saveButton.classList.remove('hidden');
+            }
+        }
+
+        // ✅ Save Updated Section Data (Title & Description)
+        function saveSectionData(sectionId, field) {
+            let value = document.getElementById(field === 'title' ? 'section-title' : 'section-description').value;
+
+            fetch(`/update_section/{{ section.id }}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ field: field, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Section updated successfully!");
+                    const inputField = document.getElementById(field === 'title' ? 'section-title' : 'section-description');
+                    inputField.readOnly = true;
+                    inputField.classList.remove('editing');
+                    const saveButton = document.querySelector(`button[onclick="saveSectionData('{{ section.id }}', '${field}')"]`);
+                    saveButton.classList.add('hidden');
+                    saveButton.previousElementSibling.style.display = 'inline-block';
+                } else {
+                    alert("Error updating section.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+{% endblock %}
