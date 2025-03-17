@@ -49,13 +49,12 @@
                     <div class="exercise-card">
                         <div class="exercise-header">
                             <h4>{{ exercise.title }}</h4>
-                            <button class="toggle-questions-btn" onclick="toggleQuestions('{{ exercise.id }}')">
-                                <i class="fas fa-chevron-down" id="toggle-icon-{{ exercise.id }}"></i>
-                            </button>
+                            <button class="remove-btn" onclick="removeExercise('{{ section.id }}', '{{ exercise.id }}')">❌ Remove</button>
                         </div>
 
-                        <!-- Questions List (Initially Hidden) -->
-                        <div id="exercise-questions-{{ exercise.id }}" class="exercise-questions hidden">
+                        <!-- ✅ Display Exercise Questions Directly -->
+                        <div class="exercise-questions">
+                            <h5>Questions:</h5>
                             {% for question in exercise.questions.all %}
                                 <div class="question-card">
                                     <p>🔹 {{ question.question_text }}</p>
@@ -64,11 +63,6 @@
                                 <p>No questions available.</p>
                             {% endfor %}
                         </div>
-
-                        <!-- Remove Exercise Button -->
-                        <button class="remove-btn" onclick="removeExercise('{{ section.id }}', '{{ exercise.id }}')">
-                            ❌ Remove Exercise
-                        </button>
                     </div>
                 {% empty %}
                     <p>No exercises available.</p>
@@ -78,7 +72,7 @@
     </div>
 
     <script>
-        // ✅ Toggle Edit Mode for Section Title & Description
+        // ✅ Toggle Edit Mode for Section Title and Description
         function toggleEdit(fieldId, editButton) {
             const inputField = document.getElementById(fieldId);
             const saveButton = editButton.nextElementSibling;
@@ -165,21 +159,6 @@
             })
             .catch(error => console.error("Error:", error));
         }
-
-        // ✅ Toggle Questions for an Exercise
-        function toggleQuestions(exerciseId) {
-            const questionDiv = document.getElementById(`exercise-questions-${exerciseId}`);
-            const icon = document.getElementById(`toggle-icon-${exerciseId}`);
-
-            questionDiv.classList.toggle("hidden");
-
-            if (questionDiv.classList.contains("hidden")) {
-                icon.classList.remove("fa-chevron-up");
-                icon.classList.add("fa-chevron-down");
-            } else {
-                icon.classList.remove("fa-chevron-down");
-                icon.classList.add("fa-chevron-up");
-            }
-        }
     </script>
+
 {% endblock %}

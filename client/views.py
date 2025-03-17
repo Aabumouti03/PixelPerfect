@@ -72,11 +72,8 @@ def edit_module(request, module_id):
 def edit_section(request, section_id):
     section = get_object_or_404(Section, id=section_id)
 
-    # ✅ Fetch exercises **NOT** already in this section
+    # ✅ Fetch all exercises **NOT** already in this section
     all_exercises = Exercise.objects.exclude(id__in=section.exercises.values_list('id', flat=True))
-
-    # ✅ Ensure questions are preloaded to avoid extra DB queries
-    section_exercises = section.exercises.prefetch_related('questions')
 
     if request.method == "POST":
         form = SectionForm(request.POST, instance=section)
@@ -92,7 +89,6 @@ def edit_section(request, section_id):
         'form': form,
         'section': section,
         'all_exercises': all_exercises,
-        'section_exercises': section_exercises,  # ✅ Pass exercises with questions
     })
 
 
