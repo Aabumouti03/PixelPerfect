@@ -57,6 +57,9 @@ urlpatterns = [
     path('add_section_to_module/<int:module_id>/', clientViews.add_section_to_module, name='add_section_to_module'),
     path('remove_section_from_module/<int:module_id>/', clientViews.remove_section_from_module, name='remove_section_from_module'),
     path('update_section/<int:section_id>/', clientViews.update_section, name='update_section'), 
+    path('add_exercise_to_section/<int:section_id>/', clientViews.add_exercise_to_section, name='add_exercise_to_section'),
+    path('remove_exercise_from_section/<int:section_id>/', clientViews.remove_exercise_from_section, name='remove_exercise_from_section'),
+
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),

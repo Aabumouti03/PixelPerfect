@@ -26,41 +26,39 @@
             </div>
         </div>
 
-        <!-- Exercises in the Section -->
+        <!-- Exercises -->
         <div class="section-section">
             <h3>Exercises</h3>
 
-            {% for exercise in section.exercises.all %}
-                <div class="exercise-card">
-                    <div class="exercise-header">
-                        <h4>{{ exercise.title }}</h4>
-                        <a href="{% url 'edit_exercise' exercise.id %}" class="edit-btn">Edit</a>
-                    </div>
+            <!-- Add Exercise Dropdown -->
+            <div class="add-exercise">
+                <select id="exercise-dropdown">
+                    <option value="">Select an exercise to add</option>
+                    {% for exercise in all_exercises %}
+                        <option value="{{ exercise.id }}">{{ exercise.title }}</option>
+                    {% empty %}
+                        <option value="" disabled>No available exercises</option>
+                    {% endfor %}
+                </select>
+                <button class="add-btn" onclick="addExercise('{{ section.id }}')">Add Exercise</button>
+            </div>
 
-                    <p><strong>Type:</strong> {{ exercise.get_exercise_type_display }}</p>
-
-                    <!-- Exercise Responses -->
-                    <div class="exercise-responses">
-                        <h5>Responses:</h5>
-                        {% for question in exercise.questions.all %}
-                            <div class="question-card">
-                                <p><strong>Question:</strong> {{ question.question_text }}</p>
-                                <ul>
-                                    {% for response in question.questionresponse_set.all %}
-                                        <li>{{ response.response_text }}</li>
-                                    {% empty %}
-                                        <li>No responses yet.</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% empty %}
-                            <p>No questions available.</p>
-                        {% endfor %}
+            <!-- Exercise List with Checkboxes -->
+            <form id="remove-exercise-form">
+                {% for exercise in section.exercises.all %}
+                    <div class="exercise-card">
+                        <input type="checkbox" name="remove_exercise" value="{{ exercise.id }}">
+                        <div class="exercise-header">
+                            <h4>{{ exercise.title }}</h4>
+                            <a href="{% url 'edit_exercise' exercise.id %}" class="edit-btn">Edit</a>
+                        </div>
+                        <p>Type: {{ exercise.get_exercise_type_display }}</p>
                     </div>
-                </div>
-            {% empty %}
-                <p>No exercises available in this section.</p>
-            {% endfor %}
+                {% empty %}
+                    <p>No exercises available.</p>
+                {% endfor %}
+                <button type="button" class="remove-btn" onclick="removeExercises('{{ section.id }}')">Remove Selected Exercises</button>
+            </form>
         </div>
     </div>
 
@@ -82,7 +80,7 @@
         function saveSectionData(sectionId, field) {
             let value = document.getElementById(field === 'title' ? 'section-title' : 'section-description').value;
 
-            fetch(`/update_section/{{ section.id }}/`, {
+            fetch(`/update_section/${sectionId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +95,7 @@
                     const inputField = document.getElementById(field === 'title' ? 'section-title' : 'section-description');
                     inputField.readOnly = true;
                     inputField.classList.remove('editing');
-                    const saveButton = document.querySelector(`button[onclick="saveSectionData('{{ section.id }}', '${field}')"]`);
+                    const saveButton = document.querySelector(`button[onclick="saveSectionData('${sectionId}', '${field}')"]`);
                     saveButton.classList.add('hidden');
                     saveButton.previousElementSibling.style.display = 'inline-block';
                 } else {
@@ -106,6 +104,96 @@
             })
             .catch(error => console.error("Error:", error));
         }
+
+        // ✅ Add Exercise to Section
+        function addExercise(sectionId) {
+            let exerciseId = document.getElementById('exercise-dropdown').value;
+
+            if (!exerciseId) {
+                alert("Please select an exercise.");
+                return;
+            }
+
+            fetch(`/add_exercise_to_section/${sectionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ exercise_id: exerciseId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Exercise added successfully!");
+                    location.reload();
+                } else {
+                    alert("Error adding exercise.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // ✅ Remove Selected Exercises from Section
+        function removeExercises(sectionId) {
+            let selectedExercises = Array.from(document.querySelectorAll('input[name="remove_exercise"]:checked'))
+                .map(el => el.value);
+
+            if (selectedExercises.length === 0) {
+                alert("Please select at least one exercise to remove.");
+                return;
+            }
+
+            fetch(`/remove_exercise_from_section/${sectionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ exercise_ids: selectedExercises })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Exercises removed successfully!");
+                    location.reload();
+                } else {
+                    alert("Error removing exercises.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
     </script>
 
+    <style>
+        .edit-input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+        }
+
+        .editing {
+            border: 1px solid #007bff;
+            background: #f8f9fa;
+            padding: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .edit-btn, .save-btn, .add-btn, .remove-btn {
+            margin-top: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            color: white;
+        }
+
+        .edit-btn { background: #007bff; }
+        .save-btn { background: #28a745; }
+        .add-btn { background: #17a2b8; }
+        .remove-btn { background: #dc3545; }
+    </style>
 {% endblock %}

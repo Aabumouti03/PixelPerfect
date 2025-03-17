@@ -181,6 +181,44 @@ def update_section(request, section_id):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
+@csrf_exempt
+def add_exercise_to_section(request, section_id):
+    """Handles adding an exercise to a section via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            exercise_id = data.get("exercise_id")
+
+            section = get_object_or_404(Section, id=section_id)
+            exercise = get_object_or_404(Exercise, id=exercise_id)
+
+            section.exercises.add(exercise)
+
+            return JsonResponse({"success": True, "message": "Exercise added successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
+@csrf_exempt
+def remove_exercise_from_section(request, section_id):
+    """Handles removing exercises from a section via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            exercise_ids = data.get("exercise_ids", [])
+
+            section = get_object_or_404(Section, id=section_id)
+            section.exercises.remove(*exercise_ids)
+
+            return JsonResponse({"success": True, "message": "Exercises removed successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
 def add_module(request):
     """Handles adding a module with multiple sections."""
     form_data = request.session.get('module_form_data', {})  # Load stored data
