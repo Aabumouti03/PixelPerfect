@@ -1,6 +1,12 @@
 from django.test import TestCase
 from unittest.mock import patch
 from django.db.models import Avg, Count
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+from client.models import Module
+from users.models import EndUser
+from django.test.client import Client
+
 
 from client.statistics import (
     get_module_enrollment_stats,
@@ -68,3 +74,70 @@ class ModuleStatisticsTests(TestCase):
         labels, data = get_users_last_work_time()
         self.assertEqual(labels, ["1_month", "3_months"])
         self.assertEqual(data, [10, 5])
+
+
+
+
+#Testing the ratings
+User = get_user_model()
+
+class ModuleRatingsTests(TestCase):
+
+    def setUp(self):
+        """Set up a test user and log them in as an admin."""
+        self.admin_user = User.objects.create_superuser(username="admin", email="admin@example.com", password="adminpassword")
+        self.client = Client()
+        self.client.login(username="admin", password="adminpassword")  # Log in as admin
+
+    @patch("client.models.Module.objects.annotate")
+    @patch("client.statistics.get_module_enrollment_stats")
+    @patch("client.statistics.get_module_completion_stats")
+    @patch("client.statistics.get_average_completion_percentage")
+    @patch("client.statistics.get_modules_count")
+
+    def test_modules_statistics_view_ratings(
+        self, 
+        mock_modules_count, 
+        mock_avg_completion, 
+        mock_completion_stats, 
+        mock_enrollment_stats,
+        mock_module_annotate
+    ):
+     
+        
+        # Mock statistics data
+        mock_modules_count.return_value = 2
+        mock_enrollment_stats.return_value = (["Module A", "Module B"], [10, 5])
+        mock_completion_stats.return_value = (["Module A", "Module B"], [8, 3], [2, 2])
+        mock_avg_completion.return_value = (["Module A", "Module B"], [85.5, 72.3])
+
+        # Mock average ratings for modules
+        mock_module_annotate.return_value.values.return_value = [
+            {"title": "Module A", "avg_rating": 4.2},
+            {"title": "Module B", "avg_rating": 3.8},
+        ]
+
+        # Get the response from the view
+        response = self.client.get(reverse("modules_statistics"))  # Ensure the correct URL name
+
+        # Ensure the response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Ensure the context contains the correct data
+        context = response.context
+
+        # Check if the average ratings are present
+        self.assertIn("rating_labels", context)
+        self.assertIn("rating_data", context)
+
+        # Parse JSON data
+        rating_labels = context["rating_labels"]
+        rating_data = context["rating_data"]
+
+        # Expected results
+        expected_labels = '["Module A", "Module B"]'
+        expected_data = '[4.2, 3.8]'
+
+        # Assert correct rating values
+        self.assertEqual(rating_labels, expected_labels)
+        self.assertEqual(rating_data, expected_data)

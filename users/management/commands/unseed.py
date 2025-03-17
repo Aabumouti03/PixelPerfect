@@ -5,7 +5,7 @@ from django.db import transaction, connection
 from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 from client.models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
-from users.models import EndUser, User, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress, UserResponse
+from users.models import EndUser, User, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress, UserResponse, Quote
 
 class Command(BaseCommand):
     help = "Deletes all seeded data except Admins and their users"
@@ -32,14 +32,9 @@ class Command(BaseCommand):
                 UserModuleProgress,
                 UserProgramEnrollment,
                 UserModuleEnrollment,
+                Quote,
             ]
 
-            for model in models_to_delete:
-                try:
-                    deleted_count, _ = model.objects.all().delete()
-                    self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_count} objects from {model.__name__}"))
-                except Exception as e:
-                    self.stdout.write(self.style.WARNING(f"⚠️ Skipping {model.__name__}: {e}"))
             for model in models_to_delete:
                 try:
                     deleted_count, _ = model.objects.all().delete()

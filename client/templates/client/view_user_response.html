@@ -12,7 +12,7 @@
     <div class="content">
         <div class="top-bar">
             <a href="{% url 'view_responders' user_response.questionnaire.id %}" class="back-btn">← Back</a>
-            <h1>Response by {{ user_response.user.user.full_name }}</h1>
+            <h1>{{ user_response.questionnaire.title }} - Response by {{ user_response.user.user.get_full_name }}</h1>
         </div>
 
         <!-- User's Responses -->

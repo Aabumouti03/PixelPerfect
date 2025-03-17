@@ -1,7 +1,14 @@
-{% load static %}
+{% load static %} 
+
+{% block extra_css %} 
+
+    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
+
+{% endblock %}
+
 <div class="sidebar">
     <div class="logo">
-        <img src="{% static 'users/img/logo.svg' %}" alt="Logo" class="logoIcon">
+        <img src="{% static 'img/logo.svg' %}" alt="Logo" class="logoIcon">
         <span class="brand">ReWork</span>
     </div>
     <ul class="nav-links">
@@ -15,7 +22,7 @@
 
 
             <a href="{% url 'userModules' %}" class="{% if request.path == '/modules/' %}active{% endif %}">
-                <img src="{% static 'users/users/img/modules.svg' %}" alt="Modules" class="icon">
+                <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
@@ -36,19 +43,12 @@
         </li>
         <div class="logout">
 
-            <a href="{% url 'log_out' %}" class="{%if request.path == '/log_out/' %}active{% endif %}">
+            <a href="#" class="{%if request.path == '/log_out/' %}active{% endif %}" id="logout-link">
             <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
             <span>Logout</span>
             </a>
         </div>
-
-            <a href="#" id="logout-link">
-                <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">
-                <span>Logout</span>
-            </a>
-        </div>
-        
-          
+ 
         
     </ul>
 

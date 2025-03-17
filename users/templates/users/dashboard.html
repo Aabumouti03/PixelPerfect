@@ -2,10 +2,10 @@
 {% load static %} 
 
 {% block extra_css %} 
-
     <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <script src="{% static 'users/js/sticky_note.js' %}"></script>
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 
 
 {% endblock %}
@@ -21,9 +21,6 @@
         <h1>Welcome back, {{ user.first_name }}!</h1>
         
     {% endif %}
-
-    <p>This is your personal dashboard where you can view your program, modules, and track your progress.</p>
-    <p>A clear mind goes a long way! Use the sticky note below to write down any thoughts on your mind.</p>
 
 
     <!-- Programs Container -->
@@ -60,7 +57,7 @@
                         <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
                         {% if forloop.first or module.progress_value > 0 %}
-                            <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
+                            <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
                         {% else %}
                             <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
                         {% endif %}
@@ -81,7 +78,7 @@
 
         <div class="modules-header">
             <h2>Your Modules</h2>
-            <a href="{% url 'dashboard' %}" class="view-all-button">View All Modules</a>
+            <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
 
         </div>
 
@@ -102,7 +99,7 @@
 
                     <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
-                    <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
+                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
                 </div>
 
             {% endfor %}      
@@ -110,15 +107,37 @@
     </div>
 
 
+    <div class="recently-accessed-container">
+        <!-- ✅ Recently Accessed Modules Box -->
+        <div class="recently-accessed">
+            <h3>Recently Accessed Modules</h3>
+            <ul class="recent-modules-list">
+                {% for module in recent_modules %}
+                    <li class="recent-module-item">
+                        <a href="{% url 'module_overview' module.id %}">{{ module.title }}</a>
+                    </li>
+                {% empty %}
+                    <li class="no-modules">No recently accessed modules.</li>
+                {% endfor %}
+            </ul>
 
-    <!-- Sticky Note -->
-
-
-    <div class="sticky-note">
-        <textarea placeholder="Write your note here..."></textarea>
-        <div class="note-controls">
-            <button class="bullet-btn">•</button>
+            <h3>Quote of the Day</h3>
+            {% if quote_of_the_day %}
+                <p class="quote-text">"{{ quote_of_the_day}}"</p>
+            {% else %}
+                <p>No quote available today.</p>
+            {% endif %}
         </div>
     </div>
+
+
+    <!-- Sticky Note -->
+<div class="sticky-note">
+    <textarea id="sticky-note" placeholder="Write your note here...">{{ sticky_note.content|default:'' }}</textarea>
+    <div class="note-controls">
+        <button class="bullet-btn">•</button>
+    </div>
+</div>
+
 </div>
 {% endblock %}

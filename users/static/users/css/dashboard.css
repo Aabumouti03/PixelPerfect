@@ -70,6 +70,7 @@ body {
 .nav-links a.active {
     font-weight: bolder;
     color: white;
+    background-color: #F24505;
 }
 
 
@@ -205,27 +206,21 @@ body {
 }
 
 /* Module Card */
-/* Both program and modules container */
 .module-card {
-    border-radius: 20px;
-    box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
-    width: 250px; /* Fixed width */
-    height: 283px; /* Fixed height */
-    flex-shrink: 0;
-    padding: 20px;
-    border-left: 5px solid #1d3c5337;
-    box-sizing: border-box; /* Ensure padding is included in the width/height */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: #ffffff;
     border-radius: 12px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    min-height: 220px;
-    max-width: 280px;
+    width: 250px; /* Fixed width */
+    height: 300px; /* Fixed height */
+    flex-shrink: 0;
+    padding: 20px;
+    box-sizing: border-box; /* Ensure padding is included */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out elements */
+    align-items: center;
+    background: #ffffff;
     text-align: center;
+    overflow: hidden; /* Prevent elements from overflowing */
 }
 
 /* Alternate colors for adjacent cards */
@@ -246,21 +241,29 @@ body {
     color: #d0cfcf;
 }
 
-/* Module Title */
-/* Both program and modules container */
+/* Ensure title stays inside the card */
 .module-card h3 {
-    padding-top: 80px;
-    margin: 10px 0;
-    color: #e9e6e6;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 
 /* Module Description */
 /* Both program and modules container */
 
+/* Ensure description stays inside the card */
 .module-card p {
-    font-size: 0.9rem;
+    font-size: 14px;
     color: #666;
-    margin-bottom: 10px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 40px; /* Prevents it from pushing elements down */
+    margin: 5px 0;
 }
 
 /* View All Buttons */
@@ -285,24 +288,22 @@ body {
 }
 
 
-/* Progress Container */
-/* Both program and modules container */
+/* Adjust progress container so it stays inside the card */
 .progress-container {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%; /* Ensures the same width for all progress bars */
-    height: 10px;
-    overflow: hidden;
-    background: transparent;
-    margin-top: 10px;
     padding: 5px;
+    margin-top: auto; /* Push progress bar to bottom */
 }
+
 
 /* Progress Bar */
 /* Both program and modules container */
+/* Progress bar */
 .progress-bar {
-    width: 100%;  /* Ensures full width inside container */
+    width: 100%;
     height: 10px;
     background-color: #ddd;
     border-radius: 10px;
@@ -310,26 +311,22 @@ body {
     overflow: hidden;
 }
 
-/* Progress Fill */
-/* Both program and modules container */
+/* Progress fill */
 .progress-fill {
     height: 100%;
     background: #F24505;
     transition: width 0.5s ease-in-out;
 }
 
-/* Progress Text */
-/* Both program and modules container */
+/* Progress text */
 .progress-text {
-    margin-left: 10px;
-    font-size: 0.85rem;
+    font-size: 12px;
     font-weight: bold;
     color: #333;
     white-space: nowrap;
-    min-width: 50px;
-    background: transparent;
     text-align: right;
 }
+
 
 /* Locked Module */
 .module-card.locked {
@@ -372,36 +369,37 @@ body {
     color: #ffffff;
 }
 
-/* Start Module Button */
-/* Both program and modules container */
+/* Ensure the start module button stays inside */
 .view-module-button {
     display: inline-block;
     background: white;
     color: #F24505;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: bold;
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 8px;
     text-decoration: none;
     text-align: center;
     transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
     border: 2px solid #F24505;
+    margin-top: auto; /* Push button to the bottom */
 }
 
-/* Start Module Button hover */
-/* Both program and modules container */
+/* Button hover effect */
 .view-module-button:hover {
     background: #F24505;
     color: white;
 }
 
 
+
+
 /* Locked module styling */
 .module-card.locked {
-    background: #e6e6e6 !important; /* Ensure it's a gray background */
+    background: #e6e6e6 !important;
     color: #999;
     pointer-events: none;
-    opacity: 0.8; /* Slight fade effect */
+    opacity: 0.8;
 }
 
 /* Locked module title */
@@ -424,11 +422,100 @@ body {
     background: #aaa; /* Dimmed progress bar */
 }
 
+
 /* Locked module message */
 .module-card.locked .locked-message {
     font-size: 0.85rem;
     color: #666;
     font-weight: bold;
     text-align: center;
-    margin-top: 10px;
+    margin-top: auto; /* Push message to bottom */
 }
+
+
+/* Hide progress bar and progress text for locked modules */
+.module-card.locked .progress-container,
+.module-card.locked .progress-text {
+    display: none;
+}
+
+
+.recently-accessed {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    padding: 15px;
+    background: #f5f5f5; /* Light grey background */
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Adds spacing between sections */
+}
+
+/* ✅ Quote & Recently Accessed Container */
+.recently-accessed-container {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align to the left */
+    gap: 20px; /* Adds spacing between boxes */
+    width: 100%;
+    max-width: 2px; /* Set width to align with sidebar */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* ✅ Quote Styling */
+.quote-text {
+    text-decoration: none;
+    font-size: 0.95rem;
+    font: italic;
+    color: #333;
+}
+
+/* ✅ Title Styling */
+.recently-accessed h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1px;
+}
+
+/* ✅ List Styling */
+.recent-modules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ✅ Module Items */
+.recent-module-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* ✅ Last Item (Remove Border) */
+.recent-module-item:last-child {
+    border-bottom: none;
+}
+
+/* ✅ Module Links */
+.recent-module-item a {
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: #333;
+    transition: color 0.2s ease-in-out;
+}
+
+.recent-module-item a:hover {
+    color: #007bff; /* Blue highlight */
+}
+
+/* ✅ No Modules Message */
+.no-modules {
+    font-size: 0.85rem;
+    color: #888;
+}
+

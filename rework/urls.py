@@ -2,13 +2,13 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-
+from django.views.generic import TemplateView
 from client import views as clientViews
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
 from client import views
 from client.views import delete_module
-from users.views import enroll_module, unenroll_module 
+from users.views import enroll_module, unenroll_module
 
 urlpatterns = [
     # Admin URL
@@ -34,6 +34,10 @@ urlpatterns = [
     path('reset_password_complete/',
         authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
+    
+    path("verify-email/<uidb64>/<token>/", usersViews.verify_email, name="verify_email"),
+    path("email-verification-pending/", TemplateView.as_view(template_name="users/email_verification_pending.html"), name="email_verification_pending"),
+    path("email-verified-success/", TemplateView.as_view(template_name="users/email_verified_success.html"), name="email_verified_success"),
 
     # Home page
     path('about/', usersViews.about, name='about'),
@@ -44,7 +48,6 @@ urlpatterns = [
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
     path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
-
 
     # Program-related URLs
     path('programs/', clientViews.programs, name='programs'),
@@ -60,9 +63,20 @@ urlpatterns = [
     # Categories
     path('create_category/', clientViews.create_category, name='create_category'),
     path('category_list/', clientViews.category_list, name='category_list'),  
-    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
+    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'), 
+    path('categories/<int:category_id>/edit/', clientViews.edit_category, name='edit_category'),   
 
     # Statistics
+
+    #User urls for modules
+    path('userModules/', usersViews.user_modules, name='modules'),
+    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('all_modules/', usersViews.all_modules, name='all_modules'),
+
+    # User dashboard details
+    path('dashboard/', usersViews.dashboard, name='dashboard'),
+    path('profile/', usersViews.profile, name='profile'),
+    path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', clientViews.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
     path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
@@ -84,6 +98,9 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
+    path('save-notes/', usersViews.save_notes, name='save_notes'),
+    path('get-notes/', usersViews.get_notes, name='get_notes'), 
+    path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
 
     # Questionnaire
     path('welcome/', usersViews.welcome_view, name='welcome'),
@@ -121,10 +138,6 @@ urlpatterns = [
     path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
     path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
     path("save_journal_entry/", usersViews.save_journal_entry, name="save_journal_entry"),
-    
-    #temp - by raghad
-    path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
-
 ]
 
 # Debug settings (corrected)
@@ -132,13 +145,11 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     urlpatterns += [
-        path('programs/', clientViews.programs, name='programs'),
         path('log_out/', clientViews.log_out_client, name="log_out"),
         path('create_program/', clientViews.create_program, name='create_program'),
-        path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
-        path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-        path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
         path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
         path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
         path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
+        path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
+        path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
     ]

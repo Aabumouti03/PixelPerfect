@@ -56,6 +56,8 @@ body {
     margin: 20px 0;
 }
 
+
+
 .nav-links a {
     text-decoration: none;
     color: white;
@@ -65,28 +67,29 @@ body {
     gap: 10px;
     white-space: nowrap;
     padding: 15px 0px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-.nav-links a.active {
-    font-weight: bolder;
-    color: white;
-}
-
-
+/* Only darken slightly on hover */
 .nav-links a:hover {
-    width: 225px;
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    opacity: 1;
-    padding: 15px 0px;
-    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
-    border-radius: 8px; /* Soft rounded corners */
+    background-color: rgba(255, 255, 255, 0.1); /* Lighter transparency */
+    border-radius: 8px;
 }
+
+/* Keep the active link's background and color the same as the sidebar */
+.nav-links a.active {
+    font-weight: bold !important;
+    background-color: #F24505 !important; /* Forces background color */
+    color: white !important; /* Ensures text remains white */
+    border-radius: 8px;
+}
+
+/* Only apply hover effect to non-active links */
+.nav-links a:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.15) !important; /* Subtle darkening */
+    border-radius: 8px;
+}
+
 
 .logout {
     list-style: none;
@@ -195,24 +198,30 @@ body {
 .toggle {
     position: absolute;
     top: 50%;
-    right: 5px; /* Places it towards the right */
-    transform: translateY(-50%); /* Centers it vertically */
-    width: 20px; /* Adjust size */
-    height: 20px;
+    right: -25px; /* Move it slightly outside the sidebar */
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    transition: opacity 0.3s ease-in-out;
+    cursor: pointer;
+    transition: opacity 0.3s ease-in-out, right 0.3s ease-in-out;
 }
 
-/* Show toggle when sidebar is collapsed */
+
+/* Hide the toggle button when sidebar expands */
 .sidebar:hover .toggle {
+    right: -25px; /* Move it outside */
     opacity: 0;
 }
 
-/* Ensure toggle is visible when sidebar is hidden */
+
+/* Ensure toggle button is always visible */
 .sidebar:not(:hover) .toggle {
+    right: 10px; /* Keep it visible inside the collapsed sidebar */
     opacity: 1;
 }
 
