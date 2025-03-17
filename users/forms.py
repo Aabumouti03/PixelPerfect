@@ -272,22 +272,26 @@ class UserProfileForm(forms.ModelForm):
         self.cleaned_data['email'] = email
         return email  
     
+
     def clean_new_email(self):
-        """Ensure new email is unique, case-insensitive, and properly formatted before verification."""
-        new_email = self.cleaned_data.get('new_email')
+        """Ensure new email is unique, but allow pending verification."""
+        new_email = self.cleaned_data.get('new_email', '').strip().lower()
 
-        if new_email:
-            new_email = new_email.strip().lower()  # Convert to lowercase
-            user_id = self.instance.user.id if hasattr(self.instance, 'user') else None  # Get the current User ID
+        # Ensure instance exists and is an EndUser before accessing user
+        if not isinstance(self.instance, EndUser) or not hasattr(self.instance, 'user') or not self.instance.user:
+            self.add_error('new_email', "Internal error: EndUser is not linked to a User.")
+            return new_email  # Prevent further validation issues
 
-            # Ensure new email is unique and not the same as the current user's email
+        user_id = self.instance.user.id
+
+        if new_email and new_email != self.instance.user.email:
+            # Exclude users who have the email in 'email' or 'new_email'
             if User.objects.exclude(id=user_id).filter(email=new_email).exists():
                 self.add_error('new_email', "A user with this email already exists.")
-
+            elif User.objects.exclude(id=user_id).filter(new_email=new_email).exists():
+                self.add_error('new_email', "This email is already pending verification.")
 
         return new_email
-
-
 
 
     def clean(self):

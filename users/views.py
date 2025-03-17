@@ -571,10 +571,13 @@ def update_profile(request):
                 user.save()
                 update_session_auth_hash(request, user)
 
+            user.refresh_from_db()  # 🔥 Ensures all updates are reflected in the next database query
+
             return redirect('show_profile')
 
         else:
             messages.error(request, "There were errors in the form.")
+            print(form.errors)  # 🔥 Debugging: Print form errors if test fails
 
     else:
         form = UserProfileForm(instance=user.User_profile, user=user)
@@ -583,10 +586,11 @@ def update_profile(request):
 
 
 def verify_email(request, uidb64, token):
+    User = get_user_model()
+    
     try:
         # Decode user id
         uid = force_str(urlsafe_base64_decode(uidb64))
-        User = get_user_model()
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
         return HttpResponse("Invalid verification link.")
@@ -621,7 +625,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('profile_page')  # Redirect back to the profile if deletion fails
+            return redirect('show_profile')  # Redirect back to the profile if deletion fails
 
     # Confirmation before deletion
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}

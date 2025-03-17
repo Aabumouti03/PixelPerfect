@@ -116,7 +116,15 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+
+    # Journal URLs (moved outside debug block)
+    path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+    path("save_journal_entry/", usersViews.save_journal_entry, name="save_journal_entry"),
     
+    #temp - by raghad
+    path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
+
 ]
 
 # Debug settings (corrected)
