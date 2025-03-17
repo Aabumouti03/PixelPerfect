@@ -155,7 +155,3 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "re.work.website2025@gmail.com"
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
-
-
-# if "test" in sys.argv:
-#     EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
