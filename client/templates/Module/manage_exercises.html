@@ -9,13 +9,13 @@
         {% for exercise in exercises %}
             <div class="exercise-card" id="exercise-{{ exercise.id }}">
                 <!-- Exercise Title -->
-                <h3>
+                <div class="exercise-header">
                     <input type="text" value="{{ exercise.title }}" id="title-{{ exercise.id }}" class="edit-input" readonly>
-                </h3>
-
-                <!-- Edit Button -->
-                <button class="edit-btn" onclick="enableEdit('{{ exercise.id }}')">✏️ Edit</button>
-                <button class="save-btn hidden" onclick="saveExercise('{{ exercise.id }}')">💾 Save</button>
+                    <div class="action-buttons">
+                        <button class="edit-btn" onclick="enableEdit('{{ exercise.id }}')">✏️ Edit</button>
+                        <button class="save-btn hidden" onclick="saveExercise('{{ exercise.id }}')">💾 Save</button>
+                    </div>
+                </div>
 
                 <!-- Questions List -->
                 <div class="exercise-questions">
@@ -40,24 +40,30 @@
 </div>
 
 <style>
-    .exercise-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+    .content {
         padding: 20px;
+        max-width: 100%;
+    }
+
+    .exercise-list {
+        width: 100%;
     }
 
     .exercise-card {
         background: #f8f9fa;
-        padding: 15px;
+        padding: 20px;
         border-radius: 5px;
         border-left: 5px solid #007bff;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        width: 100%;
     }
 
-    .exercise-card h3 {
-        color: #007bff;
-        margin-bottom: 5px;
+    .exercise-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
     }
 
     .edit-input {
@@ -66,6 +72,7 @@
         outline: none;
         font-size: 18px;
         width: 100%;
+        padding: 5px;
     }
 
     .editing {
@@ -78,18 +85,36 @@
         display: none;
     }
 
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
     .edit-btn, .save-btn {
-        margin-top: 5px;
         cursor: pointer;
-        padding: 5px 10px;
+        padding: 7px 15px;
         border: none;
         color: white;
         border-radius: 4px;
         transition: 0.3s;
+        font-size: 14px;
     }
 
     .edit-btn { background: #007bff; }
     .save-btn { background: #28a745; }
+
+    .exercise-questions {
+        margin-top: 10px;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    li {
+        margin-bottom: 10px;
+    }
 </style>
 
 <script>
