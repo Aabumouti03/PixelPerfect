@@ -1,0 +1,141 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content">
+    <h2 class="page-title">Manage Exercises</h2>
+
+    <div class="exercise-list">
+        {% for exercise in exercises %}
+            <div class="exercise-card" id="exercise-{{ exercise.id }}">
+                <!-- Exercise Title -->
+                <h3>
+                    <input type="text" value="{{ exercise.title }}" id="title-{{ exercise.id }}" class="edit-input" readonly>
+                </h3>
+
+                <!-- Edit Button -->
+                <button class="edit-btn" onclick="enableEdit('{{ exercise.id }}')">✏️ Edit</button>
+                <button class="save-btn hidden" onclick="saveExercise('{{ exercise.id }}')">💾 Save</button>
+
+                <!-- Questions List -->
+                <div class="exercise-questions">
+                    <h4>Questions:</h4>
+                    {% if exercise.questions.all %}
+                        <ul>
+                            {% for question in exercise.questions.all %}
+                                <li>
+                                    <input type="text" value="{{ question.question_text }}" id="question-{{ question.id }}" class="edit-input" readonly>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No questions available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p>No exercises found.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .exercise-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .exercise-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 5px solid #007bff;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .exercise-card h3 {
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+
+    .edit-input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 18px;
+        width: 100%;
+    }
+
+    .editing {
+        border: 1px solid #007bff;
+        background: #f0f8ff;
+        padding: 5px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .edit-btn, .save-btn {
+        margin-top: 5px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        transition: 0.3s;
+    }
+
+    .edit-btn { background: #007bff; }
+    .save-btn { background: #28a745; }
+</style>
+
+<script>
+    function enableEdit(exerciseId) {
+        document.getElementById(`title-${exerciseId}`).readOnly = false;
+        document.getElementById(`title-${exerciseId}`).classList.add('editing');
+
+        document.querySelectorAll(`#exercise-${exerciseId} .edit-input`).forEach(input => {
+            input.readOnly = false;
+            input.classList.add('editing');
+        });
+
+        document.querySelector(`#exercise-${exerciseId} .edit-btn`).classList.add('hidden');
+        document.querySelector(`#exercise-${exerciseId} .save-btn`).classList.remove('hidden');
+    }
+
+    function saveExercise(exerciseId) {
+        let title = document.getElementById(`title-${exerciseId}`).value;
+        let questionElements = document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input`);
+        let questions = [];
+
+        questionElements.forEach(input => {
+            let questionId = input.id.split('-')[1];
+            let questionText = input.value;
+            questions.push({ id: questionId, text: questionText });
+        });
+
+        fetch(`/update_exercise/${exerciseId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ title: title, questions: questions })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Exercise updated successfully!");
+                location.reload();
+            } else {
+                alert("❌ Error updating exercise.");
+            }
+        })
+        .catch(error => console.error("⚠️ Error:", error));
+    }
+</script>
+
+{% endblock %}

@@ -60,6 +60,7 @@ urlpatterns = [
     path('add_exercise_to_section/<int:section_id>/', clientViews.add_exercise_to_section, name='add_exercise_to_section'),
     path('remove_exercise_from_section/<int:section_id>/', clientViews.remove_exercise_from_section, name='remove_exercise_from_section'),
     path('manage_exercises/', clientViews.manage_exercises, name='manage_exercises'),
+    path('update_exercise/<int:exercise_id>/', clientViews.update_exercise, name='update_exercise'),
 
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),

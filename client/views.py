@@ -245,9 +245,34 @@ def manage_exercises(request):
     """Renders a page displaying all exercises with their questions."""
     exercises = Exercise.objects.prefetch_related('questions').all()
 
-    return render(request, 'client/manage_exercises.html', {
+    return render(request, 'Module/manage_exercises.html', {
         'exercises': exercises
     })
+
+@csrf_exempt
+def update_exercise(request, exercise_id):
+    """Handles updating an exercise title and its questions via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            exercise = get_object_or_404(Exercise, id=exercise_id)
+
+            # Update Exercise Title
+            exercise.title = data.get("title", exercise.title)
+            exercise.save()
+
+            # Update Questions
+            for question_data in data.get("questions", []):
+                question = get_object_or_404(ExerciseQuestion, id=question_data["id"])
+                question.question_text = question_data["text"]
+                question.save()
+
+            return JsonResponse({"success": True, "message": "Exercise updated successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 
 def add_module(request):
     """Handles adding a module with multiple sections."""
