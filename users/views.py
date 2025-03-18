@@ -2,12 +2,13 @@ import os
 import json
 import random
 import logging
+from django.conf import settings
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.db.models import Avg
-from .models import JournalEntry
+from .models import JournalEntry, User
 from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -19,6 +20,7 @@ from django.contrib.auth import get_user_model, authenticate, login, logout, upd
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
 logger = logging.getLogger(__name__)
+from .utils import send_verification_email_after_sign_up 
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -138,8 +140,6 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
-import random
-
 @login_required
 def save_notes(request):
     if request.method == 'POST':
@@ -233,8 +233,6 @@ def dashboard(request):
     }
     return render(request, 'users/dashboard.html', context)
 
-
-
 @login_required
 def view_program(request, program_id):
     user = request.user
@@ -295,38 +293,46 @@ def modules(request):
 def profile(request):
     return render(request, 'users/profile.html')
 
-
 def about(request):
     return render(request, 'users/about.html')
 
 def contact_us(request):
     return render(request, 'users/contact_us.html')
 
-ADMIN_USERNAME = "SuperUser"
-
 def log_in(request):
     """Log in page view function"""
 
+    error_message = None
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+            username = form.cleaned_data.get('username').strip()  # Trim spaces
+            password = form.cleaned_data.get('password').strip()
+
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
-                login(request, user)
-    
-                if user.username == ADMIN_USERNAME and user.is_superuser:
-                    return redirect('client_dashboard')
+                if not user.email_verified:
+                    error_message = "You must verify your email before logging in."
+                else:
+                    login(request, user)
 
-                return redirect('dashboard')
+                    # Redirect to `next` if available
+                    next_url = request.GET.get('next') or request.POST.get('next')
+                    if next_url:
+                        return redirect(next_url)
+
+                    # Superuser goes to `client_dashboard`
+                    if user.is_superuser:
+                        return redirect('client_dashboard')
+
+                    # Regular users go to `dashboard`
+                    return redirect('dashboard')
 
     else:
         form = LogInForm()
 
-    return render(request, "users/log_in.html", {"form": form})
-
+    return render(request, "users/log_in.html", {"form": form, "error_message": error_message})
 
 def sign_up_step_1(request):
     """Handles Step 1: User Account Details"""
@@ -344,14 +350,12 @@ def sign_up_step_1(request):
     return render(request, "users/sign_up_step_1.html", {"user_form": user_form})
 
 def sign_up_step_2(request):
-    """Handles Step 2: Profile Details"""
+    """Handles Step 2: Profile Details and Email Verification."""
     user_data = request.session.get("user_form_data")
-
     
     if not user_data:
         return redirect("sign_up_step_1")
 
-   
     user_form = UserSignUpForm(data=user_data)
     if not user_form.is_valid():
         return redirect("sign_up_step_1")
@@ -359,10 +363,10 @@ def sign_up_step_2(request):
     if request.method == "POST":
         profile_form = EndUserProfileForm(request.POST)
 
-
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save(commit=False)
             user.set_password(user_form.cleaned_data["password1"])
+            user.email_verified = False
             user.save()
 
             profile = profile_form.save(commit=False)
@@ -371,17 +375,28 @@ def sign_up_step_2(request):
 
             del request.session["user_form_data"]
 
-            user = authenticate(username=user.username, password=user_form.cleaned_data["password1"])
-            if user:
-                login(request, user)
+            send_verification_email_after_sign_up(user, request)
 
-            return redirect("questionnaire")
-
-
+            #return render(request, "users/sign_up_email_verification.html") modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
     else:
         profile_form = EndUserProfileForm()
 
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
+
+def verify_email_after_sign_up(request, uidb64, token):
+    """Verify the user's email after signing up."""
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return HttpResponse("Invalid verification link.") #change this to a new html that displays the same message and extend the welcome page navbar.
+
+    if default_token_generator.check_token(user, token):
+        user.email_verified = True  
+        user.save()
+        return redirect('log_in') #change here to a new html that displays a success message for verifying email and a button for log in and extend the welcome page navbar
+
+    return HttpResponse("Invalid or expired token.")
 
 @login_required
 def log_out(request):
