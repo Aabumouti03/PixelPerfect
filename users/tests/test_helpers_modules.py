@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from users.models import EndUser, UserModuleProgress, UserProgramProgress
-from client.models import Module, Exercise, AdditionalResource, Program, ProgramModule, Section
+from client.models import Module, Exercise, AdditionalResource, Program, ProgramModule, Section,VideoResource
 from users.helpers_modules import calculate_progress, calculate_program_progress, update_user_program_progress
 
 User = get_user_model() 
@@ -45,6 +45,10 @@ class ProgressCalculationTests(TestCase):
         self.resource1 = AdditionalResource.objects.create(title="Resource 1", resource_type="pdf", status="not_started")
         self.resource2 = AdditionalResource.objects.create(title="Resource 2", resource_type="pdf", status="not_started")
 
+        # Create video resources
+        self.video1 = VideoResource.objects.create(title="Video 1", youtube_url="https://youtu.be/video1", status="not_started")
+        self.video2 = VideoResource.objects.create(title="Video 2", youtube_url="https://youtu.be/video2", status="not_started")
+
         # Link exercises to sections
         self.section1.exercises.add(self.exercise1)
         self.section2.exercises.add(self.exercise2)
@@ -52,33 +56,43 @@ class ProgressCalculationTests(TestCase):
         # Link resources to modules
         self.module1.additional_resources.add(self.resource1)
         self.module2.additional_resources.add(self.resource2)
+
+        # Link videos to modules
+        self.module1.video_resources.add(self.video1)
+        self.module2.video_resources.add(self.video2)
         
 
     def test_calculate_progress_with_all_completed(self):
-        """Test progress calculation when all exercises/resources are completed."""
+        """Test progress calculation when all exercises, resources, and videos are completed."""
         self.exercise1.status = "completed"
         self.exercise2.status = "completed"
         self.resource1.status = "completed"
         self.resource2.status = "completed"
+        self.video1.status = "completed"
+        self.video2.status = "completed"
         self.exercise1.save()
         self.exercise2.save()
         self.resource1.save()
         self.resource2.save()
+        self.video1.save()
+        self.video2.save()
 
         progress = calculate_progress(self.end_user, self.module1)
         self.assertEqual(progress, 100)
 
 
     def test_calculate_progress_with_no_completions(self):
-        """Test progress calculation when no exercises/resources are completed."""
+        """Test progress calculation when no exercises, resources, or videos are completed."""
         progress = calculate_progress(self.end_user, self.module1)
         self.assertEqual(progress, 0)
 
 
     def test_calculate_progress_with_partial_completions(self):
-        """Test progress calculation when some exercises/resources are completed."""
+        """Test progress calculation when some exercises, resources, or videos are completed."""
         self.exercise1.status = "completed"
+        self.video1.status = "completed"  # ✅ Including a partially completed video
         self.exercise1.save()
+        self.video1.save()
 
         progress = calculate_progress(self.end_user, self.module1)
         self.assertGreater(progress, 0)
