@@ -241,6 +241,13 @@ def remove_exercise_from_section(request, section_id):
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
 
+def manage_exercises(request):
+    """Renders a page displaying all exercises with their questions."""
+    exercises = Exercise.objects.prefetch_related('questions').all()
+
+    return render(request, 'client/manage_exercises.html', {
+        'exercises': exercises
+    })
 
 def add_module(request):
     """Handles adding a module with multiple sections."""
