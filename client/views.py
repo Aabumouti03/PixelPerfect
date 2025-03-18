@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User, EndUser, UserProgramEnrollment
-from client.models import Module, Category
+from client.models import Module, Category, VideoResource
 from collections import Counter
 import json
 from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
@@ -10,7 +10,7 @@ from django.contrib import messages
 from .models import Questionnaire, Question, Module,  Program, ProgramModule
 from users.models import Questionnaire_UserResponse, QuestionResponse
 from django.core.paginator import Paginator
-from .forms import ProgramForm, CategoryForm
+from .forms import ProgramForm, CategoryForm, VideoResourceForm
 from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
@@ -799,3 +799,28 @@ def add_module(request):
             return redirect("client_modules")  # Redirect to the Client Modules page
     return render(request, "client/add_module.html")
 
+
+# For adding video content
+@login_required
+def add_video(request):
+    """View for adding a new video resource."""
+    if request.method == "POST":
+        form = VideoResourceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("video_list")  # Redirect to video list after saving
+    else:
+        form = VideoResourceForm()
+    return render(request, "client/add_video.html", {"form": form})
+
+@login_required
+def video_list(request):
+    """View for displaying all uploaded video resources."""
+    videos = VideoResource.objects.all()
+    return render(request, "client/video_list.html", {"videos": videos})
+
+@login_required
+def video_detail(request, video_id):
+    """View for displaying a single video."""
+    video = get_object_or_404(VideoResource, id=video_id)
+    return render(request, "client/video_detail.html", {"video": video})

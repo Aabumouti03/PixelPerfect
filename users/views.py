@@ -32,7 +32,7 @@ from users.models import (
 )
 from client.models import (
     Program, Module, ProgramModule, ModuleRating, Exercise, Category,
-    AdditionalResource, Exercise
+    AdditionalResource, Exercise,VideoResource
 )
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
@@ -642,7 +642,7 @@ def user_modules(request):
 
 @login_required
 def module_overview(request, module_id):
-    """Fetch the module by ID and retrieve related exercises and additional resources.""" 
+    """Fetch the module by ID and retrieve related exercises, additional resources, and videos.""" 
     
     module = get_object_or_404(Module, id=module_id)
 
@@ -653,30 +653,25 @@ def module_overview(request, module_id):
     except EndUser.DoesNotExist:
         end_user = EndUser.objects.create(user=user)
 
-    
     exercises = []
-    additional_resources = list(module.additional_resources.all())
-
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
-
-
-    completed_items = 0
-    total_items = len(exercises) + len(additional_resources)
-
-
     for exercise in exercises:
         if exercise.status=='completed':
             completed_items += 1
 
-    for resource in additional_resources:
-        if resource.status=='completed':
-            completed_items += 1
+    additional_resources = list(module.additional_resources.all())
+    video_resources = list(module.video_resources.all())  # Fetch video resources
 
-    progress_value = 0
-    if total_items > 0:
-        progress_value = (completed_items / total_items) * 100
+    completed_items = sum(1 for exercise in exercises if exercise.status == 'completed')
+    completed_items += sum(1 for resource in additional_resources if resource.status == 'completed')
+    completed_items += sum(1 for video in video_resources if video.status == 'completed')
+
+
+    total_items = len(exercises) + len(additional_resources) + len(video_resources)
+
+    progress_value = (completed_items / total_items) * 100 if total_items > 0 else 0
 
     user_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
     user_progress.completion_percentage = progress_value
@@ -686,6 +681,7 @@ def module_overview(request, module_id):
         'module': module,
         'exercises': exercises,
         'additional_resources': additional_resources,
+        'video_resources': video_resources,  # Pass videos to template
         'progress_value': progress_value,  
     }
 
@@ -762,27 +758,26 @@ def mark_done(request):
         action = data.get("action")  # 'done' or 'undo'
 
         user = request.user
-        end_user = EndUser.objects.get(user=user)  
+        end_user = EndUser.objects.get(user=user)
 
         if item_type == "resource":
             resource = AdditionalResource.objects.get(id=item_id)
-            if resource.status == 'completed':
-                resource.status = 'in_progress'
-            else:
-                resource.status = 'completed'
+            resource.status = 'completed' if action == "done" else 'in_progress'
             resource.save()
             module = Module.objects.filter(additional_resources=resource).first()
 
         elif item_type == "exercise":
             exercise = Exercise.objects.get(id=item_id)
-            if exercise.status == 'completed':
-                exercise.status = 'in_progress'
-            else:
-                exercise.status = 'completed'
+            exercise.status = 'completed' if action == "done" else 'in_progress'
             exercise.save()
             module = exercise.sections.first().modules.first()
 
-     
+        elif item_type == "video":
+            video = VideoResource.objects.get(id=item_id)
+            video.status = 'completed' if action == "done" else 'in_progress'
+            video.save()
+            module = Module.objects.filter(video_resources=video).first()
+
         user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
         user_module_progress.completion_percentage = calculate_progress(end_user, module)
         user_module_progress.save()
@@ -1058,3 +1053,4 @@ def save_journal_entry(request):
 
     # Save the journal entry
     return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
+

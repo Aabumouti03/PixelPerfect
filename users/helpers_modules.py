@@ -2,7 +2,8 @@ from client.models import Module, Exercise, AdditionalResource,ProgramModule
 from users.models import EndUser, UserModuleProgress, UserProgramProgress
 
 def calculate_progress(end_user, module):
-  
+    """Calculate the progress of a module based on completed exercises, additional resources, and videos."""
+    
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
@@ -14,17 +15,18 @@ def calculate_progress(end_user, module):
     # Count completed resources
     completed_resources = [resource for resource in module.additional_resources.all() if resource.status == 'completed']
 
+    # Count completed videos
+    completed_videos = [video for video in module.video_resources.all() if video.status == 'completed']
+
     # Calculate total and completed items
-    total_items = len(exercises) + module.additional_resources.count()
-    completed_items = len(completed_exercises) + len(completed_resources)
+    total_items = len(exercises) + module.additional_resources.count() + module.video_resources.count()
+    completed_items = len(completed_exercises) + len(completed_resources) + len(completed_videos)
 
     # Calculate progress percentage
-    if total_items > 0:
-        progress = (completed_items / total_items) * 100
-    else:
-        progress = 0
+    progress = (completed_items / total_items) * 100 if total_items > 0 else 0
 
-    return progress
+    return round(progress, 2)  # Round to 2 decimal places for better accuracy
+
 
 def calculate_program_progress(end_user, program):
     # Get all modules in the program

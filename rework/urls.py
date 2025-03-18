@@ -35,9 +35,6 @@ urlpatterns = [
         authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
     
-    path("verify-email/<uidb64>/<token>/", usersViews.verify_email, name="verify_email"),
-    path("email-verification-pending/", TemplateView.as_view(template_name="users/email_verification_pending.html"), name="email_verification_pending"),
-    path("email-verified-success/", TemplateView.as_view(template_name="users/email_verified_success.html"), name="email_verified_success"),
 
     # Home page
     path('about/', usersViews.about, name='about'),
@@ -133,6 +130,10 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+    #video content
+    path('videos/', clientViews.video_list, name='video_list'),
+    path('videos/add/', clientViews.add_video, name='add_video'),
+    path('videos/<int:video_id>/', clientViews.video_detail, name='video_detail'),
 
     # Journal URLs (moved outside debug block)
     path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)

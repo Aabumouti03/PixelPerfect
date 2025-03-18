@@ -51,9 +51,27 @@
             <div>
                 <button type="button" class="collapsible">Videos</button>
                 <div class="collapsible-content">
-                    <p>Video Content.</p>
+                    {% if video_resources %}
+                        <ul>
+                            {% for video in video_resources %}
+                                <li>
+                                    <h3>{{ video.title }}</h3>
+                                    <p>{{ video.description }}</p>
+                                    <iframe width="560" height="315" src="{{ video.get_embed_url }}" frameborder="0" allowfullscreen></iframe>
+                                    
+                                    <!-- Done Button for Video -->
+                                    <button class="done-button undo" data-id="{{ video.id }}" data-type="video">
+                                        {% if video.status == 'completed' %}Undo{% else %}Done{% endif %}
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No video resources available for this module.</p>
+                    {% endif %}
                 </div>
             </div>
+            
 
             <div>
                 <button type="button" class="collapsible">Excersises</button>
@@ -268,6 +286,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+
 
 
 </script>
