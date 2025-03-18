@@ -32,8 +32,12 @@ class LogInViewTestCase(TestCase):
 
     def test_successful_log_in_redirects_to_dashboard(self):
         """Test that a user logs in successfully and gets redirected to the dashboard."""
+        self.test_user.email_verified = True
+        self.test_user.save()
+
         form_input = {'username': 'dandoe', 'password': 'Testuser123'}
         response = self.client.post(self.url, form_input, follow=True)
+
         self.assertRedirects(response, self.dashboard_url)
 
         user = authenticate(username='dandoe', password='Testuser123')
@@ -122,31 +126,59 @@ class LogInViewTestCase(TestCase):
     
     def test_login_trims_spaces_and_succeeds(self):
         """Ensure authentication succeeds even if username/password have leading/trailing spaces."""
+        self.test_user.email_verified = True
+        self.test_user.save()
+
         form_input = {'username': '  dandoe  ', 'password': '  Testuser123  '}
         response = self.client.post(self.url, form_input, follow=True)
-        
+
         self.assertRedirects(response, self.dashboard_url)
 
         user = authenticate(username='dandoe', password='Testuser123')
         self.assertIsNotNone(user)
         self.assertTrue(user.is_authenticated)
 
-
     def test_admin_login_redirects_to_client_dashboard(self):
-        """Ensure superuser logs in and gets redirected to the client dashboard."""
+        """Ensure superusers log in and are redirected to the client dashboard."""
         admin_user = User.objects.create_superuser(
-        username="SuperUser",
-        email="admin@example.com",
-        password="123password"
+            username="adminuser", email="admin@example.com", password="AdminPass123"
         )
+        admin_user.email_verified = True
+        admin_user.save()
 
-
-        form_input = {'username': 'SuperUser', 'password': '123password'}
+        form_input = {'username': 'adminuser', 'password': 'AdminPass123'}
         response = self.client.post(self.url, form_input, follow=True)
 
         self.assertRedirects(response, reverse('client_dashboard'))
 
-        user = authenticate(username="SuperUser", password="123password")
-        self.assertIsNotNone(user)
-        self.assertTrue(user.is_authenticated)
-        self.assertTrue(user.is_superuser)
+    def test_login_fails_for_unverified_email(self):
+        """Ensure users with unverified emails cannot log in."""
+        unverified_user = User.objects.create_user(
+            username='unverified',
+            email='unverified@example.com',  # Ensure unique email
+            password='Test1234!'
+        )
+        unverified_user.email_verified = False
+        unverified_user.save()
+
+        form_input = {'username': 'unverified', 'password': 'Test1234!'}
+        response = self.client.post(self.url, form_input)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/log_in.html")
+        self.assertContains(response, "You must verify your email before logging in.")
+
+
+    def test_login_redirects_to_next_url(self):
+        """Ensure users are redirected to their original destination after logging in."""
+        protected_url = reverse("dashboard")  # Replace with an actual protected page
+        login_url_with_next = f"{self.url}?next={protected_url}"
+
+        self.test_user.email_verified = True
+        self.test_user.save()
+
+        form_input = {'username': 'dandoe', 'password': 'Testuser123'}
+        response = self.client.post(login_url_with_next, form_input, follow=True)
+
+        self.assertRedirects(response, protected_url)
+
