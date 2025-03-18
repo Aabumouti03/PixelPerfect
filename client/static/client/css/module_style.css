@@ -1,226 +1,217 @@
-{% extends 'client/client_base.html' %}
-{% load static %}
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css');
 
-{% block content %}
-<div class="content">
-    <h2 class="page-title">Manage Exercises</h2>
-    <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
+body {
+    font-family: 'Manrope', sans-serif;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
 
-    <div class="top-buttons">
-        <a href="{% url 'add_exercise' %}" class="add-btn">+ Add Exercise</a>
-    </div>
+/* Full Page Content */
+.content {
+    flex-grow: 1;
+    padding: 30px;
+}
 
-    <div class="module-list">
-        {% for exercise in exercises %}
-            <div class="module-card">
-                <div class="module-header">
-                    <div class="module-title">
-                        <input type="text" value="{{ exercise.title }}" id="title-{{ exercise.id }}" class="edit-input" readonly>
-                    </div>
-                    <div class="module-actions">
-                        <button class="edit-btn" onclick="enableEdit('{{ exercise.id }}')">✏️ Edit</button>
-                        <button class="save-btn hidden" onclick="saveExercise('{{ exercise.id }}')">💾 Save</button>
-                        <button class="toggle-btn" onclick="toggleExercise('{{ exercise.id }}')">
-                            <i class="fas fa-chevron-left" id="toggle-icon-{{ exercise.id }}"></i>
-                        </button>
-                    </div>
-                </div>
+/* Page Title */
+.page-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding-left: 20px;
+    color: #FD5402;
+    border-left: 5px solid #FD5402;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
 
-                <div id="exercise-{{ exercise.id }}" class="module-content">
-                    <h4>Questions:</h4>
-                    {% if exercise.questions.all %}
-                        <ul class="exercise-questions">
-                            {% for question in exercise.questions.all %}
-                                <li>
-                                    <input type="text" value="{{ question.question_text }}" id="question-{{ question.id }}" class="edit-input" readonly>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No questions available.</p>
-                    {% endif %}
-                </div>
-            </div>
-        {% empty %}
-            <p>No exercises found.</p>
-        {% endfor %}
-    </div>
-</div>
+/* Top Buttons */
+.top-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
 
-<style>
-    /* Override default styling */
+.add-btn {
+    background-color: #FD5402;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 20px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.add-btn:hover {
+    background: #e04e00;
+    transform: scale(1.05);
+}
+
+/* Module List */
+.module-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Module Card */
+.module-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #73c4fd; /* Blue left border */
+    padding: 15px;
+    transition: background 0.3s ease-in-out;
+}
+
+/* Module Header */
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    transition: background 0.2s ease-in-out;
+}
+
+.module-header:hover {
+    background: rgba(115, 196, 253, 0.2);
+}
+
+/* Title inside module header */
+.module-title h3 {
+    color: #333;
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Edit & Toggle Button */
+.module-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.edit-btn {
+    background-color: #FD5402;
+    color: white;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 20px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.edit-btn:hover {
+    background: #e04e00;
+    transform: scale(1.05);
+}
+
+/* Toggle Button */
+.toggle-btn {
+    background: none;
+    color: #FD5402;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hidden Module Content */
+.module-content {
+    display: none;
+    padding: 15px;
+    background: white;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.module-content.show {
+    display: block;
+}
+
+/* Sections */
+.sections {
+    margin-top: 15px;
+}
+
+.section-card {
+    background: #ffffff; /* White background */
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px; /* Rounded corners */
+    border-left: 6px solid #FD5402;  /* Orange left border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease-in-out;
+}
+
+/* Section Title */
+.section-card h5 {
+    font-size: 20px;
+    color: #FD5402; /* Orange color */
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Section Description */
+.section-card p {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Exercises inside Sections */
+.exercise-card {
+    background: #E8F4FC; /* Light blue */
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border-left: 5px solid #73c4fd; /* Blue left border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Exercise Title */
+.exercise-card h6 {
+    font-size: 18px;
+    color: #73c4fd;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Exercise Questions */
+.exercise-card ul {
+    padding-left: 20px;
+}
+
+.exercise-card li {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
     .content {
-        flex-grow: 1;
-        padding: 30px;
-    }
-
-    .module-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .module-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 6px solid #73c4fd;
-        padding: 15px;
-        transition: background 0.3s ease-in-out;
         width: 100%;
+        padding: 15px;
     }
 
     .module-header {
-        display: flex;
+        flex-direction: row;
         justify-content: space-between;
-        align-items: center;
-        background: white;
         padding: 15px;
-        border-radius: 10px;
-        transition: background 0.2s ease-in-out;
     }
 
-    .module-header:hover {
-        background: rgba(115, 196, 253, 0.2);
-    }
-
-    .module-title input {
-        border: none;
-        font-size: 20px;
-        width: 100%;
-        font-weight: bold;
-        outline: none;
-    }
-
-    .edit-input {
-        border: none;
-        background: transparent;
-        outline: none;
+    .module-header h3 {
         font-size: 18px;
-        width: 100%;
-        padding: 5px;
-    }
-
-    .editing {
-        border: 1px solid #007bff;
-        background: #f0f8ff;
-        padding: 5px;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    .module-actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .edit-btn, .save-btn {
-        background-color: #FD5402;
-        color: white;
-        padding: 7px 15px;
-        border: none;
-        border-radius: 20px;
-        font-size: 14px;
-        transition: 0.3s;
-    }
-
-    .edit-btn:hover, .save-btn:hover {
-        background: #e04e00;
-        transform: scale(1.05);
     }
 
     .toggle-btn {
-        background: none;
-        color: #FD5402;
-        border: none;
-        font-size: 18px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: transform 0.2s ease-in-out;
+        font-size: 16px;
     }
-
-    .module-content {
-        display: none;
-        padding: 15px;
-        background: white;
-    }
-
-    .module-content.show {
-        display: block;
-    }
-
-    .exercise-questions {
-        padding-left: 20px;
-        list-style: none;
-    }
-
-    .exercise-questions li {
-        margin-bottom: 5px;
-    }
-</style>
-
-<script>
-    function enableEdit(exerciseId) {
-        document.getElementById(`title-${exerciseId}`).readOnly = false;
-        document.getElementById(`title-${exerciseId}`).classList.add('editing');
-
-        document.querySelectorAll(`#exercise-${exerciseId} .edit-input`).forEach(input => {
-            input.readOnly = false;
-            input.classList.add('editing');
-        });
-
-        document.querySelector(`#exercise-${exerciseId} .edit-btn`).classList.add('hidden');
-        document.querySelector(`#exercise-${exerciseId} .save-btn`).classList.remove('hidden');
-    }
-
-    function saveExercise(exerciseId) {
-        let title = document.getElementById(`title-${exerciseId}`).value;
-        let questionElements = document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input`);
-        let questions = [];
-
-        questionElements.forEach(input => {
-            let questionId = input.id.split('-')[1];
-            let questionText = input.value;
-            questions.push({ id: questionId, text: questionText });
-        });
-
-        fetch(`/update_exercise/${exerciseId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ title: title, questions: questions })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("✅ Exercise updated successfully!");
-                location.reload();
-            } else {
-                alert("❌ Error updating exercise.");
-            }
-        })
-        .catch(error => console.error("⚠️ Error:", error));
-    }
-
-    function toggleExercise(exerciseId) {
-        const content = document.getElementById(`exercise-${exerciseId}`);
-        const icon = document.getElementById(`toggle-icon-${exerciseId}`);
-
-        content.classList.toggle("show");
-
-        if (content.classList.contains("show")) {
-            icon.classList.remove("fa-chevron-left");
-            icon.classList.add("fa-chevron-down");
-        } else {
-            icon.classList.remove("fa-chevron-down");
-            icon.classList.add("fa-chevron-left");
-        }
-    }
-</script>
-
-{% endblock %}
+}
