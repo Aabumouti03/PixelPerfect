@@ -16,7 +16,6 @@ from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
-logger = logging.getLogger(__name__)
 from collections import defaultdict
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -292,7 +291,6 @@ def modules(request):
 #edit back to users/profile.html later
 def profile(request):
     return render(request, 'users/profile.html')
-
 
 def about(request):
     return render(request, 'users/about.html')
