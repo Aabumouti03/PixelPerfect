@@ -7,8 +7,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.db.models import Avg
+from .models import JournalEntry
+from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from users.helpers_modules import calculate_progress, update_user_program_progress
 from django.contrib.auth.decorators import login_required 
 from client.models import Category, Program,ModuleRating,Exercise
@@ -35,9 +37,12 @@ from client.models import (
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
+from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
 # Logger setup
 logger = logging.getLogger(__name__)
+
+
 
 
 def questionnaire(request):
@@ -62,13 +67,11 @@ def questionnaire(request):
     }
     return render(request, "questionnaire.html", context)
 
-@csrf_exempt
+@csrf_protect
+@login_required
 def submit_responses(request):
     if request.method == "POST":
         try:
-            if not request.user.is_authenticated:
-                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
-
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
@@ -126,7 +129,7 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-
+            redirect('recommended_programs')
             return JsonResponse({"success": True, "message": "Responses saved successfully!"})
 
         except Exception as e:
@@ -134,8 +137,8 @@ def submit_responses(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
+
 import random
-import datetime
 
 @login_required
 def save_notes(request):
@@ -280,7 +283,7 @@ def view_program(request, program_id):
     
     return render(request, 'users/view_program.html', context)
 
-#A function for displaying a page that welcomes users
+
 def welcome_page(request):
     '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
@@ -366,7 +369,12 @@ def sign_up_step_2(request):
             profile.save()
 
             del request.session["user_form_data"]
-            return redirect("log_in")
+
+            user = authenticate(username=user.username, password=user_form.cleaned_data["password1"])
+            if user:
+                login(request, user)
+
+            return redirect("questionnaire")
 
 
     else:
@@ -374,16 +382,18 @@ def sign_up_step_2(request):
 
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
-
+@login_required
 def log_out(request):
     """Handles logout only if the user confirms via modal."""
     if request.method == "POST":
         logout(request)
         return redirect('log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
-
+    referer_url = request.META.get('HTTP_REFERER')
+    if referer_url:
+        return redirect(referer_url)
+    
+    return redirect('dashboard')
 
 @login_required 
 def show_profile(request):
@@ -420,6 +430,8 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
+            user.User_profile.save()  #  Explicitly save the profile
+            user.refresh_from_db()  #  Ensure data in tests matches DB state
 
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
@@ -440,7 +452,7 @@ def update_profile(request):
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
                     # Send verification email
-                    send_mail(
+                    send_mail_status = send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
                         "noreply@example.com",
@@ -449,6 +461,7 @@ def update_profile(request):
                     )
 
                     request.session['profile_update_popup'] = 'verification_sent'
+                    request.session.save()  # Ensure session data is persisted before redirecting
                 else:
                     # If the email hasn't changed, just don't do anything with the email
                     user.new_email = None
@@ -460,6 +473,7 @@ def update_profile(request):
                 user.set_password(new_password)
                 user.save()
                 update_session_auth_hash(request, user)
+
 
             return redirect('show_profile')
 
@@ -473,10 +487,11 @@ def update_profile(request):
 
 
 def verify_email(request, uidb64, token):
+    User = get_user_model()
+    
     try:
         # Decode user id
         uid = force_str(urlsafe_base64_decode(uidb64))
-        User = get_user_model()
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
         return HttpResponse("Invalid verification link.")
@@ -490,7 +505,6 @@ def verify_email(request, uidb64, token):
             user.save()
             
             request.session['profile_update_popup'] = 'profile_updated'
-            # login(request, user)  # Log the user back in after email change
             return redirect('log_in')
 
     return HttpResponse("Invalid or expired token.")
@@ -511,7 +525,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('profile_page')  # Redirect back to the profile if deletion fails
+            return redirect('show_profile')  # Redirect back to the profile if deletion fails
 
     # Confirmation before deletion
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
@@ -964,140 +978,58 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
-def assess_user_responses_programs(user):
-    """
-    Evaluates the user's latest questionnaire responses, calculates scores for each category, 
-    and suggests programs based on negative scores.
-
-    Args:
-        user (EndUser): The user whose responses will be assessed.
-
-    Returns:
-        dict: A dictionary where keys are category names and values are lists of suggested programs.
-    """
-
-    # Step 1: Get the latest questionnaire response for the user
-    latest_response = Questionnaire_UserResponse.objects.filter(user=user).order_by('-started_at').first()
-
-    if not latest_response:
-        return {}  # No responses, return empty recommendations
-
-    # Step 2: Fetch all responses from the latest questionnaire submission
-    user_responses = QuestionResponse.objects.filter(user_response=latest_response).select_related('question__category')
-
-    # Step 3: Reset category scores for this new response
-    category_scores = defaultdict(int)
-
-    # Step 4: Calculate scores for each category
-    for response in user_responses:
-        question = response.question  # Get the related question
-        category = question.category  # Get the category
-
-        if category:  # Ensure question has a category
-            adjusted_score = response.rating_value * question.sentiment  # Multiply response by sentiment
-            category_scores[category.id] += adjusted_score  # Update category score
-
-    # Step 5: Find categories with negative scores
-    low_score_categories = [category_id for category_id, score in category_scores.items() if score < 0]
-
-    # Step 6: Fetch programs from the negatively scored categories
-    suggested_programs = {}
-    for category_id in low_score_categories:
-        category = get_object_or_404(Category, id=category_id)
-        programs = Program.objects.filter(categories=category)  
-        suggested_programs[category.name] = list(programs)  # Convert queryset to list
-
-    return suggested_programs
-
-def assess_user_responses_modules(user):
-    """
-    Evaluates the user's latest questionnaire responses, calculates scores for each category, 
-    and suggests programs based on negative scores.
-
-    Args:
-        user (EndUser): The user whose responses will be assessed.
-
-    Returns:
-        dict: A dictionary where keys are category names and values are lists of suggested programs.
-    """
-
-    # Step 1: Get the latest questionnaire response for the user
-    latest_response = Questionnaire_UserResponse.objects.filter(user=user).order_by('-started_at').first()
-
-    if not latest_response:
-        return {}  # No responses, return empty recommendations
-
-    # Step 2: Fetch all responses from the latest questionnaire submission
-    user_responses = QuestionResponse.objects.filter(user_response=latest_response).select_related('question__category')
-
-    # Step 3: Reset category scores for this new response
-    category_scores = defaultdict(int)
-
-    # Step 4: Calculate scores for each category
-    for response in user_responses:
-        question = response.question  # Get the related question
-        category = question.category  # Get the category
-
-        if category:  # Ensure question has a category
-            adjusted_score = response.rating_value * question.sentiment  # Multiply response by sentiment
-            category_scores[category.id] += adjusted_score  # Update category score
-
-    # Step 5: Find categories with negative scores
-    low_score_categories = [category_id for category_id, score in category_scores.items() if score < 0]
-
-    # Step 6: Fetch programs from the negatively scored categories
-    suggested_modules = {}
-    for category_id in low_score_categories:
-        category = get_object_or_404(Category, id=category_id)
-        modules = Module.objects.filter(categories=category)  
-        suggested_modules[category.name] = list(modules)  # Convert queryset to list
-
-    return suggested_modules
-
-
-
 @login_required
 def journal_view(request, date=None):
     """Loads the journal page and fetches saved data for a specific date."""
     user = request.user
 
-    # Use today's date if none is provided
+    # Validate & Parse Date
     if date is None:
         selected_date = now().date()
     else:
         try:
             selected_date = datetime.strptime(date, "%Y-%m-%d").date()
-        except ValueError:
-            selected_date = now().date()
+        except (ValueError, TypeError):
+            selected_date = now().date()  # Default to today if invalid
 
-    # Fetch the journal entry for the selected date (if it exists)
-    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first() or None
-    
+    # Fetch Journal Entry for the Selected Date
+    journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
 
+    # Handle AJAX Requests (Return JSON)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if journal_entry:
+            return JsonResponse({
+                "success": True,
+                "data": {
+                    "sleep_hours": journal_entry.sleep_hours,
+                    "caffeine": journal_entry.caffeine,
+                    "hydration": journal_entry.hydration,
+                    "stress": journal_entry.stress,
+                    "goal_progress": journal_entry.goal_progress,
+                    "notes": journal_entry.notes,
+                    "connected_with_family": journal_entry.connected_with_family,
+                    "expressed_gratitude": journal_entry.expressed_gratitude,
+                    "outdoors": journal_entry.outdoors,
+                    "sunset": journal_entry.sunset,
+                }
+            })
+        return JsonResponse({"success": False, "error": "No entry found."}, status=404)
 
-    print(f"📖 [DEBUG] Rendering Journal for {selected_date}")
-    if journal_entry:
-        print(f"   Sleep Hours: {journal_entry.sleep_hours}")
-        print(f"   Caffeine: {journal_entry.caffeine}")
-        print(f"   Hydration: {journal_entry.hydration}")
-        print(f"   Stress: {journal_entry.stress}")
-        print(f"   Goal Progress: {journal_entry.goal_progress}")
-        print(f"   Notes: {journal_entry.notes}")
-    else:
-        print("❌ No journal entry found for this date.")
+    # Compute Previous & Next Day
+    previous_day = (selected_date - timedelta(days=1)).strftime("%Y-%m-%d")
+    next_day = (selected_date + timedelta(days=1)).strftime("%Y-%m-%d")
 
+    # Render HTML for Standard Page Load
     context = {
-        "selected_date": selected_date,
+        "selected_date": selected_date.strftime("%Y-%m-%d"),
         "journal_entry": journal_entry,
-        "previous_day": (selected_date - timedelta(days=1)).strftime("%Y-%m-%d"),
-        "next_day": (selected_date + timedelta(days=1)).strftime("%Y-%m-%d"),
+        "previous_day": previous_day,
+        "next_day": next_day,
     }
-    
-    return render(request, "users/journal.html", context)  # ✅ Returns HTML, not JSON!
 
+    return render(request, "users/journal.html", context)
 
 @login_required
-@csrf_exempt
 def save_journal_entry(request):
     """Handles saving/updating journal entries using JSON."""
 
@@ -1116,7 +1048,9 @@ def save_journal_entry(request):
         return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
     try:
-        entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+       entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+        
     except ValueError:
         print(f"❌ Invalid Date Received: {date_str}")  # Debugging
         return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)

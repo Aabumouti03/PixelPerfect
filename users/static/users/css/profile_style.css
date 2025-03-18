@@ -272,3 +272,8 @@ html, body {
 }
 
 
+.nav-links a.active {
+    font-weight: bolder;
+    color: white;
+    background-color: #F24505;
+}

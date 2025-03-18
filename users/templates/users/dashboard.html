@@ -2,7 +2,6 @@
 {% load static %} 
 
 {% block extra_css %} 
-
     <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
     <script src="{% static 'users/js/sticky_note.js' %}"></script>
@@ -58,7 +57,7 @@
                         <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
                         {% if forloop.first or module.progress_value > 0 %}
-                            <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
+                            <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
                         {% else %}
                             <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
                         {% endif %}
@@ -79,7 +78,7 @@
 
         <div class="modules-header">
             <h2>Your Modules</h2>
-            <a href="{% url 'dashboard' %}" class="view-all-button">View All Modules</a>
+            <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
 
         </div>
 
@@ -100,7 +99,7 @@
 
                     <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
-                    <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
+                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
                 </div>
 
             {% endfor %}      

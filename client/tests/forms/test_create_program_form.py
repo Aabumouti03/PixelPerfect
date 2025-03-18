@@ -1,7 +1,7 @@
 from django import forms
 from django.test import TestCase
 from client.forms import ProgramForm
-from client.models import Program, Module, Category
+from client.models import Program, Module, Category, ProgramModule
 
 class ProgramFormTestCase(TestCase):
     """Tests for the ProgramForm."""
@@ -185,3 +185,114 @@ class ProgramFormTestCase(TestCase):
         form = ProgramForm(data=empty_modules_data)
         
         self.assertTrue(form.is_valid())
+
+    def test_valid_form_creates_new_category(self):
+        """Ensure new_category creates a new Category instance if it doesn’t exist."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["new_category"] = "Science"
+
+        form = ProgramForm(data=valid_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertTrue(Category.objects.filter(name="Science").exists())
+        self.assertIn(Category.objects.get(name="Science"), program.categories.all())
+
+    def test_new_category_is_linked_to_program(self):
+        """Ensure the new category is correctly linked to the program."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["new_category"] = "Art"
+
+        form = ProgramForm(data=valid_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save()
+        
+        new_category = Category.objects.get(name="Art")
+        self.assertIn(new_category, program.categories.all())
+
+    def test_valid_duplicate_new_category(self):
+        """Ensure form allows existing categories by reusing them instead of raising an error."""
+        existing_category = Category.objects.create(name="Existing Category")
+
+        valid_data = self.valid_form_data.copy()
+        valid_data["new_category"] = "Existing Category"
+
+        form = ProgramForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertIn(existing_category, program.categories.all())
+        self.assertEqual(Category.objects.filter(name="Existing Category").count(), 1)
+
+
+    def test_module_order_is_saved_correctly(self):
+        """Ensure module_order is saved correctly and reflected in ProgramModule entries."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["module_order"] = f"{self.module2.id},{self.module1.id}"
+
+        form = ProgramForm(data=valid_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save()
+        
+        ordered_modules = list(ProgramModule.objects.filter(program=program).order_by("order"))
+        self.assertEqual(ordered_modules[0].module, self.module2)
+        self.assertEqual(ordered_modules[1].module, self.module1)
+
+    def test_form_save_with_commit_false(self):
+        """Ensure form save(commit=False) creates an instance but does not save."""
+        form = ProgramForm(data=self.valid_form_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save(commit=False)
+        
+        self.assertFalse(Program.objects.filter(title=self.valid_form_data["title"]).exists())
+        self.assertEqual(program.title, self.valid_form_data["title"])  # Program exists in memory
+    
+    def test_program_saves_with_categories_and_modules(self):
+        """Ensure program correctly saves selected categories and modules."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["categories"] = [self.category1.id, self.category2.id]
+
+        form = ProgramForm(data=valid_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertEqual(set(program.categories.all()), {self.category1, self.category2})
+        self.assertEqual(set(ProgramModule.objects.filter(program=program).values_list("module", flat=True)), {self.module1.id, self.module2.id})
+
+    def test_new_category_whitespace_only(self):
+        """Ensure new_category containing only whitespace is ignored."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["new_category"] = "    "
+
+        form = ProgramForm(data=valid_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertFalse(Category.objects.filter(name="    ").exists())
+        self.assertEqual(program.categories.count(), 0)
+
+
+    def test_save_with_commit_false_does_not_save_relationships(self):
+        """Ensure calling save(commit=False) does not create ProgramModules or add categories."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["categories"] = [self.category1.id, self.category2.id]
+
+        form = ProgramForm(data=valid_data)
+        
+        self.assertTrue(form.is_valid())
+        program = form.save(commit=False)
+
+        self.assertFalse(Program.objects.filter(title=self.valid_form_data["title"]).exists())
+
+        self.assertIsNone(program.pk)
+
+        with self.assertRaises(ValueError):
+            program.categories.count()
+

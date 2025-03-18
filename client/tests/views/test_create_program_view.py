@@ -228,3 +228,82 @@ class CreateProgramViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("title", form.errors)
         self.assertEqual(Program.objects.filter(title__iexact="Whitespace Duplicate").count(), 1)
+
+    def test_post_create_program_with_new_category(self):
+        """Ensure a new category is created and linked to the program."""
+        self.client.login(username='adminuser', password='password123')
+
+        valid_data = self.valid_program_data.copy()
+        valid_data["new_category"] = "New Category"
+
+        response = self.client.post(self.create_program_url, valid_data, follow=True)
+
+        self.assertRedirects(response, self.programs_url)
+
+        program = Program.objects.get(title="Test Program")
+        new_category = Category.objects.get(name="New Category")
+
+        self.assertIn(new_category, program.categories.all())
+    
+    def test_post_create_program_with_existing_new_category(self):
+        """Ensure a new category is not duplicated if it already exists."""
+        self.client.login(username='adminuser', password='password123')
+
+        existing_category = Category.objects.create(name="Existing Category")
+
+        valid_data = self.valid_program_data.copy()
+        valid_data["new_category"] = "Existing Category"
+
+        response = self.client.post(self.create_program_url, valid_data, follow=True)
+
+        self.assertRedirects(response, self.programs_url)
+
+        program = Program.objects.get(title="Test Program")
+        self.assertIn(existing_category, program.categories.all())  # Should reuse the existing category
+        self.assertEqual(Category.objects.filter(name="Existing Category").count(), 1)  # No duplicates
+
+
+    def test_post_create_program_with_whitespace_new_category(self):
+        """Ensure new_category containing only whitespace is ignored."""
+        self.client.login(username='adminuser', password='password123')
+
+        valid_data = self.valid_program_data.copy()
+        valid_data["new_category"] = "   "  # Only whitespace
+
+        response = self.client.post(self.create_program_url, valid_data, follow=True)
+
+        self.assertRedirects(response, self.programs_url)
+
+        program = Program.objects.get(title="Test Program")
+
+        self.assertEqual(program.categories.count(), 0)  # No new category should be added
+        self.assertFalse(Category.objects.filter(name="   ").exists())  # No whitespace category created
+
+    def test_post_create_program_with_selected_categories(self):
+        """Ensure selected categories are assigned to the program."""
+        self.client.login(username='adminuser', password='password123')
+
+        valid_data = self.valid_program_data.copy()
+        valid_data["categories"] = [self.category.id]  # Select existing category
+
+        response = self.client.post(self.create_program_url, valid_data, follow=True)
+
+        self.assertRedirects(response, self.programs_url)
+
+        program = Program.objects.get(title="Test Program")
+        self.assertIn(self.category, program.categories.all())  # Category should be assigned
+
+    def test_create_program_redirects_unauthenticated_users(self):
+        """Ensure unauthenticated users are redirected to login when accessing create_program."""
+        response = self.client.get(self.create_program_url)
+
+        self.assertNotEqual(response.status_code, 200)
+        self.assertTrue(response.url.startswith(reverse("log_in")))  # Should redirect to login
+
+    def test_create_program_denies_access_to_regular_users(self):
+        """Ensure regular (non-admin) users cannot access the create program page."""
+        self.client.login(username='regularuser', password='password123')
+
+        response = self.client.get(self.create_program_url)
+
+        self.assertNotEqual(response.status_code, 200)  # Should return a forbidden or redirect response

@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import Questionnaire, Question, Module,  Program, ProgramModule
-from users.models import Questionnaire_UserResponse, QuestionResponse, User
+from users.models import Questionnaire_UserResponse, QuestionResponse
 from django.core.paginator import Paginator
 from .forms import ProgramForm, CategoryForm
 from .models import Program, ProgramModule, Category
@@ -19,29 +19,17 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpRe
 import csv
 from django.db import transaction 
 from django.db.models import Max, Avg
-from client import views as clientViews
-from users import views as usersViews
-from users.views import enroll_module, unenroll_module 
-# Create your views here.
-from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
-from users.models import Questionnaire_UserResponse, QuestionResponse, User
-from django.core.paginator import Paginator
-from .forms import ProgramForm 
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse
-
-
+from django.db.models import Q
 
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
 
-
+@user_passes_test(admin_check)
 @login_required
 def manage_questionnaires(request):
     search_query = request.GET.get('search', '')  
     is_active_filter = request.GET.get('is_active')
-    sort_order = request.GET.get('sort', 'desc')
 
     # Fetch all questionnaires
     questionnaires = Questionnaire.objects.all()
@@ -53,12 +41,6 @@ def manage_questionnaires(request):
     # Apply active filter
     if is_active_filter == 'true':
         questionnaires = questionnaires.filter(is_active=True)
-
-    # Apply sorting
-    if sort_order == 'asc':
-        questionnaires = questionnaires.order_by('created_at')
-    else:
-        questionnaires = questionnaires.order_by('-created_at')
 
     # Get response count
     questionnaires_data = [
@@ -78,10 +60,10 @@ def manage_questionnaires(request):
         'questionnaires_data': page_obj,
         'page_obj': page_obj,
         'is_active_filter': is_active_filter,
-        'search_query': search_query,  
-        'sort_order': sort_order
+        'search_query': search_query
     })
 
+@user_passes_test(admin_check)
 @login_required
 def activate_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
@@ -94,6 +76,7 @@ def activate_questionnaire(request, questionnaire_id):
     messages.success(request, f'Activated: {questionnaire.title}')
     return redirect('manage_questionnaires')
 
+@user_passes_test(admin_check)
 @login_required
 def view_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
@@ -104,20 +87,23 @@ def view_questionnaire(request, questionnaire_id):
         'questions': questions
     })
 
+@user_passes_test(admin_check)
 @login_required
 def view_responders(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    search_query = request.GET.get('search', '')  # ✅ Get search query
+    search_query = request.GET.get('search', '').strip()  # ✅ Trim spaces
     responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
-    
+
     if search_query:
         responders = responders.filter(
-            user__user__first_name__icontains=search_query
-        ) | responders.filter(
-            user__user__last_name__icontains=search_query
+            Q(user__user__first_name__icontains=search_query) |
+            Q(user__user__last_name__icontains=search_query)
         )
-    
-    # set 10 requests per page
+
+    # ✅ Ensure consistent ordering for pagination
+    responders = responders.order_by("user__user__first_name")
+
+    # ✅ Paginate (10 per page)
     paginator = Paginator(responders, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -125,9 +111,11 @@ def view_responders(request, questionnaire_id):
     return render(request, 'client/view_responders.html', {
         'questionnaire': questionnaire,
         'responders': page_obj.object_list,
-        'page_obj':page_obj
+        'page_obj': page_obj,
+        'search_query': search_query,  # ✅ Keep search term in form
     })
 
+@user_passes_test(admin_check)
 @login_required
 def view_user_response(request, user_response_id):
     user_response = get_object_or_404(Questionnaire_UserResponse, id=user_response_id)
@@ -138,6 +126,7 @@ def view_user_response(request, user_response_id):
         'responses': responses,
     })
 
+@user_passes_test(admin_check)
 @login_required
 def create_questionnaire(request):
     categories = Category.objects.all()
@@ -176,6 +165,7 @@ def create_questionnaire(request):
         "sentiment_choices": sentiment_choices,  
     })
 
+@user_passes_test(admin_check)
 @login_required
 def edit_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
@@ -217,13 +207,14 @@ def edit_questionnaire(request, questionnaire_id):
         "sentiment_choices": sentiment_choices,  
     })
 
+@user_passes_test(admin_check)
 @login_required
 def delete_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questionnaire.delete()
     return redirect("manage_questionnaires")
 
-
+@user_passes_test(admin_check)
 @login_required
 def delete_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
@@ -231,6 +222,7 @@ def delete_question(request, question_id):
     question.delete()
     return redirect("edit_questionnaire", questionnaire_id=questionnaire_id)
 
+@user_passes_test(admin_check)
 @login_required
 def add_question(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
@@ -269,6 +261,7 @@ def users_management(request):
     users = EndUser.objects.all()
     return render(request, 'client/users_management.html', {'users': users})
 
+@login_required
 def user_detail_view(request, user_id):
     user_profile = get_object_or_404(EndUser, user__id=user_id)
 
@@ -317,14 +310,25 @@ def create_program(request):
                 program = form.save(commit=False)
                 program.save()
 
-            
+                # Process selected and new categories
+                selected_categories = form.cleaned_data.get("categories")
+                new_category_name = form.cleaned_data.get("new_category", "").strip()
+
+                if new_category_name:
+                    new_category, created = Category.objects.get_or_create(name=new_category_name)
+                    program.categories.add(new_category)
+
+                if selected_categories:
+                    program.categories.add(*selected_categories)
+
+                # Process module ordering from JavaScript
                 module_order = request.POST.get("module_order", "").strip()
                 if module_order:
                     module_ids = module_order.split(",")
                     ProgramModule.objects.filter(program=program).delete()
 
                     for index, module_id in enumerate(module_ids, start=1):
-                        if module_id.isdigit(): #making sure the javascript works properly
+                        if module_id.isdigit():
                             module = Module.objects.filter(id=int(module_id)).first()
                             if module:
                                 ProgramModule.objects.create(program=program, module=module, order=index)
@@ -342,11 +346,16 @@ def create_program(request):
 @login_required
 @user_passes_test(admin_check)
 def log_out_client(request):
+    """Handles logout only if the admin confirms via modal."""
     if request.method == "POST":
         logout(request)
-        return redirect('log_in')
+        return redirect('users:log_in')
 
-    return redirect('/client_dashboard/')
+    referer_url = request.META.get('HTTP_REFERER')
+    if referer_url:
+        return redirect(referer_url)
+    
+    return redirect('client_dashboard')
 
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
@@ -505,6 +514,27 @@ def create_category(request):
     }
 
     return render(request, 'client/create_category.html', context)
+
+@login_required 
+@user_passes_test(admin_check) 
+def edit_category(request, category_id):
+    """View to edit a category's modules and programs."""
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == 'POST':
+
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            category = form.save()
+            category.modules.set(form.cleaned_data['modules'])
+            category.programs.set(form.cleaned_data['programs'])
+            return redirect('category_list')  
+            
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(request, 'client/edit_category.html', {'form': form, 'category': category})
+
 
 @login_required 
 @user_passes_test(admin_check) 
