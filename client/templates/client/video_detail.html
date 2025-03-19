@@ -1,0 +1,8 @@
+
+{% block content %}
+  <h2>{{ video.title }}</h2>
+  <p>{{ video.description }}</p>
+  <iframe width="560" height="315" src="{{ video.get_embed_url }}" frameborder="0" allowfullscreen></iframe>
+  <br>
+  <a href="{% url 'video_list' %}">Back to Video List</a>
+{% endblock %}

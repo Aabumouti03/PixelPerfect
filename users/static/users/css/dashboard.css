@@ -1,521 +1,326 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
 body {
-    margin: 0;
-    font-family: 'Manrope', sans-serif;
-    display: flex;
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  display: flex;
 }
 
 .sidebar {
-    width: 60px; /* Initially, a small width */
-    height: 100vh;
-    background-color: #F24505;
-    color: white;
-    position: fixed;
-    left: 0;
-    top: 0;
-    border-top-right-radius: 15px; /* Rounds the top-left corner */
-    border-bottom-right-radius: 15px; /* Rounds the bottom-left corner */
-    overflow: hidden; /* Hide content initially */
-    transition: width 0.3s ease-in-out;
+  width: 60px;
+  height: 100vh;
+  background-color: #F24505;
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out;
 }
-
 .sidebar:hover {
-    width: 250px; /* Expand when hovered */
+  width: 250px;
 }
-
 .logo {
-    font-size: 35px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    padding-top: 20px;
-    gap: 10px; /* distance to logo */
-    opacity: 0; /* Hide menu items */
-    transition: opacity 0.3s ease-in-out;
+  font-size: 35px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-
 .sidebar:hover .logo {
-    opacity: 1; /* Show menu items on hover */
+  opacity: 1;
 }
-
 .nav-links {
-    list-style: none;
-    padding: 0;
-    margin-top: 40px;
-    padding-left: 15px;
-    opacity: 0; /* Hide menu items */
-    transition: opacity 0.3s ease-in-out;
+  list-style: none;
+  padding: 0;
+  margin-top: 40px;
+  padding-left: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-
 .sidebar:hover .nav-links {
-    opacity: 1; /* Show menu items on hover */
+  opacity: 1;
 }
-
 .nav-links li {
-    margin: 20px 0;
+  margin: 20px 0;
 }
-
 .nav-links a {
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    padding: 15px 0px;
+  text-decoration: none;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  padding: 15px 0;
 }
-
 .nav-links a.active {
-    font-weight: bolder;
-    color: white;
-    background-color: #F24505;
+  font-weight: bolder;
+  color: white;
+  background-color: #F24505;
 }
-
-
 .nav-links a:hover {
-    width: 225px;
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    opacity: 1;
-    padding: 15px 0px;
-    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
-    border-radius: 8px; /* Soft rounded corners */
+  width: 225px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
 }
-
 .logout {
-    list-style: none;
-    position: absolute;  /* Positions it relative to the sidebar */
-    bottom: 20px;
-    padding: 0;
-    left: 15px; /* Aligns it properly */
-    margin-top: 250px;
-    padding-left: 0px;
-    opacity: 0; /* Hide item */
-    transition: opacity 0.3s ease-in-out;
+  list-style: none;
+  position: absolute;
+  bottom: 20px;
+  left: 15px;
+  margin-top: 250px;
+  padding-left: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-
 .sidebar:hover .logout {
-    opacity: 1; /* Show item on hover */
+  opacity: 1;
 }
-
 .logout a {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
 }
-
 .logout a:hover {
-    width: 225px;
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    opacity: 1;
-    padding: 15px 0px;
-    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
-    border-radius: 8px; /* Soft rounded corners */
+  width: 225px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
 }
-
 .icon {
-    font-size: 20px;
-}
-
-
-
-/* Dashboard */
-
-
-/* Program header */
-.programs-header {
-    display: flex;
-    align-items: center;  /* Align items vertically */
-    justify-content: space-between; /* Push text to left, button to right */
-    width: 100%;
-    margin-bottom: 20px; /* Add spacing below the header */
-}
-
-/* Program info */
-.program-text {
-    display: flex;
-    flex-direction: column; /* Stack title and description */
-    align-items: flex-start; /* Align them to the left */
-}
-
-.program-text h2 {
-    font-size: 1.5rem; /* Adjust font size */
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px; /* Space between title and description */
-}
-
-.program-text p {
-    font-size: 1rem; /* Description font size */
-    color: #666;
-    margin: 0; /* Remove extra margin */
+  font-size: 20px;
 }
 
 .dashboard-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
+  margin-left: 60px; 
+  display: flex;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
 }
+@media (max-width: 900px) {
+    .left-column,
+    .right-column {
+      flex: 1 1 100%;
+      min-width: auto;
+    }
+  }
 
-
-/* Containers */
-/* Maintain the same design */
-.programs-container, 
-.modules-container {
-    position: relative;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
-    backdrop-filter: blur(10px);
-    margin-top: 20px;
+.left-column {
+  flex: 3;
 }
-
-.programs-header, 
-.modules-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-/* Module List */
-/* Both program and modules container */
-.module-list {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-/* Module Card */
-.module-card {
-    border-radius: 12px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    width: 250px; /* Fixed width */
-    height: 300px; /* Fixed height */
-    flex-shrink: 0;
-    padding: 20px;
-    box-sizing: border-box; /* Ensure padding is included */
+.right-column {
+    flex: 0 0 350px; 
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Space out elements */
-    align-items: center;
-    background: #ffffff;
-    text-align: center;
-    overflow: hidden; /* Prevent elements from overflowing */
+    gap: 20px;
 }
 
-/* Alternate colors for adjacent cards */
-/* Both program and modules container */
+
+.programs-container,
+.modules-container {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+  backdrop-filter: blur(10px);
+  margin-top: 20px;
+}
+.programs-header,
+.modules-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.module-list {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.module-card {
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  height: 300px;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  background: #ffffff;
+}
 .module-card:nth-child(odd) {
-    background: #73C4FD;
+  background: #73C4FD;
 }
-
-/* Alternate colors for adjacent cards */
-/* Both program and modules container */
 .module-card:nth-child(even) {
-    background: #0148FD;
+  background: #0148FD;
 }
-
-/* Alternate colors for adjacent cards */
-/* Locked */
-.module-card:nth-child(even) p {
-    color: #d0cfcf;
-}
-
-/* Ensure title stays inside the card */
 .module-card h3 {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-
-/* Module Description */
-/* Both program and modules container */
-
-/* Ensure description stays inside the card */
 .module-card p {
-    font-size: 14px;
-    color: #666;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-height: 40px; /* Prevents it from pushing elements down */
-    margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 40px;
+  margin: 5px 0;
 }
 
-/* View All Buttons */
-/* Both program and modules container */
-.view-all-button, 
-.view-program-button {
-    font-size: 12px;
-    padding: 6px 10px;
-    background-color: #F24505;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.view-all-button:hover, 
-.view-program-button:hover {
-    background-color: #f24405a5;
-}
-
-
-/* Adjust progress container so it stays inside the card */
 .progress-container {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px;
-    margin-top: auto; /* Push progress bar to bottom */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+  margin-top: auto;
 }
-
-
-/* Progress Bar */
-/* Both program and modules container */
-/* Progress bar */
 .progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: #ddd;
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
 }
-
-/* Progress fill */
 .progress-fill {
-    height: 100%;
-    background: #F24505;
-    transition: width 0.5s ease-in-out;
+  height: 100%;
+  background: #F24505;
+  transition: width 0.5s ease-in-out;
 }
-
-/* Progress text */
 .progress-text {
-    font-size: 12px;
-    font-weight: bold;
-    color: #333;
-    white-space: nowrap;
-    text-align: right;
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+  text-align: right;
 }
 
-
-/* Locked Module */
 .module-card.locked {
-    background: #e6e6e6;
-    color: #999;
-    pointer-events: none;
-    opacity: 0.8;
+  background: #e6e6e6 !important;
+  color: #999;
+  pointer-events: none;
+  opacity: 0.8;
 }
-
-/* Locked Module Title */
 .module-card.locked h3 {
-    color: #555;
-    font-size: 1rem;
+  color: #555;
 }
-
-/* Locked Module Description */
 .module-card.locked p {
-    color: #777;
-    font-size: 0.9rem;
+  color: #777;
 }
-
-/* Locked Module Progress */
-.module-card.locked .progress-container {
-    width: 90%;
-    background-color: #d6d6d6;
-    border-radius: 10px;
-    height: 10px;
-    overflow: hidden;
-}
-
-.module-card.locked .progress-fill {
-    background: #aaa;
-}
-
-/* Locked Message */
-.module-card.locked .locked-message {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: bold;
-    color: #ffffff;
-}
-
-/* Ensure the start module button stays inside */
-.view-module-button {
-    display: inline-block;
-    background: white;
-    color: #F24505;
-    font-size: 0.9rem;
-    font-weight: bold;
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    text-align: center;
-    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    border: 2px solid #F24505;
-    margin-top: auto; /* Push button to the bottom */
-}
-
-/* Button hover effect */
-.view-module-button:hover {
-    background: #F24505;
-    color: white;
-}
-
-
-
-
-/* Locked module styling */
-.module-card.locked {
-    background: #e6e6e6 !important;
-    color: #999;
-    pointer-events: none;
-    opacity: 0.8;
-}
-
-/* Locked module title */
-.module-card.locked h3 {
-    color: #555;
-}
-
-/* Locked module description */
-.module-card.locked p {
-    color: #777;
-}
-
-/* Locked progress bar */
-.module-card.locked .progress-container {
-    background-color: #d6d6d6;
-}
-
-/* Locked progress fill */
-.module-card.locked .progress-fill {
-    background: #aaa; /* Dimmed progress bar */
-}
-
-
-/* Locked module message */
-.module-card.locked .locked-message {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: bold;
-    text-align: center;
-    margin-top: auto; /* Push message to bottom */
-}
-
-
-/* Hide progress bar and progress text for locked modules */
 .module-card.locked .progress-container,
 .module-card.locked .progress-text {
-    display: none;
+  display: none;
+}
+.module-card.locked .locked-message {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-top: auto;
 }
 
+/* Buttons */
+.view-all-button,
+.view-program-button {
+  font-size: 12px;
+  padding: 6px 10px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.view-all-button:hover,
+.view-program-button:hover {
+  background-color: #f24405a5;
+}
+.view-module-button {
+  display: inline-block;
+  background: white;
+  color: #F24505;
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #F24505;
+  margin-top: auto;
+}
+.view-module-button:hover {
+  background: #F24505;
+  color: white;
+}
 
 .recently-accessed {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 300px;
-    padding: 15px;
-    background: #f5f5f5; /* Light grey background */
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Adds spacing between sections */
+  width: 100%;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
 }
-
-/* ✅ Quote & Recently Accessed Container */
-.recently-accessed-container {
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    align-items: flex-start; /* Align to the left */
-    gap: 20px; /* Adds spacing between boxes */
-    width: 100%;
-    max-width: 2px; /* Set width to align with sidebar */
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-/* ✅ Quote Styling */
-.quote-text {
-    text-decoration: none;
-    font-size: 0.95rem;
-    font: italic;
-    color: #333;
-}
-
-/* ✅ Title Styling */
 .recently-accessed h3 {
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 1px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 1px;
 }
-
-/* ✅ List Styling */
 .recent-modules-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-
-/* ✅ Module Items */
 .recent-module-item {
-    padding: 8px 0;
-    border-bottom: 1px solid #ddd;
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
 }
-
-/* ✅ Last Item (Remove Border) */
 .recent-module-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
-
-/* ✅ Module Links */
 .recent-module-item a {
-    text-decoration: none;
-    font-size: 0.9rem;
-    color: #333;
-    transition: color 0.2s ease-in-out;
+  text-decoration: none;
+  font-size: 0.9rem;
+  color: #333;
+  transition: color 0.2s ease-in-out;
 }
-
 .recent-module-item a:hover {
-    color: #007bff; /* Blue highlight */
+  color: #007bff;
 }
-
-/* ✅ No Modules Message */
 .no-modules {
-    font-size: 0.85rem;
-    color: #888;
+  font-size: 0.85rem;
+  color: #888;
 }
-
+.quote-text {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: #333;
+}

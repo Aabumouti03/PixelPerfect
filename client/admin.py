@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource,
     Category, ProgramModule, BackgroundStyle, ModuleRating, Questionnaire, Question,
-    Questionnaire, Question, ProgramModule, Category, BackgroundStyle    
+    Questionnaire, Question, ProgramModule, Category, BackgroundStyle, VideoResource   
 )
 
 
@@ -82,6 +82,10 @@ class ExerciseAdmin(admin.ModelAdmin):
         return obj.questions.count()
     
     question_count.short_description = "Number of Questions"
+
+@admin.register(VideoResource)
+class VideoResourceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'youtube_url')
 
 
 @admin.register(ExerciseQuestion)

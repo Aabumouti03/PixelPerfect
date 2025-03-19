@@ -1,0 +1,195 @@
+
+.container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    min-width: 1000px;
+}
+
+.program-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    /* Styling for the program edit form */
+    .program-edit-form {
+    width: 100%;
+    max-width: 700px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.program-edit-form h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.program-edit-form label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Enhanced styling for text area */
+.program-edit-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    resize: vertical;
+    min-height: 120px;
+    box-sizing: border-box;
+    transition: all 0.3s ease-in-out;
+    background: #f5f7fa;
+    color: #333;
+}
+
+/* Focus effect */
+.program-edit-form textarea:focus {
+    border-color: #3A88F6;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(58, 136, 246, 0.4);
+    outline: none;
+}
+
+/* Styling for input fields */
+.program-edit-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+    box-sizing: border-box;
+    background: #f5f7fa;
+    color: #333;
+}
+
+/* Focus effect for inputs */
+.program-edit-form input:focus {
+    border-color: #3A88F6;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(58, 136, 246, 0.4);
+    outline: none;
+}
+
+.program-edit-form button {
+    width: 100%;
+    background-color: #3A88F6;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.program-edit-form button:hover {
+    background-color: #2f6ed3;
+}
+
+.sortable-list {
+    list-style: none;
+    padding: 0;
+}
+
+.sortable-item {
+    background: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    cursor: grab;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-save {
+    background-color: #75b3ff;
+    color: #ffffff;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-save:hover {
+    background-color: #2f6ed3;
+}
+
+.modules-table, .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.modules-table th, .modules-table td,
+.users-table th, .users-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.modules-table th, .users-table th {
+    background-color: #3A88F6;
+    color: white;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 15px;
+    background: #3A88F6;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back-link:hover {
+    background: #2f6ed3;
+}
+
+/* Modal styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: #fff;
+    width: 500px;
+    max-width: 90%;
+    margin: 100px auto;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.modal-close {
+    float: right;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
