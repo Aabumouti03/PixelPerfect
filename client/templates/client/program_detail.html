@@ -1,296 +1,90 @@
-{% extends 'client/client_base.html' %}
-{% block title %}
-    {{ program.title }} - Details
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Program</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <link rel="stylesheet" href="{% static 'client/css/program_detail.css' %}">
+</head>
+<body class="create_category">
+    {% include 'client/client_base.html' %}
 
-{% block extra_css %}
-<style>
-    .container {
-        display: flex;
-        flex-direction: column;
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
-        min-width: 1000px;
-    }
-
-    .program-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-   
-        /* Styling for the program edit form */
-        .program-edit-form {
-        width: 100%;
-        max-width: 700px;
-        background: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .program-edit-form h2 {
-        margin-bottom: 20px;
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    .program-edit-form label {
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        display: block;
-    }
-
-    /* Enhanced styling for text area */
-    .program-edit-form textarea {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 20px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 16px;
-        resize: vertical;
-        min-height: 120px;
-        box-sizing: border-box;
-        transition: all 0.3s ease-in-out;
-        background: #f5f7fa;
-        color: #333;
-    }
-
-    /* Focus effect */
-    .program-edit-form textarea:focus {
-        border-color: #3A88F6;
-        background: #fff;
-        box-shadow: 0 0 8px rgba(58, 136, 246, 0.4);
-        outline: none;
-    }
-
-    /* Styling for input fields */
-    .program-edit-form input {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 20px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: all 0.3s ease-in-out;
-        box-sizing: border-box;
-        background: #f5f7fa;
-        color: #333;
-    }
-
-    /* Focus effect for inputs */
-    .program-edit-form input:focus {
-        border-color: #3A88F6;
-        background: #fff;
-        box-shadow: 0 0 8px rgba(58, 136, 246, 0.4);
-        outline: none;
-    }
-
-    .program-edit-form button {
-        width: 100%;
-        background-color: #3A88F6;
-        color: white;
-        padding: 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s;
-    }
-
-    .program-edit-form button:hover {
-        background-color: #2f6ed3;
-    }
-
-    .sortable-list {
-        list-style: none;
-        padding: 0;
-    }
-
-    .sortable-item {
-        background: #f0f0f0;
-        padding: 10px;
-        border: 1px solid #ddd;
-        margin-bottom: 5px;
-        cursor: grab;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .btn-save {
-        background-color: #75b3ff;
-        color: #ffffff;
-        padding: 10px;
-        border: none;
-        cursor: pointer;
-        margin-top: 10px;
-    }
-
-    .btn-save:hover {
-        background-color: #2f6ed3;
-    }
-
-    .modules-table, .users-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    .modules-table th, .modules-table td,
-    .users-table th, .users-table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-    }
-
-    .modules-table th, .users-table th {
-        background-color: #3A88F6;
-        color: white;
-    }
-
-    .back-link {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 10px 15px;
-        background: #3A88F6;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-    }
-
-    .back-link:hover {
-        background: #2f6ed3;
-    }
-
-    /* Modal styles */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        left: 0; top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-    }
-
-    .modal-content {
-        background: #fff;
-        width: 500px;
-        max-width: 90%;
-        margin: 100px auto;
-        padding: 20px;
-        border-radius: 5px;
-    }
-
-    .modal-close {
-        float: right;
-        cursor: pointer;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .checkbox-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 15px;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="program-header">
-        <div>
-            <h1>Edit Program</h1>
-            <form method="POST" action="{% url 'program_detail' program.id %}" class="program-edit-form">
+    <div class="container mt-5">
+        <div class="card p-4 shadow-sm">
+            <h2 class="text-center text-danger fw-bold">Edit Program</h2>
+            <form method="POST" action="{% url 'program_detail' program.id %}">
                 {% csrf_token %}
-                <label for="program-title">Title:</label>
-                <input type="text" name="title" id="program-title" value="{{ program.title }}" class="form-control" required>
-
-                <label for="program-description">Description:</label>
-                <textarea name="description" id="program-description" class="form-control" rows="5" required>{{ program.description }}</textarea>
-
-                <button type="submit" name="update_program" class="btn-save">Save Changes</button>
-            </form>
-        </div>
-    </div>
-
-
-    <h2>Modules in this Program:</h2>
-    <ul class="sortable-list" id="sortableModules">
-        {% for program_module in program_modules %}
-            <li class="sortable-item" data-id="{{ program_module.id }}">
-                <span>{{ program_module.module.title }}</span>
-                
-                <form method="POST" class="remove-module-form" onsubmit="return confirm('Are you sure you want to remove this module?')">
-                    {% csrf_token %}
-                    <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
-                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                </form>
-            </li>
-        {% empty %}
-            <li>No modules available.</li>
-        {% endfor %}
-    </ul>
-    <button onclick="saveModuleOrder()" class="btn-save">Save Order</button>
-
-    <button class="btn-save" onclick="openModal('moduleModal')">Add More Modules</button>
-
-    <h2>Enrolled Users:</h2>
-    <table class="users-table">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Full Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for enrollment in enrolled_users %}
-                <tr>
-                    <td>{{ enrollment.user.user.username }}</td>
-                    <td>{{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }}</td>
-                    <td>
-                        <form method="POST" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
-                            <button type="submit" class="btn-save" style="background-color: #D9534F;">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3">No users enrolled yet.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <button class="btn-save" onclick="openModal('userModal')">Add More Users</button>
-    <div id="userModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('userModal')">&times;</span>
-            <h2>Add More Users</h2>
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="add_users" value="1">
-                <div class="checkbox-list">
-                    {% for enduser in all_users %}
-                        {% if enduser.id not in enrolled_user_ids %}
-                            <label>
-                                <input type="checkbox" name="users_to_add" value="{{ enduser.id }}">
-                                {{ enduser.user.username }}
-                            </label>
-                        {% endif %}
-                    {% endfor %}
+                <div class="mb-3">
+                    <label for="program-title" class="form-label">Title:</label>
+                    <input type="text" name="title" id="program-title" value="{{ program.title }}" class="form-control" required>
                 </div>
-                <button type="submit" class="btn-save">Add Selected Users</button>
+                <div class="mb-3">
+                    <label for="program-description" class="form-label">Description:</label>
+                    <textarea name="description" id="program-description" class="form-control" rows="5" required>{{ program.description }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-danger w-100">Save Changes</button>
             </form>
         </div>
+
+        
+        <div class="mt-4">
+            <h2 class="text-danger">Modules in this Program:</h2>
+            <ul class="list-group" id="sortableModules">
+                {% for program_module in program_modules %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ program_module.id }}">
+                        {{ program_module.module.title }}
+                        <form method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">No modules available.</li>
+                {% endfor %}
+            </ul>
+            <button class="btn btn-outline-danger w-100 mt-3" onclick="openModal('moduleModal')">Add More Modules</button>
+            <button class="btn btn-danger w-100 mt-3" onclick="saveModuleOrder()">Save Module Order</button>
+        </div>
+
+
+        <div class="mt-4">
+            <h2 class="text-danger">Enrolled Users:</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrolled_users %}
+                        <tr>
+                            <td>{{ enrollment.user.user.username }}</td>
+                            <td>{{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }}</td>
+                            <td>
+                                <form method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">No users enrolled yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button class="btn btn-outline-danger w-100" onclick="openModal('userModal')">Add More Users</button>
+        </div>
+
+        <a href="{% url 'programs' %}" class="btn btn-secondary w-100 mt-3">Back to Programs</a>
     </div>
 
     <div id="moduleModal" class="modal-overlay">
@@ -310,95 +104,67 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                <button type="submit" class="btn-save">Add Selected Modules</button>
+                <button type="submit" class="btn btn-danger w-100 mt-3">Add Selected Modules</button>
             </form>
         </div>
     </div>
 
-    <a href="{% url 'programs' %}" class="back-link">Save Changes</a>
-</div>
+    <div id="userModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('userModal')">&times;</span>
+            <h2>Add More Users</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="add_users" value="1">
+                <div class="checkbox-list">
+                    {% for enduser in all_users %}
+                        {% if enduser.id not in enrolled_user_ids %}
+                            <label>
+                                <input type="checkbox" name="users_to_add" value="{{ enduser.id }}">
+                                {{ enduser.user.username }}
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-danger w-100 mt-3">Add Selected Users</button>
+            </form>
+        </div>
+    </div>
 
-
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<script>
-    let sortable = new Sortable(document.getElementById('sortableModules'), {
-        animation: 150,
-        ghostClass: 'blue-background-class'
-    });
-
-    function saveModuleOrder() {
-        let orderData = [];
-        document.querySelectorAll('.sortable-item').forEach((item, index) => {
-            orderData.push({ id: item.dataset.id, order: index + 1 });
+    <script>
+        new Sortable(document.getElementById('sortableModules'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
         });
 
-        fetch("{% url 'update_module_order' program.id %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({ order: orderData })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Module order updated successfully!");
-                location.reload();
-            } else {
-                alert("Error updating order: " + data.error);
-            }
-        })
-        .catch(error => {
-            alert("Request failed: " + error);
-        });
-    }
+        function saveModuleOrder() {
+            let orderData = [];
+            document.querySelectorAll('#sortableModules .list-group-item').forEach((item, index) => {
+                orderData.push({ id: item.dataset.id, order: index + 1 });
+            });
 
-    function openModal(modalId) {
-    let modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'block';
-    } else {
-        console.error("Modal not found:", modalId);
-    }
-    }
-
-    function closeModal(modalId) {
-        let modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
+            fetch("{% url 'update_module_order' program.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ order: orderData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Module order updated successfully!");
+                } else {
+                    alert("Error updating order: " + data.error);
+                }
+            })
+            .catch(error => {
+                alert("Request failed: " + error);
+            });
         }
-    }
-    function removeModule(moduleId) {
-        if (!confirm("Are you sure you want to remove this module?")) return;
-
-        fetch("{% url 'program_detail' program.id %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: "remove_module=" + moduleId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Module removed successfully!");
-                location.reload();
-            } else {
-                alert("Error: " + data.error);
-            }
-        })
-        .catch(error => console.error("Request failed:", error));
-    }
-
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = 'block';
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
     </script>
-
-{% endblock %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

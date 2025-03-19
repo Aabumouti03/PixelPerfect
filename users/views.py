@@ -30,7 +30,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from users.models import (
     EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
-    UserProgramEnrollment, JournalEntry
+    UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
 )
 from client.models import (
     Program, Module, ProgramModule, ModuleRating, Exercise, Category,
@@ -666,37 +666,45 @@ def user_modules(request):
 
 @login_required
 def module_overview(request, module_id):
-    """Fetch the module by ID and retrieve related exercises, additional resources, and videos.""" 
+    """Fetch the module by ID and retrieve related exercises, additional resources, and videos for a specific user.""" 
     
     module = get_object_or_404(Module, id=module_id)
-
     user = request.user
 
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
+    # Ensure the EndUser profile exists
+    end_user, created = EndUser.objects.get_or_create(user=user)
 
+    # Fetch exercises, additional resources, and videos linked to the module
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
-    for exercise in exercises:
-        if exercise.status=='completed':
-            completed_items += 1
-
     additional_resources = list(module.additional_resources.all())
-    video_resources = list(module.video_resources.all())  # Fetch video resources
+    video_resources = list(module.video_resources.all()) 
 
-    completed_items = sum(1 for exercise in exercises if exercise.status == 'completed')
-    completed_items += sum(1 for resource in additional_resources if resource.status == 'completed')
-    completed_items += sum(1 for video in video_resources if video.status == 'completed')
+    user_exercise_progress = {
+        progress.exercise.id: progress.status for progress in UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises)
+    }
+
+    user_resource_progress = {
+        progress.resource.id: progress.status for progress in UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources)
+    }
+
+    user_video_progress = {
+        progress.video.id: progress.status for progress in UserVideoProgress.objects.filter(user=end_user, video__in=video_resources)
+    }
+
+    # Calculate progress percentage
+    completed_items = sum(1 for status in user_exercise_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_resource_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_video_progress.values() if status == 'completed')
+
 
 
     total_items = len(exercises) + len(additional_resources) + len(video_resources)
-
     progress_value = (completed_items / total_items) * 100 if total_items > 0 else 0
 
+    # Update or create user-specific module progress
     user_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
     user_progress.completion_percentage = progress_value
     user_progress.save()
@@ -707,6 +715,10 @@ def module_overview(request, module_id):
         'additional_resources': additional_resources,
         'video_resources': video_resources,  # Pass videos to template
         'progress_value': progress_value,  
+        'user_exercise_progress': user_exercise_progress,  # ✅ Pass user-specific exercise progress
+        'user_resource_progress': user_resource_progress,  # ✅ Pass user-specific resource progress
+        'user_video_progress': user_video_progress,  # ✅ Pass user-specific video progress
+    
     }
 
     return render(request, 'users/moduleOverview.html', context)
@@ -774,6 +786,7 @@ def rate_module(request, module_id):
 
 
 @login_required
+@csrf_exempt
 def mark_done(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -782,37 +795,53 @@ def mark_done(request):
         action = data.get("action")  # 'done' or 'undo'
 
         user = request.user
-        end_user = EndUser.objects.get(user=user)
+        end_user, created = EndUser.objects.get_or_create(user=user)
+
+        module = None
 
         if item_type == "resource":
-            resource = AdditionalResource.objects.get(id=item_id)
-            resource.status = 'completed' if action == "done" else 'in_progress'
-            resource.save()
-            module = Module.objects.filter(additional_resources=resource).first()
+            try:
+                resource = AdditionalResource.objects.get(id=item_id)
+                user_progress, created = UserResourceProgress.objects.get_or_create(user=end_user, resource=resource)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = resource.modules.first()  
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Resource not found."})
 
         elif item_type == "exercise":
-            exercise = Exercise.objects.get(id=item_id)
-            exercise.status = 'completed' if action == "done" else 'in_progress'
-            exercise.save()
-            module = exercise.sections.first().modules.first()
+            try:
+                exercise = Exercise.objects.get(id=item_id)
+                user_progress, created = UserExerciseProgress.objects.get_or_create(user=end_user, exercise=exercise)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = exercise.sections.first().modules.first() 
+            except Exercise.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Exercise not found."})
 
         elif item_type == "video":
-            video = VideoResource.objects.get(id=item_id)
-            video.status = 'completed' if action == "done" else 'in_progress'
-            video.save()
-            module = Module.objects.filter(video_resources=video).first()
+            try:
+                video = VideoResource.objects.get(id=item_id)
+                user_progress, created = UserVideoProgress.objects.get_or_create(user=end_user, video=video)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = video.modules.first() 
+            except VideoResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Video not found."})
 
-        user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
-        user_module_progress.completion_percentage = calculate_progress(end_user, module)
-        user_module_progress.save()
+        if module:
+            user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
+            user_module_progress.completion_percentage = calculate_progress(end_user, module)
+            user_module_progress.save()
 
-        return JsonResponse({
-            "success": True,
-            "updated_progress": user_module_progress.completion_percentage
-        })
+            return JsonResponse({
+                "success": True,
+                "updated_progress": user_module_progress.completion_percentage
+            })
 
-    return JsonResponse({"success": False})
+        return JsonResponse({"success": False, "message": "Module not found."})
 
+    return JsonResponse({"success": False, "message": "Invalid request."})
 
 @login_required
 def unenroll_module(request):
