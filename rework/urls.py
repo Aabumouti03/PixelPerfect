@@ -9,7 +9,7 @@ from django.contrib.auth import views as authenticationViews
 from client import views
 from client.views import delete_module
 from users.views import enroll_module, unenroll_module
-
+app_name = "users"
 urlpatterns = [
     # Admin URL
     path('admin/', admin.site.urls),

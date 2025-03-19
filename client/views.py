@@ -349,7 +349,7 @@ def log_out_client(request):
     """Handles logout only if the admin confirms via modal."""
     if request.method == "POST":
         logout(request)
-        return redirect('users:log_in')
+        return redirect('log_in')
 
     referer_url = request.META.get('HTTP_REFERER')
     if referer_url:
