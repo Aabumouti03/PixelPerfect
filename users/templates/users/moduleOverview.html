@@ -138,6 +138,53 @@
         });
 
         document.addEventListener("DOMContentLoaded", function () {
+    const stars = document.querySelectorAll(".star");
+    const ratingValue = document.getElementById("rating-value");
+    const csrfToken = "{{ csrf_token }}"; // Ensure CSRF token is included
+
+    function updateStars(rating) {
+        stars.forEach(star => {
+            let starValue = parseInt(star.getAttribute("data-value"));
+            if (starValue <= rating) {
+                star.classList.add("selected"); //  Highlight selected stars
+            } else {
+                star.classList.remove("selected"); //  Remove highlight from unselected stars
+            }
+        });
+    }
+
+    stars.forEach(star => {
+        star.addEventListener("click", function () {
+            const rating = parseInt(this.getAttribute("data-value"));
+
+            fetch("{% url 'rate_module' module.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({ rating: rating })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    ratingValue.textContent = `(Rated: ${data.average_rating}/5)`;
+                    updateStars(data.average_rating);  //  Ensure correct number type
+                } else {
+                    alert("Error submitting rating.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
+
+    // Ensure initial stars match the current rating
+    let initialRating = parseFloat("{{ module.average_rating|default:0 }}");
+    updateStars(isNaN(initialRating) ? 0 : initialRating);
+});
+
+
+        document.addEventListener("DOMContentLoaded", function () {
     var progressChart;  // Store progress chart globally
     var ctx = document.getElementById('progressChart').getContext('2d');
     
