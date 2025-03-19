@@ -26,6 +26,7 @@ from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
 from users.models import (
     EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
     UserProgramEnrollment, JournalEntry
@@ -41,9 +42,6 @@ from .helpers_questionnaire import assess_user_responses_modules, assess_user_re
 
 # Logger setup
 logger = logging.getLogger(__name__)
-
-
-
 
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
@@ -299,6 +297,31 @@ def about(request):
     return render(request, 'users/about.html')
 
 def contact_us(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        # Combine the message content
+        full_message = (
+            f"Name: {name}\n"
+            f"Email: {email}\n\n"
+            f"Message:\n{message}"
+        )
+
+        # Send the email (settings.EMAIL_HOST_USER is often used as the 'from' address)
+        send_mail(
+            subject="New Contact Us Submission",
+            message=full_message,
+            from_email=settings.EMAIL_HOST_USER,  
+            recipient_list=[settings.EMAIL_HOST_USER],  # Replace with your admin email or use settings.ADMINS
+            fail_silently=False,
+        )
+
+        # Redirect to a success page (create a URL/path named 'contact_success' for this)
+        return redirect('contact_success')
+
+    # If GET request, simply render the contact form
     return render(request, 'users/contact_us.html')
 
 ADMIN_USERNAME = "SuperUser"
