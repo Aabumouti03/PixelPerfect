@@ -383,6 +383,9 @@ def sign_up_step_2(request):
 
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
+def sign_up_email_verification(request):
+    return render(request, "users/sign_up_email_verification.html")
+
 def verify_email_after_sign_up(request, uidb64, token):
     """Verify the user's email after signing up."""
     try:
@@ -394,9 +397,15 @@ def verify_email_after_sign_up(request, uidb64, token):
     if default_token_generator.check_token(user, token):
         user.email_verified = True  
         user.save()
-        return redirect('log_in') #change here to a new html that displays a success message for verifying email and a button for log in and extend the welcome page navbar
+        return redirect('verification_done')
 
     return HttpResponse("Invalid or expired token.")
+
+def verification_done(request):
+    return render(request, "users/verification_done.html")
+
+def get_started(request):
+    return render(request, "users/get_started.html")
 
 @login_required
 def log_out(request):
