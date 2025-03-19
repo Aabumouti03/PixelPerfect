@@ -377,7 +377,7 @@ def sign_up_step_2(request):
 
             send_verification_email_after_sign_up(user, request)
 
-            #return render(request, "users/sign_up_email_verification.html") modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
+            return render(request, "users/sign_up_email_verification.html") #modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
     else:
         profile_form = EndUserProfileForm()
 
