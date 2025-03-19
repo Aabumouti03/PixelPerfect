@@ -1,31 +1,32 @@
 from client.models import Module, Exercise, AdditionalResource,ProgramModule  
-from users.models import EndUser, UserModuleProgress, UserProgramProgress
+from users.models import EndUser, UserModuleProgress, UserProgramProgress, UserExerciseProgress, UserResourceProgress,UserVideoProgress
 
-def calculate_progress(end_user, module):
-    """Calculate the progress of a module based on completed exercises, additional resources, and videos."""
+def calculate_progress(user, module):
+    """Calculate the completion percentage for a user's progress in a module."""
     
+    # Ensure we're working with an EndUser instance
+    if isinstance(user, EndUser):  
+        end_user = user
+    else:
+        end_user = EndUser.objects.get(user=user)  # Only fetch if needed
+
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
+    additional_resources = list(module.additional_resources.all())
+    video_resources = list(module.video_resources.all()) 
 
-    # Count completed exercises
-    completed_exercises = [exercise for exercise in exercises if exercise.status == 'completed']
+    completed_items = (
+        UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises, status='completed').count() +
+        UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources, status='completed').count() +
+        UserVideoProgress.objects.filter(user=end_user, video__in=video_resources, status='completed').count()
+    )
 
-    # Count completed resources
-    completed_resources = [resource for resource in module.additional_resources.all() if resource.status == 'completed']
+    total_items = len(exercises) + len(additional_resources) + len(video_resources)
 
-    # Count completed videos
-    completed_videos = [video for video in module.video_resources.all() if video.status == 'completed']
+    return (completed_items / total_items) * 100 if total_items > 0 else 0
 
-    # Calculate total and completed items
-    total_items = len(exercises) + module.additional_resources.count() + module.video_resources.count()
-    completed_items = len(completed_exercises) + len(completed_resources) + len(completed_videos)
-
-    # Calculate progress percentage
-    progress = (completed_items / total_items) * 100 if total_items > 0 else 0
-
-    return round(progress, 2)  # Round to 2 decimal places for better accuracy
 
 
 def calculate_program_progress(end_user, program):

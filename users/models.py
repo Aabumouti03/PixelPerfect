@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Exercise,VideoResource,AdditionalResource
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.db import models
@@ -171,6 +171,46 @@ class UserModuleProgress(models.Model):
         unique_together = ('user', 'module') 
     def __str__(self):
         return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
+
+
+class UserResourceProgress(models.Model):
+    """Tracks user progress for each additional resource."""
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    resource = models.ForeignKey("client.AdditionalResource", on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    class Meta:
+        unique_together = ('user', 'resource')  # Ensures a user-resource pair is unique.
+
+    def __str__(self):
+        return f"{self.user.user.username} - {self.resource.title}: {self.status}"
+
+
+class UserExerciseProgress(models.Model):
+    """Tracks user progress for each exercise."""
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    exercise = models.ForeignKey("client.Exercise", on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    class Meta:
+        unique_together = ('user', 'exercise')
+
+    def __str__(self):
+        return f"{self.user.user.username} - {self.exercise.title}: {self.status}"
+
+
+class UserVideoProgress(models.Model):
+    """Tracks user progress for each video resource."""
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    video = models.ForeignKey("client.VideoResource", on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    class Meta:
+        unique_together = ('user', 'video')
+
+    def __str__(self):
+        return f"{self.user.user.username} - {self.video.title}: {self.status}"
+
 
 
 class UserResponse(models.Model):
