@@ -296,3 +296,143 @@ class ProgramFormTestCase(TestCase):
         with self.assertRaises(ValueError):
             program.categories.count()
 
+    def test_form_initializes_with_correct_modules_queryset(self):
+        """Ensure the form initializes with the correct modules queryset."""
+        form = ProgramForm()
+        self.assertEqual(list(form.fields["modules"].queryset), list(Module.objects.prefetch_related('categories')))
+
+    def test_clean_title_duplicate(self):
+        """Ensure duplicate title raises ValidationError."""
+        Program.objects.create(title="Existing Program", description="Existing description")
+
+        form_data = self.valid_form_data.copy()
+        form_data["title"] = "existing program"
+
+        form = ProgramForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("title", form.errors)
+        self.assertEqual(form.errors["title"], ["A program with this title already exists."])
+
+    def test_clean_new_category_existing(self):
+        """Ensure new_category returns existing category instead of creating a duplicate."""
+        existing_category = Category.objects.create(name="Science")
+
+        form_data = {"new_category": "science"}
+        form = ProgramForm(data=form_data)
+        form.is_valid()
+
+        self.assertEqual(form.cleaned_data["new_category"], "Science")
+
+    def test_clean_description_empty(self):
+        """Ensure an empty or whitespace-only description raises a ValidationError."""
+        form_data = {"title": "Valid Title", "description": "    "}
+        form = ProgramForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("description", form.errors)
+        self.assertEqual(form.errors["description"], ["Description cannot be empty."])
+
+    def test_save_with_commit_false_does_not_persist_to_db(self):
+        """Ensure calling save(commit=False) does not create ProgramModules or save categories."""
+        form = ProgramForm(data=self.valid_form_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save(commit=False)
+
+        self.assertFalse(Program.objects.filter(title=self.valid_form_data["title"]).exists())
+        self.assertIsNone(program.pk)
+
+        with self.assertRaises(ValueError):
+            program.categories.count()
+
+    def test_module_order_is_saved_correctly(self):
+        """Ensure module_order is saved correctly and reflected in ProgramModule entries."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["module_order"] = f"{self.module2.id},{self.module1.id}"
+
+        form = ProgramForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        ordered_modules = list(ProgramModule.objects.filter(program=program).order_by("order"))
+        self.assertEqual(ordered_modules[0].module, self.module2)
+        self.assertEqual(ordered_modules[1].module, self.module1)
+
+    def test_save_reuses_existing_category(self):
+        """Ensure the form reuses an existing category instead of creating a duplicate."""
+        existing_category = Category.objects.create(name="Existing Category")
+
+        form_data = self.valid_form_data.copy()
+        form_data["new_category"] = "Existing Category"
+
+        form = ProgramForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertIn(existing_category, program.categories.all())
+        self.assertEqual(Category.objects.filter(name="Existing Category").count(), 1)
+
+    def test_save_program_with_no_modules_or_categories(self):
+        """Ensure saving a program works even if no modules or categories are selected."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["modules"] = []
+        valid_data["categories"] = []
+
+        form = ProgramForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertEqual(program.categories.count(), 0)
+        self.assertEqual(program.program_modules.count(), 0)
+
+    def test_save_with_commit_false_does_not_save_to_db(self):
+        """Ensure calling save(commit=False) does not persist data in the database."""
+        form = ProgramForm(data=self.valid_form_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save(commit=False)
+
+        self.assertFalse(Program.objects.filter(title=self.valid_form_data["title"]).exists())
+        self.assertIsNone(program.pk)
+
+    def test_save_program_with_invalid_module_order(self):
+        """Ensure invalid module_order values do not break the form save method."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["module_order"] = f"{self.module1.id},invalid_id,-1"
+
+        form = ProgramForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+
+        program = form.save()
+        self.assertEqual(program.program_modules.count(), 1) 
+
+    def test_clean_new_category_reuses_existing_category(self):
+        """Ensure that clean_new_category uses an existing category instead of creating a duplicate."""
+        existing_category = Category.objects.create(name="Science")
+
+        form_data = self.valid_form_data.copy()
+        form_data["new_category"] = "science"  # Different casing
+
+        form = ProgramForm(data=form_data)
+        form.is_valid()
+
+        self.assertEqual(form.cleaned_data["new_category"], "Science")  # Should reuse existing category
+
+    def test_save_program_with_empty_module_order(self):
+        """Ensure program correctly orders modules when module_order is empty."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["module_order"] = ""
+
+        form = ProgramForm(data=valid_data)
+        self.assertTrue(form.is_valid())
+
+        program = form.save()
+
+        ordered_modules = list(ProgramModule.objects.filter(program=program).order_by("order").values_list("module_id", flat=True))
+
+        self.assertEqual(ordered_modules, [self.module1.id, self.module2.id])

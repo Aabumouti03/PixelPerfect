@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
 /* General Page Styles */
 html, body {
-    font-family: Arial, sans-serif;
     background-color: #f8f8f8;
     min-height: 100vh;
     margin: 0;
@@ -55,7 +56,7 @@ html, body {
 .small-partition {
     width: 140px;
     height: 3px;
-    background-color: #C84545;
+    background-color: #D43802;
     margin-top: 3px;
 }
 
@@ -109,7 +110,7 @@ html, body {
 .profile-details input,
 .profile-details select,
 .profile-details textarea {
-    width: 100% !important; /* Ensure full width */
+    width: 700px !important; /* Ensure full width */
     max-width: none !important; /* Override any max width */
     height: 50px;
     padding: 14px 18px;
@@ -169,27 +170,31 @@ html, body {
 }
 
 .btn {
-    padding: 14px 20px;
+    padding: 12px 18px;
     background: #F24505;
     color: white;
     border-radius: 25px;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
     text-align: center;
-    border: none;
     text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .btn:hover {
     background: #D43802;
+    color: white;
 }
 
 .btn-danger {
-    background: #C84545;
+    background: #F24505;
 }
 
 .btn-danger:hover {
-    background: #A63434;
+    background: #D43802;
+    color: white;
 }
 
 .cancel-btn {
@@ -224,7 +229,7 @@ html, body {
 
 .confirm-box h2 {
     font-size: 24px;
-    color: #C84545;
+    color: #F24505;
     margin-bottom: 10px;
 }
 
@@ -242,29 +247,35 @@ html, body {
 
 .delete-btn {
     padding: 12px 18px;
-    background: #C84545;
+    background: #F24505;
     color: white;
-    border-radius: 20px;
+    border-radius: 25px;
     font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
     text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
     border: none;
 }
 
 .delete-btn:hover {
-    background: #A63434;
+    background: #D43802;
+    color: white;
 }
 
 .cancel-btn {
     padding: 12px 18px;
     background: #ddd;
     color: black;
-    border-radius: 20px;
+    border-radius: 25px;
     font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
     text-align: center;
-    border: none;
     text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .cancel-btn:hover {
@@ -276,4 +287,32 @@ html, body {
     font-weight: bolder;
     color: white;
     background-color: #F24505;
+}
+
+/* Mobile-Specific Adjustments for Very Small Screens (Phones) */
+@media (max-width: 480px) {
+    .profile-header {
+        font-size: 20px;
+    }
+
+    .profile-details label {
+        font-size: 14px;
+    }
+
+    .profile-details input,
+    .profile-details select,
+    .profile-details textarea {
+        font-size: 14px;
+        width: 90vw!important
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+
+    .delete-btn, .cancel-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
 }
