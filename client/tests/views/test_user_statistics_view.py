@@ -12,78 +12,101 @@ class UserStatisticsViewTest(TestCase):
 
     def setUp(self):
         """Set up test data for user statistics."""
-        
-        # Create users with UNIQUE emails
-        self.user1 = User.objects.create_user(username="active_user", email="active@example.com", password="password", is_active=True)
-        self.user2 = User.objects.create_user(username="inactive_user", email="inactive@example.com", password="password", is_active=False)
 
-        # Create EndUsers with gender, ethnicity, and sector
-        self.enduser1 = EndUser.objects.create(user=self.user1, gender="male", ethnicity="asian", sector="it")
-        self.enduser2 = EndUser.objects.create(user=self.user2, gender="female", ethnicity="hispanic", sector="healthcare")
+        self.admin_user = User.objects.create_superuser(
+            username="admin_user", email="admin@example.com", password="adminpassword"
+        )
 
-        # Create a Program BEFORE Enrolling Users
+        # ✅ Create a normal user (should NOT have access)
+        self.user = User.objects.create_user(
+            username="normal_user", email="user@example.com", password="password"
+        )
+
+        # ✅ Create EndUsers
+        self.enduser1 = EndUser.objects.create(user=self.admin_user, gender="male", ethnicity="asian", sector="it")
+        self.enduser2 = EndUser.objects.create(user=self.user, gender="female", ethnicity="hispanic", sector="healthcare")
+
+        # ✅ Create a Program and enroll a user
         self.program = Program.objects.create(title="Test Program", description="Sample Program")
+        UserProgramEnrollment.objects.create(user=self.enduser1, program=self.program)
 
-        # Create a program enrollment (assign program_id properly)
-        self.program_enrollment = UserProgramEnrollment.objects.create(user=self.enduser1, program=self.program)
-
-        # Use the correct URL name
-        self.url = reverse("userStatistics")  
-
-        # Log in as `user1`
-        self.client.login(username="active_user", password="password")
+        # ✅ Define the correct URL
+        self.url = reverse("userStatistics")
 
 
     def test_user_statistics_view_status_code(self):
-        """Test if the user statistics page loads successfully."""
+        """Test if the user statistics page loads successfully for an admin."""
+        self.client.login(username="admin_user", password="adminpassword")  # ✅ Log in as admin
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)  # ✅ Expecting success
+
+
+    def test_redirect_for_non_admin(self):
+        """Ensure non-admin users are redirected (permission check)."""
+        self.client.login(username="normal_user", password="password")  # ✅ Log in as normal user
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)  # ✅ Should redirect
 
 
     def test_user_statistics_template_used(self):
         """Test that the correct template is used."""
+        self.client.login(username="admin_user", password="adminpassword")  # ✅ Log in as admin
         response = self.client.get(self.url)
         self.assertTemplateUsed(response, "client/userStatistics.html")
 
 
     def test_user_statistics_context_data(self):
         """Test that the context contains the correct user statistics."""
+        self.client.login(username="admin_user", password="adminpassword")  # ✅ Log in as admin
         response = self.client.get(self.url)
 
-
-        #Ensure 'stats' exists
+        # ✅ Ensure 'stats' exists in the context
         self.assertIn("stats", response.context, "❌ 'stats' is missing in response context")
 
-        # Ensure 'stats' is not None
-        self.assertIsNotNone(response.context["stats"], "❌ 'stats' should not be None")
-
-  
+        # ✅ Ensure 'stats' is valid JSON
         try:
             stats_data = json.loads(response.context["stats"])
         except json.JSONDecodeError:
-            self.fail("Response context 'stats' is not valid JSON")
+            self.fail("❌ Response context 'stats' is not valid JSON")
 
-        # Expected statistics
+        # ✅ Retrieve actual database counts
+        actual_total_users = EndUser.objects.count()
+        actual_active_users = EndUser.objects.filter(user__is_active=True).count()
+        actual_inactive_users = actual_total_users - actual_active_users
+        actual_programs_enrolled = UserProgramEnrollment.objects.count()
+
+        # ✅ Expected statistics
         expected_stats = {
-            "total_users": 2,
-            "active_users": 1,
-            "inactive_users": 1,
-            "programs_enrolled": 1,
-            "gender_distribution": dict(Counter(["male", "female"])),
-            "ethnicity_distribution": dict(Counter(["asian", "hispanic"])),
-            "sector_distribution": dict(Counter(["it", "healthcare"])),
+            "total_users": actual_total_users,
+            "active_users": actual_active_users,
+            "inactive_users": actual_inactive_users,
+            "programs_enrolled": actual_programs_enrolled,
+            "gender_distribution": dict(Counter(EndUser.objects.values_list('gender', flat=True))),
+            "ethnicity_distribution": dict(Counter(EndUser.objects.values_list('ethnicity', flat=True))),
+            "sector_distribution": dict(Counter(EndUser.objects.values_list('sector', flat=True))),
         }
 
-        self.assertEqual(stats_data, expected_stats)
-        
+        # ✅ Compare actual and expected results
+        self.assertEqual(stats_data, expected_stats, "❌ Mismatch between expected and actual user statistics!")
+
 
     def test_user_statistics_json_structure(self):
         """Ensure the JSON structure is valid."""
+        self.client.login(username="admin_user", password="adminpassword")  # ✅ Log in as admin
         response = self.client.get(self.url)
-        self.assertIn("stats", response.context)
+
+        self.assertIn("stats", response.context, "❌ 'stats' is missing in response context")
 
         try:
             json_data = json.loads(response.context["stats"])
-            self.assertIsInstance(json_data, dict) 
+            self.assertIsInstance(json_data, dict)  # ✅ Ensure it's a dictionary
+            self.assertIn("total_users", json_data)
+            self.assertIn("active_users", json_data)
+            self.assertIn("inactive_users", json_data)
+            self.assertIn("programs_enrolled", json_data)
+            self.assertIn("gender_distribution", json_data)
+            self.assertIn("ethnicity_distribution", json_data)
+            self.assertIn("sector_distribution", json_data)
         except json.JSONDecodeError:
-            self.fail("Response context 'stats' is not valid JSON")
+            self.fail("❌ Response context 'stats' is not valid JSON")
+

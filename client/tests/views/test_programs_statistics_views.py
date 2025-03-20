@@ -30,16 +30,19 @@ class ProgramStatisticsTests(TestCase):
     @patch("users.models.UserProgramProgress.objects.values")
     def test_get_program_completion_stats(self, mock_progress_values, mock_program_values_list):
         mock_program_values_list.return_value = ["Program A", "Program B"]
+        
+        # Mock the progress values using completion_percentage-based counts
         mock_progress_values.return_value.annotate.return_value = [
-            {"program__title": "Program A", "status": "completed", "count": 4},
-            {"program__title": "Program A", "status": "in_progress", "count": 2},
-            {"program__title": "Program B", "status": "completed", "count": 3},
+            {"program__title": "Program A", "completed_count": 4, "in_progress_count": 2},
+            {"program__title": "Program B", "completed_count": 3, "in_progress_count": 0},
         ]
         
         labels, completed_data, in_progress_data = get_program_completion_stats()
+        
         self.assertEqual(labels, ["Program A", "Program B"])
-        self.assertEqual(completed_data, [4, 3])
-        self.assertEqual(in_progress_data, [2, 0])
+        self.assertEqual(completed_data, [4, 3])  # Completed counts
+        self.assertEqual(in_progress_data, [2, 0])  # In-progress counts
+
 
     @patch("client.models.Program.objects.values_list")
     @patch("users.models.UserProgramProgress.objects.values")

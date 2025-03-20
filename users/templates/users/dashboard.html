@@ -42,13 +42,40 @@
                 </div>
                 <span class="progress-text">{{ module.progress_value }}% Complete</span>
                 {% if forloop.first or module.progress_value > 0 %}
-                  <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
+                  <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
                 {% else %}
                   <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
                 {% endif %}
               </article>
             {% endwith %}
           {% endfor %}
+
+            {% for program_module in program_modules|slice:":3" %}
+                {% with module=program_module.module %}
+
+                    <div class="module-card {% if not forloop.first and module.progress_value == 0 %}locked{% endif %}">
+                        <h3>{{ module.title }}</h3>
+                        <p>{{ module.description }}</p>
+
+                        <div class="progress-container">
+
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
+                            </div>
+
+                        </div>
+                        <span class="progress-text">{{ module.progress_value }}% Complete</span>
+
+                        {% if forloop.first or module.progress_value > 0 %}
+                            <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
+                        {% else %}
+                            <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
+                        {% endif %}
+
+                    </div>
+
+                {% endwith %}
+            {% endfor %}
         </div>
       </section>
     {% endif %}
@@ -68,6 +95,9 @@
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
                     </div>
+                    <span class="progress-text">{{ module.progress_value }}% Complete</span>
+
+                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
                 </div>
                 <span class="progress-text">{{ module.progress_value }}% Complete</span>
                 <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
