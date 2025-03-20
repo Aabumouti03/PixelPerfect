@@ -43,7 +43,7 @@ from users.models import (
 )
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-# Logger setup
+
 logger = logging.getLogger(__name__)
 
 def questionnaire(request):
@@ -740,11 +740,11 @@ def module_overview(request, module_id):
         'module': module,
         'exercises': exercises,
         'additional_resources': additional_resources,
-        'video_resources': video_resources,  # Pass videos to template
+        'video_resources': video_resources,  
         'progress_value': progress_value,  
-        'user_exercise_progress': user_exercise_progress,  # ✅ Pass user-specific exercise progress
-        'user_resource_progress': user_resource_progress,  # ✅ Pass user-specific resource progress
-        'user_video_progress': user_video_progress,  # ✅ Pass user-specific video progress
+        'user_exercise_progress': user_exercise_progress,  
+        'user_resource_progress': user_resource_progress,  
+        'user_video_progress': user_video_progress, 
     
     }
 
@@ -832,7 +832,7 @@ def mark_done(request):
                 user_progress, created = UserResourceProgress.objects.get_or_create(user=end_user, resource=resource)
                 user_progress.status = 'completed' if action == "done" else 'not_started'
                 user_progress.save()
-                module = resource.modules.first()  
+                module = Module.objects.filter(additional_resources=resource).first()  
             except AdditionalResource.DoesNotExist:
                 return JsonResponse({"success": False, "message": "Resource not found."})
 
@@ -852,7 +852,7 @@ def mark_done(request):
                 user_progress, created = UserVideoProgress.objects.get_or_create(user=end_user, video=video)
                 user_progress.status = 'completed' if action == "done" else 'not_started'
                 user_progress.save()
-                module = video.modules.first() 
+                module = Module.objects.filter(video_resources=video).first()
             except VideoResource.DoesNotExist:
                 return JsonResponse({"success": False, "message": "Video not found."})
 

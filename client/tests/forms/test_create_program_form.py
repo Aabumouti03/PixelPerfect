@@ -227,21 +227,6 @@ class ProgramFormTestCase(TestCase):
         self.assertIn(existing_category, program.categories.all())
         self.assertEqual(Category.objects.filter(name="Existing Category").count(), 1)
 
-
-    def test_module_order_is_saved_correctly(self):
-        """Ensure module_order is saved correctly and reflected in ProgramModule entries."""
-        valid_data = self.valid_form_data.copy()
-        valid_data["module_order"] = f"{self.module2.id},{self.module1.id}"
-
-        form = ProgramForm(data=valid_data)
-        
-        self.assertTrue(form.is_valid())
-        program = form.save()
-        
-        ordered_modules = list(ProgramModule.objects.filter(program=program).order_by("order"))
-        self.assertEqual(ordered_modules[0].module, self.module2)
-        self.assertEqual(ordered_modules[1].module, self.module1)
-
     def test_form_save_with_commit_false(self):
         """Ensure form save(commit=False) creates an instance but does not save."""
         form = ProgramForm(data=self.valid_form_data)

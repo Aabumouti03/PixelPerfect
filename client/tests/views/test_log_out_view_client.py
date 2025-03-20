@@ -72,3 +72,13 @@ class LogoutViewTestCase(TestCase):
         expected_redirect = f"{self.login_url}?next={self.logout_url}"
         
         self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
+
+    def test_logout_get_request_redirects_to_referer(self):
+        """Ensure GET request redirects to the referrer URL if available."""
+        self.client.login(username='adminuser', password='password123')
+
+        referer_url = self.dashboard_url
+        
+        response = self.client.get(self.logout_url, HTTP_REFERER=referer_url)
+
+        self.assertRedirects(response, referer_url)
