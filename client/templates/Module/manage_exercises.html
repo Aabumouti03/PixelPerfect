@@ -20,9 +20,12 @@
                     <div class="module-actions">
                         <button class="edit-btn" id="edit-btn-{{ exercise.id }}" onclick="enableEdit('{{ exercise.id }}')">Edit</button>
                         <button class="save-btn hidden" id="save-btn-{{ exercise.id }}" onclick="saveExercise('{{ exercise.id }}')">Save</button>
-                        <button class="remove-questions-btn" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
+                        
+                        <!-- 🛑 Remove Questions button is hidden initially -->
+                        <button class="remove-questions-btn hidden" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
                             🗑️ Remove Questions
                         </button>
+
                         <button class="delete-selected-btn hidden" id="delete-selected-btn-{{ exercise.id }}" onclick="deleteSelectedQuestions('{{ exercise.id }}')">
                             ❌ Delete Selected
                         </button>
@@ -67,8 +70,6 @@
     .module-card {
         background: #f8f9fa;
         border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 6px solid #73c4fd;
         padding: 15px;
         width: 100%;
         transition: background 0.3s ease-in-out;
@@ -81,11 +82,6 @@
         background: white;
         padding: 15px;
         border-radius: 10px;
-        transition: background 0.2s ease-in-out;
-    }
-
-    .module-header:hover {
-        background: rgba(115, 196, 253, 0.2);
     }
 
     .module-title input {
@@ -103,7 +99,6 @@
         font-size: 18px;
         width: 100%;
         padding: 5px;
-        transition: border 0.3s ease-in-out;
     }
 
     .editing {
@@ -129,12 +124,6 @@
         border: none;
         border-radius: 20px;
         font-size: 14px;
-        transition: 0.3s;
-    }
-
-    .edit-btn:hover, .save-btn:hover {
-        background: #e04e00;
-        transform: scale(1.05);
     }
 
     .toggle-btn {
@@ -143,8 +132,6 @@
         border: none;
         font-size: 18px;
         cursor: pointer;
-        font-weight: bold;
-        transition: transform 0.2s ease-in-out;
     }
 
     .module-content {
@@ -162,14 +149,11 @@
         list-style: none;
     }
 
-    .exercise-questions li {
-        margin-bottom: 5px;
-    }
 </style>
+
 
 <script>
     function enableEdit(exerciseId) {
-        // Make inputs editable
         document.getElementById(`title-${exerciseId}`).readOnly = false;
         document.getElementById(`title-${exerciseId}`).classList.add('editing');
 
@@ -178,20 +162,26 @@
             input.classList.add('editing');
         });
 
-        // Toggle buttons
+        // Hide Edit button, Show Save button
         document.getElementById(`edit-btn-${exerciseId}`).classList.add('hidden');
         document.getElementById(`save-btn-${exerciseId}`).classList.remove('hidden');
+
+        // ✅ Show Remove Questions button when in edit mode
+        document.getElementById(`remove-questions-btn-${exerciseId}`).classList.remove('hidden');
     }
 
     function saveExercise(exerciseId) {
         let title = document.getElementById(`title-${exerciseId}`).value;
-        let questionElements = document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input`);
         let questions = [];
-
-        questionElements.forEach(input => {
+        
+        document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input`).forEach(input => {
             let questionId = input.id.split('-')[1];
-            let questionText = input.value;
-            questions.push({ id: questionId, text: questionText });
+            questions.push({ id: questionId, text: input.value });
+        });
+
+        let selectedQuestions = [];
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
+            selectedQuestions.push(checkbox.value);
         });
 
         fetch(`/update_exercise/${exerciseId}/`, {
@@ -207,7 +197,6 @@
             if (data.success) {
                 alert("✅ Exercise updated successfully!");
 
-                // Make fields readonly again
                 document.getElementById(`title-${exerciseId}`).readOnly = true;
                 document.getElementById(`title-${exerciseId}`).classList.remove('editing');
 
@@ -216,14 +205,59 @@
                     input.classList.remove('editing');
                 });
 
-                // Toggle buttons back
+                // Show Edit button, Hide Save button
                 document.getElementById(`edit-btn-${exerciseId}`).classList.remove('hidden');
                 document.getElementById(`save-btn-${exerciseId}`).classList.add('hidden');
+
+                // ✅ Hide Remove Questions button after saving
+                document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
+
+                if (selectedQuestions.length > 0) {
+                    deleteSelectedQuestions(exerciseId, selectedQuestions);
+                }
             } else {
                 alert("❌ Error updating exercise.");
             }
         })
         .catch(error => console.error("⚠️ Error:", error));
+    }
+
+    function deleteSelectedQuestions(exerciseId) {
+    let selectedQuestions = [];
+    
+    document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
+        selectedQuestions.push(checkbox.value);
+    });
+
+    if (selectedQuestions.length === 0) {
+        alert("⚠️ No questions selected!");
+        return;
+    }
+
+    fetch(`/delete_exercise_questions/${exerciseId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ question_ids: selectedQuestions })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ Questions deleted successfully!");
+            
+            // Reload page to reflect changes
+            location.reload();
+        } else {
+            alert("❌ Error deleting questions: " + data.error);
+        }
+    })
+    .catch(error => console.error("⚠️ Error:", error));
+
+    // After deleting, hide "Delete Selected" and show "Remove Questions"
+    document.getElementById(`delete-selected-btn-${exerciseId}`).classList.add('hidden');
+    document.getElementById(`remove-questions-btn-${exerciseId}`).classList.remove('hidden');
     }
 
     function toggleExercise(exerciseId) {
@@ -241,47 +275,16 @@
         }
     }
 
-    // Show checkboxes for selecting questions
     function showQuestionCheckboxes(exerciseId) {
-        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox`).forEach(checkbox => {
-            checkbox.classList.remove('hidden'); // Show checkboxes
-        });
+    // Show checkboxes
+    document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox`).forEach(checkbox => {
+        checkbox.classList.remove('hidden');
+    });
 
-        document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden'); // Show delete button
-    }
-
-    // Delete selected questions
-    function deleteSelectedQuestions(exerciseId) {
-        let selectedQuestions = [];
-        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
-            selectedQuestions.push(checkbox.value);
-        });
-
-        if (selectedQuestions.length === 0) {
-            alert("⚠️ No questions selected!");
-            return;
-        }
-
-        fetch(`/delete_exercise_questions/${exerciseId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ question_ids: selectedQuestions })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("✅ Questions deleted successfully!");
-                location.reload(); // Refresh to update UI
-            } else {
-                alert("❌ Error deleting questions: " + data.error);
-            }
-        })
-        .catch(error => console.error("⚠️ Error:", error));
-    }
-
+    // Hide "Remove Questions" button and show "Delete Selected"
+    document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
+    document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden');
+}
 </script>
 
 {% endblock %}
