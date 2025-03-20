@@ -6,10 +6,7 @@
     <h2 class="page-title">Manage Exercises</h2>
     <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
 
-    <div class="top-buttons">
-        <a href="{% url 'add_exercise' %}" class="add-btn">+ Add Exercise</a>
-    </div>
-
+    <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
     <div class="module-list">
         {% for exercise in exercises %}
             <div class="module-card">
@@ -20,15 +17,19 @@
                     <div class="module-actions">
                         <button class="edit-btn" id="edit-btn-{{ exercise.id }}" onclick="enableEdit('{{ exercise.id }}')">Edit</button>
                         <button class="save-btn hidden" id="save-btn-{{ exercise.id }}" onclick="saveExercise('{{ exercise.id }}')">Save</button>
-                        
-                        <!-- 🛑 Remove Questions button is hidden initially -->
+
+                        <button class="add-question-btn hidden" id="add-question-btn-{{ exercise.id }}" onclick="addNewQuestion('{{ exercise.id }}')">
+                             Add Question
+                        </button>
+
                         <button class="remove-questions-btn hidden" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
-                            🗑️ Remove Questions
+                             Remove Questions
                         </button>
 
                         <button class="delete-selected-btn hidden" id="delete-selected-btn-{{ exercise.id }}" onclick="deleteSelectedQuestions('{{ exercise.id }}')">
-                            ❌ Delete Selected
+                             Delete Selected
                         </button>
+
                         <button class="toggle-btn" onclick="toggleExercise('{{ exercise.id }}')">
                             <i class="fas fa-chevron-left" id="toggle-icon-{{ exercise.id }}"></i>
                         </button>
@@ -150,8 +151,6 @@
     }
 
 </style>
-
-
 <script>
     function enableEdit(exerciseId) {
         document.getElementById(`title-${exerciseId}`).readOnly = false;
@@ -162,26 +161,35 @@
             input.classList.add('editing');
         });
 
-        // Hide Edit button, Show Save button
+        // ✅ Show Save and Add Question buttons, Hide Edit button
         document.getElementById(`edit-btn-${exerciseId}`).classList.add('hidden');
         document.getElementById(`save-btn-${exerciseId}`).classList.remove('hidden');
-
-        // ✅ Show Remove Questions button when in edit mode
+        document.getElementById(`add-question-btn-${exerciseId}`).classList.remove('hidden');
         document.getElementById(`remove-questions-btn-${exerciseId}`).classList.remove('hidden');
+    }
+
+    function addNewQuestion(exerciseId) {
+        let questionList = document.getElementById(`question-list-${exerciseId}`);
+
+        let newQuestionId = `new-question-${Date.now()}`;
+        let newQuestionHTML = `
+            <li id="${newQuestionId}">
+                <input type="text" placeholder="New Question..." class="edit-input new-question" data-exercise-id="${exerciseId}">
+            </li>
+        `;
+
+        questionList.insertAdjacentHTML("beforeend", newQuestionHTML);
     }
 
     function saveExercise(exerciseId) {
         let title = document.getElementById(`title-${exerciseId}`).value;
         let questions = [];
-        
-        document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input`).forEach(input => {
-            let questionId = input.id.split('-')[1];
-            questions.push({ id: questionId, text: input.value });
-        });
 
-        let selectedQuestions = [];
-        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
-            selectedQuestions.push(checkbox.value);
+        // ✅ Collect existing and new questions
+        document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input.edit-input`).forEach(input => {
+            if (input.value.trim() !== "") {
+                questions.push({ text: input.value });
+            }
         });
 
         fetch(`/update_exercise/${exerciseId}/`, {
@@ -196,25 +204,7 @@
         .then(data => {
             if (data.success) {
                 alert("✅ Exercise updated successfully!");
-
-                document.getElementById(`title-${exerciseId}`).readOnly = true;
-                document.getElementById(`title-${exerciseId}`).classList.remove('editing');
-
-                document.querySelectorAll(`#exercise-${exerciseId} .edit-input`).forEach(input => {
-                    input.readOnly = true;
-                    input.classList.remove('editing');
-                });
-
-                // Show Edit button, Hide Save button
-                document.getElementById(`edit-btn-${exerciseId}`).classList.remove('hidden');
-                document.getElementById(`save-btn-${exerciseId}`).classList.add('hidden');
-
-                // ✅ Hide Remove Questions button after saving
-                document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
-
-                if (selectedQuestions.length > 0) {
-                    deleteSelectedQuestions(exerciseId, selectedQuestions);
-                }
+                location.reload(); // Refresh UI
             } else {
                 alert("❌ Error updating exercise.");
             }
@@ -223,41 +213,30 @@
     }
 
     function deleteSelectedQuestions(exerciseId) {
-    let selectedQuestions = [];
-    
-    document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
-        selectedQuestions.push(checkbox.value);
-    });
+        let selectedQuestions = [];
 
-    if (selectedQuestions.length === 0) {
-        alert("⚠️ No questions selected!");
-        return;
-    }
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
+            selectedQuestions.push(checkbox.value);
+        });
 
-    fetch(`/delete_exercise_questions/${exerciseId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({ question_ids: selectedQuestions })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("✅ Questions deleted successfully!");
-            
-            // Reload page to reflect changes
-            location.reload();
-        } else {
-            alert("❌ Error deleting questions: " + data.error);
+        if (selectedQuestions.length === 0) {
+            alert("No questions selected!");
+            return;
         }
-    })
-    .catch(error => console.error("⚠️ Error:", error));
 
-    // After deleting, hide "Delete Selected" and show "Remove Questions"
-    document.getElementById(`delete-selected-btn-${exerciseId}`).classList.add('hidden');
-    document.getElementById(`remove-questions-btn-${exerciseId}`).classList.remove('hidden');
+        fetch(`/delete_exercise_questions/${exerciseId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ question_ids: selectedQuestions })
+        })
+        .then(response => response.json())
+        .then(() => {
+            alert("✅ Questions deleted successfully!");
+            location.reload();
+        });
     }
 
     function toggleExercise(exerciseId) {
@@ -276,15 +255,13 @@
     }
 
     function showQuestionCheckboxes(exerciseId) {
-    // Show checkboxes
-    document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox`).forEach(checkbox => {
-        checkbox.classList.remove('hidden');
-    });
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox`).forEach(checkbox => {
+            checkbox.classList.remove('hidden');
+        });
 
-    // Hide "Remove Questions" button and show "Delete Selected"
-    document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
-    document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden');
-}
+        document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
+        document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden');
+    }
 </script>
 
 {% endblock %}

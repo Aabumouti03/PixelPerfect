@@ -251,27 +251,40 @@ def manage_exercises(request):
 
 @csrf_exempt
 def update_exercise(request, exercise_id):
-    """Handles updating an exercise title and its questions via AJAX."""
+    """Updates an exercise title and adds new questions without duplicating."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             exercise = get_object_or_404(Exercise, id=exercise_id)
 
-            # Update Exercise Title
+            # ✅ Update Exercise Title
             exercise.title = data.get("title", exercise.title)
             exercise.save()
 
-            # Update Questions
+            # ✅ Get existing questions IDs
+            existing_question_ids = set(exercise.questions.values_list("id", flat=True))
+            new_question_texts = set()
+
             for question_data in data.get("questions", []):
-                question = get_object_or_404(ExerciseQuestion, id=question_data["id"])
-                question.question_text = question_data["text"]
-                question.save()
+                question_text = question_data["text"].strip()
+                if question_text and question_text not in new_question_texts:
+                    new_question_texts.add(question_text)
+                    
+                    # ✅ Check if question already exists
+                    existing_question = ExerciseQuestion.objects.filter(question_text=question_text).first()
+                    if not existing_question:
+                        existing_question = ExerciseQuestion.objects.create(question_text=question_text)
+                    
+                    if existing_question.id not in existing_question_ids:
+                        exercise.questions.add(existing_question)
 
             return JsonResponse({"success": True, "message": "Exercise updated successfully!"})
+
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 
 @csrf_exempt
 def delete_exercise_questions(request, exercise_id):
