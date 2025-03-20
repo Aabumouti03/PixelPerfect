@@ -615,12 +615,9 @@ def programs_statistics(request):
         'programs_count': programs_count
     })
 
-'''
-The userStatistics method is responsible for generating user statistics for reports. 
-It gathers various metrics about users and their enrollments in programs and 
-returns them in a JSON format to be displayed in the User Statistics Dashboard.
 
-'''
+@login_required 
+@user_passes_test(admin_check) 
 def userStatistics(request):
     total_users = EndUser.objects.count()
     active_users = EndUser.objects.filter(user__is_active=True).count()
