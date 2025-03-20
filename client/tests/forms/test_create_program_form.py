@@ -374,3 +374,65 @@ class ProgramFormTestCase(TestCase):
 
         self.assertIn(existing_category, program.categories.all())
         self.assertEqual(Category.objects.filter(name="Existing Category").count(), 1)
+
+    def test_save_program_with_no_modules_or_categories(self):
+        """Ensure saving a program works even if no modules or categories are selected."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["modules"] = []
+        valid_data["categories"] = []
+
+        form = ProgramForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save()
+
+        self.assertEqual(program.categories.count(), 0)
+        self.assertEqual(program.program_modules.count(), 0)
+
+    def test_save_with_commit_false_does_not_save_to_db(self):
+        """Ensure calling save(commit=False) does not persist data in the database."""
+        form = ProgramForm(data=self.valid_form_data)
+
+        self.assertTrue(form.is_valid())
+        program = form.save(commit=False)
+
+        self.assertFalse(Program.objects.filter(title=self.valid_form_data["title"]).exists())
+        self.assertIsNone(program.pk)
+
+    def test_save_program_with_invalid_module_order(self):
+        """Ensure invalid module_order values do not break the form save method."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["module_order"] = f"{self.module1.id},invalid_id,-1"
+
+        form = ProgramForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+
+        program = form.save()
+        self.assertEqual(program.program_modules.count(), 1) 
+
+    def test_clean_new_category_reuses_existing_category(self):
+        """Ensure that clean_new_category uses an existing category instead of creating a duplicate."""
+        existing_category = Category.objects.create(name="Science")
+
+        form_data = self.valid_form_data.copy()
+        form_data["new_category"] = "science"  # Different casing
+
+        form = ProgramForm(data=form_data)
+        form.is_valid()
+
+        self.assertEqual(form.cleaned_data["new_category"], "Science")  # Should reuse existing category
+
+    def test_save_program_with_empty_module_order(self):
+        """Ensure program correctly orders modules when module_order is empty."""
+        valid_data = self.valid_form_data.copy()
+        valid_data["module_order"] = ""
+
+        form = ProgramForm(data=valid_data)
+        self.assertTrue(form.is_valid())
+
+        program = form.save()
+
+        ordered_modules = list(ProgramModule.objects.filter(program=program).order_by("order").values_list("module_id", flat=True))
+
+        self.assertEqual(ordered_modules, [self.module1.id, self.module2.id])
