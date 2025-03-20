@@ -88,6 +88,7 @@
       </header>
       <div class="module-list">
         {% for module in outside_modules|slice:":3" %}
+
             <div class="module-card">
                 <h3>{{ module.title }}</h3>
                 <p>{{ module.description }}</p>
@@ -95,12 +96,13 @@
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
                     </div>
+                </div>
+
                     <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
                     <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
-                </div>
-                <span class="progress-text">{{ module.progress_value }}% Complete</span>
-                <a href="{% url 'module_overview' module.id %}" class="view-module-button">Start Module</a>
+               
+                
             </div>
         {% endfor %}      
     </div>
