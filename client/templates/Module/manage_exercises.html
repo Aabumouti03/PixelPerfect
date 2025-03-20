@@ -18,8 +18,14 @@
                         <input type="text" value="{{ exercise.title }}" id="title-{{ exercise.id }}" class="edit-input" readonly>
                     </div>
                     <div class="module-actions">
-                        <button class="edit-btn" onclick="enableEdit('{{ exercise.id }}')">✏️ Edit</button>
-                        <button class="save-btn hidden" onclick="saveExercise('{{ exercise.id }}')">💾 Save</button>
+                        <button class="edit-btn" id="edit-btn-{{ exercise.id }}" onclick="enableEdit('{{ exercise.id }}')">Edit</button>
+                        <button class="save-btn hidden" id="save-btn-{{ exercise.id }}" onclick="saveExercise('{{ exercise.id }}')">Save</button>
+                        <button class="remove-questions-btn" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
+                            🗑️ Remove Questions
+                        </button>
+                        <button class="delete-selected-btn hidden" id="delete-selected-btn-{{ exercise.id }}" onclick="deleteSelectedQuestions('{{ exercise.id }}')">
+                            ❌ Delete Selected
+                        </button>
                         <button class="toggle-btn" onclick="toggleExercise('{{ exercise.id }}')">
                             <i class="fas fa-chevron-left" id="toggle-icon-{{ exercise.id }}"></i>
                         </button>
@@ -28,17 +34,16 @@
 
                 <div id="exercise-{{ exercise.id }}" class="module-content">
                     <h4>Questions:</h4>
-                    {% if exercise.questions.all %}
-                        <ul class="exercise-questions">
-                            {% for question in exercise.questions.all %}
-                                <li>
-                                    <input type="text" value="{{ question.question_text }}" id="question-{{ question.id }}" class="edit-input" readonly>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No questions available.</p>
-                    {% endif %}
+                    <ul class="exercise-questions" id="question-list-{{ exercise.id }}">
+                        {% for question in exercise.questions.all %}
+                            <li id="question-li-{{ question.id }}">
+                                <input type="checkbox" class="question-checkbox hidden" id="checkbox-{{ question.id }}" value="{{ question.id }}">
+                                <input type="text" value="{{ question.question_text }}" id="question-{{ question.id }}" class="edit-input" readonly>
+                            </li>
+                        {% empty %}
+                            <p id="no-questions-msg-{{ exercise.id }}">No questions available.</p>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         {% empty %}
@@ -48,7 +53,6 @@
 </div>
 
 <style>
-    /* Override default styling */
     .content {
         flex-grow: 1;
         padding: 30px;
@@ -66,8 +70,8 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         border-left: 6px solid #73c4fd;
         padding: 15px;
-        transition: background 0.3s ease-in-out;
         width: 100%;
+        transition: background 0.3s ease-in-out;
     }
 
     .module-header {
@@ -99,10 +103,11 @@
         font-size: 18px;
         width: 100%;
         padding: 5px;
+        transition: border 0.3s ease-in-out;
     }
 
     .editing {
-        border: 1px solid #007bff;
+        border-bottom: 2px solid #007bff;
         background: #f0f8ff;
         padding: 5px;
     }
@@ -164,6 +169,7 @@
 
 <script>
     function enableEdit(exerciseId) {
+        // Make inputs editable
         document.getElementById(`title-${exerciseId}`).readOnly = false;
         document.getElementById(`title-${exerciseId}`).classList.add('editing');
 
@@ -172,8 +178,9 @@
             input.classList.add('editing');
         });
 
-        document.querySelector(`#exercise-${exerciseId} .edit-btn`).classList.add('hidden');
-        document.querySelector(`#exercise-${exerciseId} .save-btn`).classList.remove('hidden');
+        // Toggle buttons
+        document.getElementById(`edit-btn-${exerciseId}`).classList.add('hidden');
+        document.getElementById(`save-btn-${exerciseId}`).classList.remove('hidden');
     }
 
     function saveExercise(exerciseId) {
@@ -199,7 +206,19 @@
         .then(data => {
             if (data.success) {
                 alert("✅ Exercise updated successfully!");
-                location.reload();
+
+                // Make fields readonly again
+                document.getElementById(`title-${exerciseId}`).readOnly = true;
+                document.getElementById(`title-${exerciseId}`).classList.remove('editing');
+
+                document.querySelectorAll(`#exercise-${exerciseId} .edit-input`).forEach(input => {
+                    input.readOnly = true;
+                    input.classList.remove('editing');
+                });
+
+                // Toggle buttons back
+                document.getElementById(`edit-btn-${exerciseId}`).classList.remove('hidden');
+                document.getElementById(`save-btn-${exerciseId}`).classList.add('hidden');
             } else {
                 alert("❌ Error updating exercise.");
             }
@@ -221,6 +240,48 @@
             icon.classList.add("fa-chevron-left");
         }
     }
+
+    // Show checkboxes for selecting questions
+    function showQuestionCheckboxes(exerciseId) {
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox`).forEach(checkbox => {
+            checkbox.classList.remove('hidden'); // Show checkboxes
+        });
+
+        document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden'); // Show delete button
+    }
+
+    // Delete selected questions
+    function deleteSelectedQuestions(exerciseId) {
+        let selectedQuestions = [];
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
+            selectedQuestions.push(checkbox.value);
+        });
+
+        if (selectedQuestions.length === 0) {
+            alert("⚠️ No questions selected!");
+            return;
+        }
+
+        fetch(`/delete_exercise_questions/${exerciseId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ question_ids: selectedQuestions })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Questions deleted successfully!");
+                location.reload(); // Refresh to update UI
+            } else {
+                alert("❌ Error deleting questions: " + data.error);
+            }
+        })
+        .catch(error => console.error("⚠️ Error:", error));
+    }
+
 </script>
 
 {% endblock %}

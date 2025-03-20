@@ -273,6 +273,26 @@ def update_exercise(request, exercise_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+@csrf_exempt
+def delete_exercise_questions(request, exercise_id):
+    """Handles deleting selected exercise questions via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            question_ids = data.get("question_ids", [])
+
+            if not question_ids:
+                return JsonResponse({"success": False, "error": "No questions selected"}, status=400)
+
+            # ✅ Delete selected questions
+            deleted_count, _ = ExerciseQuestion.objects.filter(id__in=question_ids).delete()
+
+            return JsonResponse({"success": True, "message": f"{deleted_count} questions deleted!"})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
 def add_module(request):
     """Handles adding a module with multiple sections."""

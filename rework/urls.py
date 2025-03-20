@@ -61,6 +61,7 @@ urlpatterns = [
     path('remove_exercise_from_section/<int:section_id>/', clientViews.remove_exercise_from_section, name='remove_exercise_from_section'),
     path('manage_exercises/', clientViews.manage_exercises, name='manage_exercises'),
     path('update_exercise/<int:exercise_id>/', clientViews.update_exercise, name='update_exercise'),
+    path('delete_exercise_questions/<int:exercise_id>/', clientViews.delete_exercise_questions, name='delete_exercise_questions'),
 
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
