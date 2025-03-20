@@ -3,7 +3,6 @@
 
 {% block content %}
     <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -25,14 +24,14 @@
             width: 100%;
         }
 
-        /* Header (Title + Icons + Search Bar) */
+        /* 📌 Header Section */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
             max-width: 1100px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .header-left h1 {
@@ -51,16 +50,7 @@
             cursor: pointer;
         }
 
-        /* Profile Icon */
-        .profile-icon {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-        }
-
-        /* Search Bar */
+        /* 📌 Search Bar */
         .search-bar {
             width: 250px;
             padding: 10px;
@@ -75,7 +65,7 @@
             border-color: #4da6ff;
         }
 
-        /* Modules Container */
+        /* 📌 Modules Container */
         .modules-container {
             background: white;
             padding: 30px;
@@ -84,46 +74,93 @@
             max-width: 1100px;
             width: 100%;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+        }
+
+        /* 📌 Modules Header */
+        .modules-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
 
+        /* 📌 Unified Module Grid Layout */
         .module-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
             width: 100%;
         }
 
+        /* 📌 Unified Module Card (Same as Dashboard) */
         .module-card {
+            border-radius: 12px;
+            width: 250px; /* Fixed width */
+            height: 300px; /* Same height as dashboard */
+            flex-shrink: 0;
             padding: 20px;
-            border-radius: 10px;
-            color: white;
-            text-align: left;
-            position: relative;
-            height: 220px;
-            width: 100%;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            padding-bottom: 15px;
-            padding-left: 15px;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #ffffff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
             transition: transform 0.2s ease-in-out;
         }
 
-        .module-card:nth-child(6n+1),
-        .module-card:nth-child(6n+3),
-        .module-card:nth-child(6n+5) {
-            background-color: #0148FD;
+        /* 📌 3D Effect: Left Edge */
+        .module-card:nth-child(odd) {
+            background: #73C4FD;
+            border-left: 5px solid #5ca5ea;
         }
 
-        .module-card:nth-child(6n+2),
-        .module-card:nth-child(6n+4),
-        .module-card:nth-child(6n+6) {
-            background-color: #73C4FD;
+        .module-card:nth-child(even) {
+            background: #0148FD;
+            border-left: 5px solid #012EAB;
         }
 
-        /* Action Button */
+        .module-card h5 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+            white-space: normal;
+        }
+
+        .module-card p {
+            font-size: 14px;
+            color: #f5f5f5;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        /* 📌 Progress Bar */
+        .progress-container {
+            width: 100%;
+            padding: 5px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* 📌 Action Button (Add Module) */
         .action-button {
             position: absolute;
             top: 10px;
@@ -143,28 +180,51 @@
             color: white;
         }
 
+        /* 📌 View All Button */
+        .view-all-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .view-all-button {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 10px 15px;
+            background-color: #F24505;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .view-all-button:hover {
+            background-color: #d93804;
+        }
+
     </style>
 
     <div class="content">
-        <!-- Header Section -->
+        <!-- 📌 Header Section -->
         <div class="header">
             <div class="header-left">
                 <h1>Modules</h1>
             </div>
             <div class="header-icons">
-                <!-- Search Bar -->
                 <input type="text" class="search-bar" placeholder="Search..." onkeyup="searchModules(event)">
-
-                <!-- Notification Bell -->
                 <ion-icon name="notifications-outline"></ion-icon>
-
-                <!-- Profile Picture -->
                 <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
             </div>
         </div>
 
-        <!-- Modules Grid -->
+        <!-- 📌 Modules Container -->
         <div class="modules-container">
+            <div class="modules-header">
+                <h2>Your Modules</h2>
+                <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
+            </div>
+
             <div class="module-grid">
                 {% for module in all_modules %}
                     <div class="module-card">
@@ -177,6 +237,13 @@
                         </div>
                         <h5>{{ module.title }}</h5>
                         <p>{{ module.description }}</p>
+
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
+                            </div>
+                        </div>
+                        <span class="progress-text">{{ module.progress }}% Complete</span>
                     </div>
                 {% empty %}
                     <p style="text-align: center; color: #555;">No modules found.</p>
@@ -186,74 +253,13 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.module-card').forEach(card => {
-                let icon = card.querySelector("ion-icon");
-                let title = card.querySelector("h5") ? card.querySelector("h5").innerText : "No Title";
-        
-                // ✅ Debugging - Check if the initial icons are correct
-                console.log("Module:", title, "Initial Icon:", icon.getAttribute("name"));
-            });
-        });
-        
-        function toggleModule(button, moduleTitle) {
-            moduleTitle = moduleTitle.trim(); // ✅ Trim spaces
-        
-            let icon = button.querySelector("ion-icon");
-            let isEnrolled = icon.getAttribute("name") === "remove-outline";
-            let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
-        
-            console.log("Clicked module:", `"${moduleTitle}"`, "Detected as enrolled?", isEnrolled, "Calling API:", url);
-        
-            let requestData = JSON.stringify({ title: moduleTitle });
-        
-            fetch(url, {
-                method: "POST",
-                body: requestData,
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCSRFToken()
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Server response:", data);
-                if (data.success) {
-                    icon.setAttribute("name", isEnrolled ? "add-outline" : "remove-outline");
-                } else {
-                    console.error("Action failed:", data.error);
-                    alert("Failed: " + data.error);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-        
-        // Function to get CSRF token from cookies
-        function getCSRFToken() {
-            let cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                let cookie = cookies[i].trim();
-                if (cookie.startsWith("csrftoken=")) {
-                    return cookie.split("=")[1];
-                }
-            }
-            return "";
-        }
-
         function searchModules(event) {
             const query = event.target.value.toLowerCase();
             const modules = document.querySelectorAll('.module-card');
-            let count = 0;
-            const moduleGrid = document.querySelector('.module-grid');
 
             modules.forEach(module => {
-                const title = module.querySelector('h5')?.innerText.toLowerCase();
-                if (title.includes(query)) {
-                    module.style.display = '';
-                    count++;
-                } else {
-                    module.style.display = 'none';
-                }
+                const title = module.querySelector('h5').innerText.toLowerCase();
+                module.style.display = title.includes(query) ? '' : 'none';
             });
         }
     </script>
