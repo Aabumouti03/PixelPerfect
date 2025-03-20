@@ -14,7 +14,6 @@ class ModuleOverviewViewTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpassword")
         self.client.login(username="testuser", password="testpassword")
 
-        # ✅ Create an EndUser profile for the user
         self.end_user = EndUser.objects.create(user=self.user)
 
         # ✅ Create a module

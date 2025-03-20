@@ -14,7 +14,6 @@ class ProgressCalculationTests(TestCase):
     def setUp(self):
         """Set up test data for progress calculations."""
 
-        # ✅ Create a test user before creating EndUser
         self.user = User.objects.create_user(username="testuser", password="testpassword")
 
         # ✅ Create test EndUser linked to a real user

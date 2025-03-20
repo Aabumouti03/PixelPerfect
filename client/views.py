@@ -633,7 +633,6 @@ def userStatistics(request):
     # Get sector distribution
     sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
 
-    # Pass data as JSON
     stats_data = {
         "total_users": total_users,
         "active_users": active_users,

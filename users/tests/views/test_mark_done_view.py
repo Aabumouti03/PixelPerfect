@@ -13,7 +13,7 @@ class MarkDoneViewTest(TestCase):
 
     def setUp(self):
         """Set up test user, module, exercises, resources, and videos."""
-        # ✅ Create a test user and log them in
+
         self.user = User.objects.create_user(username="testuser", password="testpassword")
         self.client.login(username='testuser', password='testpassword')
 

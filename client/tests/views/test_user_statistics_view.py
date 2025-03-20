@@ -13,7 +13,6 @@ class UserStatisticsViewTest(TestCase):
     def setUp(self):
         """Set up test data for user statistics."""
 
-        # ✅ Create an admin user (since `userStatistics` requires admin access)
         self.admin_user = User.objects.create_superuser(
             username="admin_user", email="admin@example.com", password="adminpassword"
         )

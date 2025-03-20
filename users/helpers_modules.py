@@ -4,7 +4,7 @@ from users.models import EndUser, UserModuleProgress, UserProgramProgress, UserE
 def calculate_progress(user, module):
     """Calculate the completion percentage for a user's progress in a module."""
     
-    # Ensure we're working with an EndUser instance
+
     if isinstance(user, EndUser):  
         end_user = user
     else:

@@ -43,7 +43,7 @@ from users.models import (
 )
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-# Logger setup
+
 logger = logging.getLogger(__name__)
 
 def questionnaire(request):
