@@ -238,7 +238,7 @@ class QuestionResponse(models.Model):
     rating_value = models.IntegerField(
     null=True, 
     blank=True, 
-    validators=[MinValueValidator(1), MaxValueValidator(5)]
+    validators=[MinValueValidator(-2), MaxValueValidator(2)]
     )
     
     def clean(self):
