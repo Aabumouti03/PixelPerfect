@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import User, EndUser, UserProgramEnrollment
-from client.models import Module, Category
+from client.models import Module, Category, VideoResource
 from collections import Counter
 import json
 from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
@@ -10,7 +10,7 @@ from django.contrib import messages
 from .models import Questionnaire, Question, Module,  Program, ProgramModule
 from users.models import Questionnaire_UserResponse, QuestionResponse
 from django.core.paginator import Paginator
-from .forms import ProgramForm, CategoryForm
+from .forms import ProgramForm, CategoryForm, VideoResourceForm
 from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
@@ -20,6 +20,7 @@ import csv
 from django.db import transaction 
 from django.db.models import Max, Avg
 from django.db.models import Q
+from django.urls import reverse
 
 
 def admin_check(user):
@@ -258,7 +259,7 @@ def client_dashboard(request):
 @login_required 
 @user_passes_test(admin_check) 
 def users_management(request):
-    users = EndUser.objects.all()
+    users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
 @login_required
@@ -349,7 +350,7 @@ def log_out_client(request):
     """Handles logout only if the admin confirms via modal."""
     if request.method == "POST":
         logout(request)
-        return redirect('users:log_in')
+        return redirect('log_in')
 
     referer_url = request.META.get('HTTP_REFERER')
     if referer_url:
@@ -370,21 +371,49 @@ def program_detail(request, program_id):
     if request.method == "POST":
         if "remove_module" in request.POST:
             module_id = request.POST.get("remove_module")
-            program_module = ProgramModule.objects.filter(program=program, module_id=module_id).first()
+            if not module_id or not module_id.strip():
+                # Return an error message when no module ID is provided.
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "No module specified."
+                })
+            try:
+                module_id_int = int(module_id)
+            except ValueError:
+                # Return an error message when the module ID is not a valid number.
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "Invalid module id."
+                })
+
+            program_module = ProgramModule.objects.filter(program=program, module_id=module_id_int).first()
             if program_module:
                 program_module.delete()
             else:
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
-                    'all_users': all_users,
+                    "all_users": all_users,
                     "enrolled_user_ids": enrolled_user_ids,
-                    "program_modules": program_modules,  
+                    "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
                     "enrolled_users": enrolled_users,
                     "error_message": "Module not found."
                 })
             return redirect("program_detail", program_id=program.id)
+
 
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
@@ -439,11 +468,17 @@ def program_detail(request, program_id):
 def update_module_order(request, program_id):
     """Handles module reordering in a program while preventing UNIQUE constraint errors."""
     if request.method == "POST":
+        # First, try to parse the JSON.
         try:
             data = json.loads(request.body)
-            program = get_object_or_404(Program, id=program_id)
-            order_mapping = {int(item["id"]): index + 1 for index, item in enumerate(data["order"])}
+        except Exception as e:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=500)
 
+        # Now, get the program. If it doesn't exist, Http404 is raised.
+        program = get_object_or_404(Program, id=program_id)
+
+        try:
+            order_mapping = {int(item["id"]): index + 1 for index, item in enumerate(data["order"])}
             with transaction.atomic():
                 temp_order = 1000  
                 for module_id in order_mapping.keys():
@@ -458,6 +493,8 @@ def update_module_order(request, program_id):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
+
+@user_passes_test(lambda u: u.is_superuser, login_url='programs')
 def delete_program(request, program_id):
     """ Delete a program and redirect to the programs list """
     program = get_object_or_404(Program, id=program_id)
@@ -606,12 +643,9 @@ def programs_statistics(request):
         'programs_count': programs_count
     })
 
-'''
-The userStatistics method is responsible for generating user statistics for reports. 
-It gathers various metrics about users and their enrollments in programs and 
-returns them in a JSON format to be displayed in the User Statistics Dashboard.
 
-'''
+@login_required 
+@user_passes_test(admin_check) 
 def userStatistics(request):
     total_users = EndUser.objects.count()
     active_users = EndUser.objects.filter(user__is_active=True).count()
@@ -627,7 +661,6 @@ def userStatistics(request):
     # Get sector distribution
     sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
 
-    # Pass data as JSON
     stats_data = {
         "total_users": total_users,
         "active_users": active_users,
@@ -799,3 +832,28 @@ def add_module(request):
             return redirect("client_modules")  # Redirect to the Client Modules page
     return render(request, "client/add_module.html")
 
+
+# For adding video content
+@login_required
+def add_video(request):
+    """View for adding a new video resource."""
+    if request.method == "POST":
+        form = VideoResourceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("video_list")  # Redirect to video list after saving
+    else:
+        form = VideoResourceForm()
+    return render(request, "client/add_video.html", {"form": form})
+
+@login_required
+def video_list(request):
+    """View for displaying all uploaded video resources."""
+    videos = VideoResource.objects.all()
+    return render(request, "client/video_list.html", {"videos": videos})
+
+@login_required
+def video_detail(request, video_id):
+    """View for displaying a single video."""
+    video = get_object_or_404(VideoResource, id=video_id)
+    return render(request, "client/video_detail.html", {"video": video})

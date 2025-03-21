@@ -82,10 +82,10 @@ class ExportProgramsStatisticsCSVTest(TestCase):
             ['Enrollment - Program 1', '1'],  
             ['Enrollment - Program 2', '1'],  
             ['Enrollment - Program 3', '0'],  # No enrollment in Program 3
-            ['Completion - Program 1 (Completed)', '0'],
-            ['Completion - Program 1 (In Progress)', '1'],
-            ['Completion - Program 2 (Completed)', '1'],
-            ['Completion - Program 2 (In Progress)', '0'],
+            ['Completion - Program 1 (Completed)', '0'],  # No 100% completion
+            ['Completion - Program 1 (In Progress)', '1'],  # 75% in progress
+            ['Completion - Program 2 (Completed)', '0'],  # 85% is still "in progress"
+            ['Completion - Program 2 (In Progress)', '1'],  # 85% in progress
             ['Completion - Program 3 (Completed)', '0'],
             ['Completion - Program 3 (In Progress)', '0'],
             ['Avg Completion - Program 1', '75.0'],  # Average completion for Program 1

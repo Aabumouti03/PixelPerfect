@@ -1,6 +1,6 @@
 {% extends 'users/base.html' %}
 {% load static %}
-
+{% load custome_filters %}
 {% block title %}Module Overview{% endblock %}
 
 {% block extra_css %}
@@ -12,19 +12,12 @@
     <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Module Overview</title>
-
     <main class="content">
         <div class="header">
-            <!-- Left: Module Title -->
             <div class="header-left">
                 <h1 class="module-name">{{ module.title }}</h1>
             </div>
-        
-            <!-- Right: Star Rating System -->
-             
+
             <div class="header-right">
                 <div class="star-container">
                     <div class="star-rating">
@@ -36,151 +29,115 @@
                 </div>
             </div>
         </div> 
-            
 
-            <div class="module-info">
-                <div class="module-overview">
-                    <p>{{ module.description }}</p> 
-                </div>
-                <div class="progress-container">
-                    <canvas id="progressChart"></canvas>
-                   <p>Progress: <span id="progress-value">{{ progress_value }}%</span></p>
-                </div>
+        <div class="module-info">
+            <div class="module-overview">
+                <p>{{ module.description }}</p> 
             </div>
-
-            <div>
-                <button type="button" class="collapsible">Videos</button>
-                <div class="collapsible-content">
-                    <p>Video Content.</p>
-                </div>
+            <div class="progress-container">
+                <canvas id="progressChart"></canvas>
+                <p>Progress: <span id="progress-value">{{ progress_value }}%</span></p>
             </div>
+        </div>
 
-            <div>
-                <button type="button" class="collapsible">Excersises</button>
-                <div class="collapsible-content">
-                    {% if exercises %}
+        <div>
+            <button type="button" class="collapsible">Videos</button>
+            <div class="collapsible-content">
+                {% if video_resources %}
+                    <ul>
+                        {% for video in video_resources %}
+                        <li>
+                            <h3>{{ video.title }}</h3>
+                            <iframe width="560" height="315" src="{{ video.get_embed_url }}" frameborder="0" allowfullscreen></iframe>
+                    
+                            {% with status=user_video_progress|get_item:video.id %}
+                                <button class="done-button" data-id="{{ video.id }}" data-type="video">
+                                    {% if status == 'completed' %}Undo{% else %}Done{% endif %}
+                                </button>
+                            {% endwith %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No video resources available for this module.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <button type="button" class="collapsible">Exercises</button>
+            <div class="collapsible-content">
+                {% if exercises %}
                     <ul>
                         {% for exercise in exercises %}
-                        <li>
-                            <strong>{{ exercise.title }}</strong> ({{ exercise.exercise_type }})
-                            {% if exercise.pdf_file %}
-                                - <a href="{{ exercise.pdf_file.url }}" target="_blank">Download PDF</a>
-                            {% endif %}
-                            - <a href="{% url 'exercise_detail' exercise.id %}" class="view-exercise-link"> View Exercise </a>
-                            
-                            <!-- Done Button -->
-                            <button class="done-button undo" 
-                            data-id="{{ exercise.id }}" data-type="exercise">
-                        {% if exercise.status == 'completed' %}Undo{% else %}Done{% endif %}
-                    </button>
+                            <li>
+                                <strong>{{ exercise.title }}</strong> ({{ exercise.exercise_type }})
+                                <a href="{% url 'exercise_detail' exercise.id %}" class="view-exercise-link"> View Exercise </a>
 
-
-
-                        </li>                        
+                                {% with status=user_exercise_progress|get_item:exercise.id %}
+                                    <button class="done-button" data-id="{{ exercise.id }}" data-type="exercise">
+                                        {% if status == 'completed' %}Undo{% else %}Done{% endif %}
+                                    </button>
+                                {% endwith %}
+                            </li>
                         {% endfor %}
                     </ul>
-                    {% else %}
-                        <p>No exercises available for this module.</p>
-                    {% endif %}
-                </div>
+                {% else %}
+                    <p>No exercises available for this module.</p>
+                {% endif %}
             </div>
+        </div>
 
-
-            <div>
-                <button type="button" class="collapsible">Additional Resources</button>
-                <div class="collapsible-content">  
-                    {% if additional_resources %}
+        <div>
+            <button type="button" class="collapsible">Additional Resources</button>
+            <div class="collapsible-content">  
+                {% if additional_resources %}
                     <ul>
                         {% for resource in additional_resources %}
                         <li>
                             <strong>{{ resource.title }}</strong> ({{ resource.get_resource_type_display }})
-                            
-                            {% if resource.file %}
-                                - <a href="{{ resource.file.url }}" target="_blank">Download PDF</a>
-                            {% endif %}
-                            
                             {% if resource.url %}
                                 - <a href="{{ resource.url }}" target="_blank">Visit Resource</a>
                             {% endif %}
-                        
-                            {% if resource.description %}
-                                <p>{{ resource.description }}</p>
-                            {% endif %}
-                        
-                            <!-- Done Button -->
-                            <button class="done-button undo" 
-                            data-id="{{ resource.id }}" data-type="resource">
-                        {% if resource.status == 'completed' %}Undo{% else %}Done{% endif %}
-                    </button>
 
-
+                            {% with status=user_resource_progress|get_item:resource.id %}
+                                <button class="done-button" data-id="{{ resource.id }}" data-type="resource">
+                                    {% if status == 'completed' %}Undo{% else %}Done{% endif %}
+                                </button>
+                            {% endwith %}
                         </li>
-                        
-                        {% endfor %}
+                    {% endfor %}
                     </ul>
-                                    
                 {% else %}
                     <p>No additional resources available for this module.</p>
                 {% endif %}
-                                
-                </div>
             </div>
-            
+        </div>
 
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    // Make sure the value is a number (in case it was passed as a string)
-    var progressValue = parseFloat("{{ progress_value }}");  // Ensure it's a number
-
-    if (isNaN(progressValue)) {
-        progressValue = 0;  // Set default if value is invalid
-    }
-
-    var ctx = document.getElementById('progressChart').getContext('2d');
-    
-    var progressChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [progressValue, 100 - progressValue],  // Update with the progress value
-                backgroundColor: ['#4A90E2', '#E0E0E0'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '75%',
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
-        }
-    });
+        <script>
 
 
-});
+        document.addEventListener("DOMContentLoaded", function () {
+            var collapsibles = document.querySelectorAll(".collapsible");
 
+            collapsibles.forEach(function (collapsible) {
+                collapsible.addEventListener("click", function () {
+                    this.classList.toggle("active");
+                    var content = this.nextElementSibling;
 
-    document.addEventListener("DOMContentLoaded", function () {
-    var coll = document.getElementsByClassName("collapsible");
-
-    for (var i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
-
-            // Make sure content exists before trying to toggle it
-            if (content && content.classList.contains("collapsible-content")) {
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
-            }
+                    // Ensure the content exists before manipulating it
+                    if (content && content.classList.contains("collapsible-content")) {
+                        if (content.style.display === "block") {
+                            content.style.display = "none";
+                        } else {
+                            content.style.display = "block";
+                        }
+                    }
+                });
+            });
         });
-    }
-});
 
-
-document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
     const stars = document.querySelectorAll(".star");
     const ratingValue = document.getElementById("rating-value");
     const csrfToken = "{{ csrf_token }}"; // Ensure CSRF token is included
@@ -226,21 +183,49 @@ document.addEventListener("DOMContentLoaded", function () {
     updateStars(isNaN(initialRating) ? 0 : initialRating);
 });
 
-// handels the done button
-document.addEventListener("DOMContentLoaded", function () {
-    const doneButtons = document.querySelectorAll(".done-button");
 
-    doneButtons.forEach(button => {
+        document.addEventListener("DOMContentLoaded", function () {
+    var progressChart;  // Store progress chart globally
+    var ctx = document.getElementById('progressChart').getContext('2d');
+    
+    function updateProgressChart(progressValue) {
+        if (progressChart) {
+            progressChart.data.datasets[0].data = [progressValue, 100 - progressValue];
+            progressChart.update();
+        } else {
+            progressChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [progressValue, 100 - progressValue],
+                        backgroundColor: ['#4A90E2', '#E0E0E0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    // Initialize progress chart with initial value
+    var initialProgress = parseFloat("{{ progress_value }}");
+    updateProgressChart(isNaN(initialProgress) ? 0 : initialProgress);
+
+    document.querySelectorAll(".done-button").forEach(button => {
         button.addEventListener("click", function () {
             const itemId = this.getAttribute("data-id");
             const itemType = this.getAttribute("data-type");
             const currentText = this.textContent.trim();
-            const action = currentText === "Done" ? "done" : "undo";  // Determine action
+            const action = currentText === "Done" ? "done" : "undo"; 
 
-            // Change the button text immediately
+            // Toggle button text
             this.textContent = action === "done" ? "Undo" : "Done";
 
-            // Send the request to mark the item as done or undone
             fetch("{% url 'mark_done' %}", {
                 method: "POST",
                 headers: {
@@ -252,16 +237,12 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update the progress value on the frontend
+                    // Update progress value and chart
                     const updatedProgress = data.updated_progress || 0;
                     document.getElementById("progress-value").textContent = `${updatedProgress}%`;
-
-                    // Update the doughnut chart progress
-                    var progressChart = Chart.instances[0]; // Assuming there's only one chart
-                    progressChart.data.datasets[0].data = [updatedProgress, 100 - updatedProgress];
-                    progressChart.update(); // Update the chart
+                    updateProgressChart(updatedProgress);
                 } else {
-                    alert("Error marking as done.");
+                    alert("Error updating progress.");
                 }
             })
             .catch(error => console.error("Error:", error));
@@ -270,6 +251,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-</script>
-    {% endblock %}
+            
+        </script>
+    </main>
+{% endblock %}
+
 

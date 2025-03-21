@@ -18,9 +18,11 @@ urlpatterns = [
     path('', usersViews.welcome_page, name="welcome_page"),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
+    path('verification_done/', usersViews.verification_done, name="verification_done"),
     path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
     path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('log_out_client/', clientViews.log_out_client, name="log_out_client"),
+    path('verify-email-after-sign-up/<uidb64>/<token>/', usersViews.verify_email_after_sign_up, name='verify_email_after_sign_up'),
     
     path('reset_password/', 
         authenticationViews.PasswordResetView.as_view(template_name="users/password_reset_form.html"),
@@ -35,14 +37,12 @@ urlpatterns = [
         authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
     
-    path("verify-email/<uidb64>/<token>/", usersViews.verify_email, name="verify_email"),
-    path("email-verification-pending/", TemplateView.as_view(template_name="users/email_verification_pending.html"), name="email_verification_pending"),
-    path("email-verified-success/", TemplateView.as_view(template_name="users/email_verified_success.html"), name="email_verified_success"),
 
     # Home page
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
     path("get_started/", usersViews.get_started, name="get_started"),
+    path('contact-success/', usersViews.contact_success, name='contact_success'),
 
     # Profile management
     path('profile/', usersViews.show_profile, name='show_profile'),  
@@ -134,6 +134,10 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+    #video content
+    path('videos/', clientViews.video_list, name='video_list'),
+    path('videos/add/', clientViews.add_video, name='add_video'),
+    path('videos/<int:video_id>/', clientViews.video_detail, name='video_detail'),
 
     # Journal URLs (moved outside debug block)
     path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)

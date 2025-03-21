@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
 from django.core.exceptions import ValidationError
+from urllib.parse import urlparse, parse_qs
 
 # Choices for Exercise Types
 EXERCISE_TYPES = [
@@ -89,6 +90,7 @@ class Module(models.Model):
     categories = models.ManyToManyField(Category, related_name="modules")
     sections = models.ManyToManyField('Section', related_name="modules")  
     additional_resources = models.ManyToManyField('AdditionalResource', blank=True, related_name="sections")
+    video_resources = models.ManyToManyField('VideoResource', blank=True, related_name="modules")
     background_style = models.ForeignKey(BackgroundStyle, on_delete=models.SET_NULL, null=True, blank=True)
 
     def average_rating(self):
@@ -146,6 +148,33 @@ class AdditionalResource(models.Model):
     
     def __str__(self):
         return f"{self.title} ({self.resource_type})"
+
+
+class VideoResource(models.Model):
+    """A model for embedding YouTube videos by pasting URLs."""
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    youtube_url = models.URLField(help_text="Paste a YouTube video URL here.")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    def get_embed_url(self):
+        """Converts a YouTube link into an embeddable format."""
+        parsed_url = urlparse(self.youtube_url)
+        query_params = parse_qs(parsed_url.query)
+
+        # Extract the YouTube Video ID
+        video_id = None
+        if parsed_url.netloc in ["www.youtube.com", "youtube.com"]:
+            video_id = query_params.get("v", [None])[0]
+        elif parsed_url.netloc in ["youtu.be"]:
+            video_id = parsed_url.path.lstrip("/")
+
+        if video_id:
+            return f"https://www.youtube.com/embed/{video_id}"
+        return None  # Return None if the URL is invalid
+
+    def __str__(self):
+        return self.title
 
 
 class Exercise(models.Model):

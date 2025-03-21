@@ -373,7 +373,7 @@ button[type="submit"]:hover {
 .sign_up_card input,
 .sign_up_card select {
     width: 700px;
-    padding: 12px;
+    padding: 8px;
     border-radius: 30px;
     background-color: #f9f9f9;
     font-size: 18px;

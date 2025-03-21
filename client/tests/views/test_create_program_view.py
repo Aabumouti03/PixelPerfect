@@ -30,16 +30,6 @@ class CreateProgramViewTestCase(TestCase):
             "module_order": f"{self.module1.id},{self.module2.id}",
         }
 
-    def test_get_create_program_page_as_admin(self):
-        """Ensure the create program page loads correctly for an admin user."""
-        self.client.login(username='adminuser', password='password123')
-        
-        response = self.client.get(self.create_program_url)
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "client/create_program.html")
-        self.assertIsInstance(response.context["form"], ProgramForm)
-
     def test_get_create_program_page_as_regular_user(self):
         """Ensure a regular user cannot access the create program page."""
         self.client.login(username='regularuser', password='password123')
@@ -87,20 +77,30 @@ class CreateProgramViewTestCase(TestCase):
         
         self.assertEqual(program.program_modules.count(), 0)
 
-    def test_post_create_program_duplicate_title(self):
-        """Ensure duplicate titles (case-insensitive) are rejected."""
+    def test_trigger_form_error(self):
+        """Ensure duplicate titles (case-insensitive) are rejected and form.add_error is triggered."""
         self.client.login(username='adminuser', password='password123')
+
+        # Create a program first to trigger duplicate error
         Program.objects.create(title="Duplicate Program", description="Existing program")
-        duplicate_data = {"title": "duplicate program", "description": "Attempt duplicate creation"}
+
+        duplicate_data = {"title": "Duplicate Program", "description": "Attempt duplicate creation"}
+
         response = self.client.post(self.create_program_url, duplicate_data)
-        
+
+        # Ensure the page reloads instead of redirecting
         self.assertEqual(response.status_code, 200)
-        
+
         form = response.context["form"]
-        
+
+        # Explicitly check if "title" has an error due to form.add_error()
         self.assertFalse(form.is_valid())
         self.assertIn("title", form.errors)
+        self.assertEqual(form.errors["title"], ["A program with this title already exists."])
+
+        # Ensure only one instance of the program exists
         self.assertEqual(Program.objects.filter(title__iexact="Duplicate Program").count(), 1)
+
 
     def test_post_create_program_invalid_module_ids(self):
         """Ensure invalid module IDs in module_order are safely ignored."""
@@ -129,25 +129,7 @@ class CreateProgramViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("title", form.errors)
         self.assertFalse(Program.objects.exists())
-
-    def test_post_create_program_without_login(self):
-        """Ensure that an unauthenticated user cannot create a program."""
-        response = self.client.post(self.create_program_url, self.valid_program_data)
-        
-        self.assertNotEqual(response.status_code, 200)
-        self.assertFalse(Program.objects.filter(title="Test Program").exists())
     
-    def test_get_create_program_page_as_admin(self):
-        """Ensure the create program page loads correctly for an admin user."""
-        self.client.login(username='adminuser', password='password123')
-        
-        response = self.client.get(self.create_program_url)
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "client/create_program.html")
-        self.assertIsInstance(response.context["form"], ProgramForm)
-        self.assertIn("categories", response.context)
-
     def test_post_create_program_with_invalid_data(self):
         """Ensure invalid form submissions are handled properly."""
         self.client.login(username='adminuser', password='password123')
@@ -172,14 +154,6 @@ class CreateProgramViewTestCase(TestCase):
         program = Program.objects.get(title="Ordered Modules Program")
         module_ids = list(program.program_modules.order_by('order').values_list('module_id', flat=True))
         self.assertEqual(module_ids, [self.module2.id, self.module1.id])
-
-
-    def test_post_create_program_without_login(self):
-        """Ensure that an unauthenticated user cannot create a program."""
-        response = self.client.post(self.create_program_url, self.valid_program_data)
-        
-        self.assertNotEqual(response.status_code, 200)
-        self.assertFalse(Program.objects.filter(title="Test Program").exists())
 
     def test_post_create_program_existing_title_fails(self):
         """Ensure that trying to create a program with an existing title fails and does not update."""
@@ -229,22 +203,6 @@ class CreateProgramViewTestCase(TestCase):
         self.assertIn("title", form.errors)
         self.assertEqual(Program.objects.filter(title__iexact="Whitespace Duplicate").count(), 1)
 
-    def test_post_create_program_with_new_category(self):
-        """Ensure a new category is created and linked to the program."""
-        self.client.login(username='adminuser', password='password123')
-
-        valid_data = self.valid_program_data.copy()
-        valid_data["new_category"] = "New Category"
-
-        response = self.client.post(self.create_program_url, valid_data, follow=True)
-
-        self.assertRedirects(response, self.programs_url)
-
-        program = Program.objects.get(title="Test Program")
-        new_category = Category.objects.get(name="New Category")
-
-        self.assertIn(new_category, program.categories.all())
-    
     def test_post_create_program_with_existing_new_category(self):
         """Ensure a new category is not duplicated if it already exists."""
         self.client.login(username='adminuser', password='password123')
@@ -307,3 +265,144 @@ class CreateProgramViewTestCase(TestCase):
         response = self.client.get(self.create_program_url)
 
         self.assertNotEqual(response.status_code, 200)  # Should return a forbidden or redirect response
+
+    def test_post_create_program_invalid_form_no_description(self):
+        """Ensure form submission fails if description is missing but title is unique."""
+        self.client.login(username='adminuser', password='password123')
+
+        invalid_data = {
+            "title": "Valid Unique Title",
+            "description": "",  # Missing description
+            "module_order": f"{self.module1.id}",
+        }
+
+        response = self.client.post(self.create_program_url, invalid_data)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+
+        # Make sure "title" does NOT have an error (because it's not a duplicate)
+        self.assertNotIn("title", form.errors)
+
+        # Ensure "description" field has an error
+        self.assertIn("description", form.errors)
+
+        # Ensure the program was NOT created
+        self.assertFalse(Program.objects.filter(title="Valid Unique Title").exists())
+
+    def test_create_program_denied_for_non_admin(self):
+        """Ensure a non-admin user is redirected when trying to access create_program."""
+        self.client.login(username="regularuser", password="password123")
+
+        response = self.client.get(self.create_program_url, follow=True)
+
+        # Check that the user is redirected to login
+        expected_redirect_url = reverse("log_in") + f"?next={self.create_program_url}"
+        self.assertRedirects(response, expected_redirect_url)
+
+    def test_post_create_program_with_new_category(self):
+        """Ensure a new category is created and linked to the program."""
+        self.client.login(username='adminuser', password='password123')
+
+        valid_data = self.valid_program_data.copy()
+        valid_data["new_category"] = "New Category"
+
+        response = self.client.post(self.create_program_url, valid_data, follow=True)
+
+        self.assertRedirects(response, self.programs_url)
+
+        # Ensure program is created
+        self.assertTrue(Program.objects.filter(title="Test Program").exists())
+        program = Program.objects.get(title="Test Program")
+
+        # Ensure new category exists
+        self.assertTrue(Category.objects.filter(name="New Category").exists())
+        new_category = Category.objects.get(name="New Category")
+
+        # Ensure the new category is associated with the program
+        self.assertIn(new_category, program.categories.all())
+
+    def test_post_create_program_without_login(self):
+        """Ensure that an unauthenticated user cannot create a program."""
+        response = self.client.post(self.create_program_url, self.valid_program_data, follow=True)
+
+        # Ensure user is redirected to login page
+        expected_redirect = reverse("log_in") + f"?next={self.create_program_url}"
+        self.assertRedirects(response, expected_redirect)
+
+        # Ensure the program was not created
+        self.assertFalse(Program.objects.filter(title="Test Program").exists())
+
+
+    def test_get_create_program_page_as_admin(self):
+        """Ensure the create program page loads correctly for an admin user."""
+        self.client.login(username='adminuser', password='password123')
+
+        response = self.client.get(self.create_program_url)
+
+        # Ensure correct response and template
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "client/create_program.html")
+
+        # Ensure form is included in context
+        self.assertIn("form", response.context)
+        self.assertIsInstance(response.context["form"], ProgramForm)
+
+        # Ensure categories exist in the context
+        self.assertIn("categories", response.context)
+        self.assertEqual(list(response.context["categories"]), list(Category.objects.all()))
+
+    def test_post_create_program_invalid_form(self):
+        """Ensure an invalid form submission doesn't create a program and returns errors."""
+        self.client.login(username='adminuser', password='password123')
+
+        invalid_data = {"title": "", "description": ""}  # Missing required fields
+        response = self.client.post(self.create_program_url, invalid_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "client/create_program.html")
+        self.assertFalse(Program.objects.exists())
+        self.assertIn("title", response.context["form"].errors)
+        self.assertIn("description", response.context["form"].errors)
+
+    def test_create_program_redirects_non_admins(self):
+        """Ensure non-admin users are redirected when trying to access create_program."""
+        self.client.login(username="regularuser", password="password123")
+        response = self.client.get(self.create_program_url, follow=True)
+
+        expected_redirect_url = reverse("log_in") + f"?next={self.create_program_url}"
+        self.assertRedirects(response, expected_redirect_url)
+
+    def test_create_program_redirects_anonymous_users(self):
+        """Ensure unauthenticated users are redirected to login when accessing create_program."""
+        response = self.client.get(self.create_program_url)
+
+        expected_redirect_url = reverse("log_in") + f"?next={self.create_program_url}"
+        self.assertRedirects(response, expected_redirect_url)
+
+    def test_post_create_program_invalid_title(self):
+        """Ensure program creation fails if the title is empty or just whitespace."""
+        self.client.login(username='adminuser', password='password123')
+        
+        invalid_data = {"title": "  ", "description": "Invalid title"}
+        response = self.client.post(self.create_program_url, invalid_data)
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("title", form.errors)
+        self.assertFalse(Program.objects.exists())
+
+    def test_create_program_template_rendering(self):
+        """Ensure the create program page renders with the expected context."""
+        self.client.login(username='adminuser', password='password123')
+        response = self.client.get(self.create_program_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "client/create_program.html")
+        self.assertIn("form", response.context)
+        self.assertIsInstance(response.context["form"], ProgramForm)
+        self.assertIn("categories", response.context)
+        self.assertEqual(list(response.context["categories"]), list(Category.objects.all()))

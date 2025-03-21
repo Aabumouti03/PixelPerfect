@@ -1,30 +1,33 @@
 from client.models import Module, Exercise, AdditionalResource,ProgramModule  
-from users.models import EndUser, UserModuleProgress, UserProgramProgress
+from users.models import EndUser, UserModuleProgress, UserProgramProgress, UserExerciseProgress, UserResourceProgress,UserVideoProgress
 
-def calculate_progress(end_user, module):
-  
+def calculate_progress(user, module):
+    """Calculate the completion percentage for a user's progress in a module."""
+    
+
+    if isinstance(user, EndUser):  
+        end_user = user
+    else:
+        end_user = EndUser.objects.get(user=user)  # Only fetch if needed
+
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
+    additional_resources = list(module.additional_resources.all())
+    video_resources = list(module.video_resources.all()) 
 
-    # Count completed exercises
-    completed_exercises = [exercise for exercise in exercises if exercise.status == 'completed']
+    completed_items = (
+        UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises, status='completed').count() +
+        UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources, status='completed').count() +
+        UserVideoProgress.objects.filter(user=end_user, video__in=video_resources, status='completed').count()
+    )
 
-    # Count completed resources
-    completed_resources = [resource for resource in module.additional_resources.all() if resource.status == 'completed']
+    total_items = len(exercises) + len(additional_resources) + len(video_resources)
 
-    # Calculate total and completed items
-    total_items = len(exercises) + module.additional_resources.count()
-    completed_items = len(completed_exercises) + len(completed_resources)
+    return (completed_items / total_items) * 100 if total_items > 0 else 0
 
-    # Calculate progress percentage
-    if total_items > 0:
-        progress = (completed_items / total_items) * 100
-    else:
-        progress = 0
 
-    return progress
 
 def calculate_program_progress(end_user, program):
     # Get all modules in the program

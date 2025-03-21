@@ -2,6 +2,7 @@ import os
 import json
 import random
 import logging
+from django.conf import settings
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
@@ -18,7 +19,9 @@ from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
+from collections import defaultdict
 logger = logging.getLogger(__name__)
+from .utils import send_verification_email_after_sign_up 
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -26,24 +29,22 @@ from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
 from users.models import (
-    EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
-    UserProgramEnrollment, JournalEntry
+    User, EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
+    UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
 )
 from client.models import (
     Program, Module, ProgramModule, ModuleRating, Exercise, Category,
-    AdditionalResource, Exercise
+    AdditionalResource, Exercise,VideoResource
 )
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-# Logger setup
+
 logger = logging.getLogger(__name__)
-
-
-
 
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
@@ -138,8 +139,6 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
-import random
-
 @login_required
 def save_notes(request):
     if request.method == 'POST':
@@ -233,8 +232,6 @@ def dashboard(request):
     }
     return render(request, 'users/dashboard.html', context)
 
-
-
 @login_required
 def view_program(request, program_id):
     user = request.user
@@ -295,38 +292,74 @@ def modules(request):
 def profile(request):
     return render(request, 'users/profile.html')
 
-
 def about(request):
     return render(request, 'users/about.html')
 
 def contact_us(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        # Combine the message content
+        full_message = (
+            f"Name: {name}\n"
+            f"Email: {email}\n\n"
+            f"Message:\n{message}"
+        )
+
+        # Send the email (settings.EMAIL_HOST_USER is often used as the 'from' address)
+        send_mail(
+            subject="New Contact Us Submission",
+            message=full_message,
+            from_email=settings.EMAIL_HOST_USER,  
+            recipient_list=[settings.EMAIL_HOST_USER],  # Replace with your admin email or use settings.ADMINS
+            fail_silently=False,
+        )
+
+        # Redirect to a success page (create a URL/path named 'contact_success' for this)
+        return redirect('contact_success')
+
+    # If GET request, simply render the contact form
     return render(request, 'users/contact_us.html')
 
-ADMIN_USERNAME = "SuperUser"
+def contact_success(request):
+    return render(request, 'users/contact_success.html')
 
 def log_in(request):
     """Log in page view function"""
 
+    error_message = None
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+            username = form.cleaned_data.get('username').strip()  # Trim spaces
+            password = form.cleaned_data.get('password').strip()
+
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
-                login(request, user)
-    
-                if user.username == ADMIN_USERNAME and user.is_superuser:
-                    return redirect('client_dashboard')
+                if not user.email_verified:
+                    error_message = "You must verify your email before logging in."
+                else:
+                    login(request, user)
 
-                return redirect('dashboard')
+                    # Redirect to `next` if available
+                    next_url = request.GET.get('next') or request.POST.get('next')
+                    if next_url:
+                        return redirect(next_url)
+
+                    # Superuser goes to `client_dashboard`
+                    if user.is_superuser:
+                        return redirect('client_dashboard')
+
+                    # Regular users go to `dashboard`
+                    return redirect('dashboard')
 
     else:
         form = LogInForm()
 
-    return render(request, "users/log_in.html", {"form": form})
-
+    return render(request, "users/log_in.html", {"form": form, "error_message": error_message})
 
 def sign_up_step_1(request):
     """Handles Step 1: User Account Details"""
@@ -344,14 +377,12 @@ def sign_up_step_1(request):
     return render(request, "users/sign_up_step_1.html", {"user_form": user_form})
 
 def sign_up_step_2(request):
-    """Handles Step 2: Profile Details"""
+    """Handles Step 2: Profile Details and Email Verification."""
     user_data = request.session.get("user_form_data")
-
     
     if not user_data:
         return redirect("sign_up_step_1")
 
-   
     user_form = UserSignUpForm(data=user_data)
     if not user_form.is_valid():
         return redirect("sign_up_step_1")
@@ -359,10 +390,10 @@ def sign_up_step_2(request):
     if request.method == "POST":
         profile_form = EndUserProfileForm(request.POST)
 
-
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save(commit=False)
             user.set_password(user_form.cleaned_data["password1"])
+            user.email_verified = False
             user.save()
 
             profile = profile_form.save(commit=False)
@@ -371,17 +402,35 @@ def sign_up_step_2(request):
 
             del request.session["user_form_data"]
 
-            user = authenticate(username=user.username, password=user_form.cleaned_data["password1"])
-            if user:
-                login(request, user)
+            send_verification_email_after_sign_up(user, request)
 
-            return redirect("get_started")
-
-
+            return render(request, "users/sign_up_email_verification.html") #modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
     else:
         profile_form = EndUserProfileForm()
 
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
+
+def sign_up_email_verification(request):
+    return render(request, "users/sign_up_email_verification.html")
+
+def verify_email_after_sign_up(request, uidb64, token):
+    """Verify the user's email after signing up."""
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return HttpResponse("Invalid verification link.") #change this to a new html that displays the same message and extend the welcome page navbar.
+
+    if default_token_generator.check_token(user, token):
+        user.email_verified = True  
+        user.save()
+        return redirect('verification_done')
+
+    return HttpResponse("Invalid or expired token.")
+
+def verification_done(request):
+    return render(request, "users/verification_done.html")
+
 
 @login_required
 def log_out(request):
@@ -724,42 +773,45 @@ def user_modules(request):
 
 @login_required
 def module_overview(request, module_id):
-    """Fetch the module by ID and retrieve related exercises and additional resources.""" 
+    """Fetch the module by ID and retrieve related exercises, additional resources, and videos for a specific user.""" 
     
     module = get_object_or_404(Module, id=module_id)
-
     user = request.user
 
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
+    # Ensure the EndUser profile exists
+    end_user, created = EndUser.objects.get_or_create(user=user)
 
-    
+    # Fetch exercises, additional resources, and videos linked to the module
     exercises = []
-    additional_resources = list(module.additional_resources.all())
-
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
+    additional_resources = list(module.additional_resources.all())
+    video_resources = list(module.video_resources.all()) 
+
+    user_exercise_progress = {
+        progress.exercise.id: progress.status for progress in UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises)
+    }
+
+    user_resource_progress = {
+        progress.resource.id: progress.status for progress in UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources)
+    }
+
+    user_video_progress = {
+        progress.video.id: progress.status for progress in UserVideoProgress.objects.filter(user=end_user, video__in=video_resources)
+    }
+
+    # Calculate progress percentage
+    completed_items = sum(1 for status in user_exercise_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_resource_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_video_progress.values() if status == 'completed')
 
 
-    completed_items = 0
-    total_items = len(exercises) + len(additional_resources)
 
+    total_items = len(exercises) + len(additional_resources) + len(video_resources)
+    progress_value = (completed_items / total_items) * 100 if total_items > 0 else 0
 
-    for exercise in exercises:
-        if exercise.status=='completed':
-            completed_items += 1
-
-    for resource in additional_resources:
-        if resource.status=='completed':
-            completed_items += 1
-
-    progress_value = 0
-    if total_items > 0:
-        progress_value = (completed_items / total_items) * 100
-
+    # Update or create user-specific module progress
     user_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
     user_progress.completion_percentage = progress_value
     user_progress.save()
@@ -768,7 +820,12 @@ def module_overview(request, module_id):
         'module': module,
         'exercises': exercises,
         'additional_resources': additional_resources,
+        'video_resources': video_resources,  
         'progress_value': progress_value,  
+        'user_exercise_progress': user_exercise_progress,  
+        'user_resource_progress': user_resource_progress,  
+        'user_video_progress': user_video_progress, 
+    
     }
 
     return render(request, 'users/moduleOverview.html', context)
@@ -836,6 +893,7 @@ def rate_module(request, module_id):
 
 
 @login_required
+@csrf_exempt
 def mark_done(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -844,38 +902,53 @@ def mark_done(request):
         action = data.get("action")  # 'done' or 'undo'
 
         user = request.user
-        end_user = EndUser.objects.get(user=user)  
+        end_user, created = EndUser.objects.get_or_create(user=user)
+
+        module = None
 
         if item_type == "resource":
-            resource = AdditionalResource.objects.get(id=item_id)
-            if resource.status == 'completed':
-                resource.status = 'in_progress'
-            else:
-                resource.status = 'completed'
-            resource.save()
-            module = Module.objects.filter(additional_resources=resource).first()
+            try:
+                resource = AdditionalResource.objects.get(id=item_id)
+                user_progress, created = UserResourceProgress.objects.get_or_create(user=end_user, resource=resource)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = Module.objects.filter(additional_resources=resource).first()  
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Resource not found."})
 
         elif item_type == "exercise":
-            exercise = Exercise.objects.get(id=item_id)
-            if exercise.status == 'completed':
-                exercise.status = 'in_progress'
-            else:
-                exercise.status = 'completed'
-            exercise.save()
-            module = exercise.sections.first().modules.first()
+            try:
+                exercise = Exercise.objects.get(id=item_id)
+                user_progress, created = UserExerciseProgress.objects.get_or_create(user=end_user, exercise=exercise)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = exercise.sections.first().modules.first() 
+            except Exercise.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Exercise not found."})
 
-     
-        user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
-        user_module_progress.completion_percentage = calculate_progress(end_user, module)
-        user_module_progress.save()
+        elif item_type == "video":
+            try:
+                video = VideoResource.objects.get(id=item_id)
+                user_progress, created = UserVideoProgress.objects.get_or_create(user=end_user, video=video)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = Module.objects.filter(video_resources=video).first()
+            except VideoResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Video not found."})
 
-        return JsonResponse({
-            "success": True,
-            "updated_progress": user_module_progress.completion_percentage
-        })
+        if module:
+            user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
+            user_module_progress.completion_percentage = calculate_progress(end_user, module)
+            user_module_progress.save()
 
-    return JsonResponse({"success": False})
+            return JsonResponse({
+                "success": True,
+                "updated_progress": user_module_progress.completion_percentage
+            })
 
+        return JsonResponse({"success": False, "message": "Module not found."})
+
+    return JsonResponse({"success": False, "message": "Invalid request."})
 
 @login_required
 def unenroll_module(request):
@@ -1140,3 +1213,4 @@ def save_journal_entry(request):
 
     # Save the journal entry
     return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
+

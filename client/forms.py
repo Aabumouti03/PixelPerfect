@@ -1,5 +1,5 @@
 from django import forms
-from .models import Program, Module, Category, ProgramModule
+from .models import Program, Module, Category, ProgramModule, VideoResource
 
 class ProgramForm(forms.ModelForm):
     categories = forms.ModelMultipleChoiceField(
@@ -126,4 +126,15 @@ class CategoryForm(forms.ModelForm):
                 'class': 'form-control rounded-pill border-2',
                 'placeholder': 'Enter category name:'
             }),
+        }
+
+#fir uploading video content
+class VideoResourceForm(forms.ModelForm):
+    class Meta:
+        model = VideoResource
+        fields = ['title', 'description', 'youtube_url']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter video title'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter video description'}),
+            'youtube_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste YouTube video URL'}),
         }

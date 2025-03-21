@@ -247,6 +247,7 @@ class Command(BaseCommand):
                 "email": email,
                 "is_staff": False,
                 "is_superuser": False,
+                "email_verified": True,
             })
 
             if created:
@@ -298,6 +299,7 @@ class Command(BaseCommand):
                 "email": ADMIN["email"],
                 "is_staff": ADMIN["is_staff"],
                 "is_superuser": ADMIN["is_superuser"],
+                "email_verified": True,
             })
             if created:
                 admin.set_password(PASSWORD)
