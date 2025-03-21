@@ -1,210 +1,14 @@
 {% extends 'users/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'users/css/allModules.css' %}">
+  <script src="{% static 'users/js/allModules.js' %}"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+{% endblock %}
+
 {% block content %}
-    <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Nunito', sans-serif;
-        }
-
-        .content {
-            padding: 40px;
-            background-color: #f9f9f9;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            width: 100%;
-        }
-
-        /* 📌 Header Section */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 1100px;
-            margin-bottom: 20px;
-        }
-
-        .header-left h1 {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .header-icons {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header-icons ion-icon {
-            font-size: 22px;
-            cursor: pointer;
-        }
-
-        /* 📌 Search Bar */
-        .search-bar {
-            width: 250px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            transition: width 0.4s ease;
-        }
-
-        .search-bar:focus {
-            width: 350px;
-            outline: none;
-            border-color: #4da6ff;
-        }
-
-        /* 📌 Modules Container */
-        .modules-container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-            max-width: 1100px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 📌 Modules Header */
-        .modules-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        /* 📌 Unified Module Grid Layout */
-        .module-grid {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-        }
-
-        /* 📌 Unified Module Card (Same as Dashboard) */
-        .module-card {
-            border-radius: 12px;
-            width: 250px; /* Fixed width */
-            height: 300px; /* Same height as dashboard */
-            flex-shrink: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-start;
-            background: #ffffff;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        /* 📌 3D Effect: Left Edge */
-        .module-card:nth-child(odd) {
-            background: #73C4FD;
-            border-left: 5px solid #5ca5ea;
-        }
-
-        .module-card:nth-child(even) {
-            background: #0148FD;
-            border-left: 5px solid #012EAB;
-        }
-
-        .module-card h5 {
-            font-size: 18px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 5px;
-            white-space: normal;
-        }
-
-        .module-card p {
-            font-size: 14px;
-            color: #f5f5f5;
-            max-height: 60px;
-            overflow: hidden;
-        }
-
-        /* 📌 Progress Bar */
-        .progress-container {
-            width: 100%;
-            padding: 5px 0;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: white;
-            transition: width 0.5s ease-in-out;
-        }
-
-        /* 📌 Action Button (Add Module) */
-        .action-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .action-button ion-icon {
-            font-size: 18px;
-            color: white;
-        }
-
-        /* 📌 View All Button */
-        .view-all-container {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .view-all-button {
-            font-size: 14px;
-            font-weight: bold;
-            padding: 10px 15px;
-            background-color: #F24505;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .view-all-button:hover {
-            background-color: #d93804;
-        }
-
-    </style>
-
     <div class="content">
         <!-- 📌 Header Section -->
         <div class="header">
@@ -220,8 +24,8 @@
         <!-- 📌 Modules Container -->
         <div class="modules-container">
             <div class="modules-header">
-                <h2>Your Modules</h2>
-                <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
+                <h2>All Modules</h2>
+                <a href="{% url 'userModules' %}" class="view-all-button">View Your Modules</a>
             </div>
 
             <div class="module-grid">
@@ -250,16 +54,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function searchModules(event) {
-            const query = event.target.value.toLowerCase();
-            const modules = document.querySelectorAll('.module-card');
-
-            modules.forEach(module => {
-                const title = module.querySelector('h5').innerText.toLowerCase();
-                module.style.display = title.includes(query) ? '' : 'none';
-            });
-        }
-    </script>
 {% endblock %}
