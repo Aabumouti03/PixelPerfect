@@ -34,7 +34,7 @@
             <tbody>
                 {% for responder in page_obj %}
                 <tr>
-                    <!-- ✅ Fixed Name Display -->
+                    <!--  Fixed Name Display -->
                     <td>{{ responder.user.user.get_full_name|default:"No Name" }}</td>
                     <td>{{ responder.started_at }}</td>
                     <td>

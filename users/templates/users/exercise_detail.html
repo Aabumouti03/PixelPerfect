@@ -20,8 +20,17 @@
     {% endif %}
 </div>
 
-<div class="exercise-container">
-    <!-- Left: Questions -->
+<div class="exercise-container vertical-layout">
+    <!-- Top: Diagram -->
+    <div class="diagram-container">
+        {% if exercise.diagram %}
+            <img src="{{ exercise.diagram.url }}" alt="Exercise Diagram">
+        {% else %}
+            <p>No diagram available for this exercise.</p>
+        {% endif %}
+    </div>
+
+    <!-- Bottom: Questions -->
     <div class="questions-container">
         <h3>Questions</h3>
         <form method="POST" action="{% url 'exercise_detail' exercise.id %}" id="exercise-form">
@@ -37,16 +46,8 @@
             </div>
         </form>
     </div>
-
-    <!-- Right: Diagram -->
-    <div class="diagram-container">
-        {% if exercise.diagram %}
-            <img src="{{ exercise.diagram.url }}" alt="Exercise Diagram">
-        {% else %}
-            <p>No diagram available for this exercise.</p>
-        {% endif %}
-    </div>
 </div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
