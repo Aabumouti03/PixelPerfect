@@ -2,23 +2,30 @@
 
 .right-column .sticky-note {
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
   min-height: 180px;
   background-color: rgba(115, 196, 253, 0.69);
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
   position: relative;
-  margin: 0 auto;
+  margin: 0 auto 20px auto; /* Adds gap at bottom */
+  box-sizing: border-box;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add consistent margin around the entire sticky-note element */
+.right-column .sticky-note {
+  margin: 0 10px 20px 10px; /* Matches spacing of other elements */
 }
 
 .right-column .sticky-note textarea {
-  width: 100%;
-  height: 120px;
+  flex-grow: 1;
   border: none;
   background: transparent;
-  resize: none;
+  resize: vertical;
   font-family: 'Manrope', sans-serif;
   font-size: 15px;
   outline: none;
@@ -27,7 +34,7 @@
 .right-column .note-controls {
   display: flex;
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: 10px;
   position: relative;
 }
 
@@ -44,6 +51,7 @@
   text-align: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   transition: transform 0.2s, background 0.3s;
+  position: relative;
 }
 
 .right-column .bullet-btn:hover {
@@ -55,6 +63,7 @@
   transform: scale(0.95);
 }
 
+/* Tooltip */
 .right-column .bullet-btn::after {
   content: "Toggle Bullets";
   position: absolute;
@@ -75,4 +84,23 @@
 .right-column .bullet-btn:hover::after {
   opacity: 1;
   visibility: visible;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 800px) {
+  .right-column .sticky-note {
+    min-height: 150px;
+    padding: 10px;
+  }
+
+  .right-column .sticky-note textarea {
+    font-size: 14px;
+  }
+
+  .right-column .bullet-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    line-height: 30px;
+  }
 }

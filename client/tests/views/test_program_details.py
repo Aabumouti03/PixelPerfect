@@ -3,6 +3,8 @@ from django.urls import reverse
 from users.models import User 
 from client.models import Program, Module, ProgramModule
 from users.models import EndUser, UserProgramEnrollment
+from django.contrib.auth import get_user_model
+from urllib.parse import unquote
 
 class ProgramDetailViewTest(TestCase):
 
@@ -67,6 +69,15 @@ class ProgramDetailViewTest(TestCase):
 
     def test_program_delete_nonexistent(self):
         """Test attempting to delete a non-existent program."""
+        # Create and log in as a superuser
+        User = get_user_model()
+        superuser = User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="adminpassword"
+        )
+        self.client.login(username="admin", password="adminpassword")
+        
         url = reverse("delete_program", args=[9999])  # Non-existent program
         response = self.client.post(url)
         self.assertEqual(response.status_code, 404)
@@ -190,5 +201,92 @@ class ProgramDetailViewTest(TestCase):
         # Check if the new module was added with correct order
         new_program_module = ProgramModule.objects.get(program=self.program, module=self.module2)
         self.assertEqual(new_program_module.order, 2)
+   
+    def test_successful_program_deletion(self):
+        """Test that a superuser can successfully delete an existing program."""
+        # Create a program to delete.
+        program_to_delete = Program.objects.create(title="Delete Me", description="To be deleted")
+        User = get_user_model()
+        superuser = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpassword"
+        )
+        self.client.login(username="admin", password="adminpassword")
+        url = reverse("delete_program", args=[program_to_delete.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Program.objects.filter(id=program_to_delete.id).exists())
 
+    def test_delete_program_via_get(self):
+        """Test that a superuser can delete a program via a GET request as well."""
+        program_to_delete = Program.objects.create(title="Delete Me GET", description="To be deleted via GET")
+        User = get_user_model()
+        superuser = User.objects.create_superuser(
+            username="admin2", email="admin2@example.com", password="adminpassword"
+        )
+        self.client.login(username="admin2", password="adminpassword")
+        url = reverse("delete_program", args=[program_to_delete.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Program.objects.filter(id=program_to_delete.id).exists())
+
+    def test_delete_program_non_superuser(self):
+        """Test that a non-superuser attempting to delete a program is redirected."""
+        program_to_delete = Program.objects.create(title="Non-Superuser Delete", description="Should not be deleted")
+        # 'testuser' is not a superuser.
+        self.client.login(username="testuser", password="testpassword")
+        url = reverse("delete_program", args=[program_to_delete.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        # The program should still exist.
+        self.assertTrue(Program.objects.filter(id=program_to_delete.id).exists())
+
+    def test_update_program_with_empty_title(self):
+        """Test updating program details with an empty title."""
+        self.client.login(username="testuser", password="testpassword")
+        url = reverse("program_detail", args=[self.program.id])
+        updated_data = {"title": "", "description": "Updated Description", "update_program": "1"}
+        response = self.client.post(url, updated_data)
+        self.assertEqual(response.status_code, 302)
+        self.program.refresh_from_db()
+        # The title is updated to an empty string as no validation is performed.
+        self.assertEqual(self.program.title, "")
+        self.assertEqual(self.program.description, "Updated Description")
+
+    def test_add_users_with_invalid_user_id(self):
+        """Test that adding a user with an invalid user_id returns a 404."""
+        self.client.login(username="testuser", password="testpassword")
+        url = reverse("program_detail", args=[self.program.id])
+        data = {"add_users": "1", "users_to_add": [9999]}  # 9999 is an invalid user_id.
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_remove_module_without_module_id(self):
+        """Test attempting to remove a module when no module ID is provided."""
+        self.client.login(username="testuser", password="testpassword")
+        url = reverse("program_detail", args=[self.program.id])
+        data = {"remove_module": ""}  # Empty module ID.
+        response = self.client.post(url, data)
+        # The view returns the same page with an error message; hence a 200 response.
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_add_duplicate_module_error_message(self):
+        """Test that attempting to add a duplicate module returns an error message."""
+        self.client.login(username="testuser", password="testpassword")
+        url = reverse("program_detail", args=[self.program.id])
+        data = {"add_modules": "1", "modules_to_add": [self.module1.id]}
+        # First addition should be successful.
+        self.client.post(url, data)
+        # Second addition should trigger a duplicate module error.
+        response = self.client.post(url, data)
+        decoded_url = unquote(response.url)
+        self.assertIn("error_message=Duplicate module added.", decoded_url)
+
+    def test_add_modules_without_module_ids(self):
+        """Test adding modules when no module IDs are provided."""
+        self.client.login(username="testuser", password="testpassword")
+        url = reverse("program_detail", args=[self.program.id])
+        data = {"add_modules": "1", "modules_to_add": []}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
 

@@ -142,16 +142,25 @@
     const ratingValue = document.getElementById("rating-value");
     const csrfToken = "{{ csrf_token }}"; // Ensure CSRF token is included
 
-    function updateStars(rating) {
+    const userRating = parseInt("{{ user_rating }}", 10);  // ✅ Fetch user's rating
+    const averageRating = parseFloat("{{ module.average_rating|default:0 }}"); // ✅ Fetch average rating
+
+    function updateStars(userRating) {
         stars.forEach(star => {
             let starValue = parseInt(star.getAttribute("data-value"));
-            if (starValue <= rating) {
-                star.classList.add("selected"); //  Highlight selected stars
+            if (starValue <= userRating) {
+                star.classList.add("selected"); // ✅ Highlight user rating
             } else {
-                star.classList.remove("selected"); //  Remove highlight from unselected stars
+                star.classList.remove("selected");
             }
         });
     }
+
+    // ✅ Initialize stars based on user's rating
+    updateStars(isNaN(userRating) ? 0 : userRating);
+    
+    // ✅ Display the average rating in the text
+    ratingValue.textContent = `(Rated: ${averageRating.toFixed(1)}/5)`;
 
     stars.forEach(star => {
         star.addEventListener("click", function () {
@@ -168,8 +177,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    ratingValue.textContent = `(Rated: ${data.average_rating}/5)`;
-                    updateStars(data.average_rating);  //  Ensure correct number type
+                    updateStars(rating);  // ✅ Update selected stars with the user's rating
+                    ratingValue.textContent = `(Rated: ${data.average_rating.toFixed(1)}/5)`;
                 } else {
                     alert("Error submitting rating.");
                 }
@@ -177,14 +186,10 @@
             .catch(error => console.error("Error:", error));
         });
     });
-
-    // Ensure initial stars match the current rating
-    let initialRating = parseFloat("{{ module.average_rating|default:0 }}");
-    updateStars(isNaN(initialRating) ? 0 : initialRating);
 });
+   
 
-
-        document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
     var progressChart;  // Store progress chart globally
     var ctx = document.getElementById('progressChart').getContext('2d');
     

@@ -151,44 +151,111 @@ body {
 }
 
 .module-card {
-  border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  width: 250px;
-  height: 300px;
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  overflow: hidden;
-  background: #ffffff;
-}
-.module-card:nth-child(odd) {
-  background: #73C4FD;
-}
-.module-card:nth-child(even) {
-  background: #0148FD;
-}
-.module-card h3 {
-  font-size: 18px;
-  color: #333;
-  margin-bottom: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.module-card p {
-  font-size: 14px;
-  color: #666;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 40px;
-  margin: 5px 0;
+    border-radius: 12px;
+    width: 250px; /* Fixed width */
+    height: 320px; /* Slightly increased height for better text fit */
+    flex-shrink: 0;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out elements */
+    align-items: center;
+    background: #ffffff;
+    text-align: center;
+    position: relative;
+    overflow: hidden; /* Prevent elements from overflowing */
 }
 
+/* 3D Effect: Adding subtle shadow on the left edge */
+.module-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+
+}
+
+/* Alternate colors for adjacent cards */
+.module-card:nth-child(odd) {
+    background: #73C4FD;
+    border-left: 5px solid #5ca5ea; /* Blue 3D-like left edge */
+}
+
+.module-card:nth-child(even) {
+    background: #0048FF;
+    border-left: 5px solid #012EAB; /* Blue 3D-like left edge */
+}
+
+.module-card:nth-child(odd) h3 {
+    color: #333;
+}
+
+.module-card:nth-child(even) h3 {
+    color: #eeebeb;
+}
+
+.module-card:nth-child(odd) p {
+    color: #333;
+}
+
+.module-card:nth-child(even) p {
+    color: #eeebeb;
+}
+
+/* Ensure title stays inside the card */
+.module-card h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+    white-space: normal; /* Allow text to wrap */
+    overflow: hidden;
+    max-height: 45px; /* Prevent title from being too long */
+}
+
+/* Module Description */
+.module-card p {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    overflow: hidden;
+    max-height: 60px; /* Increased height for better readability */
+    margin: 5px 10px;
+    white-space: normal; /* Allow wrapping */
+}
+
+
+
+/* Progress Bar */
+.progress-container {
+    width: 100%;
+    padding: 5px 0;
+}
+
+
+/* View Module Button */
+.view-module-button {
+    background: white;
+    color: #F24505;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;
+}
+
+.view-module-button:hover {
+    background: #F24505;
+    color: white;
+}
+
+
+
+/* trying new adjustment for different screen sizes */
 .progress-container {
   width: 100%;
   display: flex;
@@ -218,10 +285,11 @@ body {
 }
 
 .module-card.locked {
-  background: #e6e6e6 !important;
-  color: #999;
-  pointer-events: none;
-  opacity: 0.8;
+    background: #e6e6e6;
+    color: #999;
+    pointer-events: none;
+    opacity: 0.8;
+    border-left: 5px solid #999; 
 }
 .module-card.locked h3 {
   color: #555;
@@ -327,4 +395,72 @@ body {
   font-style: italic;
   font-size: 0.95rem;
   color: #333;
+}
+
+.dashboard-container {
+    margin-left: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-width: 1400px;
+    padding: 20px;
+}
+
+.left-column {
+    flex: 3;
+    min-width: 280px;
+}
+
+.right-column {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px; 
+    box-sizing: border-box; 
+}
+
+.programs-container,
+.modules-container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.module-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+
+@media (max-width: 1200px) {
+    .dashboard-container {
+        flex-direction: column;
+        align-items: center;
+        margin-left: 60px;
+    }
+    
+    .left-column, .right-column {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .module-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 800px) {
+    body {
+        flex-direction: column;
+    }
+    .dashboard-container {
+        margin-left: 0;
+        padding: 10px;
+    }
+    .sidebar {
+        display: none; 
+    }
 }

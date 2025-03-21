@@ -1,6 +1,6 @@
 from users.models import EndUser, UserProgramEnrollment, UserProgramProgress, UserModuleEnrollment, UserModuleProgress
 from client.models import Program, Module
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Q
 
 
 # Programs Statistics 
@@ -29,26 +29,27 @@ def get_program_completion_stats():
     """Fetch the completion statistics for each program, including those with 0% completion."""
     
     all_programs = Program.objects.values_list('title', flat=True)
-
+    
     completion_stats = (
-        UserProgramProgress.objects.values('program__title', 'status')
-        .annotate(count=Count('id'))
+        UserProgramProgress.objects
+        .values('program__title')
+        .annotate(
+            completed_count=Count('id', filter=Q(completion_percentage=100)),
+            in_progress_count=Count('id', filter=Q(completion_percentage__lt=100))
+        )
     )
-
+    
     completion_data = {title: {'completed': 0, 'in_progress': 0} for title in all_programs}
-
+    
     for entry in completion_stats:
         program = entry['program__title']
-        status = entry['status']
-        if status == 'completed':
-            completion_data[program]['completed'] = entry['count']
-        else:
-            completion_data[program]['in_progress'] += entry['count']
-
+        completion_data[program]['completed'] = entry['completed_count']
+        completion_data[program]['in_progress'] = entry['in_progress_count']
+    
     labels = list(completion_data.keys())
     completed_data = [completion_data[p]['completed'] for p in labels]
     in_progress_data = [completion_data[p]['in_progress'] for p in labels]
-
+    
     return labels, completed_data, in_progress_data
 
 def get_average_program_completion_percentage():
@@ -114,23 +115,27 @@ def get_module_enrollment_stats():
 
 def get_module_completion_stats():
     all_modules = Module.objects.values_list('title', flat=True)
+    
     completion_stats = (
-        UserModuleProgress.objects.values('module__title', 'status')
-        .annotate(count=Count('id'))
+        UserModuleProgress.objects
+        .values('module__title')
+        .annotate(
+            completed_count=Count('id', filter=Q(completion_percentage=100)),
+            in_progress_count=Count('id', filter=Q(completion_percentage__lt=100))
+        )
     )
-
+    
     completion_data = {title: {'completed': 0, 'in_progress': 0} for title in all_modules}
+    
     for entry in completion_stats:
         module = entry['module__title']
-        status = entry['status']
-        if status == 'completed':
-            completion_data[module]['completed'] = entry['count']
-        else:
-            completion_data[module]['in_progress'] += entry['count']
+        completion_data[module]['completed'] = entry['completed_count']
+        completion_data[module]['in_progress'] = entry['in_progress_count']
 
     labels = list(completion_data.keys())
     completed_data = [completion_data[m]['completed'] for m in labels]
     in_progress_data = [completion_data[m]['in_progress'] for m in labels]
+    
     return labels, completed_data, in_progress_data
 
 def get_average_completion_percentage():

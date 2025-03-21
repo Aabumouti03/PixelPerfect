@@ -1,67 +1,45 @@
 {% extends 'users/base.html' %}
 {% load static %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'users/css/user_modules.css' %}">
-{% endblock %}
-
-{% block content %}
+    <link rel="stylesheet" href="{% static 'users/css/userModules.css' %}">
+    <script src="{% static 'users/js/userModules.js' %}"></script>
     <script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+{% endblock %}
 
-    <main class="content">
-        <div class="header">
-            <div class="header-left">
-                <h1>{{ user.username }}'s Modules</h1>
-            </div>
-            <div class="header-icons">
-                <input type="text" class="search-bar" placeholder="Search..." onkeyup="searchModules(event)">
-            </div>
-        </div>
+{% block content %}
 
-        <div class="module-grid">
-            {% for module in module_data %}
-                <div class="module-card">
-                    <h5>{{ module.title }}</h5>
-                    <p>{{ module.description }}</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: {{ module.progress }}%;"></div>
-                    </div>
-                    <div class="progress-container">
-                        <small>{{ module.progress }}% completed</small>
-                        <a href="{% url 'module_overview' module.id %}">View →</a>
+
+
+
+    <section class="modules-container">
+        <header class="modules-header">
+        <h2>Your Modules</h2>
+        <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
+        </header>
+        <div class="module-list">
+        {% for module in module_data|slice:":3" %}
+
+            <div class="module-card">
+                <h3>{{ module.title }}</h3>
+                <p>{{ module.description }}</p>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
                     </div>
                 </div>
-            {% empty %}
-                <p style="text-align: center; color: #555;">No modules enrolled yet.</p>
-            {% endfor %}
-        
-            <div class="view-all-container">
-                <a href="{% url 'all_modules' %}" class="view-all-button">View all modules</a>
+
+                    <span class="progress-text">{{ module.progress_value }}% Complete</span>
+
+                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
+                    
+                
+                
             </div>
-        </div>
-              
-    </main>
+        {% endfor %}      
+    </div>
 
-    <script>
-        function searchModules(event) {
-            const query = event.target.value.toLowerCase();
-            const modules = document.querySelectorAll('.module-card');
-            let count = 0;
-            const moduleGrid = document.querySelector('.module-grid');
 
-            modules.forEach(module => {
-                const title = module.querySelector('h5')?.innerText.toLowerCase();
-                if (title.includes(query)) {
-                    module.style.display = '';
-                    count++;
-                } else {
-                    module.style.display = 'none';
-                }
-            });
-
-            moduleGrid.classList.toggle('one-item', count === 1);
-        }
-    </script>
 {% endblock %}

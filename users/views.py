@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from django.db.models import Avg
-from .models import JournalEntry, User
+from django.db.models import Avg, Q
+from .models import JournalEntry
 from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -31,7 +31,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from users.models import (
-    EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
+    User, EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
     UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
 )
 from client.models import (
@@ -43,7 +43,7 @@ from users.models import (
 )
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-# Logger setup
+
 logger = logging.getLogger(__name__)
 
 def questionnaire(request):
@@ -404,7 +404,7 @@ def sign_up_step_2(request):
 
             send_verification_email_after_sign_up(user, request)
 
-            return render(request, "users/sign_up_email_verification.html") #modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
+            return render(request, "users/sign_up_email_verification.html")
     else:
         profile_form = EndUserProfileForm()
 
@@ -419,20 +419,18 @@ def verify_email_after_sign_up(request, uidb64, token):
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
-        return HttpResponse("Invalid verification link.") #change this to a new html that displays the same message and extend the welcome page navbar.
+        return render(request, 'users/invalid_verification.html')
 
     if default_token_generator.check_token(user, token):
         user.email_verified = True  
         user.save()
         return redirect('verification_done')
 
-    return HttpResponse("Invalid or expired token.")
+    return render(request, 'users/invalid_verification.html')
 
 def verification_done(request):
     return render(request, "users/verification_done.html")
 
-def get_started(request):
-    return render(request, "users/get_started.html")
 
 @login_required
 def log_out(request):
@@ -666,6 +664,88 @@ def recommended_modules(request):
         "enrolled_modules": enrolled_modules
     })
 
+
+@login_required
+def get_started(request):
+    categories = Category.objects.all()
+    
+    filter_pressed = "filter" in request.GET
+    search_pressed = "search_btn" in request.GET
+
+    # Reset everything when "Reset" or "Filter" is pressed
+    if filter_pressed:
+        search_query = ""  # Reset search
+    else:
+        search_query = request.GET.get("search", "").strip()
+
+    sort = request.GET.get("sort", None)
+    filter_type = request.GET.get("filter_type", "all")
+    selected_category_ids = request.GET.getlist("category")
+    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
+
+    # If all categories are selected, reset selection
+    if len(selected_category_ids) == len(categories):
+        selected_category_ids = [category.id for category in categories]
+
+    # Fetch data
+    programs = Program.objects.all()
+    modules = Module.objects.all()
+
+    # Apply filters
+    if filter_pressed:
+
+        #  Check if all categories are selected
+        all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
+
+        if all_categories_selected or not selected_category_ids:
+            #  If all categories are selected, include programs/modules with NO categories
+            programs = programs.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+
+            modules = modules.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+        else:
+            # Standard filtering when not all categories are selected
+            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
+            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
+
+
+        if filter_type == "programs":
+            modules = Module.objects.none()
+        elif filter_type == "modules":
+            programs = Program.objects.none()
+
+    # Apply search logic
+    if search_pressed and search_query:
+        programs = programs.filter(title__icontains=search_query)
+        modules = modules.filter(title__icontains=search_query)
+
+    # Apply sorting
+    if sort == "asc":
+        programs = programs.order_by("title")
+        modules = modules.order_by("title")
+    elif sort == "desc":
+        programs = programs.order_by("-title")
+        modules = modules.order_by("-title")
+
+    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
+    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
+
+    return render(request, "users/get_started.html", {
+        "categories": categories,
+        "programs": programs,
+        "modules": modules,
+        "selected_category_ids": selected_category_ids,
+        "search_query": search_query,
+        "sort": sort,
+        "filter_type": filter_type,
+        "enrolled_programs": enrolled_programs,
+        "enrolled_modules": enrolled_modules,
+    })
+
+
 @login_required
 def user_modules(request):
     user = request.user
@@ -740,11 +820,11 @@ def module_overview(request, module_id):
         'module': module,
         'exercises': exercises,
         'additional_resources': additional_resources,
-        'video_resources': video_resources,  # Pass videos to template
+        'video_resources': video_resources,  
         'progress_value': progress_value,  
-        'user_exercise_progress': user_exercise_progress,  # ✅ Pass user-specific exercise progress
-        'user_resource_progress': user_resource_progress,  # ✅ Pass user-specific resource progress
-        'user_video_progress': user_video_progress,  # ✅ Pass user-specific video progress
+        'user_exercise_progress': user_exercise_progress,  
+        'user_resource_progress': user_resource_progress,  
+        'user_video_progress': user_video_progress, 
     
     }
 
@@ -788,28 +868,41 @@ def rate_module(request, module_id):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            rating_value = int(data.get("rating", 0))
 
-            # reject invalid ratigs
+            # Ensure the rating is a valid integer
+            try:
+                rating_value = int(data.get("rating", 0))
+            except ValueError:
+                return JsonResponse({"success": False, "message": "Invalid rating format."})
+
+            # Reject invalid ratings
             if not (1 <= rating_value <= 5):
                 return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-            end_user, created = EndUser.objects.get_or_create(user=request.user)
+            end_user, _ = EndUser.objects.get_or_create(user=request.user)
 
-            # update or create the rating
+            # Update or create the rating
             rating_obj, created = ModuleRating.objects.update_or_create(
                 user=end_user,  
                 module=module,
                 defaults={'rating': rating_value}
             )
 
+            # ✅ Calculate the new average rating
+            average_rating = ModuleRating.objects.filter(module=module).aggregate(Avg('rating'))['rating__avg']
+            average_rating = round(average_rating, 1) if average_rating else 0
+
+            return JsonResponse({
+                "success": True,
+                "average_rating": average_rating,
+                "user_rating": rating_value,  # ✅ Include user's rating
+                "message": "Rating submitted successfully." if created else "Rating updated successfully."
+            })
+
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON data"})
+            return JsonResponse({"success": False, "message": "Invalid JSON data."})
 
-    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-    average_rating = round(average_rating, 1) if average_rating else 0
-
-    return JsonResponse({"success": True, "average_rating": average_rating})
+    return JsonResponse({"success": False, "message": "Invalid request method."})
 
 
 @login_required
@@ -832,7 +925,7 @@ def mark_done(request):
                 user_progress, created = UserResourceProgress.objects.get_or_create(user=end_user, resource=resource)
                 user_progress.status = 'completed' if action == "done" else 'not_started'
                 user_progress.save()
-                module = resource.modules.first()  
+                module = Module.objects.filter(additional_resources=resource).first()  
             except AdditionalResource.DoesNotExist:
                 return JsonResponse({"success": False, "message": "Resource not found."})
 
@@ -852,7 +945,7 @@ def mark_done(request):
                 user_progress, created = UserVideoProgress.objects.get_or_create(user=end_user, video=video)
                 user_progress.status = 'completed' if action == "done" else 'not_started'
                 user_progress.save()
-                module = video.modules.first() 
+                module = Module.objects.filter(video_resources=video).first()
             except VideoResource.DoesNotExist:
                 return JsonResponse({"success": False, "message": "Video not found."})
 
