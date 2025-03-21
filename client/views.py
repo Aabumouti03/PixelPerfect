@@ -371,21 +371,49 @@ def program_detail(request, program_id):
     if request.method == "POST":
         if "remove_module" in request.POST:
             module_id = request.POST.get("remove_module")
-            program_module = ProgramModule.objects.filter(program=program, module_id=module_id).first()
+            if not module_id or not module_id.strip():
+                # Return an error message when no module ID is provided.
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "No module specified."
+                })
+            try:
+                module_id_int = int(module_id)
+            except ValueError:
+                # Return an error message when the module ID is not a valid number.
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "Invalid module id."
+                })
+
+            program_module = ProgramModule.objects.filter(program=program, module_id=module_id_int).first()
             if program_module:
                 program_module.delete()
             else:
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
-                    'all_users': all_users,
+                    "all_users": all_users,
                     "enrolled_user_ids": enrolled_user_ids,
-                    "program_modules": program_modules,  
+                    "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
                     "enrolled_users": enrolled_users,
                     "error_message": "Module not found."
                 })
             return redirect("program_detail", program_id=program.id)
+
 
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
