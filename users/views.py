@@ -404,7 +404,7 @@ def sign_up_step_2(request):
 
             send_verification_email_after_sign_up(user, request)
 
-            return render(request, "users/sign_up_email_verification.html") #modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
+            return render(request, "users/sign_up_email_verification.html")
     else:
         profile_form = EndUserProfileForm()
 
@@ -419,14 +419,14 @@ def verify_email_after_sign_up(request, uidb64, token):
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
-        return HttpResponse("Invalid verification link.") #change this to a new html that displays the same message and extend the welcome page navbar.
+        return render(request, 'users/invalid_verification.html')
 
     if default_token_generator.check_token(user, token):
         user.email_verified = True  
         user.save()
         return redirect('verification_done')
 
-    return HttpResponse("Invalid or expired token.")
+    return render(request, 'users/invalid_verification.html')
 
 def verification_done(request):
     return render(request, "users/verification_done.html")

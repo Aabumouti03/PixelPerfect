@@ -22,6 +22,7 @@ urlpatterns = [
     path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
     path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('log_out_client/', clientViews.log_out_client, name="log_out_client"),
+    path('sign_up_email_verification/', usersViews.sign_up_email_verification, name="sign_up_email_verification"),
     path('verify-email-after-sign-up/<uidb64>/<token>/', usersViews.verify_email_after_sign_up, name='verify_email_after_sign_up'),
     
     path('reset_password/', 
