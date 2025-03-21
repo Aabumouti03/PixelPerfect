@@ -259,7 +259,7 @@ def client_dashboard(request):
 @login_required 
 @user_passes_test(admin_check) 
 def users_management(request):
-    users = EndUser.objects.all()
+    users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
 @login_required
