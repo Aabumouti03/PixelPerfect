@@ -868,28 +868,41 @@ def rate_module(request, module_id):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            rating_value = int(data.get("rating", 0))
 
-            # reject invalid ratigs
+            # Ensure the rating is a valid integer
+            try:
+                rating_value = int(data.get("rating", 0))
+            except ValueError:
+                return JsonResponse({"success": False, "message": "Invalid rating format."})
+
+            # Reject invalid ratings
             if not (1 <= rating_value <= 5):
                 return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-            end_user, created = EndUser.objects.get_or_create(user=request.user)
+            end_user, _ = EndUser.objects.get_or_create(user=request.user)
 
-            # update or create the rating
+            # Update or create the rating
             rating_obj, created = ModuleRating.objects.update_or_create(
                 user=end_user,  
                 module=module,
                 defaults={'rating': rating_value}
             )
 
+            # ✅ Calculate the new average rating
+            average_rating = ModuleRating.objects.filter(module=module).aggregate(Avg('rating'))['rating__avg']
+            average_rating = round(average_rating, 1) if average_rating else 0
+
+            return JsonResponse({
+                "success": True,
+                "average_rating": average_rating,
+                "user_rating": rating_value,  # ✅ Include user's rating
+                "message": "Rating submitted successfully." if created else "Rating updated successfully."
+            })
+
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON data"})
+            return JsonResponse({"success": False, "message": "Invalid JSON data."})
 
-    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-    average_rating = round(average_rating, 1) if average_rating else 0
-
-    return JsonResponse({"success": True, "average_rating": average_rating})
+    return JsonResponse({"success": False, "message": "Invalid request method."})
 
 
 @login_required
