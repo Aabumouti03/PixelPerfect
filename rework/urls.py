@@ -42,6 +42,7 @@ urlpatterns = [
     # Home page
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
+    path("get_started/", usersViews.get_started, name="get_started"),
 
     # Profile management
     path('profile/', usersViews.show_profile, name='show_profile'),  

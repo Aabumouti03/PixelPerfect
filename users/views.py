@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from django.db.models import Avg
+from django.db.models import Avg, Q
 from .models import JournalEntry
 from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
@@ -375,7 +375,7 @@ def sign_up_step_2(request):
             if user:
                 login(request, user)
 
-            return redirect("questionnaire")
+            return redirect("get_started")
 
 
     else:
@@ -614,6 +614,88 @@ def recommended_modules(request):
         "modules": all_modules or [],
         "enrolled_modules": enrolled_modules
     })
+
+
+@login_required
+def get_started(request):
+    categories = Category.objects.all()
+    
+    filter_pressed = "filter" in request.GET
+    search_pressed = "search_btn" in request.GET
+
+    # Reset everything when "Reset" or "Filter" is pressed
+    if filter_pressed:
+        search_query = ""  # Reset search
+    else:
+        search_query = request.GET.get("search", "").strip()
+
+    sort = request.GET.get("sort", None)
+    filter_type = request.GET.get("filter_type", "all")
+    selected_category_ids = request.GET.getlist("category")
+    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
+
+    # If all categories are selected, reset selection
+    if len(selected_category_ids) == len(categories):
+        selected_category_ids = [category.id for category in categories]
+
+    # Fetch data
+    programs = Program.objects.all()
+    modules = Module.objects.all()
+
+    # Apply filters
+    if filter_pressed:
+
+        #  Check if all categories are selected
+        all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
+
+        if all_categories_selected or not selected_category_ids:
+            #  If all categories are selected, include programs/modules with NO categories
+            programs = programs.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+
+            modules = modules.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+        else:
+            # Standard filtering when not all categories are selected
+            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
+            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
+
+
+        if filter_type == "programs":
+            modules = Module.objects.none()
+        elif filter_type == "modules":
+            programs = Program.objects.none()
+
+    # Apply search logic
+    if search_pressed and search_query:
+        programs = programs.filter(title__icontains=search_query)
+        modules = modules.filter(title__icontains=search_query)
+
+    # Apply sorting
+    if sort == "asc":
+        programs = programs.order_by("title")
+        modules = modules.order_by("title")
+    elif sort == "desc":
+        programs = programs.order_by("-title")
+        modules = modules.order_by("-title")
+
+    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
+    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
+
+    return render(request, "users/get_started.html", {
+        "categories": categories,
+        "programs": programs,
+        "modules": modules,
+        "selected_category_ids": selected_category_ids,
+        "search_query": search_query,
+        "sort": sort,
+        "filter_type": filter_type,
+        "enrolled_programs": enrolled_programs,
+        "enrolled_modules": enrolled_modules,
+    })
+
 
 @login_required
 def user_modules(request):
