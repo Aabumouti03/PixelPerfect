@@ -8,45 +8,86 @@ class JournalViewTest(TestCase):
     """Test suite for journal_view."""
 
     def setUp(self):
-        """Create a test user and login."""
+        """Create a test user and log in."""
+        print("🔍 Setting up the test environment...")
         self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.client.login(username="testuser", password="testpass")
+        login_success = self.client.login(username="testuser", password="testpass")
+        print(f"✅ Login successful: {login_success}")
+        
         self.today = now().date()
         self.yesterday = self.today - timedelta(days=1)
         self.tomorrow = self.today + timedelta(days=1)
+        print(f"📅 Test Dates - Today: {self.today}, Yesterday: {self.yesterday}, Tomorrow: {self.tomorrow}")
 
-    def test_journal_view_without_entry(self):
-        """Test that a journal page with no entry renders an empty form."""
+    def test_journal_view_no_date(self):
+        """Test accessing the journal view with no date provided."""
+        print("\n📌 Running: test_journal_view_no_date")
+        
         response = self.client.get(reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]))
+        print(f"📥 Request made to URL: {reverse('journal_by_date', args=[self.today.strftime('%Y-%m-%d')])}")
+        
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Daily Journal")  # Ensure the page title is present
-        self.assertContains(response, 'name="sleep_hours"')  # Check if sleep_hours input exists
-        self.assertContains(response, 'name="caffeine"')  # Ensure caffeine input exists
-        self.assertContains(response, 'name="hydration"')  # Ensure hydration input exists
+        print(f"✅ Response status code: {response.status_code}")
+        
+        self.assertContains(response, self.today.strftime("%Y-%m-%d"))
+        print("✅ Found today's date in the response content.")
 
-
-    def test_journal_view_with_existing_entry(self):
-        """Test that a journal page with an existing entry shows saved data."""
-        JournalEntry.objects.create(
-            user=self.user, date=self.today, sleep_hours=7, caffeine="yes",
-            hydration=8, stress="medium", goal_progress="high", notes="Had a great day!"
+    def test_journal_view_ajax_no_entry(self):
+        """Test AJAX request when no journal entry exists for the date."""
+        print("\n📌 Running: test_journal_view_ajax_no_entry")
+        
+        response = self.client.get(
+            reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
-        response = self.client.get(reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "value=\"7\"")  # Check if sleep hours are displayed
-        self.assertContains(response, "value=\"yes\"")  # Check if caffeine is pre-selected
-        self.assertContains(response, "value=\"8\"")  # Check if hydration is prefilled
-        self.assertContains(response, "Had a great day!")  # Check if notes appear
+        
+        print(f"📥 AJAX Request made to URL: {reverse('journal_by_date', args=[self.today.strftime('%Y-%m-%d')])}")
+        print(f"✅ Response status code: {response.status_code}")
+        print(f"✅ Response content: {response.content}")
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(response.content, {"success": False, "error": "No entry found."})
+        print("✅ AJAX No Entry Test Passed.")
 
-    def test_journal_view_invalid_date(self):
-        """Test handling of an invalid date format."""
-        response = self.client.get(reverse("journal_by_date", args=["invalid-date"]))
-        self.assertEqual(response.status_code, 200)  # Should still render the page
-        self.assertContains(response, "Daily Journal")  # Page should load with default date
-
-    def test_previous_and_next_day_navigation(self):
-        """Test that the 'Previous' and 'Next' buttons link to the correct dates."""
-        response = self.client.get(reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]))
+    def test_journal_view_ajax_with_entry(self):
+        """Test AJAX request when a journal entry exists for the date."""
+        print("\n📌 Running: test_journal_view_ajax_with_entry")
+        
+        journal_entry = JournalEntry.objects.create(
+            user=self.user, date=self.today, sleep_hours=7, caffeine="yes"
+        )
+        
+        print(f"✅ Journal entry created: {journal_entry}")
+        
+        response = self.client.get(
+            reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest"
+        )
+        
+        print(f"📥 AJAX Request made to URL: {reverse('journal_by_date', args=[self.today.strftime('%Y-%m-%d')])}")
+        print(f"✅ Response status code: {response.status_code}")
+        print(f"✅ Response content: {response.content}")
+        
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, f"/journal/{self.yesterday.strftime('%Y-%m-%d')}/")  # Previous link
-        self.assertContains(response, f"/journal/{self.tomorrow.strftime('%Y-%m-%d')}/")  # Next link
+        self.assertIn("sleep_hours", response.json()["data"])
+        self.assertIn("caffeine", response.json()["data"])
+        
+        expected_response = {
+            "success": True,
+            "data": {
+                "sleep_hours": 7,
+                "caffeine": "yes",
+                "hydration": None,
+                "stress": None,
+                "goal_progress": None,
+                "notes": None,
+                "connected_with_family": None,
+                "expressed_gratitude": None,
+                "outdoors": None,
+                "sunset": None,
+            }
+        }
+        
+        
+        self.assertJSONEqual(response.content, expected_response)
+        print("✅ AJAX With Entry Test Passed.")

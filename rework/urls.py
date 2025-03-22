@@ -19,10 +19,10 @@ urlpatterns = [
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
     path('verification_done/', usersViews.verification_done, name="verification_done"),
-    path('get_started/', usersViews.get_started, name="get_started"),
     path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
     path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('log_out_client/', clientViews.log_out_client, name="log_out_client"),
+    path('sign_up_email_verification/', usersViews.sign_up_email_verification, name="sign_up_email_verification"),
     path('verify-email-after-sign-up/<uidb64>/<token>/', usersViews.verify_email_after_sign_up, name='verify_email_after_sign_up'),
     
     path('reset_password/', 
@@ -42,6 +42,8 @@ urlpatterns = [
     # Home page
     path('about/', usersViews.about, name='about'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
+    path("get_started/", usersViews.get_started, name="get_started"),
+    path('contact-success/', usersViews.contact_success, name='contact_success'),
 
     # Profile management
     path('profile/', usersViews.show_profile, name='show_profile'),  

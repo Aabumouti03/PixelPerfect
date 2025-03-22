@@ -8,24 +8,24 @@ body {
 
 .form-label {
     font-weight: bold;
-    color: #ff440f;
+    color: #000000;
     font-size: 20px;
 }
 
 .form-control {
     border-radius: 10px !important;
     padding: 12px 20px;
-    border: 2px solid #ff440f;
+    border: 2px solid #F24505;
     transition: all 0.3s ease-in-out;
 }
 
 .form-control:focus {
-    border-color: #ff440f;
+    border-color: #F24505;
     box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
 }
 
 .form-check-input {
-    accent-color: #ff440f;
+    accent-color: #F24505;
     width: 22px;
     height: 22px;
     margin-right: 10px;
@@ -49,37 +49,46 @@ body {
 }
 
 .btn-primary {
-    background-color: #ff440f;
-    border-color: #ff440f;
-    border-radius: 50px;
-    padding: 12px 25px;
-    font-size: 16px;
+    padding: 12px 18px;
+    background: #F24505;
+    color: white;
+    font-family: Manrope;
+    border-radius: 25px;
+    font-size: 14px;
     font-weight: bold;
-    transition: background 0.3s ease-in-out, transform 0.2s;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .btn-primary:hover {
-    background-color: #cc370d;
-    transform: translateY(-2px);
+    background: #D43802;
+    color: white;
 }
 
 .btn-secondary {
-    background-color: #6c757d;
-    border-radius: 50px;
-    padding: 12px 25px;
-    font-size: 16px;
-    transition: background 0.3s ease-in-out, transform 0.2s;
+    padding: 12px 18px;
+    background: #ddd;
+    color: black;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
+    background: #bbb;
 }
 
 .create_category h2 {
     font-weight: bold;
-    font-style: italic;
-    color: #ff440f;
+    color: #000000;
     text-align: center;
     margin-bottom: 20px;
     font-size: 36px;
@@ -88,7 +97,7 @@ body {
 .card {
     border-radius: 20px;
     background-color: #f9f9f9;
-    border: 2px solid #ff440f;
+    border: 2px solid #F24505;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -96,7 +105,7 @@ body {
     background: #f9f9f9;
     border-radius: 10px;
     padding: 10px;
-    border: 2px solid #ff440f;
+    border: 2px solid #F24505;
     min-height: 50px;
 }
 
@@ -104,7 +113,7 @@ body {
     display: flex;
     align-items: center;
     padding: 12px;
-    border: 1px solid #ff440f;
+    border: 1px solid #F24505;
     background: white;
     border-radius: 50px;
     margin-bottom: 8px;
@@ -118,13 +127,13 @@ body {
 
 .sortable-ghost {
     background-color: rgba(255, 68, 15, 0.2) !important;
-    border: 1px dashed #ff440f;
+    border: 1px dashed #F24505;
 }
 
 .drag-handle {
     cursor: grab;
     font-size: 18px;
-    color: #ff440f;
+    color: #F24505;
 }
 
 textarea.form-control {
@@ -136,7 +145,7 @@ textarea.form-control {
 }
 
 .module-box {
-    border: 2px solid #ff440f;
+    border: 2px solid #F24505;
     border-radius: 10px;
     padding: 15px;
     background-color: #fff;

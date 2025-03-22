@@ -13,7 +13,8 @@
 
     {% include 'users/welcome_page_navbar.html' %}
     <div class="contact_container">
-        <form action="" class="contact_left">
+        <form method="post" class="contact_left">
+            {% csrf_token %}
             <div class="contact_left_title">
                 <h2> Get in touch! We are here to help.</h2>
             </div>
@@ -27,7 +28,5 @@
             <img src="{% static 'users/img/message.jpg' %}" alt="Contact Us">
         </div>
     </div>
-
-
 </body>
 </html>

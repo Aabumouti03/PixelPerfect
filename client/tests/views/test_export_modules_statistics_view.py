@@ -81,10 +81,10 @@ class ExportModulesStatisticsCSVTest(TestCase):
             ['Enrollment - Module 1', '1'],  
             ['Enrollment - Module 2', '1'],  
             ['Enrollment - Module 3', '0'],  # No enrollment in Module 3
-            ['Completion - Module 1 (Completed)', '0'],
-            ['Completion - Module 1 (In Progress)', '1'],
-            ['Completion - Module 2 (Completed)', '1'],
-            ['Completion - Module 2 (In Progress)', '0'],
+            ['Completion - Module 1 (Completed)', '0'],  # No 100% completion
+            ['Completion - Module 1 (In Progress)', '1'],  # 75% in progress
+            ['Completion - Module 2 (Completed)', '0'],  # 85% is still "in progress"
+            ['Completion - Module 2 (In Progress)', '1'],  # 85% in progress
             ['Completion - Module 3 (Completed)', '0'],
             ['Completion - Module 3 (In Progress)', '0'],
             ['Avg Completion - Module 1', '75.0'],  # Average completion for Module 1

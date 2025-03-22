@@ -30,21 +30,23 @@ class ModuleStatisticsTests(TestCase):
         labels, data = get_module_enrollment_stats()
         self.assertEqual(labels, ["Module A", "Module B"])
         self.assertEqual(data, [5, 3])
-
+        
     @patch("client.models.Module.objects.values_list")
     @patch("users.models.UserModuleProgress.objects.values")
     def test_get_module_completion_stats(self, mock_progress_values, mock_module_values_list):
         mock_module_values_list.return_value = ["Module A", "Module B"]
+        
+        # Mock data now follows completion_percentage logic instead of status
         mock_progress_values.return_value.annotate.return_value = [
-            {"module__title": "Module A", "status": "completed", "count": 4},
-            {"module__title": "Module A", "status": "in_progress", "count": 2},
-            {"module__title": "Module B", "status": "completed", "count": 3},
+            {"module__title": "Module A", "completed_count": 4, "in_progress_count": 2},
+            {"module__title": "Module B", "completed_count": 3, "in_progress_count": 0},
         ]
         
         labels, completed_data, in_progress_data = get_module_completion_stats()
         self.assertEqual(labels, ["Module A", "Module B"])
-        self.assertEqual(completed_data, [4, 3])
-        self.assertEqual(in_progress_data, [2, 0])
+        self.assertEqual(completed_data, [4, 3])  # Completed counts
+        self.assertEqual(in_progress_data, [2, 0])  # In-progress counts
+
 
     @patch("client.models.Module.objects.values_list")
     @patch("users.models.UserModuleProgress.objects.values")

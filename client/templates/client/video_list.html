@@ -1,12 +1,119 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .video-container {
+        width: 1000px;
+        margin-left: 130px ;
+        margin-right: 130px ;
+        margin-top: 90px ;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+        text-align: center;
+    }
+
+    /* Styled heading */
+    .page-title {
+        font-size: 30px;
+        font-weight: bold;
+        color: #ff6b00; 
+        margin-top: 90px;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    /* Video List */
+    .video-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .video-list li {
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: 0.3s ease-in-out;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-list li:hover {
+        background: #fff3e0;
+        transform: scale(1.02);
+    }
+
+    .video-list a {
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: bold;
+        color: #004aad;
+        transition: 0.3s ease-in-out;
+    }
+
+    .video-list a:hover {
+        color: #ff6b00;
+    }
+
+    /* Add Video Button */
+    .add-video-btn {
+        display: block;
+        width: fit-content;
+        margin: 20px auto;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #fff;
+        background: #ff6b00;
+        border-radius: 8px;
+    }
+
+    .add-video-btn:hover {
+        background:  #ff6b00;
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #fff;
+        background: #ff6b00;
+        border-radius: 8px;
+    }
+
+    .back-btn:hover {
+        background:  #ff6b00;
+
+    }
+
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2>Video List</h2>
-  <a href="{% url 'add_video' %}">Add New Video</a>
-  <ul>
-    {% for video in videos %}
-      <li>
-        <a href="{% url 'video_detail' video.id %}">{{ video.title }}</a>
-      </li>
-    {% endfor %}
-  </ul>
+<h2 class="page-title"> Video List</h2>
+
+<div class="video-container">
+    <a href="{% url 'add_video' %}" class="add-video-btn">➕ Add New Video</a>
+
+    {% if videos %}
+        <ul class="video-list">
+            {% for video in videos %}
+                <li>
+                    <a href="{% url 'video_detail' video.id %}">▶ {{ video.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No videos available. Add a new one!</p>
+    {% endif %}
+
+    <a href="{% url 'client_dashboard' %}" class="back-btn">⬅ Back to Dashboard</a>
+</div>
 {% endblock %}

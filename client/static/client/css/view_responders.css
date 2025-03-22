@@ -15,11 +15,12 @@ body {
 
 /* Header Styling */
 .top-bar {
-    display: flex;
+    display: column;
     align-items: center;
     justify-content: stretch;
     margin-bottom: 20px;
-    color: #F24505;
+    margin-left: auto;
+    color: #000000;
 }
 
 /* Table Styling */
@@ -56,15 +57,19 @@ body {
 
 /* Button Styling */
 .btn {
-    padding: 10px 15px;
-    text-decoration: none;
-    border-radius: 20px;
-    font-size: 16px;
-    font-weight: bold;
-    display: inline-block;
-    transition: background 0.3s, transform 0.2s;
-    cursor: pointer;
-    border: 2px solid transparent;
+    font-family: 'Manrope';
+    font-size: 14px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 /* Button Colors */
@@ -74,10 +79,9 @@ body {
     border-color: #3498db;
 }
 
-/* Hover Effects */
-.btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    transform: scale(1.05);
+.view-btn:hover {
+    background: #ebeaea;
+    color: #3498db;
 }
 
 /* Grid Layout for Consistency */
@@ -104,8 +108,8 @@ body {
 }
 
 .back-btn:hover {
-    background: #F24505;
-    transform: scale(1.05);
+        background: #D43802;
+        color: white;
 }
 /* Responsive Design */
 @media (max-width: 1024px) {
@@ -200,17 +204,24 @@ body {
 }
 
 .search-btn {
-    background-color: #F24505;
-    color: white;
-    padding: 8px 15px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    font-family: 'Manrope';
+    font-size: 14px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 .search-btn:hover {
-    background-color: #f24505;
+    background: #D43802;
+    color: white;
 }
 
 

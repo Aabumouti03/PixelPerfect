@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from django.db.models import Avg
-from .models import JournalEntry, User
+from django.db.models import Avg, Q
+from .models import JournalEntry
 from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -19,6 +19,7 @@ from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
+from collections import defaultdict
 logger = logging.getLogger(__name__)
 from .utils import send_verification_email_after_sign_up 
 from django.core.mail import send_mail
@@ -28,9 +29,10 @@ from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
 from users.models import (
-    EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
-    UserProgramEnrollment, JournalEntry
+    User, EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
+    UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
 )
 from client.models import (
     Program, Module, ProgramModule, ModuleRating, Exercise, Category,
@@ -41,11 +43,8 @@ from users.models import (
 )
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-# Logger setup
+
 logger = logging.getLogger(__name__)
-
-
-
 
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
@@ -131,8 +130,8 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-            redirect('recommended_programs')
-            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+                
+            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
@@ -249,7 +248,6 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
 
     # Fetch user progress for each module
     user_progress = {
@@ -257,29 +255,34 @@ def view_program(request, program_id):
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
+    program_modules_data = []  # Store all program modules with progress and locked status
+    previous_completed = True  # The first module should be unlocked
+
+    for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
+        progress_value = user_progress.get(module.id, 0)  # Get progress percentage or default to 0%
+        is_locked = not previous_completed  # Lock module if previous is not completed
 
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
+        program_modules_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress_value": progress_value,
+            "module_order": index + 1,
+            "locked": is_locked,
+        })
 
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
+        # Update the previous_completed status
+        previous_completed = (progress_value == 100)
 
     context = {
         'user': user,
         'program': program,
-        'program_modules': program_modules,
+        'program_modules': program_modules_data,
     }
     
     return render(request, 'users/view_program.html', context)
+
 
 
 def welcome_page(request):
@@ -297,7 +300,31 @@ def about(request):
     return render(request, 'users/about.html')
 
 def contact_us(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        full_message = (
+            f"Name: {name}\n"
+            f"Email: {email}\n\n"
+            f"Message:\n{message}"
+        )
+
+        send_mail(
+            subject="New Contact Us Submission",
+            message=full_message,
+            from_email=settings.EMAIL_HOST_USER,  
+            recipient_list=[settings.EMAIL_HOST_USER],  
+            fail_silently=False,
+        )
+
+        return redirect('contact_success')
+
     return render(request, 'users/contact_us.html')
+
+def contact_success(request):
+    return render(request, 'users/contact_success.html')
 
 def log_in(request):
     """Log in page view function"""
@@ -377,7 +404,7 @@ def sign_up_step_2(request):
 
             send_verification_email_after_sign_up(user, request)
 
-            return render(request, "users/sign_up_email_verification.html") #modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
+            return render(request, "users/sign_up_email_verification.html")
     else:
         profile_form = EndUserProfileForm()
 
@@ -392,20 +419,18 @@ def verify_email_after_sign_up(request, uidb64, token):
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
-        return HttpResponse("Invalid verification link.") #change this to a new html that displays the same message and extend the welcome page navbar.
+        return render(request, 'users/invalid_verification.html')
 
     if default_token_generator.check_token(user, token):
         user.email_verified = True  
         user.save()
         return redirect('verification_done')
 
-    return HttpResponse("Invalid or expired token.")
+    return render(request, 'users/invalid_verification.html')
 
 def verification_done(request):
     return render(request, "users/verification_done.html")
 
-def get_started(request):
-    return render(request, "users/get_started.html")
 
 @login_required
 def log_out(request):
@@ -639,6 +664,88 @@ def recommended_modules(request):
         "enrolled_modules": enrolled_modules
     })
 
+
+@login_required
+def get_started(request):
+    categories = Category.objects.all()
+    
+    filter_pressed = "filter" in request.GET
+    search_pressed = "search_btn" in request.GET
+
+    # Reset everything when "Reset" or "Filter" is pressed
+    if filter_pressed:
+        search_query = ""  # Reset search
+    else:
+        search_query = request.GET.get("search", "").strip()
+
+    sort = request.GET.get("sort", None)
+    filter_type = request.GET.get("filter_type", "all")
+    selected_category_ids = request.GET.getlist("category")
+    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
+
+    # If all categories are selected, reset selection
+    if len(selected_category_ids) == len(categories):
+        selected_category_ids = [category.id for category in categories]
+
+    # Fetch data
+    programs = Program.objects.all()
+    modules = Module.objects.all()
+
+    # Apply filters
+    if filter_pressed:
+
+        #  Check if all categories are selected
+        all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
+
+        if all_categories_selected or not selected_category_ids:
+            #  If all categories are selected, include programs/modules with NO categories
+            programs = programs.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+
+            modules = modules.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+        else:
+            # Standard filtering when not all categories are selected
+            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
+            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
+
+
+        if filter_type == "programs":
+            modules = Module.objects.none()
+        elif filter_type == "modules":
+            programs = Program.objects.none()
+
+    # Apply search logic
+    if search_pressed and search_query:
+        programs = programs.filter(title__icontains=search_query)
+        modules = modules.filter(title__icontains=search_query)
+
+    # Apply sorting
+    if sort == "asc":
+        programs = programs.order_by("title")
+        modules = modules.order_by("title")
+    elif sort == "desc":
+        programs = programs.order_by("-title")
+        modules = modules.order_by("-title")
+
+    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
+    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
+
+    return render(request, "users/get_started.html", {
+        "categories": categories,
+        "programs": programs,
+        "modules": modules,
+        "selected_category_ids": selected_category_ids,
+        "search_query": search_query,
+        "sort": sort,
+        "filter_type": filter_type,
+        "enrolled_programs": enrolled_programs,
+        "enrolled_modules": enrolled_modules,
+    })
+
+
 @login_required
 def user_modules(request):
     user = request.user
@@ -659,44 +766,52 @@ def user_modules(request):
             "id": module.id,
             "title": module.title,
             "description": module.description,
-            "progress": progress_percentage,
+            "progress_value": progress_percentage,  
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})
 
 @login_required
 def module_overview(request, module_id):
-    """Fetch the module by ID and retrieve related exercises, additional resources, and videos.""" 
+    """Fetch the module by ID and retrieve related exercises, additional resources, and videos for a specific user.""" 
     
     module = get_object_or_404(Module, id=module_id)
-
     user = request.user
 
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
+    # Ensure the EndUser profile exists
+    end_user, created = EndUser.objects.get_or_create(user=user)
 
+    # Fetch exercises, additional resources, and videos linked to the module
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
-    for exercise in exercises:
-        if exercise.status=='completed':
-            completed_items += 1
-
     additional_resources = list(module.additional_resources.all())
-    video_resources = list(module.video_resources.all())  # Fetch video resources
+    video_resources = list(module.video_resources.all()) 
 
-    completed_items = sum(1 for exercise in exercises if exercise.status == 'completed')
-    completed_items += sum(1 for resource in additional_resources if resource.status == 'completed')
-    completed_items += sum(1 for video in video_resources if video.status == 'completed')
+    user_exercise_progress = {
+        progress.exercise.id: progress.status for progress in UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises)
+    }
+
+    user_resource_progress = {
+        progress.resource.id: progress.status for progress in UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources)
+    }
+
+    user_video_progress = {
+        progress.video.id: progress.status for progress in UserVideoProgress.objects.filter(user=end_user, video__in=video_resources)
+    }
+
+    # Calculate progress percentage
+    completed_items = sum(1 for status in user_exercise_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_resource_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_video_progress.values() if status == 'completed')
+
 
 
     total_items = len(exercises) + len(additional_resources) + len(video_resources)
-
     progress_value = (completed_items / total_items) * 100 if total_items > 0 else 0
 
+    # Update or create user-specific module progress
     user_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
     user_progress.completion_percentage = progress_value
     user_progress.save()
@@ -705,8 +820,12 @@ def module_overview(request, module_id):
         'module': module,
         'exercises': exercises,
         'additional_resources': additional_resources,
-        'video_resources': video_resources,  # Pass videos to template
+        'video_resources': video_resources,  
         'progress_value': progress_value,  
+        'user_exercise_progress': user_exercise_progress,  
+        'user_resource_progress': user_resource_progress,  
+        'user_video_progress': user_video_progress, 
+    
     }
 
     return render(request, 'users/moduleOverview.html', context)
@@ -715,7 +834,6 @@ def module_overview(request, module_id):
 @login_required
 def exercise_detail(request, exercise_id):
     """Fetch the exercise details, including questions, saved responses, and the related diagram."""
-
     exercise = get_object_or_404(Exercise, id=exercise_id)
 
     user, created = EndUser.objects.get_or_create(user=request.user)
@@ -742,7 +860,6 @@ def exercise_detail(request, exercise_id):
 @csrf_exempt  
 @login_required
 def rate_module(request, module_id):
-    """Handles AJAX-based user rating for a module."""
     
     module = get_object_or_404(Module, id=module_id)
 
@@ -774,6 +891,7 @@ def rate_module(request, module_id):
 
 
 @login_required
+@csrf_exempt
 def mark_done(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -782,37 +900,53 @@ def mark_done(request):
         action = data.get("action")  # 'done' or 'undo'
 
         user = request.user
-        end_user = EndUser.objects.get(user=user)
+        end_user, created = EndUser.objects.get_or_create(user=user)
+
+        module = None
 
         if item_type == "resource":
-            resource = AdditionalResource.objects.get(id=item_id)
-            resource.status = 'completed' if action == "done" else 'in_progress'
-            resource.save()
-            module = Module.objects.filter(additional_resources=resource).first()
+            try:
+                resource = AdditionalResource.objects.get(id=item_id)
+                user_progress, created = UserResourceProgress.objects.get_or_create(user=end_user, resource=resource)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = Module.objects.filter(additional_resources=resource).first()  
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Resource not found."})
 
         elif item_type == "exercise":
-            exercise = Exercise.objects.get(id=item_id)
-            exercise.status = 'completed' if action == "done" else 'in_progress'
-            exercise.save()
-            module = exercise.sections.first().modules.first()
+            try:
+                exercise = Exercise.objects.get(id=item_id)
+                user_progress, created = UserExerciseProgress.objects.get_or_create(user=end_user, exercise=exercise)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = exercise.sections.first().modules.first() 
+            except Exercise.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Exercise not found."})
 
         elif item_type == "video":
-            video = VideoResource.objects.get(id=item_id)
-            video.status = 'completed' if action == "done" else 'in_progress'
-            video.save()
-            module = Module.objects.filter(video_resources=video).first()
+            try:
+                video = VideoResource.objects.get(id=item_id)
+                user_progress, created = UserVideoProgress.objects.get_or_create(user=end_user, video=video)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = Module.objects.filter(video_resources=video).first()
+            except VideoResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Video not found."})
 
-        user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
-        user_module_progress.completion_percentage = calculate_progress(end_user, module)
-        user_module_progress.save()
+        if module:
+            user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
+            user_module_progress.completion_percentage = calculate_progress(end_user, module)
+            user_module_progress.save()
 
-        return JsonResponse({
-            "success": True,
-            "updated_progress": user_module_progress.completion_percentage
-        })
+            return JsonResponse({
+                "success": True,
+                "updated_progress": user_module_progress.completion_percentage
+            })
 
-    return JsonResponse({"success": False})
+        return JsonResponse({"success": False, "message": "Module not found."})
 
+    return JsonResponse({"success": False, "message": "Invalid request."})
 
 @login_required
 def unenroll_module(request):
