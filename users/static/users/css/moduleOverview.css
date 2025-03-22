@@ -281,28 +281,39 @@ canvas#progressChart {
 }
 
 .done-button {
-    background-color: #F24505;  /* Default to orange */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 12px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 /* Style for "Done" state (orange) */
 .done-button {
-    background-color: #F24505;  /* Default to orange */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-left: 15px; /* ✅ Adds spacing to move it right */
+    font-size: 12px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 /* Style for "Done" state (orange) */
 .done-button.undo {
-    background-color: #F24505;
+    background-color: #ccc;
     color: white;
     padding: 10px 20px;
     margin-left: 15px; /* ✅ Adds spacing to move it right */

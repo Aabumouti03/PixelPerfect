@@ -40,6 +40,12 @@ body {
     color: #333;
 }
 
+.modules-header h2 {
+    font-weight: 700;
+    color: #000000;
+    padding-right: 30px;
+}
+
 /* Search bar */
 .search-bar {
     width: 250px;

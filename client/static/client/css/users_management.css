@@ -96,6 +96,23 @@ h2 {
     transition: 0.3s ease;
 }
 
+/* View Button Style */
+.view-btn {
+    font-family: 'Manrope';
+    padding: 6px 12px;
+    background-color: #F24505;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* View Button Hover Effect */
+.view-btn:hover {
+    background-color: #D43802;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .table-controls {
