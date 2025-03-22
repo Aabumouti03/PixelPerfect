@@ -64,7 +64,8 @@ class ViewProgramTest(TestCase):
         self.client.logout()
         response = self.client.get(self.program_url)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse("login")))
+        self.assertTrue(response.url.startswith(reverse("log_in")))
+
 
     def test_modules_are_ordered_correctly(self):
         """Test that program modules are ordered correctly"""
