@@ -130,8 +130,8 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-            redirect('recommended_programs')
-            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+                
+            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
@@ -248,7 +248,6 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
 
     # Fetch user progress for each module
     user_progress = {
@@ -256,29 +255,34 @@ def view_program(request, program_id):
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
+    program_modules_data = []  # Store all program modules with progress and locked status
+    previous_completed = True  # The first module should be unlocked
+
+    for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
+        progress_value = user_progress.get(module.id, 0)  # Get progress percentage or default to 0%
+        is_locked = not previous_completed  # Lock module if previous is not completed
 
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
+        program_modules_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress_value": progress_value,
+            "module_order": index + 1,
+            "locked": is_locked,
+        })
 
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
+        # Update the previous_completed status
+        previous_completed = (progress_value == 100)
 
     context = {
         'user': user,
         'program': program,
-        'program_modules': program_modules,
+        'program_modules': program_modules_data,
     }
     
     return render(request, 'users/view_program.html', context)
+
 
 
 def welcome_page(request):
@@ -301,26 +305,22 @@ def contact_us(request):
         email = request.POST.get('email')
         message = request.POST.get('message')
 
-        # Combine the message content
         full_message = (
             f"Name: {name}\n"
             f"Email: {email}\n\n"
             f"Message:\n{message}"
         )
 
-        # Send the email (settings.EMAIL_HOST_USER is often used as the 'from' address)
         send_mail(
             subject="New Contact Us Submission",
             message=full_message,
             from_email=settings.EMAIL_HOST_USER,  
-            recipient_list=[settings.EMAIL_HOST_USER],  # Replace with your admin email or use settings.ADMINS
+            recipient_list=[settings.EMAIL_HOST_USER],  
             fail_silently=False,
         )
 
-        # Redirect to a success page (create a URL/path named 'contact_success' for this)
         return redirect('contact_success')
 
-    # If GET request, simply render the contact form
     return render(request, 'users/contact_us.html')
 
 def contact_success(request):
@@ -867,41 +867,28 @@ def rate_module(request, module_id):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            rating_value = int(data.get("rating", 0))
 
-            # Ensure the rating is a valid integer
-            try:
-                rating_value = int(data.get("rating", 0))
-            except ValueError:
-                return JsonResponse({"success": False, "message": "Invalid rating format."})
-
-            # Reject invalid ratings
+            # reject invalid ratigs
             if not (1 <= rating_value <= 5):
                 return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-            end_user, _ = EndUser.objects.get_or_create(user=request.user)
+            end_user, created = EndUser.objects.get_or_create(user=request.user)
 
-            # Update or create the rating
+            # update or create the rating
             rating_obj, created = ModuleRating.objects.update_or_create(
                 user=end_user,  
                 module=module,
                 defaults={'rating': rating_value}
             )
 
-            # ✅ Calculate the new average rating
-            average_rating = ModuleRating.objects.filter(module=module).aggregate(Avg('rating'))['rating__avg']
-            average_rating = round(average_rating, 1) if average_rating else 0
-
-            return JsonResponse({
-                "success": True,
-                "average_rating": average_rating,
-                "user_rating": rating_value,  # ✅ Include user's rating
-                "message": "Rating submitted successfully." if created else "Rating updated successfully."
-            })
-
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON data."})
+            return JsonResponse({"success": False, "message": "Invalid JSON data"})
 
-    return JsonResponse({"success": False, "message": "Invalid request method."})
+    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+    average_rating = round(average_rating, 1) if average_rating else 0
+
+    return JsonResponse({"success": True, "average_rating": average_rating})
 
 
 @login_required
