@@ -2,6 +2,7 @@ from django.test import SimpleTestCase
 from users.templatetags import custome_filters
 
 class GetItemFilterTest(SimpleTestCase):
+    
     def test_key_exists_in_dict(self):
         data = {'name': 'queen'}
         result = custome_filters.get_item(data, 'name')

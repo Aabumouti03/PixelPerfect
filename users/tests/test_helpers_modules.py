@@ -7,7 +7,6 @@ from users.models import (
 from client.models import Module, Exercise, AdditionalResource, Program, ProgramModule, Section, VideoResource
 from users.helpers_modules import calculate_progress, calculate_program_progress, update_user_program_progress
 
-
 User = get_user_model()
 
 class ProgressCalculationTests(TestCase):

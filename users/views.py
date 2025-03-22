@@ -834,7 +834,6 @@ def module_overview(request, module_id):
 @login_required
 def exercise_detail(request, exercise_id):
     """Fetch the exercise details, including questions, saved responses, and the related diagram."""
-
     exercise = get_object_or_404(Exercise, id=exercise_id)
 
     user, created = EndUser.objects.get_or_create(user=request.user)
