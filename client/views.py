@@ -75,7 +75,7 @@ def edit_module(request, module_id):
     return render(request, 'Module/edit_module.html', {
         'form': form,
         'module': module,
-        'all_sections': all_sections  # ✅ Pass sections to template
+        'all_sections': all_sections  # Pass sections to template
     })
 
 @user_passes_test(admin_check)
