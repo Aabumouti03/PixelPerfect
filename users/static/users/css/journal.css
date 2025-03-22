@@ -1,4 +1,5 @@
 /* General Page Styling */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 .journal-container {
     max-width: 900px; /* Increase the width */
     margin: 20px auto; /* Center it */

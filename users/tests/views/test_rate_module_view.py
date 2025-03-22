@@ -118,7 +118,8 @@ class RateModuleTestCase(TestCase):
         """Test that unauthenticated users cannot rate a module."""
         url = reverse("rate_module", kwargs={"module_id": self.module.id})
         response = self.client.post(url, json.dumps({"rating": 4}), content_type="application/json")
-        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertEqual(response.status_code, 302) 
+        
 
     def test_get_request_is_rejected(self):
         """Test that a GET request is rejected."""
