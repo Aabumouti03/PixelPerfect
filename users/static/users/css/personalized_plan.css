@@ -34,22 +34,11 @@ body {
     margin-left: 270px;
 }
 
-/* Container for program cards - one per row */
-.programs-container {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
-    backdrop-filter: blur(10px);
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-}
+
 
 /* Program card styling to match dashboard */
-.program-card {
+.program-card,
+.module-card {
     border-radius: 12px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
     width: 100%;
@@ -63,26 +52,123 @@ body {
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.program-card:hover {
+.program-card:hover,
+.module-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Program title and description */
-.program-card h3 {
+.program-card,
+.module-card h3 {
     font-size: 1.5rem;
     color: #333;
     margin-bottom: 10px;
 }
 
-.program-card p {
+.program-card,
+.module-card p {
     font-size: 1rem;
     color: #666;
     margin-bottom: 15px;
 }
 
+
+
+
+.module-card,
+.program-card  {
+    border-radius: 12px;
+    width: 250px; /* Fixed width */
+    height: 320px; /* Slightly increased height for better text fit */
+    flex-shrink: 0;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out elements */
+    align-items: center;
+    background: #ffffff;
+    text-align: center;
+    position: relative;
+    overflow: hidden; /* Prevent elements from overflowing */
+}
+
+/* 3D Effect: Adding subtle shadow on the left edge */
+.module-card::before,
+.program-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+
+}
+
+/* Alternate colors for adjacent cards */
+.module-card:nth-child(odd),
+.program-card:nth-child(odd)  {
+    background: #73C4FD;
+    border-left: 5px solid #5ca5ea; /* Blue 3D-like left edge */
+}
+
+.module-card:nth-child(even),
+.program-card:nth-child(even) {
+    background: #0048FF;
+    border-left: 5px solid #012EAB; /* Blue 3D-like left edge */
+}
+
+.module-card:nth-child(odd), .program-card:nth-child(odd) h3 {
+    color: #333;
+}
+
+.module-card:nth-child(even), .program-card:nth-child(even) h3 {
+    color: #eeebeb;
+}
+
+.module-card:nth-child(odd), .program-card:nth-child(odd) p {
+    color: #333;
+}
+
+.module-card:nth-child(even), .program-card:nth-child(even) p {
+    color: #eeebeb;
+}
+
+
+/* Ensure title stays inside the card */
+.module-card, .program-card h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+    white-space: normal; /* Allow text to wrap */
+    overflow: hidden;
+    max-height: 45px; /* Prevent title from being too long */
+}
+
+/* Module Description */
+.module-card, .program-card p {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    overflow: hidden;
+    max-height: 60px; /* Increased height for better readability */
+    margin: 5px 10px;
+    white-space: normal; /* Allow wrapping */
+}
+
+
+
 /* Buttons positioned at the top-right corner */
 .program-card .button-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.module-card .button-container {
     position: absolute;
     top: 15px;
     right: 15px;
@@ -127,17 +213,14 @@ body {
 }
 
 /* Container for modules - 3 per row */
+.programs-container,
 .modules-container {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
-    backdrop-filter: blur(10px);
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+  backdrop-filter: blur(10px);
+  margin-top: 20px;
 }
 
 /* Button styling */
@@ -155,7 +238,7 @@ button, .view-program-button {
 }
 
 button:hover, .view-program-button:hover {
-    background-color: #d63d04;
+    background-color: #D43802;
 }
 
 .enroll-button.enrolled {
@@ -182,4 +265,23 @@ button:hover, .view-program-button:hover {
 
 .nav-buttons a button:hover {
     background-color: #444;
+}
+
+
+/* View Module Button */
+.view-module-button {
+    background: white;
+    color: #F24505;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;
+}
+
+.view-module-button:hover {
+    background: #D43802;
+    color: white;
 }

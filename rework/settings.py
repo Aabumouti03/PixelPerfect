@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
-LOGIN_URL = "/log_in/"  # Change this to match your actual login URL
+LOGIN_URL = "/accounts/log_in/"  # Change this to match your actual login URL
 
 
 # Internationalization

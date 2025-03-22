@@ -50,15 +50,15 @@ h2 {
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
 .exercise-title {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
     margin-bottom: 20px;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #333;
+    margin-left: auto;
+    color: #000000;
 }
-.exercise-title p {
-    font-size: 1rem;
-    color: #555;
+.exercise-title h1 {
+    margin-left: 330px;
 }
 
 /* Exercise Container */
@@ -113,18 +113,21 @@ h2 {
     margin-top: 20px;
 }
 .submit-container button {
-    background-color: #FF6600; 
-    border: none;
-    padding: 12px 20px;
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease-in-out;
+    font-size: 16px;
+  padding: 14px 20px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 .submit-container button:hover {
-    background: linear-gradient(135deg, #0056b3, #002e7c);
+    background: linear-gradient(135deg, #D43802, #D43802);
 }
 
 /* Diagram Section */
@@ -150,4 +153,22 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+.back-btn {
+    background-color: #F24505; 
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.back-btn:hover {
+    background: #D43802;
+    color: white;
 }

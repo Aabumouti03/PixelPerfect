@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
 body {
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Manrope', sans-serif;
 }
 
 /* Main container */
@@ -38,6 +38,12 @@ body {
     font-size: 2rem;
     font-weight: 700;
     color: #333;
+}
+
+.modules-header h2 {
+    font-weight: 700;
+    color: #000000;
+    padding-right: 30px;
 }
 
 /* Search bar */

@@ -37,7 +37,7 @@
 
 .contact_left_title h2 {
     font-weight: 600;
-    color: #ff440f;
+    color: #F24505;
     font-size: 30px;
     margin-bottom: 10px;
     text-align: center;
@@ -51,7 +51,7 @@
     outline: none;
     padding-left: 25px;
     font-weight: 500;
-    color: #ff440f;
+    color: #F24505;
     border-radius: 50px;
     display: block;
     box-sizing: border-box;
@@ -60,7 +60,7 @@
 textarea.contact_inputs {
     height: 350px;
     padding: 15px 25px;
-    border: 2px solid #ff440f;
+    border: 2px solid #F24505;
     border-radius: 20px;
     resize: both;
     box-sizing: border-box; 
@@ -72,8 +72,8 @@ textarea.contact_inputs {
 .contact_body input{
     border-radius: 50px;
     background-color: white;
-    color: #ff440f;
-    border: 2px solid #ff440f; 
+    color: #F24505;
+    border: 2px solid #F24505; 
     width: 600px;
 }
 .contact_body input:hover{
@@ -84,7 +84,7 @@ textarea.contact_inputs {
     width: 600px;
     height: 50px;
     background-color: rgb(255, 255, 180);
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     border: none;
     border-radius: 50px;
@@ -93,12 +93,12 @@ textarea.contact_inputs {
 }
 
 .contact_left button:hover {
-    background-color: #ff440f;
+    background-color: #F24505;
     color: white;
 }
 .contact_inputs::placeholder {
 
-    color: #ff440f;
+    color: #F24505;
 }
  
 .contact_right {
@@ -197,7 +197,7 @@ textarea.contact_inputs {
 
 .title-background {
     display: inline-block;
-    background: #ff5722;
+    background: #F24505;
     color: white;
     padding: 12px 25px;
     border-radius: 5px;
@@ -229,7 +229,7 @@ textarea.contact_inputs {
 
 .cta-button {
     display: block;
-    background-color: #ff440f;
+    background-color: #F24505;
     color: white;
     font-size: 18px;
     font-weight: bold;
@@ -245,16 +245,16 @@ textarea.contact_inputs {
 }
 
 .cta-button:hover {
-    background-color: #d9380c;
+    background-color: #D43802;
     transform: translateY(-2px);
 }
 
 .strong_personalization{
-    color: #ff440f;
+    color: #F24505;
 }
 
 .start_journey{
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     font-size: 20px;
 }

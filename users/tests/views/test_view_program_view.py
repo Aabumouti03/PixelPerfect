@@ -48,7 +48,7 @@ class ViewProgramTest(TestCase):
         
         response = self.client.get(self.program_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'users/program_not_found.html')  # Should load the 'program_not_found.html'
+        self.assertTemplateUsed(response, 'users/program_not_found.html')
 
     def test_authenticated_user_not_enrolled_sees_not_found_page(self):
         """Test that an authenticated user not enrolled in the program gets a not found page"""
@@ -56,47 +56,45 @@ class ViewProgramTest(TestCase):
         new_program = Program.objects.create(title="Other Program", description="Another test program")
         response = self.client.get(reverse("view_program", args=[new_program.id]))
 
-        self.assertEqual(response.status_code, 200)  # Should load 'program_not_found.html'
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/program_not_found.html")
 
     def test_unauthenticated_user_redirected_to_login(self):
         """Test that an unauthenticated user is redirected to login"""
         self.client.logout()
         response = self.client.get(self.program_url)
-        self.assertEqual(response.status_code, 302)  # Should redirect
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("log_in")))
 
-        from django.conf import settings
-        expected_login_url = settings.LOGIN_URL if hasattr(settings, "LOGIN_URL") else "/accounts/login/"
-        self.assertTrue(response.url.startswith(expected_login_url))
 
     def test_modules_are_ordered_correctly(self):
         """Test that program modules are ordered correctly"""
         response = self.client.get(self.program_url)
 
         modules = response.context["program_modules"]
-        self.assertEqual(modules[0].module.title, "Module 1")
-        self.assertEqual(modules[1].module.title, "Module 2")
+        self.assertEqual(modules[0]["title"], "Module 1")
+        self.assertEqual(modules[1]["title"], "Module 2")
 
     def test_module_progress_values(self):
         """Test that progress values are assigned correctly"""
         response = self.client.get(self.program_url)
 
         modules = response.context["program_modules"]
-        self.assertEqual(modules[0].module.progress_value, 100)  # Module 1 completed
-        self.assertEqual(modules[1].module.progress_value, 50)   # Module 2 at 50%
+        self.assertEqual(modules[0]["progress_value"], 100)  # Module 1 completed
+        self.assertEqual(modules[1]["progress_value"], 50)   # Module 2 at 50%
 
     def test_module_locking_logic(self):
         """Test that modules are locked/unlocked based on progress"""
         response = self.client.get(self.program_url)
 
         modules = response.context["program_modules"]
-        self.assertFalse(modules[0].module.locked)  # First module should be unlocked
-        self.assertFalse(modules[1].module.locked)  # Second module should also be unlocked
+        self.assertFalse(modules[0]["locked"])  # First module should be unlocked
+        self.assertFalse(modules[1]["locked"])  # Second module should also be unlocked
 
         # Now, reset progress for module1 and re-run the test
         UserModuleProgress.objects.filter(module=self.module1).update(completion_percentage=0)
         response = self.client.get(self.program_url)
 
         modules = response.context["program_modules"]
-        self.assertFalse(modules[0].module.locked)  # First module should still be unlocked
-        self.assertTrue(modules[1].module.locked)   # Second module should now be locked
+        self.assertFalse(modules[0]["locked"])  # First module should still be unlocked
+        self.assertTrue(modules[1]["locked"])   # Second module should now be locked
