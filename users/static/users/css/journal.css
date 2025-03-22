@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 /* General Page Styling */
 .journal-container {
     max-width: 900px; /* Increase the width */
@@ -18,6 +19,10 @@
     margin-bottom: 20px;
 }
 
+.journal-header h1{
+    padding: 30px;
+}
+
 .journal-entry {
     display: flex;
     flex-direction: column;
@@ -35,17 +40,24 @@
 }
 
 .nav-button {
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #F24505;
-    padding: 8px 15px;
-    border-radius: 8px;
-    transition: background 0.3s ease-in-out;
+    display: inline-block;
+  background: white;
+  color: #F24505;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 10px 14px;
+  border-radius: 25px;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #F24505;
+  margin-top: auto;
 }
 
 .nav-button:hover {
-    background: rgba(242, 69, 5, 0.1);
+    background: #D43802;
+    color: white;
 }
 
 /* Journal Form */
@@ -151,6 +163,7 @@ input:focus, select:focus, textarea:focus {
     color: white;
     border-radius: 25px;
     font-size: 14px;
+    font-family: Manrope;
     font-weight: bold;
     cursor: pointer;
     text-align: center;

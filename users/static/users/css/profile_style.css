@@ -205,6 +205,7 @@ html, body {
     padding: 12px 18px;
     background: #F24505;
     color: white;
+    font-family: Manrope;
     border-radius: 25px;
     font-size: 14px;
     font-weight: bold;
@@ -283,6 +284,7 @@ html, body {
     color: white;
     border-radius: 25px;
     font-size: 14px;
+    font-family: Manrope;
     font-weight: bold;
     cursor: pointer;
     text-align: center;
