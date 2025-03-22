@@ -44,10 +44,14 @@ from django.http import JsonResponse
 from collections import defaultdict
 
 
+@user_passes_test(admin_check)
+@login_required
 def CreateModule(request):
     modules = Module.objects.prefetch_related("sections__exercises__questions").all()
     return render(request, "Module/Edit_Add_Module.html", {"modules": modules})
 
+@user_passes_test(admin_check)
+@login_required
 def edit_module(request, module_id):
     """Handles editing an existing module."""
     module = get_object_or_404(Module, id=module_id)
@@ -72,6 +76,8 @@ def edit_module(request, module_id):
         'all_sections': all_sections  # ✅ Pass sections to template
     })
 
+@user_passes_test(admin_check)
+@login_required
 def edit_section(request, section_id):
     section = get_object_or_404(Section, id=section_id)
 
@@ -94,7 +100,8 @@ def edit_section(request, section_id):
         'all_exercises': all_exercises,
     })
 
-
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def update_module(request, module_id):
     """Updates the module title or description based on AJAX request."""
@@ -119,7 +126,8 @@ def update_module(request, module_id):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
-
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def add_section_to_module(request, module_id):
     """Handles adding a section to a module via AJAX."""
@@ -139,7 +147,8 @@ def add_section_to_module(request, module_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
-
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def remove_section_from_module(request, module_id):
     """Handles removing sections from a module via AJAX."""
@@ -157,7 +166,8 @@ def remove_section_from_module(request, module_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
-
+@user_passes_test(admin_check)
+@login_required
 def edit_exercise(request, exercise_id):
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == "POST":
@@ -170,6 +180,8 @@ def edit_exercise(request, exercise_id):
         form = ExerciseForm(instance=exercise)
     return render(request, 'Module/edit_exercise.html', {'form': form, 'exercise': exercise})
 
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def update_section(request, section_id):
     """Updates the section title or description via AJAX request."""
@@ -196,6 +208,8 @@ def update_section(request, section_id):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def add_exercise_to_section(request, section_id):
     """Handles adding an exercise to a section via AJAX."""
@@ -215,6 +229,8 @@ def add_exercise_to_section(request, section_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def remove_exercise_from_section(request, section_id):
     """Handles removing exercises from a section via AJAX."""
@@ -244,6 +260,8 @@ def remove_exercise_from_section(request, section_id):
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
 
+@user_passes_test(admin_check)
+@login_required
 def manage_exercises(request):
     """Renders a page displaying all exercises with their questions."""
     exercises = Exercise.objects.prefetch_related('questions').all()
@@ -252,6 +270,8 @@ def manage_exercises(request):
         'exercises': exercises
     })
 
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def update_exercise(request, exercise_id):
     """Updates an exercise title and adds new questions without duplicating."""
@@ -288,7 +308,8 @@ def update_exercise(request, exercise_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
-
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def delete_exercise_questions(request, exercise_id):
     """Handles deleting selected exercise questions via AJAX."""
@@ -310,6 +331,8 @@ def delete_exercise_questions(request, exercise_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+@user_passes_test(admin_check)
+@login_required
 @csrf_exempt
 def add_exercise_ajax(request):
     """Handles AJAX request to add a new exercise without page reload."""
@@ -337,6 +360,8 @@ def add_exercise_ajax(request):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+@user_passes_test(admin_check)
+@login_required
 def add_module(request):
     """Handles adding a module with multiple sections."""
     form_data = request.session.get('module_form_data', {})  # Load stored data
@@ -357,6 +382,8 @@ def add_module(request):
     sections = Section.objects.all()
     return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
 
+@user_passes_test(admin_check)
+@login_required
 def add_section(request):
     """Handles the addition of a new section with title, description, and exercises."""
     form = SectionForm(request.POST or None)
@@ -367,11 +394,15 @@ def add_section(request):
     exercises = Exercise.objects.all()  # ✅ Fetch all exercises
     return render(request, 'Module/add_section.html', {'form': form, 'exercises': exercises})
 
+@user_passes_test(admin_check)
+@login_required
 def get_sections(request):
     """Returns all sections as JSON (for dynamically updating dropdown)."""
     sections = list(Section.objects.values('id', 'title'))
     return JsonResponse({'sections': sections})
-   
+
+@user_passes_test(admin_check)
+@login_required  
 def add_exercise(request):
     """Handles adding a new exercise with title, type, and related questions."""
     form = ExerciseForm(request.POST or None)
@@ -383,6 +414,8 @@ def add_exercise(request):
     return render(request, 'Module/add_exercise.html', {'form': form, 'questions': questions})
   
 
+@user_passes_test(admin_check)
+@login_required
 def add_Equestion(request):
     """Handles adding a new question with only the required fields."""
     form = ExerciseQuestionForm(request.POST or None)
