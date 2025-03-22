@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 /* General Page Styling */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 body {
     margin: 0;
     font-family: 'Manrope', sans-serif;
-    background-color: #f24505; /* Orange background */
+    background-color: #F24505; /* Orange background */
     color: white;
     text-align: center;
 }
@@ -44,7 +45,7 @@ body {
 }
 
 .btn:hover {
-    background: #d63008;
+    background: #D43802;
     color: white;
 }
 
@@ -147,7 +148,7 @@ body {
 }
 
 .search-box button:hover {
-    background: #d63008;
+    background: #D43802;
 }
 
 /* Sorting Dropdown */
@@ -158,16 +159,16 @@ body {
 
 .sorting-dropdown select {
     padding: 8px;
-    border: 2px solid #f24505;
+    border: 2px solid #F24505;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    color: #f24505;
+    color: #F24505;
     background: white;
 }
 
 .sorting-dropdown select:hover {
-    background: #f24505;
+    background: #D43802;
     color: white;
 }
 
@@ -182,13 +183,13 @@ body {
 .button-container .btn {
     padding: 10px 20px;
     font-weight: bold;
-    background: #f24505;
+    background: #F24505;
     color: white;
     border: none;
 }
 
 .button-container .btn:hover {
-    background: #d63008;
+    background: #D43802;
 }
 
 /* Results Section */
@@ -269,13 +270,13 @@ body {
 }
 
 .view-btn {
-    background: #ff6600; /* Orange */
+    background: #F24505; /* Orange */
     color: white;
     margin-left: 5px;
 }
 
 .view-btn:hover {
-    background: #cc5200;
+    background: #D43802;
 }
 
 /* Skip Button */
@@ -291,7 +292,7 @@ body {
 }
 
 .skip-button:hover {
-    background: #d63008;
+    background: #D43802;
     color: white;
 }
 
@@ -329,7 +330,7 @@ button, .view-program-button, .view-module-button {
 }
 
 button:hover, .view-program-button:hover {
-    background-color: #d63d04;
+    background-color: #D43802;
 }
 
 /* Styling for Special Buttons */
@@ -349,7 +350,7 @@ button:hover, .view-program-button:hover {
 /* Hover Effect */
 .special-btn:hover {
     background: white;
-    color: #f24505; /* Match the orange background */
+    color: #D43802; /* Match the orange background */
 }
 
 /* Adjustments for positioning */

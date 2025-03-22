@@ -19,7 +19,7 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
-    color: #F24505;
+    color: #000000;
 }
 
 /* Table Styling */
@@ -56,15 +56,19 @@ body {
 
 /* Button Styling */
 .btn {
-    padding: 10px 15px;
-    text-decoration: none;
-    border-radius: 20px;
-    font-size: 16px;
-    font-weight: bold;
-    display: inline-block;
-    transition: background 0.3s, transform 0.2s;
-    cursor: pointer;
-    border: 2px solid transparent;
+    font-family: 'Manrope';
+    font-size: 14px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 /* Button Colors */
@@ -91,10 +95,19 @@ body {
     border-color: purple;
 }
 
-/* Hover Effects */
-.btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    transform: scale(1.05);
+.view-btn:hover {
+    background: #ebeaea;
+    color: #3498db;
+}
+
+.activate-btn:hover {
+    background: #ebeaea;
+    color: #27ae60;
+}
+
+.responders-btn:hover {
+    background: #ebeaea;
+    color: purple;
 }
 
 /* Grid Layout for Consistency */
@@ -136,18 +149,23 @@ body {
 
 /* Create Button - Top Right */
 .create-btn {
-    background: #f24505;
-    color: white;
     font-size: 16px;
-    font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 20px;
-    text-decoration: none;
-    transition: background 0.3s ease-in-out;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 .create-btn:hover {
-    background: #d63008;
+    background: #D43802;
+  color: white;
 }
 
 .center-text {
@@ -304,17 +322,12 @@ input:checked + .slider:before {
 }
 
 .search-btn {
-    background-color: #F24505;
-    color: white;
-    padding: 8px 15px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    text-decoration: none;
 }
 
 .search-btn:hover {
-    background-color: #f24505;
+    background: #D43802;
+  color: white;
 }
 
 

@@ -15,11 +15,12 @@ body {
 
 /* Top Bar */
 .top-bar {
-    display: flex;
-    justify-content: stretch;
+    display: column;
     align-items: center;
+    justify-content: stretch;
     margin-bottom: 20px;
-    color: #F24505;
+    margin-left: auto;
+    color: #000000;
 }
 
 /* Description Box */
@@ -106,6 +107,6 @@ body {
 }
 
 .back-btn:hover {
-    background: #F24505;
-    transform: scale(1.05);
+    background: #D43802;
+    color: white;
 }

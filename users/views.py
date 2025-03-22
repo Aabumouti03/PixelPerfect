@@ -953,6 +953,9 @@ def unenroll_module(request):
         try:
             data = json.loads(request.body)
             module_title = data.get("title")
+            
+            if not module_title:
+                return JsonResponse({"success": False, "error": "Missing module title"}, status=400)
 
             # Find the module
             module = Module.objects.filter(title=module_title).first()

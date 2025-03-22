@@ -32,6 +32,7 @@
                 <th onclick="sortTable(5)">Sector ⬍</th>
                 <th onclick="sortTable(6)">Phone ⬍</th>
                 <th onclick="sortTable(7)">Last Work ⬍</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -45,6 +46,9 @@
                 <td>{{ user.sector|default:"N/A" }}</td>
                 <td>{{ user.phone_number|default:"N/A" }}</td>
                 <td>{{ user.last_time_to_work|default:"N/A" }}</td>
+                <td>
+                    <button class="view-btn" onclick="window.location.href='{% url 'user_detail_view' user.user.id %}'">View</button>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

@@ -11,7 +11,7 @@ body {
 }
 
 .navbar {
-    background-color: #ff440f;
+    background-color: #F24505;
     padding: 10px 20px;
     display: flex;
     justify-content: space-between;
@@ -27,7 +27,7 @@ body {
     color: white
 }
 .navbar-get-started{
-    color: #ff440f
+    color: #F24505
 }
 
 .nav-item{
@@ -64,19 +64,19 @@ body {
 
 .orange-button{
     color: #fff;
-    background-color: #ff440f;
+    background-color: #F24505;
     border-color: white; 
     text-decoration: none;
     font-size: 24px;
 }
 
 .orange-button:hover {
-    background-color: #bb2d3b;
-    border-color: #b02a37;
+    background-color: #D43802;
+    border-color: #D43802;
 }
 
 .yellow-button{
-    color: #ff440f;
+    color: #F24505;
     font-size: 18px;
     background-color: rgb(255, 255, 180);
     border-color: rgb(255, 219, 219); 
@@ -90,24 +90,24 @@ body {
 
 /* Steps Section */
 .steps{
-    background-color: #ff440f;
+    background-color: #F24505;
     color: white;
     font-size: 25px;
 }
 
 .sub-text{
     font-size: 20px;
-    color:#ff440f;
+    color:#F24505;
 }
 
 .mid-text{
     font-size: 21px;
-    color:#ff440f;
+    color:#F24505;
 }
 
 .main-text{
     font-size: 45px;
-    color: #ff440f;
+    color: #F24505;
 }
 
 
@@ -139,7 +139,7 @@ body {
     height: 600px;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
-    background-color: #ff440f; 
+    background-color: #F24505; 
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -163,7 +163,7 @@ body {
 
 button[type="submit"] {
     background-color: rgb(255, 255, 180);
-    color:  #ff440f; 
+    color:  #F24505; 
     font-weight: bold;
     border: none;
     padding: 15px;
@@ -175,7 +175,7 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
     background-color:  #ecef68;
-    color:  #ff440f; 
+    color:  #F24505; 
    
 }
 
@@ -211,7 +211,7 @@ button[type="submit"]:hover {
 }
 
 .form-control::placeholder {
-    color: #ff440f;
+    color: #F24505;
     padding-left:20px;
     opacity: 1;
     font-weight: bold;
@@ -219,7 +219,7 @@ button[type="submit"]:hover {
 }
 
 .form-control {
-    color: #ff440f; 
+    color: #F24505; 
     font-weight: bold;
     padding-left: 40px;
     border-radius: 25px;
@@ -229,7 +229,7 @@ button[type="submit"]:hover {
 
 
 .form-control:focus {
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     padding-left:30px;
     box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
@@ -259,7 +259,7 @@ button[type="submit"]:hover {
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 20px;
-    color: #ff440f; 
+    color: #F24505; 
 }
 
 
@@ -347,7 +347,7 @@ button[type="submit"]:hover {
     height: 720px;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
-    background-color: #ff440f;
+    background-color: #F24505;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -382,7 +382,7 @@ button[type="submit"]:hover {
     outline: none;
     transition: all 0.3s ease-in-out;
     cursor: pointer;
-    color: #ff440f !important;
+    color: #F24505 !important;
 }
 
 
@@ -405,7 +405,7 @@ button[type="submit"]:hover {
 .sign_up_card input:focus,
 .sign_up_card select:focus {
     background-color: rgb(255, 255, 180);
-    border-color: #ff440f;
+    border-color: #F24505;
 }
 
 /* Autofill input fields styling */
@@ -414,8 +414,8 @@ button[type="submit"]:hover {
 .sign_up_card input:-webkit-autofill:focus, 
 .sign_up_card input:-webkit-autofill:active {
     background-color: #f9f9f9 !important;
-    color: #ff440f !important;
-    -webkit-text-fill-color: #ff440f !important;
+    color: #F24505 !important;
+    -webkit-text-fill-color: #F24505 !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -447,7 +447,7 @@ button[type="submit"]:hover {
 /* Placeholder and Select Styling */
 .sign_up_input_group input::placeholder,
 .sign_up_input_group select {
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     font-size: 18px;
 }
@@ -465,7 +465,7 @@ button[type="submit"]:hover {
 button[type="submit"],
 .sign_up_button {
     background-color: rgb(255, 255, 180);
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     border: none;
     border-radius: 50px;
@@ -478,7 +478,7 @@ button[type="submit"],
 button[type="submit"]:hover,
 .sign_up_button:hover {
     background-color: #ecef68;
-    color: #ff440f;
+    color: #F24505;
 }
 
 /* Previous & Sign Up Button Container */
@@ -495,7 +495,7 @@ button[type="submit"]:hover,
 .previous_button,
 .sign_up_button {
     background-color: rgb(255, 255, 180);
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     border: none;
     padding: 15px;
@@ -514,13 +514,13 @@ button[type="submit"]:hover,
 
 
 .previous_button{
-    color: #ff440f !important;
+    color: #F24505 !important;
     padding-bottom: 10px !important;
 }
 
 .previous_button:hover {
     background-color: #ecef68;
-    color: #ff440f;
+    color: #F24505;
 }
 
 
@@ -567,7 +567,7 @@ button[type="submit"]:hover,
     height: auto;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
-    background-color: #ff5733;
+    background-color: #F24505;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -596,7 +596,7 @@ button[type="submit"]:hover,
     background-color: #f9f9f9;
     outline: none;
     transition: all 0.3s ease-in-out;
-    color: #ff440f;
+    color: #F24505;
 }
 
 .password-reset-container p{
@@ -613,7 +613,7 @@ button[type="submit"]:hover,
     font-size: 18px;
     font-weight: bold;
     background-color: rgb(255, 255, 180);
-    color:  #ff5733; 
+    color:  #F24505; 
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -665,7 +665,7 @@ button[type="submit"]:hover,
 
 .password-reset-btn {
     background-color: rgb(255, 255, 180);
-    color: #ff5733 !important;
+    color: #F24505 !important;
     font-weight: bold;
     border: none;
     padding: 12px 20px;
@@ -682,7 +682,7 @@ button[type="submit"]:hover,
 
 .password-reset-btn:hover {
     background-color: #ecef68;
-    color: #ff5733;
+    color: #F24505;
 }
 
 .toggle-password {
@@ -692,5 +692,5 @@ button[type="submit"]:hover,
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 20px;
-    color: #ff5733;
+    color: #F24505;
 }

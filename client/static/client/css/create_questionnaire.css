@@ -19,26 +19,29 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-    color: #F24505;
+    color: black;
 }
 
 /* Save Button */
 .save-btn {
+    font-size: 16px;
+    font-family: 'Manrope';
+    padding: 10px 14px;
     background-color: #F24505;
     color: white;
-    padding: 10px 15px;
     text-decoration: none;
-    font-size: 16px;
+    border-radius: 25px;
     font-weight: bold;
     border: none;
-    border-radius: 20px;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #ffffff;
 }
 
 .save-btn:hover {
-    background: #F24505;
-    transform: scale(1.05);
+    background: #D43802;
+    color: white;
 }
 
 /* Editable Title & Description */
@@ -55,12 +58,13 @@ body {
 
 .description-box input,
 .description-box textarea {
-    width: 99%;
-    padding: 8px;
+    height: 50px;
+    padding: 14px 18px;
     font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    resize:both;
+    border: 1px solid #CCC;
+    border-radius: 25px;
+    background-color: #fff;
+    box-sizing: border-box;
 }
 
 /* Questions Container */
@@ -82,68 +86,69 @@ body {
 }
 
 .question-card input {
-    width: 99%;
-    padding: 8px;
+    height: 50px;
+    padding: 14px 18px;
     font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #CCC;
+    border-radius: 25px;
+    background-color: #fff;
+    box-sizing: border-box;
 }
 
-/* Choice List */
-.choice-list {
-    list-style: none;
-    padding: 0;
-}
-
-.choice-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-    padding: 8px;
-    border-radius: 5px;
-    margin-bottom: 5px;
-    border: 1px solid #ddd;
-}
-
-.choice-list input {
-    flex-grow: 1;
-    border: none;
+/* Dropdown styling */
+.question-type-select {
+    width: 100%; 
+    height: 50px;
+    padding: 14px 18px;
     font-size: 16px;
+    border: 1px solid #CCC;
+    border-radius: 25px ;
+    background-color: #eaeaea8d ;
+    box-sizing: border-box;
+    outline: none;
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+
+    -webkit-appearance: none;
+    -moz-appearance: none ;
+    appearance: none  ;   
 }
 
-/* Rating Scale */
-.rating-scale {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+/* Hover Effect */
+.question-type-select:hover {
+    border-color: #888;
+    background-color: #fff; /* Brightens background to indicate interactivity */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
 }
 
-.rating-scale input {
-    width: 50px;
-    padding: 5px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+/* Make sure options are readable */
+.question-type-select option {
+    padding: 10px;
+    background-color: #fff;
+    color: #333;
 }
 
 /* Delete Buttons */
 .delete-btn {
-    background-color: #e74c3c;
-    color: white;
-    padding: 6px 12px;
-    font-size: 14px;
-    font-weight: bold;
-    text-decoration: none;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    font-size: 12px;
+        font-family: 'Manrope';
+        padding: 10px 14px;
+        background-color: #F24505;
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+        border: 2px solid #ffffff;
 }
 
 .delete-btn:hover {
-    background: #c0392b;
-    transform: scale(1.05);
+    background: #D43802;
+  color: white;
 }
 
 
@@ -154,46 +159,24 @@ body {
 }
 
 .add-btn {
+    font-size: 16px;
+    font-family: 'Manrope';
+    padding: 10px 14px;
     background-color: #F24505;
     color: white;
-    padding: 10px 15px;
-    font-size: 16px;
-    font-weight: bold;
     text-decoration: none;
-    border-radius: 20px;
-    display: inline-block;
-    transition: background 0.3s, transform 0.2s;
+    border-radius: 25px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #ffffff;
 }
 
 .add-btn:hover {
-    background: #F24505;
-    transform: scale(1.05);
-}
-
-/* Style for the question type dropdown */
-.question-type-select {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background-color: #fff;
-    color: #333;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-/* Hover effect */
-.question-type-select:hover {
-    border-color: #3498db;
-}
-
-/* Focus (when clicked) */
-.question-type-select:focus {
-    outline: none;
-    border-color: #f24505;
-    box-shadow: 0px 0px 5px rgba(242, 69, 5, 0.5);
+    background: #D43802;
+    color: white;
 }
 
 /* Hide elements */
@@ -201,21 +184,23 @@ body {
     display: none;
 }
 .back-btn {
+    font-size: 16px;
+    padding: 10px 14px;
     background-color: #F24505;
     color: white;
-    padding: 10px 15px;
     text-decoration: none;
-    font-size: 16px;
+    border-radius: 25px;
     font-weight: bold;
     border: none;
-    border-radius: 20px;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #ffffff;
 }
 
 .back-btn:hover {
-    background: #F24505; /* Darker grey on hover */
-    transform: scale(1.05);
+    background: #D43802;
+  color: white;
 }
 
 .message-container {

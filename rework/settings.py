@@ -113,7 +113,7 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 
-LOGIN_URL = "/log_in/"  # Change this to match your actual login URL
+LOGIN_URL = "/accounts/log_in/"  # Change this to match your actual login URL
 
 
 # Internationalization

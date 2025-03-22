@@ -93,7 +93,11 @@ class Migration(migrations.Migration):
             name='Section',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+<<<<<<< HEAD
                 ('title', models.CharField(max_length=255, unique=True)),
+=======
+                ('title', models.CharField(max_length=255)),
+>>>>>>> 3da24c5aa1f53e07d5cdf0c6ace76dc7dcc75550
                 ('description', models.TextField(blank=True, null=True)),
                 ('diagram', models.ImageField(blank=True, null=True, upload_to='diagrams/')),
                 ('text_position_from_diagram', models.CharField(choices=[('above', 'Above the Diagram'), ('below', 'Below the Diagram'), ('left', 'Left of the Diagram'), ('right', 'Right of the Diagram')], default='below', max_length=10)),

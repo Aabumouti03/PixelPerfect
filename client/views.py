@@ -12,6 +12,9 @@ from .models import Questionnaire, Question, Module,  Program, ProgramModule
 from users.models import Questionnaire_UserResponse, QuestionResponse
 from django.core.paginator import Paginator
 from .forms import ProgramForm, CategoryForm, VideoResourceForm
+
+from client.forms import ModuleForm #
+
 from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
@@ -1232,10 +1235,10 @@ def export_user_statistics_csv(request):
     return response
 
 # Client Modules Views
-
+@login_required
 def module_overview(request, module_id):
     module = get_object_or_404(Module, id=module_id)
-    return render(request, "client/moduleOverview.html", {"module": module})
+    return render(request, "client/edit_module.html", {"module": module})
 
 @login_required
 @user_passes_test(admin_check)
@@ -1254,22 +1257,6 @@ def client_modules(request):
         modules_list.append(module_data)
 
     return render(request, "client/client_modules.html", {"modules": modules_list})
-
-# @login_required
-# @user_passes_test(admin_check)
-# def edit_module(request, module_id):
-#     module = get_object_or_404(Module, id=module_id)
-    
-#     if request.method == "POST":
-#         form = ModuleForm(request.POST, instance=module)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('client_modules')  # Redirect back to module management
-    
-#     else:
-#         form = ModuleForm(instance=module)
-
-#     return render(request, 'client/edit_module.html', {'form': form, 'module': module})
 
 @login_required
 @user_passes_test(admin_check)
