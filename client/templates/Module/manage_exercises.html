@@ -182,35 +182,53 @@
     }
 
     function saveExercise(exerciseId) {
-        let title = document.getElementById(`title-${exerciseId}`).value;
+        let titleInput = document.getElementById(`title-${exerciseId}`);
+
+        // Ensure title is not empty
+        if (!titleInput || titleInput.value.trim() === "") {
+            alert("⚠️ Please enter a title for the exercise.");
+            return;
+        }
+
+        let title = titleInput.value.trim();
         let questions = [];
 
-        // ✅ Collect existing and new questions
-        document.querySelectorAll(`#exercise-${exerciseId} .exercise-questions input.edit-input`).forEach(input => {
+        // Collect all question texts
+        document.querySelectorAll(`#question-list-${exerciseId} .edit-input`).forEach(input => {
             if (input.value.trim() !== "") {
-                questions.push({ text: input.value });
+                questions.push({ id: input.dataset.questionId || null, text: input.value });
             }
         });
 
-        fetch(`/update_exercise/${exerciseId}/`, {
-            method: 'POST',
+        let isUpdating = !exerciseId.startsWith("new-exercise-");  // Check if it's a real exercise
+
+        let url = isUpdating ? `/update_exercise/${exerciseId}/` : "{% url 'add_exercise_ajax' %}"; 
+        let method = "POST";  // Both create & update use POST for simplicity
+
+        fetch(url, {
+            method: method,
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
             },
             body: JSON.stringify({ title: title, questions: questions })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("✅ Exercise updated successfully!");
-                location.reload(); // Refresh UI
+                alert(isUpdating ? "✅ Exercise updated successfully!" : "✅ New exercise added!");
+                location.reload();
             } else {
-                alert("❌ Error updating exercise.");
+                alert("❌ Error: " + data.error);
             }
         })
-        .catch(error => console.error("⚠️ Error:", error));
+        .catch(error => {
+            console.error("⚠️ Error:", error);
+            alert("❌ Something went wrong.");
+        });
     }
+
+
 
     function deleteSelectedQuestions(exerciseId) {
         let selectedQuestions = [];
@@ -262,6 +280,54 @@
         document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
         document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden');
     }
+
+    function addExercise() {
+        let moduleList = document.querySelector(".module-list");
+
+        let newExerciseId = `new-exercise-${Date.now()}`;
+        let exerciseHTML = `
+            <div class="module-card" id="${newExerciseId}">
+                <div class="module-header">
+                    <div class="module-title">
+                        <input type="text" placeholder="Enter title..." class="edit-input" id="title-${newExerciseId}">
+                    </div>
+                    <div class="module-actions">
+                        <button class="save-btn" onclick="saveExercise('${newExerciseId}')">Save</button>
+                        <button class="remove-btn" onclick="removeExercise('${newExerciseId}')">❌ Remove</button>
+                    </div>
+                </div>
+                <div class="module-content">
+                    <h4>Questions:</h4>
+                    <ul class="exercise-questions" id="question-list-${newExerciseId}"></ul>
+                    <button class="add-question-btn" onclick="addNewQuestion('${newExerciseId}')">➕ Add Question</button>
+                </div>
+            </div>
+        `;
+
+        moduleList.insertAdjacentHTML("beforeend", exerciseHTML);
+    }
+
+    function addNewQuestion(exerciseId) {
+        let questionList = document.getElementById(`question-list-${exerciseId}`);
+        let questionId = `question-${Date.now()}`;
+
+        let newQuestionHTML = `
+            <li id="${questionId}">
+                <input type="text" placeholder="New Question..." class="edit-input">
+            </li>
+        `;
+
+        questionList.insertAdjacentHTML("beforeend", newQuestionHTML);
+    }
+
+    function removeExercise(exerciseId) {
+        document.getElementById(exerciseId).remove();
+    }
+
+    function removeQuestion(questionId) {
+        document.getElementById(questionId).remove();
+    }
+    
 </script>
 
 {% endblock %}

@@ -307,6 +307,33 @@ def delete_exercise_questions(request, exercise_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+@csrf_exempt
+def add_exercise_ajax(request):
+    """Handles AJAX request to add a new exercise without page reload."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            title = data.get("title", "").strip()
+            questions_data = data.get("questions", [])
+
+            if not title:
+                return JsonResponse({"success": False, "error": "Title is required"}, status=400)
+
+            # ✅ Create new exercise
+            new_exercise = Exercise.objects.create(title=title)
+
+            # ✅ Add questions
+            for question_text in questions_data:
+                question = ExerciseQuestion.objects.create(question_text=question_text)
+                new_exercise.questions.add(question)
+
+            return JsonResponse({"success": True, "exercise_id": new_exercise.id})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 def add_module(request):
     """Handles adding a module with multiple sections."""
     form_data = request.session.get('module_form_data', {})  # Load stored data

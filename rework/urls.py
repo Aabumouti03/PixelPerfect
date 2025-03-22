@@ -62,7 +62,7 @@ urlpatterns = [
     path('manage_exercises/', clientViews.manage_exercises, name='manage_exercises'),
     path('update_exercise/<int:exercise_id>/', clientViews.update_exercise, name='update_exercise'),
     path('delete_exercise_questions/<int:exercise_id>/', clientViews.delete_exercise_questions, name='delete_exercise_questions'),
-
+    path("add_exercise_ajax/", clientViews.add_exercise_ajax, name="add_exercise_ajax"),
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
