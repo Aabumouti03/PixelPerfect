@@ -159,3 +159,22 @@ class UpdateProfileViewTest(TestCase):
         self.client.logout()
         response = self.client.get(self.update_profile_url)
         self.assertRedirects(response, f"/log_in/?next={self.update_profile_url}")
+
+    def test_user_without_profile_redirects_to_welcome(self):
+        """Test that a user without a profile is redirected with an error message."""
+        # Create a user without creating an EndUser profile
+        user_without_profile = User.objects.create_user(
+            username="noprofileuser",
+            email="noprofile@example.com",
+            password="Test@1234"
+        )
+        self.client.force_login(user_without_profile)
+
+        response = self.client.get(self.update_profile_url, follow=True)
+        
+        # Check redirection
+        self.assertRedirects(response, reverse('welcome_page'))
+
+        # Check for error message
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("Profile not found." in str(m) for m in messages))

@@ -105,6 +105,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # User model for authentication and login purposes
 AUTH_USER_MODEL = 'users.User'
+AUTHENTICATION_BACKENDS = [
+    'users.backends.CaseInsensitiveUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+
 LOGIN_REDIRECT_URL = '/dashboard/'
 
 LOGIN_URL = "/log_in/"  # Change this to match your actual login URL
@@ -137,7 +143,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/log_in/'
 LOGIN_REDIRECT_URL = '' 
 LOGOUT_REDIRECT_URL = 'log_in'
 

@@ -1,0 +1,199 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <h2 class="page-title">Edit Module</h2>
+        <link rel="stylesheet" href="{% static 'client/css/edit_module_style.css' %}">
+
+        <!-- Module Title -->
+        <div class="module-section">
+            <h3>Module Title</h3>
+            <div class="editable-field">
+                <input type="text" id="module-title" value="{{ module.title }}" class="edit-input" readonly>
+                <button class="edit-btn" onclick="toggleEdit('module-title', this)">Edit</button>
+                <button class="save-btn hidden" onclick="saveModuleData('{{ module.id }}', 'title')">Save</button>
+            </div>
+        </div>
+
+        <!-- Module Description -->
+        <div class="module-section">
+            <h3>Description</h3>
+            <div class="editable-field">
+                <textarea id="module-description" class="edit-input" readonly>{{ module.description }}</textarea>
+                <button class="edit-btn" onclick="toggleEdit('module-description', this)">Edit</button>
+                <button class="save-btn hidden" onclick="saveModuleData('{{ module.id }}', 'description')">Save</button>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        <div class="module-section">
+            <h3>Sections</h3>
+
+            <!-- Add Section Dropdown -->
+            <div class="add-section">
+                <select id="section-dropdown">
+                    <option value="">Select a section to add</option>
+                    {% for section in all_sections %}
+                        <option value="{{ section.id }}">{{ section.title }}</option>
+                    {% empty %}
+                        <option value="" disabled>No available sections</option>
+                    {% endfor %}
+                </select>
+                <button class="add-btn" onclick="addSection('{{ module.id }}')">Add Section</button>
+            </div>
+
+            <!-- Section List with Checkboxes -->
+            <form id="remove-section-form">
+                {% for section in module.sections.all %}
+                    <div class="section-card">
+                        <input type="checkbox" name="remove_section" value="{{ section.id }}">
+                        <div class="section-header">
+                            <h4>{{ section.title }}</h4>
+                            <a href="{% url 'edit_section' section.id %}" class="edit-btn">Edit</a>
+                        </div>
+                        <p>{{ section.description }}</p>
+                    </div>
+                {% empty %}
+                    <p>No sections available.</p>
+                {% endfor %}
+                <button type="button" class="remove-btn" onclick="removeSections('{{ module.id }}')">Remove Selected Sections</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ✅ Toggle Edit Mode for Module Title and Description
+        function toggleEdit(fieldId, editButton) {
+            const inputField = document.getElementById(fieldId);
+            const saveButton = editButton.nextElementSibling;
+
+            if (inputField.readOnly) {
+                inputField.readOnly = false;
+                inputField.classList.add('editing');
+                editButton.style.display = 'none';
+                saveButton.classList.remove('hidden');
+            }
+        }
+
+        // ✅ Save Updated Module Data (Title & Description)
+        function saveModuleData(moduleId, field) {
+            let value = document.getElementById(field === 'title' ? 'module-title' : 'module-description').value;
+
+            fetch(`/update_module/${moduleId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ field: field, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Module updated successfully!");
+                    const inputField = document.getElementById(field === 'title' ? 'module-title' : 'module-description');
+                    inputField.readOnly = true;
+                    inputField.classList.remove('editing');
+                    const saveButton = document.querySelector(`button[onclick="saveModuleData('${moduleId}', '${field}')"]`);
+                    saveButton.classList.add('hidden');
+                    saveButton.previousElementSibling.style.display = 'inline-block';
+                } else {
+                    alert("Error updating module.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // ✅ Add Section to Module
+        function addSection(moduleId) {
+            let sectionId = document.getElementById('section-dropdown').value;
+
+            if (!sectionId) {
+                alert("Please select a section.");
+                return;
+            }
+
+            fetch(`/add_section_to_module/${moduleId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ section_id: sectionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Section added successfully!");
+                    location.reload();
+                } else {
+                    alert("Error adding section.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // ✅ Remove Selected Sections from Module
+        function removeSections(moduleId) {
+            let selectedSections = Array.from(document.querySelectorAll('input[name="remove_section"]:checked'))
+                .map(el => el.value);
+
+            if (selectedSections.length === 0) {
+                alert("Please select at least one section to remove.");
+                return;
+            }
+
+            fetch(`/remove_section_from_module/${moduleId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ section_ids: selectedSections })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Sections removed successfully!");
+                    location.reload();
+                } else {
+                    alert("Error removing sections.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+    <style>
+        .edit-input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+        }
+
+        .editing {
+            border: 1px solid #007bff;
+            background: #f8f9fa;
+            padding: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .edit-btn, .save-btn, .add-btn, .remove-btn {
+            margin-top: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            color: white;
+        }
+
+        .edit-btn { background: #007bff; }
+        .save-btn { background: #28a745; }
+        .add-btn { background: #17a2b8; }
+        .remove-btn { background: #dc3545; }
+    </style>
+{% endblock %}

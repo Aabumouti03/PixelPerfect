@@ -11,11 +11,21 @@ from client.views import delete_module
 from users.views import enroll_module, unenroll_module
 
 urlpatterns = [
-    # Admin URL
+
+    # Users Views
     path('admin/', admin.site.urls),
   
     # Authentication section
     path('', usersViews.welcome_page, name="welcome_page"),
+    path('dashboard/', usersViews.dashboard, name="dashboard"),
+
+    # Redirect "Modules" to "Edit_Add_Module"
+    path('modules/', clientViews.CreateModule, name="modules"),
+
+    path('about/', usersViews.about, name='about'),
+
+    # Other Paths
+    path('profile/', usersViews.profile, name='profile'),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
     path('verification_done/', usersViews.verification_done, name="verification_done"),
@@ -41,10 +51,36 @@ urlpatterns = [
 
     # Home page
     path('about/', usersViews.about, name='about'),
+
+    # Modules (Client)
+    path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
+    path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),
+    path('edit_section/<int:section_id>/', clientViews.edit_section, name='edit_section'),
+    path('edit_exercise/<int:exercise_id>/', clientViews.edit_exercise, name='edit_exercise'),
+    path('update_module/<int:module_id>/', clientViews.update_module, name='update_module'),
+    path('add_section_to_module/<int:module_id>/', clientViews.add_section_to_module, name='add_section_to_module'),
+    path('remove_section_from_module/<int:module_id>/', clientViews.remove_section_from_module, name='remove_section_from_module'),
+    path('update_section/<int:section_id>/', clientViews.update_section, name='update_section'), 
+    path('add_exercise_to_section/<int:section_id>/', clientViews.add_exercise_to_section, name='add_exercise_to_section'),
+    path('remove_exercise_from_section/<int:section_id>/', clientViews.remove_exercise_from_section, name='remove_exercise_from_section'),
+    path('manage_exercises/', clientViews.manage_exercises, name='manage_exercises'),
+    path('update_exercise/<int:exercise_id>/', clientViews.update_exercise, name='update_exercise'),
+    path('delete_exercise_questions/<int:exercise_id>/', clientViews.delete_exercise_questions, name='delete_exercise_questions'),
+    path("add_exercise_ajax/", clientViews.add_exercise_ajax, name="add_exercise_ajax"),
+
+    path('userResponce/', usersViews.user_responses_main, name='userResponce'),
+    path('modules/', usersViews.modules, name='modules'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
     path("get_started/", usersViews.get_started, name="get_started"),
     path('contact-success/', usersViews.contact_success, name='contact_success'),
+   
+    path('modules/add/', clientViews.add_module, name='add_module'),
+    path('sections/add/', clientViews.add_section, name='add_section'),
+    path('sections/get_all/', clientViews.get_sections, name='get_sections'),
+    path('exercises/add/', clientViews.add_exercise, name='add_exercise'), 
+    path('questions/add/', clientViews.add_Equestion, name='add_question'),  
 
+ 
     # Profile management
     path('profile/', usersViews.show_profile, name='show_profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  

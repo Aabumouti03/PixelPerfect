@@ -1,0 +1,97 @@
+.content {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.section-section {
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #007bff;
+    font-size: 20px;
+}
+
+.editable-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.edit-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    padding: 5px;
+    font-size: 16px;
+}
+
+.editing {
+    border: 1px solid #007bff;
+    background: #f8f9fa;
+    padding: 5px;
+}
+
+.edit-btn, .save-btn, .add-btn, .remove-btn {
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.edit-btn { background: #007bff; }
+.save-btn { background: #28a745; }
+.add-btn { background: #17a2b8; }
+.remove-btn { background: #dc3545; }
+
+.exercise-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 5px solid #007bff;
+}
+
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.exercise-header h4 {
+    margin: 0;
+}
+
+.exercise-questions {
+    margin-top: 10px;
+}
+
+.question-card {
+    background: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid #28a745;
+    margin-bottom: 10px;
+}
+
+.question-card p {
+    margin: 0;
+}
+
+.question-card ul {
+    padding-left: 20px;
+}

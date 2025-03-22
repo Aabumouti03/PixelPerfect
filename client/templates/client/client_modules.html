@@ -252,9 +252,9 @@
                         <!-- Icons Container -->
                         <div class="icons-container">
                             <!-- Edit Button -->
-                            <div class="edit-button" onclick="window.location.href='{% url 'module_overview' module.id %}'">
+                            <a href="{% url 'edit_module' module.id %}" class="edit-button">
                                 <ion-icon name="pencil"></ion-icon>
-                            </div>
+                            </a>
                             <!-- Delete Button -->
                             <form action="{% url 'delete_module' module.id %}" method="POST" class="delete-form">
                                 {% csrf_token %}
@@ -271,9 +271,12 @@
                 {% endfor %}
             
                 <!-- Add Module Card -->
-                <div class="add-module-card" onclick="window.location.href='{% url 'add_module' %}'">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                </div>
+                <a href="{% url 'add_module' %}">
+                    <div class="add-module-card">
+                        <ion-icon name="add-circle-outline"></ion-icon>
+                    </div>
+                </a>
+                
             </div>
             
         </div>

@@ -1,0 +1,333 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content">
+    <h2 class="page-title">Manage Exercises</h2>
+    <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
+
+    <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
+    <div class="module-list">
+        {% for exercise in exercises %}
+            <div class="module-card">
+                <div class="module-header">
+                    <div class="module-title">
+                        <input type="text" value="{{ exercise.title }}" id="title-{{ exercise.id }}" class="edit-input" readonly>
+                    </div>
+                    <div class="module-actions">
+                        <button class="edit-btn" id="edit-btn-{{ exercise.id }}" onclick="enableEdit('{{ exercise.id }}')">Edit</button>
+                        <button class="save-btn hidden" id="save-btn-{{ exercise.id }}" onclick="saveExercise('{{ exercise.id }}')">Save</button>
+
+                        <button class="add-question-btn hidden" id="add-question-btn-{{ exercise.id }}" onclick="addNewQuestion('{{ exercise.id }}')">
+                             Add Question
+                        </button>
+
+                        <button class="remove-questions-btn hidden" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
+                             Remove Questions
+                        </button>
+
+                        <button class="delete-selected-btn hidden" id="delete-selected-btn-{{ exercise.id }}" onclick="deleteSelectedQuestions('{{ exercise.id }}')">
+                             Delete Selected
+                        </button>
+
+                        <button class="toggle-btn" onclick="toggleExercise('{{ exercise.id }}')">
+                            <i class="fas fa-chevron-left" id="toggle-icon-{{ exercise.id }}"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="exercise-{{ exercise.id }}" class="module-content">
+                    <h4>Questions:</h4>
+                    <ul class="exercise-questions" id="question-list-{{ exercise.id }}">
+                        {% for question in exercise.questions.all %}
+                            <li id="question-li-{{ question.id }}">
+                                <input type="checkbox" class="question-checkbox hidden" id="checkbox-{{ question.id }}" value="{{ question.id }}">
+                                <input type="text" value="{{ question.question_text }}" id="question-{{ question.id }}" class="edit-input" readonly>
+                            </li>
+                        {% empty %}
+                            <p id="no-questions-msg-{{ exercise.id }}">No questions available.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% empty %}
+            <p>No exercises found.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .content {
+        flex-grow: 1;
+        padding: 30px;
+    }
+
+    .module-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .module-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        width: 100%;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .module-title input {
+        border: none;
+        font-size: 20px;
+        width: 100%;
+        font-weight: bold;
+        outline: none;
+    }
+
+    .edit-input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 18px;
+        width: 100%;
+        padding: 5px;
+    }
+
+    .editing {
+        border-bottom: 2px solid #007bff;
+        background: #f0f8ff;
+        padding: 5px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .module-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .edit-btn, .save-btn {
+        background-color: #FD5402;
+        color: white;
+        padding: 7px 15px;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    .toggle-btn {
+        background: none;
+        color: #FD5402;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .module-content {
+        display: none;
+        padding: 15px;
+        background: white;
+    }
+
+    .module-content.show {
+        display: block;
+    }
+
+    .exercise-questions {
+        padding-left: 20px;
+        list-style: none;
+    }
+
+</style>
+<script>
+    function enableEdit(exerciseId) {
+        document.getElementById(`title-${exerciseId}`).readOnly = false;
+        document.getElementById(`title-${exerciseId}`).classList.add('editing');
+
+        document.querySelectorAll(`#exercise-${exerciseId} .edit-input`).forEach(input => {
+            input.readOnly = false;
+            input.classList.add('editing');
+        });
+
+        // ✅ Show Save and Add Question buttons, Hide Edit button
+        document.getElementById(`edit-btn-${exerciseId}`).classList.add('hidden');
+        document.getElementById(`save-btn-${exerciseId}`).classList.remove('hidden');
+        document.getElementById(`add-question-btn-${exerciseId}`).classList.remove('hidden');
+        document.getElementById(`remove-questions-btn-${exerciseId}`).classList.remove('hidden');
+    }
+
+    function addNewQuestion(exerciseId) {
+        let questionList = document.getElementById(`question-list-${exerciseId}`);
+
+        let newQuestionId = `new-question-${Date.now()}`;
+        let newQuestionHTML = `
+            <li id="${newQuestionId}">
+                <input type="text" placeholder="New Question..." class="edit-input new-question" data-exercise-id="${exerciseId}">
+            </li>
+        `;
+
+        questionList.insertAdjacentHTML("beforeend", newQuestionHTML);
+    }
+
+    function saveExercise(exerciseId) {
+        let titleInput = document.getElementById(`title-${exerciseId}`);
+
+        // Ensure title is not empty
+        if (!titleInput || titleInput.value.trim() === "") {
+            alert("⚠️ Please enter a title for the exercise.");
+            return;
+        }
+
+        let title = titleInput.value.trim();
+        let questions = [];
+
+        // Collect all question texts
+        document.querySelectorAll(`#question-list-${exerciseId} .edit-input`).forEach(input => {
+            if (input.value.trim() !== "") {
+                questions.push({ id: input.dataset.questionId || null, text: input.value });
+            }
+        });
+
+        let isUpdating = !exerciseId.startsWith("new-exercise-");  // Check if it's a real exercise
+
+        let url = isUpdating ? `/update_exercise/${exerciseId}/` : "{% url 'add_exercise_ajax' %}"; 
+        let method = "POST";  // Both create & update use POST for simplicity
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ title: title, questions: questions })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(isUpdating ? "✅ Exercise updated successfully!" : "✅ New exercise added!");
+                location.reload();
+            } else {
+                alert("❌ Error: " + data.error);
+            }
+        })
+        .catch(error => {
+            console.error("⚠️ Error:", error);
+            alert("❌ Something went wrong.");
+        });
+    }
+
+
+
+    function deleteSelectedQuestions(exerciseId) {
+        let selectedQuestions = [];
+
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox:checked`).forEach(checkbox => {
+            selectedQuestions.push(checkbox.value);
+        });
+
+        if (selectedQuestions.length === 0) {
+            alert("No questions selected!");
+            return;
+        }
+
+        fetch(`/delete_exercise_questions/${exerciseId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ question_ids: selectedQuestions })
+        })
+        .then(response => response.json())
+        .then(() => {
+            alert("✅ Questions deleted successfully!");
+            location.reload();
+        });
+    }
+
+    function toggleExercise(exerciseId) {
+        const content = document.getElementById(`exercise-${exerciseId}`);
+        const icon = document.getElementById(`toggle-icon-${exerciseId}`);
+
+        content.classList.toggle("show");
+
+        if (content.classList.contains("show")) {
+            icon.classList.remove("fa-chevron-left");
+            icon.classList.add("fa-chevron-down");
+        } else {
+            icon.classList.remove("fa-chevron-down");
+            icon.classList.add("fa-chevron-left");
+        }
+    }
+
+    function showQuestionCheckboxes(exerciseId) {
+        document.querySelectorAll(`#exercise-${exerciseId} .question-checkbox`).forEach(checkbox => {
+            checkbox.classList.remove('hidden');
+        });
+
+        document.getElementById(`remove-questions-btn-${exerciseId}`).classList.add('hidden');
+        document.getElementById(`delete-selected-btn-${exerciseId}`).classList.remove('hidden');
+    }
+
+    function addExercise() {
+        let moduleList = document.querySelector(".module-list");
+
+        let newExerciseId = `new-exercise-${Date.now()}`;
+        let exerciseHTML = `
+            <div class="module-card" id="${newExerciseId}">
+                <div class="module-header">
+                    <div class="module-title">
+                        <input type="text" placeholder="Enter title..." class="edit-input" id="title-${newExerciseId}">
+                    </div>
+                    <div class="module-actions">
+                        <button class="save-btn" onclick="saveExercise('${newExerciseId}')">Save</button>
+                        <button class="remove-btn" onclick="removeExercise('${newExerciseId}')">❌ Remove</button>
+                    </div>
+                </div>
+                <div class="module-content">
+                    <h4>Questions:</h4>
+                    <ul class="exercise-questions" id="question-list-${newExerciseId}"></ul>
+                    <button class="add-question-btn" onclick="addNewQuestion('${newExerciseId}')">➕ Add Question</button>
+                </div>
+            </div>
+        `;
+
+        moduleList.insertAdjacentHTML("beforeend", exerciseHTML);
+    }
+
+    function addNewQuestion(exerciseId) {
+        let questionList = document.getElementById(`question-list-${exerciseId}`);
+        let questionId = `question-${Date.now()}`;
+
+        let newQuestionHTML = `
+            <li id="${questionId}">
+                <input type="text" placeholder="New Question..." class="edit-input">
+            </li>
+        `;
+
+        questionList.insertAdjacentHTML("beforeend", newQuestionHTML);
+    }
+
+    function removeExercise(exerciseId) {
+        document.getElementById(exerciseId).remove();
+    }
+
+    function removeQuestion(questionId) {
+        document.getElementById(questionId).remove();
+    }
+    
+</script>
+
+{% endblock %}

@@ -1,3 +1,51 @@
+/* General styling */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Title styling */
+h2 {
+    text-align: center;
+    color: #007bff;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Card styling */
+.card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Response styling */
+.response-box {
+    background: #f8f9fa;
+    border-left: 5px solid #007bff;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+.text-muted {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+/* Responsive grid */
+@media (max-width: 768px) {
+    .col-md-6 {
+        width: 100%;
+    }
 @import url('users/styles.css');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 

@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from users.models import User, EndUser, UserProgramEnrollment
+from django.shortcuts import render, redirect, get_object_or_404, redirect, get_object_or_404
+from client.models import Program, Module
+from django.shortcuts import render, get_object_or_404
 from client.models import Module, Category, VideoResource
 from collections import Counter
 import json
@@ -24,9 +25,408 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 
 
+from django.db.models import Max
+from client import views as clientViews
+from users import views as usersViews
+from users.views import enroll_module, unenroll_module 
+from django.contrib import messages
+from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
+from users.models import Questionnaire_UserResponse, QuestionResponse, User
+from django.core.paginator import Paginator
+from .forms import ProgramForm 
+from django.contrib.auth.decorators import login_required
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
+
+from .forms import ModuleForm, SectionForm, ExerciseForm,ExerciseQuestionForm
+from .models import Module, Section, Exercise, Question, ExerciseQuestion
+from django.db import transaction
+from django.http import JsonResponse
+from collections import defaultdict
+
+
+@user_passes_test(admin_check)
+@login_required
+def CreateModule(request):
+    modules = Module.objects.prefetch_related("sections__exercises__questions").all()
+    return render(request, "Module/Edit_Add_Module.html", {"modules": modules})
+
+@user_passes_test(admin_check)
+@login_required
+def edit_module(request, module_id):
+    """Handles editing an existing module."""
+    module = get_object_or_404(Module, id=module_id)
+
+    # Get sections **NOT** already in this module
+    all_sections = Section.objects.exclude(id__in=module.sections.values_list('id', flat=True))
+
+    if request.method == "POST":
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Module updated successfully!")
+            return redirect('client_modules')  # Redirect to module list
+        else:
+            messages.error(request, "Error updating module. Please check the form.")
+    else:
+        form = ModuleForm(instance=module)
+
+    return render(request, 'Module/edit_module.html', {
+        'form': form,
+        'module': module,
+        'all_sections': all_sections  # ✅ Pass sections to template
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def edit_section(request, section_id):
+    section = get_object_or_404(Section, id=section_id)
+
+    # ✅ Fetch all exercises **NOT** already in this section
+    all_exercises = Exercise.objects.exclude(id__in=section.exercises.values_list('id', flat=True))
+
+    if request.method == "POST":
+        form = SectionForm(request.POST, instance=section)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Section updated successfully!")
+            return redirect('edit_module', section.modules.first().id)
+
+    else:
+        form = SectionForm(instance=section)
+
+    return render(request, 'Module/edit_section.html', {
+        'form': form,
+        'section': section,
+        'all_exercises': all_exercises,
+    })
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def update_module(request, module_id):
+    """Updates the module title or description based on AJAX request."""
+    if request.method == 'POST':
+        module = get_object_or_404(Module, id=module_id)
+        try:
+            data = json.loads(request.body)
+            field = data.get('field')
+            value = data.get('value')
+
+            if field == 'title':
+                module.title = value
+            elif field == 'description':
+                module.description = value
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid field'}, status=400)
+
+            module.save()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def add_section_to_module(request, module_id):
+    """Handles adding a section to a module via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            section_id = data.get("section_id")
+
+            module = get_object_or_404(Module, id=module_id)
+            section = get_object_or_404(Section, id=section_id)
+
+            module.sections.add(section)
+
+            return JsonResponse({"success": True, "message": "Section added successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def remove_section_from_module(request, module_id):
+    """Handles removing sections from a module via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            section_ids = data.get("section_ids", [])
+
+            module = get_object_or_404(Module, id=module_id)
+            module.sections.remove(*section_ids)
+
+            return JsonResponse({"success": True, "message": "Sections removed successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+def edit_exercise(request, exercise_id):
+    exercise = get_object_or_404(Exercise, id=exercise_id)
+    if request.method == "POST":
+        form = ExerciseForm(request.POST, instance=exercise)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Exercise updated successfully!")
+            return redirect('edit_section', exercise.sections.first().id)
+    else:
+        form = ExerciseForm(instance=exercise)
+    return render(request, 'Module/edit_exercise.html', {'form': form, 'exercise': exercise})
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def update_section(request, section_id):
+    """Updates the section title or description via AJAX request."""
+    if request.method == 'POST':
+        section = get_object_or_404(Section, id=section_id)
+        
+        try:
+            data = json.loads(request.body)
+            field = data.get('field')
+            value = data.get('value')
+
+            if field == 'title':
+                section.title = value
+            elif field == 'description':
+                section.description = value
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid field'}, status=400)
+
+            section.save()
+            return JsonResponse({'success': True})
+        
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def add_exercise_to_section(request, section_id):
+    """Handles adding an exercise to a section via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            exercise_id = data.get("exercise_id")
+
+            section = get_object_or_404(Section, id=section_id)
+            exercise = get_object_or_404(Exercise, id=exercise_id)
+
+            section.exercises.add(exercise)
+
+            return JsonResponse({"success": True, "message": "Exercise added successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def remove_exercise_from_section(request, section_id):
+    """Handles removing exercises from a section via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            exercise_ids = data.get("exercise_ids", [])  # ✅ Ensure it's a list
+
+            section = get_object_or_404(Section, id=section_id)
+
+            print(f"🔍 Received request to remove exercises: {exercise_ids}")  # Debugging
+            print(f"📌 Current exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
+
+            if not exercise_ids:
+                return JsonResponse({"success": False, "error": "No exercise IDs received."}, status=400)
+
+            # ✅ Remove exercises
+            section.exercises.remove(*exercise_ids)
+
+            print(f"✅ Updated exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
+
+            return JsonResponse({"success": True, "message": "Exercises removed successfully!"})
+        except Exception as e:
+            print(f"❌ Error: {e}")  # Debugging
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
+@user_passes_test(admin_check)
+@login_required
+def manage_exercises(request):
+    """Renders a page displaying all exercises with their questions."""
+    exercises = Exercise.objects.prefetch_related('questions').all()
+
+    return render(request, 'Module/manage_exercises.html', {
+        'exercises': exercises
+    })
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def update_exercise(request, exercise_id):
+    """Updates an exercise title and adds new questions without duplicating."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            exercise = get_object_or_404(Exercise, id=exercise_id)
+
+            # ✅ Update Exercise Title
+            exercise.title = data.get("title", exercise.title)
+            exercise.save()
+
+            # ✅ Get existing questions IDs
+            existing_question_ids = set(exercise.questions.values_list("id", flat=True))
+            new_question_texts = set()
+
+            for question_data in data.get("questions", []):
+                question_text = question_data["text"].strip()
+                if question_text and question_text not in new_question_texts:
+                    new_question_texts.add(question_text)
+                    
+                    # ✅ Check if question already exists
+                    existing_question = ExerciseQuestion.objects.filter(question_text=question_text).first()
+                    if not existing_question:
+                        existing_question = ExerciseQuestion.objects.create(question_text=question_text)
+                    
+                    if existing_question.id not in existing_question_ids:
+                        exercise.questions.add(existing_question)
+
+            return JsonResponse({"success": True, "message": "Exercise updated successfully!"})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def delete_exercise_questions(request, exercise_id):
+    """Handles deleting selected exercise questions via AJAX."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            question_ids = data.get("question_ids", [])
+
+            if not question_ids:
+                return JsonResponse({"success": False, "error": "No questions selected"}, status=400)
+
+            # ✅ Delete selected questions
+            deleted_count, _ = ExerciseQuestion.objects.filter(id__in=question_ids).delete()
+
+            return JsonResponse({"success": True, "message": f"{deleted_count} questions deleted!"})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def add_exercise_ajax(request):
+    """Handles AJAX request to add a new exercise without page reload."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            title = data.get("title", "").strip()
+            questions_data = data.get("questions", [])
+
+            if not title:
+                return JsonResponse({"success": False, "error": "Title is required"}, status=400)
+
+            # ✅ Create new exercise
+            new_exercise = Exercise.objects.create(title=title)
+
+            # ✅ Add questions
+            for question_text in questions_data:
+                question = ExerciseQuestion.objects.create(question_text=question_text)
+                new_exercise.questions.add(question)
+
+            return JsonResponse({"success": True, "exercise_id": new_exercise.id})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+@user_passes_test(admin_check)
+@login_required
+def add_module(request):
+    """Handles adding a module with multiple sections."""
+    form_data = request.session.get('module_form_data', {})  # Load stored data
+    form = ModuleForm(initial=form_data) if form_data else ModuleForm()
+
+    if request.method == 'POST':
+        form = ModuleForm(request.POST)
+        if form.is_valid():
+            module = form.save(commit=False)
+            module.save()
+            form.save_m2m()  # Save many-to-many relationship
+            
+            request.session.pop('module_form_data', None)  # Clear stored data after save
+            return redirect('modules')  
+
+        request.session['module_form_data'] = request.POST  # Save form data if invalid
+
+    sections = Section.objects.all()
+    return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
+
+@user_passes_test(admin_check)
+@login_required
+def add_section(request):
+    """Handles the addition of a new section with title, description, and exercises."""
+    form = SectionForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('add_module')
+
+    exercises = Exercise.objects.all()  # ✅ Fetch all exercises
+    return render(request, 'Module/add_section.html', {'form': form, 'exercises': exercises})
+
+@user_passes_test(admin_check)
+@login_required
+def get_sections(request):
+    """Returns all sections as JSON (for dynamically updating dropdown)."""
+    sections = list(Section.objects.values('id', 'title'))
+    return JsonResponse({'sections': sections})
+
+@user_passes_test(admin_check)
+@login_required  
+def add_exercise(request):
+    """Handles adding a new exercise with title, type, and related questions."""
+    form = ExerciseForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('add_section')
+
+    questions = ExerciseQuestion.objects.all()  # ✅ Fetch all questions
+    return render(request, 'Module/add_exercise.html', {'form': form, 'questions': questions})
+  
+
+@user_passes_test(admin_check)
+@login_required
+def add_Equestion(request):
+    """Handles adding a new question with only the required fields."""
+    form = ExerciseQuestionForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('add_exercise')  # ✅ Redirect back to add exercise page
+
+    return render(request, 'Module/add_question.html', {'form': form})
+
 
 @user_passes_test(admin_check)
 @login_required
@@ -855,21 +1255,21 @@ def client_modules(request):
 
     return render(request, "client/client_modules.html", {"modules": modules_list})
 
-@login_required
-@user_passes_test(admin_check)
-def edit_module(request, module_id):
-    module = get_object_or_404(Module, id=module_id)
+# @login_required
+# @user_passes_test(admin_check)
+# def edit_module(request, module_id):
+#     module = get_object_or_404(Module, id=module_id)
     
-    if request.method == "POST":
-        form = ModuleForm(request.POST, instance=module)
-        if form.is_valid():
-            form.save()
-            return redirect('client_modules')  # Redirect back to module management
+#     if request.method == "POST":
+#         form = ModuleForm(request.POST, instance=module)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('client_modules')  # Redirect back to module management
     
-    else:
-        form = ModuleForm(instance=module)
+#     else:
+#         form = ModuleForm(instance=module)
 
-    return render(request, 'client/edit_module.html', {'form': form, 'module': module})
+#     return render(request, 'client/edit_module.html', {'form': form, 'module': module})
 
 @login_required
 @user_passes_test(admin_check)
@@ -878,18 +1278,18 @@ def delete_module(request, module_id):
     module.delete()
     return redirect("client_modules")
 
-@login_required
-@user_passes_test(admin_check)
-def add_module(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
+# @login_required
+# @user_passes_test(admin_check)
+# def add_module(request):
+#     if request.method == "POST":
+#         title = request.POST.get("title")
+#         description = request.POST.get("description")
         
-        if title and description:  # Ensure both fields are filled
-            new_module = Module.objects.create(title=title, description=description)
-            new_module.save()
-            return redirect("client_modules")  # Redirect to the Client Modules page
-    return render(request, "client/add_module.html")
+#         if title and description:  # Ensure both fields are filled
+#             new_module = Module.objects.create(title=title, description=description)
+#             new_module.save()
+#             return redirect("client_modules")  # Redirect to the Client Modules page
+#     return render(request, "client/add_module.html")
 
 
 # For adding video content

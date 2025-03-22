@@ -19,16 +19,17 @@
             </a>
         </li>
         <li>
-
-
             <a href="{% url 'userModules' %}" class="{% if request.path == '/modules/' %}active{% endif %}">
                 <img src="{% static 'users/img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
             </a>
         </li>
- 
-
-
+        <li>
+            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
+                <i class="fa-regular fa-pen-to-square icon"></i>
+                <span>Your Response</span>
+            </a>
+        </li>        
         <li>
             <a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">
                 <img src="{% static 'users/img/profile.svg' %}" alt="Profile" class="icon">

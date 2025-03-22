@@ -1,0 +1,85 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        
+        <h2 class="page-title">Manage Modules</h2>
+        <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
+
+        <!-- Add Module Button -->
+        <div class="top-buttons">
+            <a href="{% url 'add_module' %}" class="add-btn">+ Add Module</a>
+        </div>
+
+        <div class="module-list">
+            {% for module in modules %}
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-title">
+                            <h3>{{ module.title }}</h3>
+                        </div>
+                        <div class="module-actions">
+                            <a href="{% url 'edit_module' module.id %}" class="edit-btn">Edit</a>
+                            <button class="toggle-btn" onclick="toggleModule('{{ module.id }}')">
+                                <i class="fas fa-chevron-left" id="toggle-icon-{{ module.id }}"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="module-{{ module.id }}" class="module-content">
+                        <p class="module-description"><strong></strong> {{ module.description }}</p>
+
+                        <!-- Sections -->
+                        <div class="sections">
+                            {% for section in module.sections.all %}
+                                <div class="section-card">
+                                    <h5>{{ section.title }}</h5>
+                                    <p>{{ section.description }}</p>
+
+                                    <!-- Exercises inside each section -->
+                                    <div class="exercises">
+                        
+                                        {% for exercise in section.exercises.all %}
+                                            <div class="exercise-card">
+                                                <h6>{{ exercise.title }}</h6>
+                                                <ul>
+                                                    {% for question in exercise.questions.all %}
+                                                        <li>{{ question.question_text }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% empty %}
+                                            <p>No exercises available.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p>No sections available.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No modules available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleModule(moduleId) {
+            const content = document.getElementById(`module-${moduleId}`);
+            const icon = document.getElementById(`toggle-icon-${moduleId}`);
+
+            content.classList.toggle("show");
+
+            if (content.classList.contains("show")) {
+                icon.classList.remove("fa-chevron-left");
+                icon.classList.add("fa-chevron-down");
+            } else {
+                icon.classList.remove("fa-chevron-down");
+                icon.classList.add("fa-chevron-left");
+            }
+        }
+    </script>
+{% endblock %}

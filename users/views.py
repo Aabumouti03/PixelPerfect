@@ -1,6 +1,4 @@
-import os
 import json
-import random
 import logging
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -12,14 +10,13 @@ from .models import JournalEntry
 from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from users.helpers_modules import calculate_progress, update_user_program_progress
+from users.helpers_modules import calculate_progress
 from django.contrib.auth.decorators import login_required 
 from client.models import Category, Program,ModuleRating,Exercise
 from django.shortcuts import redirect, render,  get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
-from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
 from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
-from collections import defaultdict
 logger = logging.getLogger(__name__)
 from .utils import send_verification_email_after_sign_up 
 from django.core.mail import send_mail
@@ -27,7 +24,6 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.utils.timezone import now
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from users.models import (
@@ -35,16 +31,17 @@ from users.models import (
     UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
 )
 from client.models import (
-    Program, Module, ProgramModule, ModuleRating, Exercise, Category,
+    Program, Module, ModuleRating, Exercise, Category,
     AdditionalResource, Exercise,VideoResource
 )
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
+from .models import UserResponse
+from .models import User, EndUser, Module
+from client.models import Exercise, ExerciseQuestion
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-
-logger = logging.getLogger(__name__)
 
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
@@ -289,10 +286,11 @@ def welcome_page(request):
     '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
 
+@login_required
 def modules(request):
     return render(request, 'users/modules.html')
 
-#edit back to users/profile.html later
+@login_required
 def profile(request):
     return render(request, 'users/profile.html')
 
@@ -333,10 +331,11 @@ def log_in(request):
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username').strip()  # Trim spaces
+            username = form.cleaned_data.get('username').strip().lower()
             password = form.cleaned_data.get('password').strip()
 
             user = authenticate(request, username=username, password=password)
+
 
             if user is not None:
                 if not user.email_verified:
@@ -1211,4 +1210,34 @@ def save_journal_entry(request):
 
     # Save the journal entry
     return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+
+@login_required
+def user_responses_main(request):
+    """Shows all exercises as clickable boxes."""
+    exercises = Exercise.objects.all()
+    return render(request, "UserResponce/user_responses_main.html", {"exercises": exercises})
+
+
+@login_required
+def exercise_detail_view(request, exercise_id):
+    """Shows all questions for a selected exercise, with all user responses."""
+    
+    exercise = get_object_or_404(Exercise, id=exercise_id)
+    questions = exercise.questions.all()
+    
+    # Get the logged-in user’s profile
+    enduser = getattr(request.user, 'User_profile', None)
+    if not enduser:
+        return redirect('dashboard')  
+
+    # Fetch responses for each question in the exercise
+    questions_with_responses = []
+    for question in questions:
+        responses = UserResponse.objects.filter(user=enduser, question=question)
+        questions_with_responses.append({'question': question, 'responses': responses})
+
+    return render(request, "UserResponce/exercise_detail.html", 
+    {"exercise": exercise, "questions_with_responses": questions_with_responses})
 

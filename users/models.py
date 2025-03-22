@@ -60,6 +60,12 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+    def save(self, *args, **kwargs):
+        if self.username:
+            self.username = self.username.lower()
+        super().save(*args, **kwargs)
+
 
 
 class Admin(models.Model):
@@ -170,8 +176,7 @@ class UserModuleProgress(models.Model):
     class Meta:
         unique_together = ('user', 'module') 
     def __str__(self):
-        return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
-
+        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
 class UserResourceProgress(models.Model):
     """Tracks user progress for each additional resource."""
