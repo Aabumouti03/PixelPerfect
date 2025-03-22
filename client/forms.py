@@ -138,3 +138,25 @@ class VideoResourceForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter video description'}),
             'youtube_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste YouTube video URL'}),
         }
+        
+class ModuleForm(forms.ModelForm):
+    class Meta:
+        model = Module
+        fields = ['title', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter module title'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter module description'
+            }),
+        }
+
+    def clean_title(self):
+        """Ensure module title is unique, case-insensitively."""
+        title = self.cleaned_data.get('title')
+        if Module.objects.filter(title__iexact=title).exists():
+            raise forms.ValidationError('A module with this title already exists.')
+        return title

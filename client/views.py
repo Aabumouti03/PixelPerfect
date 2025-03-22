@@ -11,6 +11,9 @@ from .models import Questionnaire, Question, Module,  Program, ProgramModule
 from users.models import Questionnaire_UserResponse, QuestionResponse
 from django.core.paginator import Paginator
 from .forms import ProgramForm, CategoryForm, VideoResourceForm
+
+from client.forms import ModuleForm #
+
 from .models import Program, ProgramModule, Category
 from client.statistics import * 
 from django.views.decorators.csrf import csrf_exempt
@@ -746,11 +749,12 @@ def export_user_statistics_csv(request):
     return response
 
 # Client Modules Views
-
+@login_required
 def module_overview(request, module_id):
     module = get_object_or_404(Module, id=module_id)
-    return render(request, "client/moduleOverview.html", {"module": module})
+    return render(request, "client/edit_module.html", {"module": module})
 
+@login_required
 def client_modules(request):
     modules = Module.objects.all().values("id", "title", "description") 
     module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
@@ -767,7 +771,7 @@ def client_modules(request):
 
     return render(request, "client/client_modules.html", {"modules": modules_list})
 
-
+@login_required
 def edit_module(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     
@@ -775,19 +779,21 @@ def edit_module(request, module_id):
         form = ModuleForm(request.POST, instance=module)
         if form.is_valid():
             form.save()
-            return redirect('client_modules')  # Redirect back to module management
+            return redirect('client_modules')  
     
     else:
         form = ModuleForm(instance=module)
 
     return render(request, 'client/edit_module.html', {'form': form, 'module': module})
 
+@login_required
 def delete_module(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     module.delete()
     return redirect("client_modules")
 
 
+@login_required
 def add_module(request):
     if request.method == "POST":
         title = request.POST.get("title")
