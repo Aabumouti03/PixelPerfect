@@ -861,7 +861,6 @@ def exercise_detail(request, exercise_id):
 @csrf_exempt  
 @login_required
 def rate_module(request, module_id):
-    """Handles AJAX-based user rating for a module."""
     
     module = get_object_or_404(Module, id=module_id)
 

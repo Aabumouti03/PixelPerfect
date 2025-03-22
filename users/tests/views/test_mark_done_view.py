@@ -89,7 +89,7 @@ class MarkDoneViewTest(TestCase):
         self.assertEqual(progress.status, "not_started")
 
     def test_progress_calculation(self):
-        total_items = 6  # 2 exercises + 2 resources + 2 videos
+        total_items = 6  
 
         self.mark_done(self.exercise_1.id, "exercise", "done")
         self.mark_done(self.video_1.id, "video", "done")
