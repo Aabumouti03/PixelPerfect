@@ -99,40 +99,45 @@ h1 {
 }
 
 .edit-btn {
-    flex: 2; 
-    padding: 4px 6px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
+    font-size: 14px;
+    padding: 10px 14px;
+    background-color: white;
+    color: #F24505;
     text-decoration: none;
-    display: inline-block;        
+    border-radius: 25px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;   
+    width: 50%;
+    max-width: 100%;     
 }
 
 .delete-btn {
-    padding: 4px 6px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
+    font-size: 14px;
+    padding: 10px 14px;
+    background-color: white;
+    color: #F24505;
     text-decoration: none;
-    display: inline-block;
+    border-radius: 25px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505; 
     width: 50%; 
     max-width: 100%; 
 }
 
-.edit-btn {
-    background: white;
-    color: #3A88F6;
-}
-
 .edit-btn:hover {
-    background: #f0f0f0;
-}
-
-.delete-btn {
-    background: #ff4d4d;
-    color: white;
+    background: #D43802;
+  color: white;
 }
 
 .delete-btn:hover {
-    background: #cc0000;
+    background: #D43802;
+  color: white;
 }

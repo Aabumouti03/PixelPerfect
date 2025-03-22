@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
 /* Make the content fit the full viewport */
 .content {
     width: 100%;
@@ -15,7 +16,7 @@
 .users-container {
     width: 95%;
     max-width: 1200px;
-    background: #d6eaf3;
+    background: #ffffff;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -26,7 +27,7 @@ h2 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 26px;
-    color: #ff4500;
+    color: #000000;
 }
 
 /* Improve Search & Filter Layout */

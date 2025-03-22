@@ -9,8 +9,9 @@
 
 {% block content %}
 
-<a href="javascript:history.back()" class="back-button"></a>
-
+<div class="top-bar">
+    <a href="{% url 'users_management' %}" class="back-button">← Back</a>
+</div>
 <div class="user-detail-container">
     
     <!-- ✅ User Details Section (Now a Card) -->
