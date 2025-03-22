@@ -217,6 +217,26 @@ body {
     background: #F24505; /* Darker grey on hover */
     transform: scale(1.05);
 }
+
+.message-container {
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.alert {
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.alert.error {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .question-type-select {

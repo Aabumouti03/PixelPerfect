@@ -16,6 +16,17 @@
             <button type="submit" form="edit-form" class="btn save-btn">Save Changes</button>
         </div>
 
+        <!-- ✅ Messages Section -->
+        {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Questionnaire Edit Form -->
         <form id="edit-form" method="POST" action="{% url 'edit_questionnaire' questionnaire.id %}">
             {% csrf_token %}

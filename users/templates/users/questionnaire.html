@@ -12,12 +12,14 @@
     <section class="layout">
         <header class="header">
             <nav class="navbar">
-                <a href="#" class="nav-logo">
+                <a href="javascript:void(0);" class="nav-logo">
                     <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
                     <span class="logo-title">ReWork</span>
                 </a>
-                <a href="#" class="btn">Log out</a>
+            
+                <button type="button" class="btn" id="logout-btn">Log out</button>             
             </nav>
+            
         </header>
 
         <!-- MAIN CONTENT -->
@@ -61,6 +63,18 @@
     <script id="questions-data" type="application/json">
         {{ questions_json|safe }}
     </script>
+
+     <!-- Log out-->
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <h2>Are you sure you want to log out?</h2>
+            <form method="POST" action="{% url 'log_out' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn confirm-logout">Yes, Log Out</button>
+                <button type="button" class="btn cancel-logout" id="cancel-logout">Cancel</button>
+            </form>
+        </div>
+    </div>
 
     <!-- JavaScript for Dynamic Behavior -->
     <script>
@@ -199,6 +213,27 @@
 
         // Initialize on page load
         window.onload = updateQuestion;
+        //Logout modal
+
+        const logoutBtn = document.getElementById("logout-btn");
+        const logoutModal = document.getElementById("logout-modal");
+        const cancelLogout = document.getElementById("cancel-logout");
+
+        logoutBtn.addEventListener("click", () => {
+            logoutModal.style.display = "block";
+        });
+
+        cancelLogout.addEventListener("click", () => {
+            logoutModal.style.display = "none";
+        });
+
+        // Optional: Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target === logoutModal) {
+                logoutModal.style.display = "none";
+            }
+        };
     </script>    
+    
 </body>
 </html>

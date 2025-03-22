@@ -21,6 +21,8 @@ from django.db import transaction
 from django.db.models import Max, Avg
 from django.db.models import Q
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 def admin_check(user):
@@ -92,7 +94,7 @@ def view_questionnaire(request, questionnaire_id):
 @login_required
 def view_responders(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    search_query = request.GET.get('search', '').strip()  # ✅ Trim spaces
+    search_query = request.GET.get('search', '').strip()  
     responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
 
     if search_query:
@@ -101,10 +103,10 @@ def view_responders(request, questionnaire_id):
             Q(user__user__last_name__icontains=search_query)
         )
 
-    # ✅ Ensure consistent ordering for pagination
+    # Ensure consistent ordering for pagination
     responders = responders.order_by("user__user__first_name")
 
-    # ✅ Paginate (10 per page)
+    # Paginate (10 per page)
     paginator = Paginator(responders, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -113,7 +115,7 @@ def view_responders(request, questionnaire_id):
         'questionnaire': questionnaire,
         'responders': page_obj.object_list,
         'page_obj': page_obj,
-        'search_query': search_query,  # ✅ Keep search term in form
+        'search_query': search_query,
     })
 
 @user_passes_test(admin_check)
@@ -137,6 +139,25 @@ def create_questionnaire(request):
         title = request.POST.get("title")
         description = request.POST.get("description")
 
+        #Validation
+        if not title:
+            messages.error(request, "Title is required.")
+            return redirect("create_questionnaire")
+
+        if not description:
+            messages.error(request, "Description is required.")
+            return redirect("create_questionnaire")
+
+        question_index = 0
+        has_questions = False
+        while f"question_text_{question_index}" in request.POST:
+            has_questions = True
+            break
+
+        if not has_questions:
+            messages.error(request, "At least one question is required.")
+            return redirect("create_questionnaire")
+
         questionnaire = Questionnaire.objects.create(title=title, description=description)
 
         question_index = 0
@@ -146,7 +167,13 @@ def create_questionnaire(request):
             sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  
             category_id = request.POST.get(f"category_{question_index}")
             
-            category = Category.objects.get(id=category_id) if category_id else None  
+            category = None
+            if category_id:
+                try:
+                    category = Category.objects.get(id=category_id)
+                except ObjectDoesNotExist:
+                    messages.error(request, f"Category ID {category_id} does not exist. Please select a valid category.")
+                    return redirect("create_questionnaire")  
 
             Question.objects.create(
                 questionnaire=questionnaire,
@@ -158,7 +185,6 @@ def create_questionnaire(request):
 
             question_index += 1  
 
-        messages.success(request, "Questionnaire created successfully!")
         return redirect("manage_questionnaires")
 
     return render(request, "client/create_questionnaire.html", {
@@ -172,19 +198,38 @@ def edit_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
     categories = Category.objects.all()
-    sentiment_choices = Question.SENTIMENT_CHOICES  # ✅ Get choices from model
+    sentiment_choices = Question.SENTIMENT_CHOICES  
 
     if request.method == "POST":
-        questionnaire.title = request.POST.get("title")
-        questionnaire.description = request.POST.get("description")
+        title = request.POST.get("title", "").strip()
+        description = request.POST.get("description", "").strip()
+
+        # Validation: Ensure title and description are not empty
+        if not title:
+            messages.error(request, "Title is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        if not description:
+            messages.error(request, "Description is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        # Ensure at least one question exists
+        if not questions.exists():
+            messages.error(request, "At least one question is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        # Update questionnaire details
+        questionnaire.title = title
+        questionnaire.description = description
         questionnaire.save()
 
         for question in questions:
-            question_text = request.POST.get(f"question_text_{question.id}")
-            question_type = request.POST.get(f"question_type_{question.id}")
-            sentiment = request.POST.get(f"sentiment_{question.id}")
-            category_id = request.POST.get(f"category_{question.id}")
+            question_text = request.POST.get(f"question_text_{question.id}", "").strip()
+            question_type = request.POST.get(f"question_type_{question.id}", "").strip()
+            sentiment = request.POST.get(f"sentiment_{question.id}", "").strip()
+            category_id = request.POST.get(f"category_{question.id}", "").strip()
 
+            # Update only if fields are provided (avoids overwriting with blanks)
             if question_text:
                 question.question_text = question_text
 
@@ -192,10 +237,18 @@ def edit_questionnaire(request, questionnaire_id):
                 question.question_type = question_type
 
             if sentiment:
-                question.sentiment = int(sentiment)  
+                try:
+                    question.sentiment = int(sentiment)
+                except ValueError:
+                    messages.error(request, f"Invalid sentiment value for question {question.id}.")
+                    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
             if category_id:
-                question.category = Category.objects.get(id=category_id)
+                try:
+                    question.category = Category.objects.get(id=category_id)
+                except ObjectDoesNotExist:
+                    messages.error(request, f"Invalid category ID {category_id}.")
+                    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
             question.save()
 
@@ -205,7 +258,7 @@ def edit_questionnaire(request, questionnaire_id):
         "questionnaire": questionnaire,
         "questions": questions,
         "categories": categories,
-        "sentiment_choices": sentiment_choices,  
+        "sentiment_choices": sentiment_choices,
     })
 
 @user_passes_test(admin_check)
