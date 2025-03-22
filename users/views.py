@@ -130,8 +130,8 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-            redirect('recommended_programs')
-            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+                
+            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
@@ -248,7 +248,6 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
 
     # Fetch user progress for each module
     user_progress = {
@@ -256,29 +255,34 @@ def view_program(request, program_id):
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
+    program_modules_data = []  # Store all program modules with progress and locked status
+    previous_completed = True  # The first module should be unlocked
+
+    for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
+        progress_value = user_progress.get(module.id, 0)  # Get progress percentage or default to 0%
+        is_locked = not previous_completed  # Lock module if previous is not completed
 
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
+        program_modules_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress_value": progress_value,
+            "module_order": index + 1,
+            "locked": is_locked,
+        })
 
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
+        # Update the previous_completed status
+        previous_completed = (progress_value == 100)
 
     context = {
         'user': user,
         'program': program,
-        'program_modules': program_modules,
+        'program_modules': program_modules_data,
     }
     
     return render(request, 'users/view_program.html', context)
+
 
 
 def welcome_page(request):

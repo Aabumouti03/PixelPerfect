@@ -4,12 +4,6 @@ from users.models import EndUser, UserModuleProgress, UserProgramProgress, UserE
 def calculate_progress(user, module):
     """Calculate the completion percentage for a user's progress in a module."""
     
-
-    if isinstance(user, EndUser):  
-        end_user = user
-    else:
-        end_user = EndUser.objects.get(user=user)  # Only fetch if needed
-
     exercises = []
     for section in module.sections.all():
         if section.exercises.exists():
@@ -18,9 +12,9 @@ def calculate_progress(user, module):
     video_resources = list(module.video_resources.all()) 
 
     completed_items = (
-        UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises, status='completed').count() +
-        UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources, status='completed').count() +
-        UserVideoProgress.objects.filter(user=end_user, video__in=video_resources, status='completed').count()
+        UserExerciseProgress.objects.filter(user=user, exercise__in=exercises, status='completed').count() +
+        UserResourceProgress.objects.filter(user=user, resource__in=additional_resources, status='completed').count() +
+        UserVideoProgress.objects.filter(user=user, video__in=video_resources, status='completed').count()
     )
 
     total_items = len(exercises) + len(additional_resources) + len(video_resources)
@@ -61,3 +55,7 @@ def update_user_program_progress(end_user, program):
     # Update the completion percentage of the user for the program
     user_program_progress.completion_percentage = progress
     user_program_progress.save()
+
+
+
+

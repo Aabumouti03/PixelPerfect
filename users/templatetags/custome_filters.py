@@ -7,5 +7,5 @@ def get_item(dictionary, key):
     """Safely get an item from a dictionary in Django templates."""
     if isinstance(dictionary, dict):
         return dictionary.get(key, None)
-    return None  # Return None if it's not a dictionary
+    return None  
 
