@@ -250,7 +250,7 @@
 }
 
 .view-all-button:hover {
-    background-color: #c9301c;
+    background-color: #D43802;
 }
 
 /* ✅ Style the questionnaire list */
@@ -286,7 +286,7 @@
 
 /* ✅ Highlight selected choice */
 .selected-choice {
-    background: #f24405;
+    background: #F24505;
     color: white;
     font-weight: bold;
 }
@@ -317,18 +317,23 @@
 
 /* ✅ Button Style */
 .view-answers-btn {
-    background-color: #F24505;
+    padding: 12px 18px;
+    background: #F24505;
     color: white;
-    border: none;
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 5px;
+    font-family: Manrope;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .view-answers-btn:hover {
-    background-color: #c9301c;
+    background: #D43802;
+    color: white;
 }
 
 /* ✅ Responsive Adjustments */

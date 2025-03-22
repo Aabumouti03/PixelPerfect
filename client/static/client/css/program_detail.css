@@ -12,12 +12,12 @@ body {
     padding: 20px 40px 10px 30px;
     background: white;
     border-radius: 20px;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 h1, h2 {
-    color: #ff440f;
+    color: #F24505;
     font-weight: bold;
     text-align: center;
     font-size: 36px;
@@ -26,66 +26,73 @@ h1, h2 {
 .card {
     border-radius: 20px;
     background-color: #f9f9f9;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
 }
 
 .form-label {
     font-weight: bold;
-    color: #ff440f;
+    color: #F24505;
     font-size: 20px;
 }
 
 .form-control {
     border-radius: 10px !important;
     padding: 12px 20px;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     background: #f5f7fa;
     transition: all 0.3s ease-in-out;
 }
 
 .form-control:focus {
-    border-color: #ff440f;
+    border-color: #F24505;
     box-shadow: 0 0 5px rgba(255, 68, 15, 0.5);
     background: #fff;
 }
 
 .btn-primary {
-    background-color: #ff440f;
-    border: 3px solid #ff440f;
-    border-radius: 50px;
-    padding: 12px 25px;
-    font-size: 16px;
+    padding: 12px 18px;
+    background: #F24505;
+    color: white;
+    font-family: Manrope;
+    border-radius: 25px;
+    font-size: 14px;
     font-weight: bold;
-    transition: background 0.3s ease-in-out, transform 0.2s;
-    width: 100%;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .btn-primary:hover {
-    background-color: #cc370d;
-    transform: translateY(-2px);
+    background: #D43802;
+    color: white;
 }
 
 .btn-secondary {
-    background-color: #6c757d;
-    border: 3px solid #6c757d;
-    border-radius: 50px;
-    padding: 12px 25px;
-    font-size: 16px;
-    transition: background 0.3s ease-in-out, transform 0.2s;
-    width: 100%;
+    padding: 12px 18px;
+    background: #ddd;
+    color: black;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
+    background: #bbb;
 }
 
 .list-group-item {
     background: #fff;
     border-radius: 10px;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     padding: 10px 15px;
     margin-bottom: 8px;
 }
@@ -94,7 +101,7 @@ h1, h2 {
     background: #f9f9f9;
     border-radius: 10px;
     padding: 10px;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     min-height: 50px;
 }
 
@@ -103,7 +110,7 @@ h1, h2 {
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     background: white;
     border-radius: 10px;
     margin-bottom: 8px;
@@ -116,7 +123,7 @@ h1, h2 {
 }
 
 .module-box {
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
     border-radius: 10px;
     padding: 15px;
     background-color: #fff;
@@ -142,7 +149,7 @@ h1, h2 {
     margin: 100px auto;
     padding: 20px;
     border-radius: 10px;
-    border: 3px solid #ff440f;
+    border: 3px solid #F24505;
 }
 
 .modal-close {
@@ -150,7 +157,7 @@ h1, h2 {
     cursor: pointer;
     font-size: 18px;
     font-weight: bold;
-    color: #ff440f;
+    color: #F24505;
 }
 
 .checkbox-list {

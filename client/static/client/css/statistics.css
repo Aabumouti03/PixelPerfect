@@ -18,7 +18,7 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    color: #F24505;
+    color: #000000;
 }
 
 .card-container {
@@ -144,18 +144,19 @@ body {
 }
 
 .custom-btn {
-    display: inline-block;
-    padding: 12px 24px;
+    background-color: #F24505; 
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
     font-size: 16px;
     font-weight: bold;
-    text-decoration: none;
-    border-radius: 30px;
-    background-color: #007bff;
-    color: white;
     border: none;
-    transition: background-color 0.3s ease;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
 }
 
 .custom-btn:hover {
-    background-color: #0056b3;
+    background: #D43802;
+    color: white;
 }

@@ -234,7 +234,7 @@ canvas#progressChart {
 }
 
 .submit-container button {
-    background-color: #FF6600; /* Bright orange */
+    background-color: #F24505; /* Bright orange */
     color: white; /* White text for contrast */
     font-size: 16px;
     font-weight: bold;
@@ -246,12 +246,12 @@ canvas#progressChart {
 }
 
 .submit-container button:hover {
-    background-color: #E65C00; /* Slightly darker orange for hover effect */
+    background-color: #D43802; /* Slightly darker orange for hover effect */
     transform: scale(1.05); /* Slight zoom effect */
 }
 
 .submit-container button:active {
-    background-color: #CC4E00; /* Even darker orange when clicked */
+    background-color: #D43802; /* Even darker orange when clicked */
     transform: scale(0.98); /* Slight press-in effect */
 }
 
@@ -281,7 +281,7 @@ canvas#progressChart {
 }
 
 .done-button {
-    background-color: #CC4E00;  /* Default to orange */
+    background-color: #F24505;  /* Default to orange */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -291,7 +291,7 @@ canvas#progressChart {
 
 /* Style for "Done" state (orange) */
 .done-button {
-    background-color: #CC4E00;  /* Default to orange */
+    background-color: #F24505;  /* Default to orange */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -302,7 +302,7 @@ canvas#progressChart {
 
 /* Style for "Done" state (orange) */
 .done-button.undo {
-    background-color: #CC4E00;
+    background-color: #F24505;
     color: white;
     padding: 10px 20px;
     margin-left: 15px; /* ✅ Adds spacing to move it right */

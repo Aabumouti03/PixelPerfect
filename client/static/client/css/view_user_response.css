@@ -107,6 +107,6 @@ body {
 }
 
 .back-btn:hover {
-    background: #F24505;
-    transform: scale(1.05);
+    background: #D43802;
+    color: white;
 }
