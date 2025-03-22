@@ -784,6 +784,8 @@ def module_overview(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     return render(request, "client/moduleOverview.html", {"module": module})
 
+@login_required
+@user_passes_test(admin_check)
 def client_modules(request):
     modules = Module.objects.all().values("id", "title", "description") 
     module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
@@ -800,7 +802,8 @@ def client_modules(request):
 
     return render(request, "client/client_modules.html", {"modules": modules_list})
 
-
+@login_required
+@user_passes_test(admin_check)
 def edit_module(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     
@@ -815,12 +818,15 @@ def edit_module(request, module_id):
 
     return render(request, 'client/edit_module.html', {'form': form, 'module': module})
 
+@login_required
+@user_passes_test(admin_check)
 def delete_module(request, module_id):
     module = get_object_or_404(Module, id=module_id)
     module.delete()
     return redirect("client_modules")
 
-
+@login_required
+@user_passes_test(admin_check)
 def add_module(request):
     if request.method == "POST":
         title = request.POST.get("title")
@@ -835,6 +841,7 @@ def add_module(request):
 
 # For adding video content
 @login_required
+@user_passes_test(admin_check)
 def add_video(request):
     """View for adding a new video resource."""
     if request.method == "POST":
@@ -847,12 +854,14 @@ def add_video(request):
     return render(request, "client/add_video.html", {"form": form})
 
 @login_required
+@user_passes_test(admin_check)
 def video_list(request):
     """View for displaying all uploaded video resources."""
     videos = VideoResource.objects.all()
     return render(request, "client/video_list.html", {"videos": videos})
 
 @login_required
+@user_passes_test(admin_check)
 def video_detail(request, video_id):
     """View for displaying a single video."""
     video = get_object_or_404(VideoResource, id=video_id)
