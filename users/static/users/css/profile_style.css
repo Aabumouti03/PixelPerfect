@@ -108,7 +108,6 @@ html, body {
 }
 
 .profile-details input,
-.profile-details select,
 .profile-details textarea {
     width: 700px !important; /* Ensure full width */
     max-width: none !important; /* Override any max width */
@@ -117,10 +116,43 @@ html, body {
     font-size: 16px;
     border: 1px solid #CCC;
     border-radius: 25px;
-    background-color: #FBFCF5;
+    background-color: #fff;
     box-sizing: border-box;
 }
 
+/* Dropdown styling */
+.profile-details select {
+    width: 100%; 
+    height: 50px;
+    padding: 14px 18px;
+    padding-right: 45px; /* Make space for the arrow */
+    font-size: 16px;
+    border: 1px solid #CCC;
+    border-radius: 25px;
+    background-color: #eaeaea79; 
+    box-sizing: border-box;
+    -webkit-appearance: none; /* Remove default styles */
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Effect */
+.profile-details select:hover {
+    border-color: #888;
+    background-color: #fff; /* Brightens background to indicate interactivity */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Make sure options are readable */
+.profile-details select option {
+    padding: 10px;
+    background-color: #fff;
+    color: #333;
+}
 
 /* Password Wrapper with Eye Inside */
 .password-wrapper {
@@ -287,6 +319,18 @@ html, body {
     font-weight: bolder;
     color: white;
     background-color: #F24505;
+}
+
+/* Make Profile Page React to Sidebar Hover */
+body.navbar-hovered .profile-container {
+    transition: margin-left 0.3s ease, opacity 0.3s;
+    margin-left: 100px; /* Adjust this to move your profile page content */
+    opacity: 0.9; /* Slight transparency for a nice effect */
+}
+
+/* Example of changing profile background color */
+body.navbar-hovered .profile-container {
+    background-color: #f0f0f0;
 }
 
 /* Mobile-Specific Adjustments for Very Small Screens (Phones) */

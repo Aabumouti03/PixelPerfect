@@ -55,25 +55,61 @@ form {
     gap: 20px;
 }
 
-
 .journal-entry input,
-.journal-entry select,
 .journal-entry textarea {
-    width: 100%; /* Keep full width */
-    height: 40px; /* Reduce height */
-    font-size: 16px; /* Adjust font size for better readability */
-    padding: 10px; /* Adjust padding */
-    border: 2px solid #ccc;
-    border-radius: 8px; /* Slightly rounded edges */
+    width: 100%; 
+    height: 50px;
+    padding: 14px 18px;
+    font-size: 16px;
+    border: 1px solid #CCC;
+    border-radius: 25px;
+    background-color: #fff;
     box-sizing: border-box;
+    box-sizing: border-box;
+    outline: none;
+    cursor: pointer; /* 👈 Clearly indicates it's clickable */
+    transition: all 0.2s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown styling */
+.journal-entry select {
+    width: 100%; 
+    height: 50px;
+    padding: 14px 18px;
+    padding-right: 45px; /* Make space for the arrow */
+    font-size: 16px;
+    border: 1px solid #CCC;
+    border-radius: 25px;
+    background-color: #eaeaea79; 
+    box-sizing: border-box;
+    -webkit-appearance: none; /* Remove default styles */
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Effect */
+.journal-entry select:hover {
+    border-color: #888;
+    background-color: #fff; /* Brightens background to indicate interactivity */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Make sure options are readable */
+.journal-entry select option {
+    padding: 10px;
+    background-color: #fff;
+    color: #333;
 }
 
 textarea {
     min-height: 100px; /* Reduce the height of the text area */
     resize: vertical; /* Allow resizing but keep it compact */
 }
-
-
 
 input:focus, select:focus, textarea:focus {
     border-color: #F24505;
@@ -90,11 +126,17 @@ input:focus, select:focus, textarea:focus {
 }
 
 .toggle-group label {
-    cursor: pointer;
-    padding: 10px 20px;
+    padding: 12px 18px;
     background: #ddd;
-    border-radius: 6px;
-    transition: background 0.3s;
+    color: black;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .toggle-group input:checked + label {
@@ -104,18 +146,21 @@ input:focus, select:focus, textarea:focus {
 
 /* Submit Button */
 .submit-btn {
+    padding: 12px 18px;
     background: #F24505;
     color: white;
-    font-size: 1rem;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
 }
 
 .submit-btn:hover {
-    background: #d93800;
+    background: #D43802;
 }
 
 /* Success Message */

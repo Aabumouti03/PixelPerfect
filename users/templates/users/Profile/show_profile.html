@@ -1,11 +1,10 @@
-<body class="profile-page">
-{% extends "users/base.html" %}
+{% extends 'users/base.html' %}
 {% load static %}
 
-{% block title %}User Profile{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'users/css/profile_style.css' %}">
+{% endblock %}
 
-{% block content %}
-<link rel="stylesheet" href="{% static 'users/css/profile_style.css' %}">
 
 {% if messages %}
     <div class="alert alert-{{ messages.0.tags }}">
@@ -13,7 +12,7 @@
     </div>
 {% endif %}
 
-
+{% block content %}
 <div class="profile-container">
     <!-- Profile Header -->
     <div class="profile-header">
@@ -91,6 +90,25 @@
         }
     </script>
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const navbar = document.getElementById('sidebar-navbar');
+        const body = document.body;
+
+        if (navbar) {
+            // When the mouse enters the navbar
+            navbar.addEventListener('mouseenter', function () {
+                body.classList.add('navbar-hovered');
+            });
+
+            // When the mouse leaves the navbar
+            navbar.addEventListener('mouseleave', function () {
+                body.classList.remove('navbar-hovered');
+            });
+        }
+    });
+</script>
 
 
 {% endblock %}
