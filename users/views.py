@@ -766,7 +766,7 @@ def user_modules(request):
             "id": module.id,
             "title": module.title,
             "description": module.description,
-            "progress": progress_percentage,
+            "progress_value": progress_percentage,  
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})

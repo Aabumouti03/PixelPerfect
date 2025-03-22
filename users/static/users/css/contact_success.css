@@ -13,8 +13,6 @@
     align-items: center;
     min-height: 100vh;
     padding-top: 80px;
-    /* Optional: set a background color or image */
-    /* background-color: #fff; */
 }
 
 .success_container {
@@ -27,7 +25,6 @@
     border-radius: 30px;
     padding: 40px;
     overflow: hidden;
-    /* Optional: set a subtle background color or gradient to match your theme */
     background-color: #fdf1ed;
 }
 
