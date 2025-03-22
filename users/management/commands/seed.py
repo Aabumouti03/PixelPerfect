@@ -6,7 +6,7 @@ django.setup()
 
 import random
 from django.contrib.auth import get_user_model
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule, BackgroundStyle
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule, BackgroundStyle, ProgramModule
 from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment, Quote
 from django.db import transaction
 from django.core.management.base import BaseCommand

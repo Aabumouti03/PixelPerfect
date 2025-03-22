@@ -1,0 +1,65 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
+
+        <h2 class="page-title">Add New Question</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.question_text.id_for_label }}">{{ form.question_text.label }}</label>
+                {{ form.question_text }}
+            </div>
+
+
+            <button type="submit" class="save-btn">Save Question</button>
+        </form>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ✅ Function to update selected items dynamically
+            function updateSelectedItems(checkboxName, displayListId) {
+                let selectedList = document.getElementById(displayListId);
+                if (!selectedList) return;  // If element doesn't exist, exit function
+        
+                selectedList.innerHTML = "";
+        
+                document.querySelectorAll(`input[type="checkbox"][name="${checkboxName}"]:checked`).forEach(checkbox => {
+                    let label = document.querySelector(`label[for="${checkbox.id}"]`);
+                    if (label) {
+                        let li = document.createElement('li');
+                        li.textContent = label.textContent.trim();
+                        selectedList.appendChild(li);
+                    }
+                });
+            }
+        
+            // ✅ Update sections when selected
+            document.querySelectorAll('input[type="checkbox"][name="sections"]').forEach(input => {
+                input.addEventListener('change', () => updateSelectedItems("sections", "selected-sections"));
+            });
+        
+            // ✅ Update exercises when selected
+            document.querySelectorAll('input[type="checkbox"][name="exercises"]').forEach(input => {
+                input.addEventListener('change', () => updateSelectedItems("exercises", "selected-exercises"));
+            });
+        
+            // ✅ Update questions when selected
+            document.querySelectorAll('input[type="checkbox"][name="questions"]').forEach(input => {
+                input.addEventListener('change', () => updateSelectedItems("questions", "selected-questions"));
+            });
+        
+            // ✅ Trigger updates on page load (in case of pre-selected values)
+            updateSelectedItems("sections", "selected-sections");
+            updateSelectedItems("exercises", "selected-exercises");
+            updateSelectedItems("questions", "selected-questions");
+        });
+        </script>
+        
+{% endblock %}

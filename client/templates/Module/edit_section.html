@@ -1,0 +1,181 @@
+{% extends 'client/client_base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <h2 class="page-title">Edit Section</h2>
+        <link rel="stylesheet" href="{% static 'client/css/edit_section_style.css' %}">
+
+        <!-- Section Title -->
+        <div class="section-section">
+            <h3>Section Title</h3>
+            <div class="editable-field">
+                <input type="text" id="section-title" value="{{ section.title }}" class="edit-input" readonly>
+                <button class="edit-btn" onclick="toggleEdit('section-title', this)">Edit</button>
+                <button class="save-btn hidden" onclick="saveSectionData('{{ section.id }}', 'title')">Save</button>
+            </div>
+        </div>
+
+        <!-- Section Description -->
+        <div class="section-section">
+            <h3>Description</h3>
+            <div class="editable-field">
+                <textarea id="section-description" class="edit-input" readonly>{{ section.description }}</textarea>
+                <button class="edit-btn" onclick="toggleEdit('section-description', this)">Edit</button>
+                <button class="save-btn hidden" onclick="saveSectionData('{{ section.id }}', 'description')">Save</button>
+            </div>
+        </div>
+
+        <!-- Exercises -->
+        <div class="section-section">
+            <h3>Exercises</h3>
+
+            <!-- Add Exercise Dropdown -->
+            <div class="add-exercise">
+                <select id="exercise-dropdown">
+                    <option value="">Select an exercise to add</option>
+                    {% for exercise in all_exercises %}
+                        <option value="{{ exercise.id }}">{{ exercise.title }}</option>
+                    {% empty %}
+                        <option value="" disabled>No available exercises</option>
+                    {% endfor %}
+                </select>
+                <button class="add-btn" onclick="addExercise('{{ section.id }}')">Add Exercise</button>
+            </div>
+
+            <!-- Exercise List -->
+            <!-- ✅ Ensure each exercise-card has a data attribute -->
+            <div class="exercises">
+                {% for exercise in section.exercises.all %}
+                    <div class="exercise-card" data-exercise-id="{{ exercise.id }}">
+                        <div class="exercise-header">
+                            <h4>{{ exercise.title }}</h4>
+                            <button class="remove-btn" onclick="removeExercise('{{ section.id }}', '{{ exercise.id }}')">
+                                ❌ Remove
+                            </button>
+                        </div>
+
+                        <!-- ✅ Display Exercise Questions Directly -->
+                        <div class="exercise-questions">
+                            <h5>Questions:</h5>
+                            {% for question in exercise.questions.all %}
+                                <div class="question-card">
+                                    <p>🔹 {{ question.question_text }}</p>
+                                </div>
+                            {% empty %}
+                                <p>No questions available.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No exercises available.</p>
+                {% endfor %}
+             </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ✅ Toggle Edit Mode for Section Title and Description
+        function toggleEdit(fieldId, editButton) {
+            const inputField = document.getElementById(fieldId);
+            const saveButton = editButton.nextElementSibling;
+
+            if (inputField.readOnly) {
+                inputField.readOnly = false;
+                inputField.classList.add('editing');
+                editButton.style.display = 'none';
+                saveButton.classList.remove('hidden');
+            }
+        }
+
+        // ✅ Save Updated Section Data (Title & Description)
+        function saveSectionData(sectionId, field) {
+            let value = document.getElementById(field === 'title' ? 'section-title' : 'section-description').value;
+
+            fetch(`/update_section/${sectionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ field: field, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Section updated successfully!");
+                    location.reload();
+                } else {
+                    alert("Error updating section.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // ✅ Add Exercise to Section
+        function addExercise(sectionId) {
+            let exerciseId = document.getElementById('exercise-dropdown').value;
+
+            if (!exerciseId) {
+                alert("Please select an exercise.");
+                return;
+            }
+
+            fetch(`/add_exercise_to_section/${sectionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ exercise_id: exerciseId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Exercise added successfully!");
+                    location.reload();
+                } else {
+                    alert("Error adding exercise.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // ✅ Remove Exercise from Section
+        // ✅ Remove Selected Exercises from Section
+        // ✅ Remove a single exercise from the section
+        function removeExercise(sectionId, exerciseId) {
+            console.log("Removing Exercise:", exerciseId);  // Debugging
+
+            fetch(`/remove_exercise_from_section/${sectionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ exercise_ids: [exerciseId] }) // ✅ Send as an array
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("📥 Response received:", data);  // Debugging
+
+                if (data.success) {
+                    alert("✅ Exercise removed successfully!");
+
+                    // ✅ Remove the exercise from the DOM without reloading
+                    let exerciseCard = document.querySelector(`.exercise-card[data-exercise-id="${exerciseId}"]`);
+                    if (exerciseCard) {
+                        exerciseCard.remove();
+                    }
+                } else {
+                    alert("❌ Error removing exercise.");
+                }
+            })
+            .catch(error => console.error("⚠️ Error:", error));
+        }
+
+
+    </script>
+
+{% endblock %}

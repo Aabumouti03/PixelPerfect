@@ -63,7 +63,7 @@
     <section class="modules-container">
       <header class="modules-header">
         <h2>Your Modules</h2>
-        <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
+        <a href="{% url 'userModules' %}" class="view-all-button">View Your Modules</a>
       </header>
       <div class="module-list">
         {% for module in outside_modules|slice:":3" %}

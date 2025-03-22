@@ -170,8 +170,7 @@ class UserModuleProgress(models.Model):
     class Meta:
         unique_together = ('user', 'module') 
     def __str__(self):
-        return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
-
+        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
 class UserResourceProgress(models.Model):
     """Tracks user progress for each additional resource."""

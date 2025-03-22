@@ -23,7 +23,15 @@
                 <span>Programs</span>
             </a>
         </li>
-        <li></li>
+        
+        <li>
+            <a href="{% url 'edit_add_module' %}" class="{%if request.path == '/edit_add/' %}active{% endif %}">
+                <img src="{% static 'img/programs.svg' %}" alt="Programs" class="icon">
+                <span>Manage Modules</span>
+            </a>
+        </li>
+
+        <li>
             <a href="{% url 'client_modules' %}" class="{%if request.path == '/client_modules/' %}active{% endif %}">
                 <img src="{% static 'img/modules.svg' %}" alt="Modules" class="icon">
                 <span>Modules</span>
@@ -50,6 +58,14 @@
                 <span>Questionnaires</span>
             </a>
         </li>
+        
+        <li>
+            <a href="{% url 'manage_exercises' %}" class="{%if request.path == '/manage_exercises/' %}active{% endif %}">
+                <img src="{% static 'img/programs.svg' %}" alt="Programs" class="icon">
+                <span>Manage Exercises</span>
+            </a>
+        </li>
+        
         <div class="logout">
             <a href="#" id="logout-link">
                 <img src="{% static 'users/img/logout.svg' %}" alt="Logout" class="icon">

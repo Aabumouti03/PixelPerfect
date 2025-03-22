@@ -18,7 +18,7 @@ class UserSignUpForm(UserCreationForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Re-enter password: *'}),
         label=""
     )
-
+ 
     def clean_username(self):
         """Ensure username does not contain spaces and has at least 3 characters."""
         username = self.cleaned_data.get("username")

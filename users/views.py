@@ -41,6 +41,9 @@ from client.models import (
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
+from .models import UserResponse
+from .models import User, EndUser, Module
+from client.models import Exercise, ExerciseQuestion
 from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
 
@@ -130,8 +133,8 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-            redirect('recommended_programs')
-            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+                
+            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
@@ -248,7 +251,6 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
 
     # Fetch user progress for each module
     user_progress = {
@@ -256,29 +258,34 @@ def view_program(request, program_id):
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
+    program_modules_data = []  # Store all program modules with progress and locked status
+    previous_completed = True  # The first module should be unlocked
+
+    for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
+        progress_value = user_progress.get(module.id, 0)  # Get progress percentage or default to 0%
+        is_locked = not previous_completed  # Lock module if previous is not completed
 
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
+        program_modules_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress_value": progress_value,
+            "module_order": index + 1,
+            "locked": is_locked,
+        })
 
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
+        # Update the previous_completed status
+        previous_completed = (progress_value == 100)
 
     context = {
         'user': user,
         'program': program,
-        'program_modules': program_modules,
+        'program_modules': program_modules_data,
     }
     
     return render(request, 'users/view_program.html', context)
+
 
 
 def welcome_page(request):
@@ -301,26 +308,22 @@ def contact_us(request):
         email = request.POST.get('email')
         message = request.POST.get('message')
 
-        # Combine the message content
         full_message = (
             f"Name: {name}\n"
             f"Email: {email}\n\n"
             f"Message:\n{message}"
         )
 
-        # Send the email (settings.EMAIL_HOST_USER is often used as the 'from' address)
         send_mail(
             subject="New Contact Us Submission",
             message=full_message,
             from_email=settings.EMAIL_HOST_USER,  
-            recipient_list=[settings.EMAIL_HOST_USER],  # Replace with your admin email or use settings.ADMINS
+            recipient_list=[settings.EMAIL_HOST_USER],  
             fail_silently=False,
         )
 
-        # Redirect to a success page (create a URL/path named 'contact_success' for this)
         return redirect('contact_success')
 
-    # If GET request, simply render the contact form
     return render(request, 'users/contact_us.html')
 
 def contact_success(request):
@@ -404,7 +407,7 @@ def sign_up_step_2(request):
 
             send_verification_email_after_sign_up(user, request)
 
-            return render(request, "users/sign_up_email_verification.html") #modify the html for this (extend the welcome page navbar in it and then write something relayted to like we sent a verification link to your email.)
+            return render(request, "users/sign_up_email_verification.html")
     else:
         profile_form = EndUserProfileForm()
 
@@ -419,14 +422,14 @@ def verify_email_after_sign_up(request, uidb64, token):
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
-        return HttpResponse("Invalid verification link.") #change this to a new html that displays the same message and extend the welcome page navbar.
+        return render(request, 'users/invalid_verification.html')
 
     if default_token_generator.check_token(user, token):
         user.email_verified = True  
         user.save()
         return redirect('verification_done')
 
-    return HttpResponse("Invalid or expired token.")
+    return render(request, 'users/invalid_verification.html')
 
 def verification_done(request):
     return render(request, "users/verification_done.html")
@@ -766,7 +769,7 @@ def user_modules(request):
             "id": module.id,
             "title": module.title,
             "description": module.description,
-            "progress": progress_percentage,
+            "progress_value": progress_percentage,  
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})
@@ -834,7 +837,6 @@ def module_overview(request, module_id):
 @login_required
 def exercise_detail(request, exercise_id):
     """Fetch the exercise details, including questions, saved responses, and the related diagram."""
-
     exercise = get_object_or_404(Exercise, id=exercise_id)
 
     user, created = EndUser.objects.get_or_create(user=request.user)
@@ -861,7 +863,6 @@ def exercise_detail(request, exercise_id):
 @csrf_exempt  
 @login_required
 def rate_module(request, module_id):
-    """Handles AJAX-based user rating for a module."""
     
     module = get_object_or_404(Module, id=module_id)
 
@@ -1213,4 +1214,34 @@ def save_journal_entry(request):
 
     # Save the journal entry
     return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+
+@login_required
+def user_responses_main(request):
+    """Shows all exercises as clickable boxes."""
+    exercises = Exercise.objects.all()
+    return render(request, "UserResponce/user_responses_main.html", {"exercises": exercises})
+
+
+@login_required
+def exercise_detail_view(request, exercise_id):
+    """Shows all questions for a selected exercise, with all user responses."""
+    
+    exercise = get_object_or_404(Exercise, id=exercise_id)
+    questions = exercise.questions.all()
+    
+    # Get the logged-in user’s profile
+    enduser = getattr(request.user, 'User_profile', None)
+    if not enduser:
+        return redirect('dashboard')  
+
+    # Fetch responses for each question in the exercise
+    questions_with_responses = []
+    for question in questions:
+        responses = UserResponse.objects.filter(user=enduser, question=question)
+        questions_with_responses.append({'question': question, 'responses': responses})
+
+    return render(request, "UserResponce/exercise_detail.html", 
+    {"exercise": exercise, "questions_with_responses": questions_with_responses})
 
