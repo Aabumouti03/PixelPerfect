@@ -22,10 +22,22 @@ def send_verification_email_after_sign_up(user, request):
     
     {verification_url}
     
-    If you did not sign up for this account, please ignore this email.
-    
-    Thank you,
-    ReWork Team.
+    This link is valid for a limited time and can only be used once. If you do not complete verification, your account may remain inactive.
+
+    If you did not sign up for a ReWork account, you can safely ignore this message.
+
+    We are excited to support your journey toward returning to work with confidence. After verifying your email, you'll be able to:
+
+    • Access our full suite of tailored support modules  
+    • Track your readiness progress  
+    • Connect with programs designed for your needs  
+
+    If you have any questions or run into issues, feel free to reach out to our support team in the contact us section.
+
+    We hope you enjoy your jouney.
+
+    Best regards,  
+    The ReWork Team
     """
 
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
