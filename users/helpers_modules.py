@@ -17,6 +17,8 @@ def calculate_progress(user, module):
         UserVideoProgress.objects.filter(user=user, video__in=video_resources, status='completed').count()
     )
 
+    
+
     total_items = len(exercises) + len(additional_resources) + len(video_resources)
 
     return (completed_items / total_items) * 100 if total_items > 0 else 0
