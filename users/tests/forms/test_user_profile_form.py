@@ -52,10 +52,6 @@ class UserProfileFormTest(TestCase):
             "sector": "finance",
         }
         form = UserProfileForm(data=form_data, instance=self.end_user, user=self.user)
-
-        # Print errors before asserting
-        if not form.is_valid():
-            print("Form Errors:", form.errors)
              
         self.assertTrue(form.is_valid())
 
@@ -168,3 +164,38 @@ class UserProfileFormTest(TestCase):
         form = UserProfileForm(data=form_data, user=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("new_email", form.errors)
+
+    def test_password_with_spaces(self):
+        """Test that passwords with spaces are invalid."""
+        form_data = {
+            "new_password": "With space1A",
+            "confirm_password": "With space1A",
+        }
+        form = UserProfileForm(data=form_data, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("new_password", form.errors)
+        self.assertTrue(any("Password should not contain spaces." in e for e in form.errors["new_password"]))
+
+    def test_new_email_already_used_as_existing_email(self):
+        """Test that an existing user's primary email is not allowed as new_email."""
+        # Create another user who already uses this email as their main email
+        User.objects.create_user(
+            username="otheruser",
+            email="used@example.com",
+            password="Test@1234"
+        )
+
+        form_data = {
+            "new_email": "used@example.com"
+        }
+
+        form = UserProfileForm(data=form_data, instance=self.end_user, user=self.user)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("new_email", form.errors)
+
+        self.assertTrue(
+            any("user with this email already exists" in e.lower() for e in form.errors["new_email"]),
+            "Expected error message about existing email not found."
+        )
+
