@@ -98,22 +98,22 @@
             if (currentQuestion.question_type === "AGREEMENT") {
                 document.getElementById("answer-options").style.display = "block";
                 let choicesHtml = `
-                   <button class="answer-btn" data-value="5">Strongly Agree</button>
-                   <button class="answer-btn" data-value="4">Agree</button>
-                   <button class="answer-btn" data-value="3">Neutral</button>
-                   <button class="answer-btn" data-value="2">Disagree</button>
-                   <button class="answer-btn" data-value="1">Strongly Disagree</button>  
+                   <button class="answer-btn" data-value="2">Strongly Agree</button>
+                   <button class="answer-btn" data-value="1">Agree</button>
+                   <button class="answer-btn" data-value="0">Neutral</button>
+                   <button class="answer-btn" data-value="-1">Disagree</button>
+                   <button class="answer-btn" data-value="-2">Strongly Disagree</button>  
                 `;
                 document.getElementById("answer-options").innerHTML = choicesHtml;
             } 
             else if (currentQuestion.question_type === "RATING") {
                 document.getElementById("rating-options").style.display = "block";
                 let ratingHtml = `
-                    <button class="rating-btn" data-value="1">1</button>
-                    <button class="rating-btn" data-value="2">2</button>
-                    <button class="rating-btn" data-value="3">3</button>
-                    <button class="rating-btn" data-value="4">4</button>
-                    <button class="rating-btn" data-value="5">5</button>
+                    <button class="rating-btn" data-value="-2">1</button>
+                    <button class="rating-btn" data-value="-1">2</button>
+                    <button class="rating-btn" data-value="0">3</button>
+                    <button class="rating-btn" data-value="1">4</button>
+                    <button class="rating-btn" data-value="2">5</button>
                 `;
                 document.getElementById("rating-options").innerHTML = ratingHtml;
             }

@@ -16,7 +16,6 @@
 
     <!-- Search & Sorting -->
     <div class="search-sort-container">
-        <!-- Search Bar -->
         <form method="GET" class="search-form">
             <input type="text" name="search" placeholder="Search responders by name..." value="{{ search_query }}" class="search-input">
             <button type="submit" class="btn search-btn">Search</button>
@@ -35,7 +34,8 @@
             <tbody>
                 {% for responder in page_obj %}
                 <tr>
-                    <td>{{ responder.user.user.full_name }}</td>
+                    <!--  Fixed Name Display -->
+                    <td>{{ responder.user.user.get_full_name|default:"No Name" }}</td>
                     <td>{{ responder.started_at }}</td>
                     <td>
                         <a href="{% url 'view_user_response' responder.id %}" class="btn view-btn">View Response</a>
@@ -56,10 +56,10 @@
         <ul class="pagination">
             {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link prev-next" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_order %}&sort={{ sort_order }}{% endif %}">&laquo; First</a>
+                    <a class="page-link prev-next" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link prev-next" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_order %}&sort={{ sort_order }}{% endif %}">Prev</a>
+                    <a class="page-link prev-next" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Prev</a>
                 </li>
             {% endif %}
 
@@ -68,17 +68,17 @@
                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                 {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_order %}&sort={{ sort_order }}{% endif %}">{{ num }}</a>
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
                     </li>
                 {% endif %}
             {% endfor %}
 
             {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link prev-next" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_order %}&sort={{ sort_order }}{% endif %}">Next</a>
+                    <a class="page-link prev-next" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link prev-next" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_order %}&sort={{ sort_order }}{% endif %}">Last &raquo;</a>
+                    <a class="page-link prev-next" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a>
                 </li>
             {% endif %}
         </ul>

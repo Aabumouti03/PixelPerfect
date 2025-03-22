@@ -3,43 +3,29 @@
 <head>
     {% load static %}  
     
-<<<<<<< HEAD
-=======
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/profile.style.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/moduleOverview.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ReWork{% endblock %}</title>
 
     <!-- Link to your CSS file -->
-<<<<<<< HEAD
-    <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
-    {% block extra_css %} {% endblock %}
-
-</head>
-<body>
-    
-=======
     <link rel="stylesheet" href="{% static 'client/css/styles.css' %}">
     {% block extra_css %} {% endblock %}
     
 </head>
 
 <body>
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
     {% include 'users/partials/navbar.html' %}
 
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
-<<<<<<< HEAD
-=======
 
 </body>
 </html>
@@ -61,7 +47,6 @@
 
     <!-- Extra JavaScript Block (Ensures JavaScript in Other Templates Works) -->
     {% block extra_js %}{% endblock %}
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
 
 </body>
 </html>

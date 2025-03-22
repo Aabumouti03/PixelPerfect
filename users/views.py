@@ -2,45 +2,52 @@ import os
 import json
 import random
 import logging
-from collections import defaultdict
+from django.conf import settings
 from datetime import datetime, timedelta
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from django.db.models import Avg
+from django.db.models import Avg, Q
+from .models import JournalEntry
+from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from users.helpers_modules import calculate_progress, update_user_program_progress
+from django.contrib.auth.decorators import login_required 
+from client.models import Category, Program,ModuleRating,Exercise
+from django.shortcuts import redirect, render,  get_object_or_404
+from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
+from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm, ExerciseAnswerForm
+from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
+from collections import defaultdict
+logger = logging.getLogger(__name__)
+from .utils import send_verification_email_after_sign_up 
+from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.utils.timezone import now
-from django.core.mail import send_mail
 from django.contrib import messages
-from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
-
-from users.helpers_modules import calculate_progress
+from django.conf import settings
 from users.models import (
-    EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
-    UserProgramEnrollment, JournalEntry
+    User, EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
+    UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
 )
 from client.models import (
-    Program, Module, ProgramModule, ModuleRating, Exercise, Category
+    Program, Module, ProgramModule, ModuleRating, Exercise, Category,
+    AdditionalResource, Exercise,VideoResource
 )
-from users.forms import LogInForm, EndUserProfileForm, UserSignUpForm, UserProfileForm, ExerciseAnswerForm
 from users.models import (
     Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
 )
 from .models import UserResponse
 from .models import User, EndUser, Module
 from client.models import Exercise, ExerciseQuestion
+from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
 
-# Logger setup
+
 logger = logging.getLogger(__name__)
-
-
 
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
@@ -64,13 +71,11 @@ def questionnaire(request):
     }
     return render(request, "questionnaire.html", context)
 
-@csrf_exempt
+@csrf_protect
+@login_required
 def submit_responses(request):
     if request.method == "POST":
         try:
-            if not request.user.is_authenticated:
-                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
-
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
@@ -128,8 +133,8 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-
-            return JsonResponse({"success": True, "message": "Responses saved successfully!"})
+                
+            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
@@ -137,8 +142,6 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
-
-@csrf_exempt
 @login_required
 def save_notes(request):
     if request.method == 'POST':
@@ -166,7 +169,6 @@ def get_notes(request):
     except StickyNote.DoesNotExist:
         return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
 
-
 @login_required
 def dashboard(request):
     user = request.user
@@ -191,29 +193,47 @@ def dashboard(request):
 
     # Mark only the first module as accessible
     previous_module_completed = True  # The first module is always accessible
+    unlocked_modules = set()
+
     for program_module in program_modules:
         module = program_module.module
         module.progress_value = user_progress.get(module.id, 0)
 
         if previous_module_completed:
             module.is_unlocked = True  # Unlock if it's the first or previous is completed
+            unlocked_modules.add(module.id)  # Store unlocked module IDs
         else:
             module.is_unlocked = False  # Keep locked
 
         previous_module_completed = module.progress_value == 100  # Update for next iteration
 
-    # Get modules outside the program that the user is enrolled in
+    # Get modules outside the program that the user is enrolled in (standalone modules are always unlocked)
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
     outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
+    # Get recently accessed modules **EXCLUDING LOCKED ONES**
+    recent_enrollments = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:3]
+
+    # Ensure only unlocked modules appear in recently accessed
+    recent_modules = [
+        enrollment.module for enrollment in recent_enrollments
+        if enrollment.module.id and (
+            enrollment.module.id in unlocked_modules or  # Module is unlocked in a program
+            enrollment.module in outside_modules  # Standalone modules are always unlocked
+        )
+    ]
+
+    quote_of_the_day = Quote.get_quote_of_the_day()
+    
     context = {
         'user': request.user,
         'program': program,
         'program_modules': program_modules,
         'outside_modules': outside_modules,  # Only enrolled modules outside the program
+        'recent_modules': recent_modules,  # Excludes locked modules
+        "quote_of_the_day": quote_of_the_day
     }
     return render(request, 'users/dashboard.html', context)
-
 
 @login_required
 def view_program(request, program_id):
@@ -231,7 +251,6 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
 
     # Fetch user progress for each module
     user_progress = {
@@ -239,162 +258,39 @@ def view_program(request, program_id):
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
+    program_modules_data = []  # Store all program modules with progress and locked status
+    previous_completed = True  # The first module should be unlocked
+
+    for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
+        progress_value = user_progress.get(module.id, 0)  # Get progress percentage or default to 0%
+        is_locked = not previous_completed  # Lock module if previous is not completed
 
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
+        program_modules_data.append({
+            "id": module.id,
+            "title": module.title,
+            "description": module.description,
+            "progress_value": progress_value,
+            "module_order": index + 1,
+            "locked": is_locked,
+        })
 
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
+        # Update the previous_completed status
+        previous_completed = (progress_value == 100)
 
     context = {
         'user': user,
         'program': program,
-        'program_modules': program_modules,
+        'program_modules': program_modules_data,
     }
     
     return render(request, 'users/view_program.html', context)
 
 
-@csrf_exempt
-@login_required
-def save_notes(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        content = data.get('content')
 
-        # Get the EndUser instance for the logged-in user
-        end_user = EndUser.objects.get(user=request.user)
-
-        # Get or create the sticky note for the current user
-        sticky_note, created = StickyNote.objects.get_or_create(user=end_user)
-        sticky_note.content = content
-        sticky_note.save()
-
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
-@login_required
-def get_notes(request):
-    try:
-        # Get the EndUser instance for the logged-in user
-        end_user = EndUser.objects.get(user=request.user)
-        sticky_note = StickyNote.objects.get(user=end_user)
-        return JsonResponse({'success': True, 'content': sticky_note.content})
-    except StickyNote.DoesNotExist:
-        return JsonResponse({'success': True, 'content': ''})  # Return empty content if no note exists
-
-
-@login_required
-def dashboard(request):
-    user = request.user
-
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
-
-    # Fetch the program the user is enrolled in (if any)
-    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
-    program = user_program_enrollment.program if user_program_enrollment else None
-
-    # Fetch program modules if the user is enrolled, sorted by order
-    program_modules = program.program_modules.all().order_by("order") if program else []
-
-    # Get user progress for each module
-    user_progress = {
-        progress.module.id: progress.completion_percentage
-        for progress in UserModuleProgress.objects.filter(user=end_user)
-    }
-
-    # Mark only the first module as accessible
-    previous_module_completed = True  # The first module is always accessible
-    for program_module in program_modules:
-        module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)
-
-        if previous_module_completed:
-            module.is_unlocked = True  # Unlock if it's the first or previous is completed
-        else:
-            module.is_unlocked = False  # Keep locked
-
-        previous_module_completed = module.progress_value == 100  # Update for next iteration
-
-    # Get modules outside the program that the user is enrolled in
-    enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
-    outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
-
-    context = {
-        'user': user,
-        'program': program,
-        'program_modules': program_modules,
-        'outside_modules': outside_modules,  # Only enrolled modules outside the program
-    }
-    return render(request, 'users/dashboard.html', context)
-
-
-@login_required
-def view_program(request, program_id):
-    user = request.user
-
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        return render(request, 'users/program_not_found.html')
-
-    # Get the user's enrolled program
-    user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user, program_id=program_id).first()
-    
-    if not user_program_enrollment:
-        return render(request, 'users/program_not_found.html')
-
-    program = user_program_enrollment.program
-    program_modules = program.program_modules.all().order_by('order')  # Ensuring modules are in order
-
-    # Fetch user progress for each module
-    user_progress = {
-        progress.module.id: progress.completion_percentage
-        for progress in UserModuleProgress.objects.filter(user=end_user)
-    }
-
-    # Assign progress values and determine if a module is locked
-    previous_completed = True  # First module should be unlocked
-    for index, program_module in enumerate(program_modules):
-        module = program_module.module
-        module.progress_value = user_progress.get(module.id, 0)  # Default to 0%
-        module.module_order = index + 1  # Assign order number
-
-        # Lock modules that are not the first and depend on previous completion
-        if previous_completed:
-            module.locked = False
-        else:
-            module.locked = True
-
-        # Update `previous_completed` for the next iteration
-        previous_completed = module.progress_value == 100
-
-    context = {
-        'user': user,
-        'program': program,
-        'program_modules': program_modules,
-    }
-    
-    return render(request, 'users/view_program.html', context)
-
-
-#A function for displaying a page that welcomes users
 def welcome_page(request):
     '''A function for displaying a page that welcomes users'''
     return render(request, 'users/welcome_page.html')
-
 
 def modules(request):
     return render(request, 'users/modules.html')
@@ -403,39 +299,70 @@ def modules(request):
 def profile(request):
     return render(request, 'users/profile.html')
 
-
 def about(request):
     return render(request, 'users/about.html')
 
 def contact_us(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        full_message = (
+            f"Name: {name}\n"
+            f"Email: {email}\n\n"
+            f"Message:\n{message}"
+        )
+
+        send_mail(
+            subject="New Contact Us Submission",
+            message=full_message,
+            from_email=settings.EMAIL_HOST_USER,  
+            recipient_list=[settings.EMAIL_HOST_USER],  
+            fail_silently=False,
+        )
+
+        return redirect('contact_success')
+
     return render(request, 'users/contact_us.html')
 
-ADMIN_USERNAME = "SuperUser"
-
+def contact_success(request):
+    return render(request, 'users/contact_success.html')
 
 def log_in(request):
     """Log in page view function"""
 
+    error_message = None
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+            username = form.cleaned_data.get('username').strip()  # Trim spaces
+            password = form.cleaned_data.get('password').strip()
+
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
-                login(request, user)
-    
-                if user.username == ADMIN_USERNAME and user.is_superuser:
-                    return redirect('client_dashboard')
+                if not user.email_verified:
+                    error_message = "You must verify your email before logging in."
+                else:
+                    login(request, user)
 
-                return redirect('dashboard')
+                    # Redirect to `next` if available
+                    next_url = request.GET.get('next') or request.POST.get('next')
+                    if next_url:
+                        return redirect(next_url)
+
+                    # Superuser goes to `client_dashboard`
+                    if user.is_superuser:
+                        return redirect('client_dashboard')
+
+                    # Regular users go to `dashboard`
+                    return redirect('dashboard')
 
     else:
         form = LogInForm()
 
-    return render(request, "users/log_in.html", {"form": form})
-
+    return render(request, "users/log_in.html", {"form": form, "error_message": error_message})
 
 def sign_up_step_1(request):
     """Handles Step 1: User Account Details"""
@@ -453,14 +380,12 @@ def sign_up_step_1(request):
     return render(request, "users/sign_up_step_1.html", {"user_form": user_form})
 
 def sign_up_step_2(request):
-    """Handles Step 2: Profile Details"""
+    """Handles Step 2: Profile Details and Email Verification."""
     user_data = request.session.get("user_form_data")
-
     
     if not user_data:
         return redirect("sign_up_step_1")
 
-   
     user_form = UserSignUpForm(data=user_data)
     if not user_form.is_valid():
         return redirect("sign_up_step_1")
@@ -468,10 +393,10 @@ def sign_up_step_2(request):
     if request.method == "POST":
         profile_form = EndUserProfileForm(request.POST)
 
-
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save(commit=False)
             user.set_password(user_form.cleaned_data["password1"])
+            user.email_verified = False
             user.save()
 
             profile = profile_form.save(commit=False)
@@ -479,24 +404,49 @@ def sign_up_step_2(request):
             profile.save()
 
             del request.session["user_form_data"]
-            return redirect("log_in")
 
+            send_verification_email_after_sign_up(user, request)
 
+            return render(request, "users/sign_up_email_verification.html")
     else:
         profile_form = EndUserProfileForm()
 
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
+def sign_up_email_verification(request):
+    return render(request, "users/sign_up_email_verification.html")
 
+def verify_email_after_sign_up(request, uidb64, token):
+    """Verify the user's email after signing up."""
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return render(request, 'users/invalid_verification.html')
+
+    if default_token_generator.check_token(user, token):
+        user.email_verified = True  
+        user.save()
+        return redirect('verification_done')
+
+    return render(request, 'users/invalid_verification.html')
+
+def verification_done(request):
+    return render(request, "users/verification_done.html")
+
+
+@login_required
 def log_out(request):
     """Handles logout only if the user confirms via modal."""
     if request.method == "POST":
         logout(request)
         return redirect('log_in')
 
-    # if user cancels, stay on the same page
-    return render(request, 'users/dashboard.html', {'previous_page': request.META.get('HTTP_REFERER', '/')})
-
+    referer_url = request.META.get('HTTP_REFERER')
+    if referer_url:
+        return redirect(referer_url)
+    
+    return redirect('dashboard')
 
 @login_required 
 def show_profile(request):
@@ -533,6 +483,8 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
+            user.User_profile.save()  #  Explicitly save the profile
+            user.refresh_from_db()  #  Ensure data in tests matches DB state
 
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
@@ -553,7 +505,7 @@ def update_profile(request):
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
                     # Send verification email
-                    send_mail(
+                    send_mail_status = send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
                         "noreply@example.com",
@@ -562,6 +514,7 @@ def update_profile(request):
                     )
 
                     request.session['profile_update_popup'] = 'verification_sent'
+                    request.session.save()  # Ensure session data is persisted before redirecting
                 else:
                     # If the email hasn't changed, just don't do anything with the email
                     user.new_email = None
@@ -573,6 +526,7 @@ def update_profile(request):
                 user.set_password(new_password)
                 user.save()
                 update_session_auth_hash(request, user)
+
 
             return redirect('show_profile')
 
@@ -586,10 +540,11 @@ def update_profile(request):
 
 
 def verify_email(request, uidb64, token):
+    User = get_user_model()
+    
     try:
         # Decode user id
         uid = force_str(urlsafe_base64_decode(uidb64))
-        User = get_user_model()
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
         return HttpResponse("Invalid verification link.")
@@ -603,7 +558,6 @@ def verify_email(request, uidb64, token):
             user.save()
             
             request.session['profile_update_popup'] = 'profile_updated'
-            # login(request, user)  # Log the user back in after email change
             return redirect('log_in')
 
     return HttpResponse("Invalid or expired token.")
@@ -624,7 +578,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('profile_page')  # Redirect back to the profile if deletion fails
+            return redirect('show_profile')  # Redirect back to the profile if deletion fails
 
     # Confirmation before deletion
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
@@ -713,12 +667,92 @@ def recommended_modules(request):
         "enrolled_modules": enrolled_modules
     })
 
+
+@login_required
+def get_started(request):
+    categories = Category.objects.all()
+    
+    filter_pressed = "filter" in request.GET
+    search_pressed = "search_btn" in request.GET
+
+    # Reset everything when "Reset" or "Filter" is pressed
+    if filter_pressed:
+        search_query = ""  # Reset search
+    else:
+        search_query = request.GET.get("search", "").strip()
+
+    sort = request.GET.get("sort", None)
+    filter_type = request.GET.get("filter_type", "all")
+    selected_category_ids = request.GET.getlist("category")
+    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
+
+    # If all categories are selected, reset selection
+    if len(selected_category_ids) == len(categories):
+        selected_category_ids = [category.id for category in categories]
+
+    # Fetch data
+    programs = Program.objects.all()
+    modules = Module.objects.all()
+
+    # Apply filters
+    if filter_pressed:
+
+        #  Check if all categories are selected
+        all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
+
+        if all_categories_selected or not selected_category_ids:
+            #  If all categories are selected, include programs/modules with NO categories
+            programs = programs.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+
+            modules = modules.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+        else:
+            # Standard filtering when not all categories are selected
+            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
+            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
+
+
+        if filter_type == "programs":
+            modules = Module.objects.none()
+        elif filter_type == "modules":
+            programs = Program.objects.none()
+
+    # Apply search logic
+    if search_pressed and search_query:
+        programs = programs.filter(title__icontains=search_query)
+        modules = modules.filter(title__icontains=search_query)
+
+    # Apply sorting
+    if sort == "asc":
+        programs = programs.order_by("title")
+        modules = modules.order_by("title")
+    elif sort == "desc":
+        programs = programs.order_by("-title")
+        modules = modules.order_by("-title")
+
+    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
+    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
+
+    return render(request, "users/get_started.html", {
+        "categories": categories,
+        "programs": programs,
+        "modules": modules,
+        "selected_category_ids": selected_category_ids,
+        "search_query": search_query,
+        "sort": sort,
+        "filter_type": filter_type,
+        "enrolled_programs": enrolled_programs,
+        "enrolled_modules": enrolled_modules,
+    })
+
+
 @login_required
 def user_modules(request):
     user = request.user
     end_user, created = EndUser.objects.get_or_create(user=user)
-
-    # enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)
     
     # Fetch enrolled modules
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).select_related('module')
@@ -730,59 +764,57 @@ def user_modules(request):
         progress = UserModuleProgress.objects.filter(user=end_user, module=module).first()
 
         progress_percentage = progress.completion_percentage if progress else 0
-        background_style = module.background_style  # Get BackgroundStyle object
 
         module_data.append({
             "id": module.id,
             "title": module.title,
             "description": module.description,
-            "progress": progress_percentage,
-            "background_color": background_style.background_color if background_style else "#ffffff",
-            "background_image": f'img/backgrounds/{module.id}.jpg'  # Change based on actual background path
-
+            "progress_value": progress_percentage,  
         })
 
     return render(request, 'users/userModules.html', {"module_data": module_data})
 
 @login_required
 def module_overview(request, module_id):
-    """Fetch the module by ID and retrieve related exercises and additional resources."""
-    
+    """Fetch the module by ID and retrieve related exercises, additional resources, and videos for a specific user.""" 
     
     module = get_object_or_404(Module, id=module_id)
-
     user = request.user
 
-    try:
-        end_user = EndUser.objects.get(user=user)
-    except EndUser.DoesNotExist:
-        end_user = EndUser.objects.create(user=user)
+    # Ensure the EndUser profile exists
+    end_user, created = EndUser.objects.get_or_create(user=user)
 
-    
+    # Fetch exercises, additional resources, and videos linked to the module
     exercises = []
-    additional_resources = list(module.additional_resources.all())
-
     for section in module.sections.all():
         if section.exercises.exists():
             exercises.extend(section.exercises.all())
+    additional_resources = list(module.additional_resources.all())
+    video_resources = list(module.video_resources.all()) 
+
+    user_exercise_progress = {
+        progress.exercise.id: progress.status for progress in UserExerciseProgress.objects.filter(user=end_user, exercise__in=exercises)
+    }
+
+    user_resource_progress = {
+        progress.resource.id: progress.status for progress in UserResourceProgress.objects.filter(user=end_user, resource__in=additional_resources)
+    }
+
+    user_video_progress = {
+        progress.video.id: progress.status for progress in UserVideoProgress.objects.filter(user=end_user, video__in=video_resources)
+    }
+
+    # Calculate progress percentage
+    completed_items = sum(1 for status in user_exercise_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_resource_progress.values() if status == 'completed') + \
+                      sum(1 for status in user_video_progress.values() if status == 'completed')
 
 
-    completed_items = 0
-    total_items = len(exercises) + len(additional_resources)
 
+    total_items = len(exercises) + len(additional_resources) + len(video_resources)
+    progress_value = (completed_items / total_items) * 100 if total_items > 0 else 0
 
-    for exercise in exercises:
-        if exercise.status=='completed':
-            completed_items += 1
-
-    for resource in additional_resources:
-        if resource.status=='completed':
-            completed_items += 1
-
-    progress_value = 0
-    if total_items > 0:
-        progress_value = (completed_items / total_items) * 100
-
+    # Update or create user-specific module progress
     user_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
     user_progress.completion_percentage = progress_value
     user_progress.save()
@@ -791,15 +823,20 @@ def module_overview(request, module_id):
         'module': module,
         'exercises': exercises,
         'additional_resources': additional_resources,
+        'video_resources': video_resources,  
         'progress_value': progress_value,  
+        'user_exercise_progress': user_exercise_progress,  
+        'user_resource_progress': user_resource_progress,  
+        'user_video_progress': user_video_progress, 
+    
     }
 
     return render(request, 'users/moduleOverview.html', context)
 
+
 @login_required
 def exercise_detail(request, exercise_id):
     """Fetch the exercise details, including questions, saved responses, and the related diagram."""
-
     exercise = get_object_or_404(Exercise, id=exercise_id)
 
     user, created = EndUser.objects.get_or_create(user=request.user)
@@ -822,36 +859,42 @@ def exercise_detail(request, exercise_id):
         'diagram': diagram, 
     })
 
+
 @csrf_exempt  
+@login_required
 def rate_module(request, module_id):
-    """Handles AJAX-based user rating for a module."""
-    if request.method == "POST" and request.user.is_authenticated:
-        module = get_object_or_404(Module, id=module_id)
+    
+    module = get_object_or_404(Module, id=module_id)
+
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
             rating_value = int(data.get("rating", 0))
 
-            if 1 <= rating_value <= 5:
-             
-                end_user = request.user.User_profile 
+            # reject invalid ratigs
+            if not (1 <= rating_value <= 5):
+                return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
-                rating_obj, created = ModuleRating.objects.update_or_create(
-                    user=end_user,  
-                    module=module,
-                    defaults={'rating': rating_value}
-                )
+            end_user, created = EndUser.objects.get_or_create(user=request.user)
 
-                average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
-                average_rating = round(average_rating, 1) if average_rating else 0
-
-                return JsonResponse({"success": True, "average_rating": average_rating})
+            # update or create the rating
+            rating_obj, created = ModuleRating.objects.update_or_create(
+                user=end_user,  
+                module=module,
+                defaults={'rating': rating_value}
+            )
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": "Invalid JSON data"})
 
-    return JsonResponse({"success": False, "message": "Invalid request or unauthorized user"})
+    average_rating = module.ratings.aggregate(Avg('rating'))['rating__avg']
+    average_rating = round(average_rating, 1) if average_rating else 0
+
+    return JsonResponse({"success": True, "average_rating": average_rating})
+
 
 @login_required
+@csrf_exempt
 def mark_done(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -860,38 +903,53 @@ def mark_done(request):
         action = data.get("action")  # 'done' or 'undo'
 
         user = request.user
-        end_user = EndUser.objects.get(user=user)  
+        end_user, created = EndUser.objects.get_or_create(user=user)
+
+        module = None
 
         if item_type == "resource":
-            resource = AdditionalResource.objects.get(id=item_id)
-            if resource.status == 'completed':
-                resource.status = 'in_progress'
-            else:
-                resource.status = 'completed'
-            resource.save()
-            module = Module.objects.filter(additional_resources=resource).first()
+            try:
+                resource = AdditionalResource.objects.get(id=item_id)
+                user_progress, created = UserResourceProgress.objects.get_or_create(user=end_user, resource=resource)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = Module.objects.filter(additional_resources=resource).first()  
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Resource not found."})
 
         elif item_type == "exercise":
-            exercise = Exercise.objects.get(id=item_id)
-            if exercise.status == 'completed':
-                exercise.status = 'in_progress'
-            else:
-                exercise.status = 'completed'
-            exercise.save()
-            module = exercise.sections.first().modules.first()
+            try:
+                exercise = Exercise.objects.get(id=item_id)
+                user_progress, created = UserExerciseProgress.objects.get_or_create(user=end_user, exercise=exercise)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = exercise.sections.first().modules.first() 
+            except Exercise.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Exercise not found."})
 
-     
-        user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
-        user_module_progress.completion_percentage = calculate_progress(end_user, module)
-        user_module_progress.save()
+        elif item_type == "video":
+            try:
+                video = VideoResource.objects.get(id=item_id)
+                user_progress, created = UserVideoProgress.objects.get_or_create(user=end_user, video=video)
+                user_progress.status = 'completed' if action == "done" else 'not_started'
+                user_progress.save()
+                module = Module.objects.filter(video_resources=video).first()
+            except VideoResource.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Video not found."})
 
-        return JsonResponse({
-            "success": True,
-            "updated_progress": user_module_progress.completion_percentage
-        })
+        if module:
+            user_module_progress, created = UserModuleProgress.objects.get_or_create(user=end_user, module=module)
+            user_module_progress.completion_percentage = calculate_progress(end_user, module)
+            user_module_progress.save()
 
-    return JsonResponse({"success": False})
+            return JsonResponse({
+                "success": True,
+                "updated_progress": user_module_progress.completion_percentage
+            })
 
+        return JsonResponse({"success": False, "message": "Module not found."})
+
+    return JsonResponse({"success": False, "message": "Invalid request."})
 
 @login_required
 def unenroll_module(request):
@@ -1077,178 +1135,85 @@ def submit_responses(request):
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
 
-def assess_user_responses_programs(user):
-    """
-    Evaluates the user's latest questionnaire responses, calculates scores for each category, 
-    and suggests programs based on negative scores.
-
-    Args:
-        user (EndUser): The user whose responses will be assessed.
-
-    Returns:
-        dict: A dictionary where keys are category names and values are lists of suggested programs.
-    """
-
-    # Step 1: Get the latest questionnaire response for the user
-    latest_response = Questionnaire_UserResponse.objects.filter(user=user).order_by('-started_at').first()
-
-    if not latest_response:
-        return {}  # No responses, return empty recommendations
-
-    # Step 2: Fetch all responses from the latest questionnaire submission
-    user_responses = QuestionResponse.objects.filter(user_response=latest_response).select_related('question__category')
-
-    # Step 3: Reset category scores for this new response
-    category_scores = defaultdict(int)
-
-    # Step 4: Calculate scores for each category
-    for response in user_responses:
-        question = response.question  # Get the related question
-        category = question.category  # Get the category
-
-        if category:  # Ensure question has a category
-            adjusted_score = response.rating_value * question.sentiment  # Multiply response by sentiment
-            category_scores[category.id] += adjusted_score  # Update category score
-
-    # Step 5: Find categories with negative scores
-    low_score_categories = [category_id for category_id, score in category_scores.items() if score < 0]
-
-    # Step 6: Fetch programs from the negatively scored categories
-    suggested_programs = {}
-    for category_id in low_score_categories:
-        category = get_object_or_404(Category, id=category_id)
-        programs = Program.objects.filter(categories=category)  
-        suggested_programs[category.name] = list(programs)  # Convert queryset to list
-
-    return suggested_programs
-
-def assess_user_responses_modules(user):
-    """
-    Evaluates the user's latest questionnaire responses, calculates scores for each category, 
-    and suggests programs based on negative scores.
-
-    Args:
-        user (EndUser): The user whose responses will be assessed.
-
-    Returns:
-        dict: A dictionary where keys are category names and values are lists of suggested programs.
-    """
-
-    # Step 1: Get the latest questionnaire response for the user
-    latest_response = Questionnaire_UserResponse.objects.filter(user=user).order_by('-started_at').first()
-
-    if not latest_response:
-        return {}  # No responses, return empty recommendations
-
-    # Step 2: Fetch all responses from the latest questionnaire submission
-    user_responses = QuestionResponse.objects.filter(user_response=latest_response).select_related('question__category')
-
-    # Step 3: Reset category scores for this new response
-    category_scores = defaultdict(int)
-
-    # Step 4: Calculate scores for each category
-    for response in user_responses:
-        question = response.question  # Get the related question
-        category = question.category  # Get the category
-
-        if category:  # Ensure question has a category
-            adjusted_score = response.rating_value * question.sentiment  # Multiply response by sentiment
-            category_scores[category.id] += adjusted_score  # Update category score
-
-    # Step 5: Find categories with negative scores
-    low_score_categories = [category_id for category_id, score in category_scores.items() if score < 0]
-
-    # Step 6: Fetch programs from the negatively scored categories
-    suggested_modules = {}
-    for category_id in low_score_categories:
-        category = get_object_or_404(Category, id=category_id)
-        modules = Module.objects.filter(categories=category)  
-        suggested_modules[category.name] = list(modules)  # Convert queryset to list
-
-    return suggested_modules
-
-
-
 @login_required
 def journal_view(request, date=None):
     """Loads the journal page and fetches saved data for a specific date."""
     user = request.user
 
-    # Use today's date if none is provided
+    # Validate & Parse Date
     if date is None:
         selected_date = now().date()
     else:
         try:
             selected_date = datetime.strptime(date, "%Y-%m-%d").date()
-        except ValueError:
-            selected_date = now().date()
+        except (ValueError, TypeError):
+            selected_date = now().date()  # Default to today if invalid
 
-    # Fetch the journal entry for the selected date (if it exists)
+    # Fetch Journal Entry for the Selected Date
     journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
 
-    print(f"📖 [DEBUG] Rendering Journal for {selected_date}")
-    if journal_entry:
-        print(f"   Sleep Hours: {journal_entry.sleep_hours}")
-        print(f"   Caffeine: {journal_entry.caffeine}")
-        print(f"   Hydration: {journal_entry.hydration}")
-        print(f"   Stress: {journal_entry.stress}")
-        print(f"   Goal Progress: {journal_entry.goal_progress}")
-        print(f"   Notes: {journal_entry.notes}")
-    else:
-        print("❌ No journal entry found for this date.")
+    # Handle AJAX Requests (Return JSON)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if journal_entry:
+            return JsonResponse({
+                "success": True,
+                "data": {
+                    "sleep_hours": journal_entry.sleep_hours,
+                    "caffeine": journal_entry.caffeine,
+                    "hydration": journal_entry.hydration,
+                    "stress": journal_entry.stress,
+                    "goal_progress": journal_entry.goal_progress,
+                    "notes": journal_entry.notes,
+                    "connected_with_family": journal_entry.connected_with_family,
+                    "expressed_gratitude": journal_entry.expressed_gratitude,
+                    "outdoors": journal_entry.outdoors,
+                    "sunset": journal_entry.sunset,
+                }
+            })
+        return JsonResponse({"success": False, "error": "No entry found."}, status=404)
 
+    # Compute Previous & Next Day
+    previous_day = (selected_date - timedelta(days=1)).strftime("%Y-%m-%d")
+    next_day = (selected_date + timedelta(days=1)).strftime("%Y-%m-%d")
+
+    # Render HTML for Standard Page Load
     context = {
-        "selected_date": selected_date,
+        "selected_date": selected_date.strftime("%Y-%m-%d"),
         "journal_entry": journal_entry,
-        "previous_day": (selected_date - timedelta(days=1)).strftime("%Y-%m-%d"),
-        "next_day": (selected_date + timedelta(days=1)).strftime("%Y-%m-%d"),
+        "previous_day": previous_day,
+        "next_day": next_day,
     }
-    
-    return render(request, "users/journal.html", context)  # ✅ Returns HTML, not JSON!
 
+    return render(request, "users/journal.html", context)
 
 @login_required
-@csrf_exempt
 def save_journal_entry(request):
-    """Handles saving journal entries using JSON."""
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)  # Load JSON data
-            user = request.user
-            date_str = data.get("date")
+    """Handles saving/updating journal entries using JSON."""
 
-            if not date_str:
-                return JsonResponse({"success": False, "error": "Date is required."}, status=400)
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
 
-            # Convert string date to date object
-            try:
-                entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            except ValueError:
-                return JsonResponse({"success": False, "error": "Invalid date format."}, status=400)
+    try:
+        data = json.loads(request.body)
+        print("📥 Received Data:", data)  # Debugging
 
-            # Get or create journal entry
-            journal_entry, created = JournalEntry.objects.get_or_create(user=user, date=entry_date)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
-            # Debugging: Print before updating
-            print(f"🔹 BEFORE UPDATE: {journal_entry}")
+    date_str = data.get("date")
+    if not date_str:
+        return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
-            # Update the entry with provided data
-            journal_entry.sleep_hours = int(data.get("sleep_hours", 0)) if data.get("sleep_hours") else None
-            journal_entry.caffeine = data.get("caffeine") or None
-            journal_entry.hydration = int(data.get("hydration", 0)) if data.get("hydration") else None
-            journal_entry.stress = data.get("stress") or None
-            journal_entry.goal_progress = data.get("goal_progress") or None
-            journal_entry.notes = data.get("notes") or None
-            journal_entry.save()
+    try:
+       entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
-            # Debugging: Print after updating
-            print(f"✅ AFTER UPDATE: {journal_entry}")
+        
+    except ValueError:
+        print(f"❌ Invalid Date Received: {date_str}")  # Debugging
+        return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
-            return JsonResponse({"success": True, "message": "Journal entry saved successfully!"})
-
-        except Exception as e:
-            print("❌ [SERVER ERROR]", str(e))  # Debugging
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+    # Save the journal entry
+    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
 
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
 

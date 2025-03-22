@@ -1,309 +1,177 @@
-{% extends 'client/client_base.html' %}
-{% block title %}
-    {{ program.title }} - Details
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Program</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <link rel="stylesheet" href="{% static 'client/css/create_program.css' %}">
+</head>
 
-{% block extra_css %}
-<style>
-    .container {
-        display: flex;
-        flex-direction: column;
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
-        min-width: 1000px;
-    }
+<body class="create_program">
 
-    .program-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+    {% include 'client/client_base.html' %}
 
-    .sortable-list {
-        list-style: none;
-        padding: 0;
-    }
+    <div class="container mt-5">
+        <h2 class="mb-4">Edit Program</h2>
 
-    .sortable-item {
-        background: #f0f0f0;
-        padding: 10px;
-        border: 1px solid #ddd;
-        margin-bottom: 5px;
-        cursor: grab;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+        <!-- Form for updating Title & Description -->
+        <form method="post" class="card p-4 shadow-sm">
+            {% csrf_token %}
+            <input type="hidden" name="update_program" value="1">
 
-    .btn-save {
-        background-color: #75b3ff;
-        color: #ffffff;
-        padding: 10px;
-        border: none;
-        cursor: pointer;
-        margin-top: 10px;
-    }
+            <div class="mb-3">
+                <label for="program-title" class="form-label">1. Title:</label>
+                <input type="text" name="title" id="program-title" value="{{ program.title }}" class="form-control" required>
+            </div>
 
-    .btn-save:hover {
-        background-color: #2f6ed3;
-    }
+            <div class="mb-3">
+                <label for="program-description" class="form-label">2. Description:</label>
+                <textarea name="description" id="program-description" class="form-control" rows="5" required>{{ program.description }}</textarea>
+            </div>
 
-    .modules-table, .users-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
+            <!-- Save Changes Button (Placed under the Description) -->
+            <button type="submit" class="btn btn-primary saveProgram mt-3">Save Changes</button>
+        </form>
 
-    .modules-table th, .modules-table td,
-    .users-table th, .users-table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-    }
+        
 
-    .modules-table th, .users-table th {
-        background-color: #3A88F6;
-        color: white;
-    }
-
-    .back-link {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 10px 15px;
-        background: #3A88F6;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-    }
-
-    .back-link:hover {
-        background: #2f6ed3;
-    }
-
-    /* Modal styles */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        left: 0; top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-    }
-
-    .modal-content {
-        background: #fff;
-        width: 500px;
-        max-width: 90%;
-        margin: 100px auto;
-        padding: 20px;
-        border-radius: 5px;
-    }
-
-    .modal-close {
-        float: right;
-        cursor: pointer;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .checkbox-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 15px;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="program-header">
-        <div>
-            <h1>{{ program.title }}</h1>
-            <p>{{ program.description }}</p>
-        </div>
-    </div>
-
-    <h2>Modules in this Program:</h2>
-    <ul class="sortable-list" id="sortableModules">
-        {% for program_module in program_modules %}
-            <li class="sortable-item" data-id="{{ program_module.id }}">
-                <span>{{ program_module.module.title }}</span>
-                
-                <form method="POST" class="remove-module-form" onsubmit="return confirm('Are you sure you want to remove this module?')">
-                    {% csrf_token %}
-                    <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
-                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                </form>
-            </li>
-        {% empty %}
-            <li>No modules available.</li>
-        {% endfor %}
-    </ul>
-    <button onclick="saveModuleOrder()" class="btn-save">Save Order</button>
-
-    <button class="btn-save" onclick="openModal('moduleModal')">Add More Modules</button>
-
-    <h2>Enrolled Users:</h2>
-    <table class="users-table">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Full Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for enrollment in enrolled_users %}
-                <tr>
-                    <td>{{ enrollment.user.user.username }}</td>
-                    <td>{{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }}</td>
-                    <td>
-                        <form method="POST" style="display: inline;">
+         <!-- Modules Section -->
+         <label class="form-label mt-3">3. Selected Modules:</label>
+         <div class="module-box p-3">
+             <ul class="list-unstyled sortable-list" id="sortableModules">
+                 {% for program_module in program_modules %}
+                     <li class="d-flex align-items-center justify-content-between sortable-item" data-id="{{ program_module.id }}">
+                         <span class="drag-handle">☰</span> 
+                         <span>{{ program_module.module.title }}</span>
+                         <form method="POST" class="d-inline">
+                             {% csrf_token %}
+                             <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
+                             <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                         </form>
+                     </li>
+                 {% empty %}
+                     <li class="text-center text-muted">No modules added yet.</li>
+                 {% endfor %}
+             </ul>
+         </div>
+ 
+         <!-- Add More Modules Button -->
+         <button type="button" class="btn btn-primary w-100 mt-3" onclick="openModal('moduleModal')">Add More Modules</button>
+         <button class="btn btn-primary w-100 mt-3" onclick="saveModuleOrder()">Save Module Order</button>
+ 
+        
+        <!-- Users Section -->
+        <label class="form-label mt-4">4. Enrolled Users:</label>
+        <div class="module-box p-3">
+            <ul class="list-unstyled">
+                {% for enrollment in enrolled_users %}
+                    <li class="d-flex align-items-center justify-content-between">
+                        <span>{{ enrollment.user.user.username }} ({{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }})</span>
+                        <form method="POST" class="d-inline">
                             {% csrf_token %}
                             <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
-                            <button type="submit" class="btn-save" style="background-color: #D9534F;">Remove</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                         </form>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3">No users enrolled yet.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <button class="btn-save" onclick="openModal('userModal')">Add More Users</button>
-    <div id="userModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('userModal')">&times;</span>
-            <h2>Add More Users</h2>
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="add_users" value="1">
-                <div class="checkbox-list">
-                    {% for enduser in all_users %}
-                        {% if enduser.id not in enrolled_user_ids %}
-                            <label>
-                                <input type="checkbox" name="users_to_add" value="{{ enduser.id }}">
-                                {{ enduser.user.username }}
-                            </label>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                <button type="submit" class="btn-save">Add Selected Users</button>
-            </form>
+                    </li>
+                {% empty %}
+                    <li class="text-center text-muted">No users enrolled yet.</li>
+                {% endfor %}
+            </ul>
         </div>
+
+        <!-- Add More Users Button -->
+        <button type="button" class="btn btn-primary w-100 mt-3" onclick="openModal('userModal')">Add More Users</button>
+
+        <a href="{% url 'programs' %}" class="btn btn-primary mt-3">Go Back</a>
     </div>
 
+    <!-- Add Modules Modal -->
     <div id="moduleModal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('moduleModal')">&times;</span>
-            <h2>Add More Modules</h2>
+            <h2 class="text-center">Add More Modules</h2>
             <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="add_modules" value="1">
-                <div class="checkbox-list">
+                <div class="checkbox-list text-start">
                     {% for module in all_modules %}
                         {% if module.id not in program_module_ids %}
-                            <label>
+                            <label class="d-block">
                                 <input type="checkbox" name="modules_to_add" value="{{ module.id }}">
                                 {{ module.title }}
                             </label>
                         {% endif %}
                     {% endfor %}
                 </div>
-                <button type="submit" class="btn-save">Add Selected Modules</button>
+                <button type="submit" class="btn btn-danger w-100 mt-3">Add Selected Modules</button>
             </form>
         </div>
     </div>
 
-    <a href="{% url 'programs' %}" class="back-link">Back to Programs</a>
-</div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<script>
-    let sortable = new Sortable(document.getElementById('sortableModules'), {
-        animation: 150,
-        ghostClass: 'blue-background-class'
-    });
+    <!-- Add Users Modal -->
+    <div id="userModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('userModal')">&times;</span>
+            <h2 class="text-center">Add More Users</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="add_users" value="1">
+                <div class="checkbox-list text-start">
+                    {% for enduser in all_users %}
+                        {% if enduser.id not in enrolled_user_ids %}
+                            <label class="d-block">
+                                <input type="checkbox" name="users_to_add" value="{{ enduser.id }}">
+                                {{ enduser.user.username }}
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-danger w-100 mt-3">Add Selected Users</button>
+            </form>
+        </div>
+    </div>
 
-    function saveModuleOrder() {
-        let orderData = [];
-        document.querySelectorAll('.sortable-item').forEach((item, index) => {
-            orderData.push({ id: item.dataset.id, order: index + 1 });
-        });
+    <script>
+        function saveModuleOrder() {
+            let orderData = [];
+            document.querySelectorAll('#sortableModules .sortable-item').forEach((item, index) => {
+                orderData.push({ id: item.dataset.id, order: index + 1 });
+            });
 
-        fetch("{% url 'update_module_order' program.id %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({ order: orderData })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Module order updated successfully!");
-                location.reload();
-            } else {
-                alert("Error updating order: " + data.error);
-            }
-        })
-        .catch(error => {
-            alert("Request failed: " + error);
-        });
-    }
-
-    function openModal(modalId) {
-    let modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'block';
-    } else {
-        console.error("Modal not found:", modalId);
-    }
-    }
-
-    function closeModal(modalId) {
-        let modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
+            fetch("{% url 'update_module_order' program.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ order: orderData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Module order updated successfully!");
+                } else {
+                    alert("Error updating order.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
         }
-    }
-    function removeModule(moduleId) {
-        if (!confirm("Are you sure you want to remove this module?")) return;
 
-        fetch("{% url 'program_detail' program.id %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: "remove_module=" + moduleId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Module removed successfully!");
-                location.reload();
-            } else {
-                alert("Error: " + data.error);
-            }
-        })
-        .catch(error => console.error("Request failed:", error));
-    }
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
 
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = 'block';
-    }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'client/js/module_order_and_filter_categories.js' %}"></script>
+</body>
+</html>
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-</script>
-
-{% endblock %}

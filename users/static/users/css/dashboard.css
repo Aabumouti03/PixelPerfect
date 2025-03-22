@@ -1,434 +1,466 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
 body {
-    margin: 0;
-    font-family: 'Manrope', sans-serif;
-    display: flex;
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  display: flex;
 }
 
 .sidebar {
-    width: 60px; /* Initially, a small width */
-    height: 100vh;
-    background-color: #F24505;
-    color: white;
-    position: fixed;
-    left: 0;
-    top: 0;
-    border-top-right-radius: 15px; /* Rounds the top-left corner */
-    border-bottom-right-radius: 15px; /* Rounds the bottom-left corner */
-    overflow: hidden; /* Hide content initially */
-    transition: width 0.3s ease-in-out;
+  width: 60px;
+  height: 100vh;
+  background-color: #F24505;
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out;
 }
-
 .sidebar:hover {
-    width: 250px; /* Expand when hovered */
+  width: 250px;
 }
-
 .logo {
-    font-size: 35px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    padding-top: 20px;
-    gap: 10px; /* distance to logo */
-    opacity: 0; /* Hide menu items */
-    transition: opacity 0.3s ease-in-out;
+  font-size: 35px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-
 .sidebar:hover .logo {
-    opacity: 1; /* Show menu items on hover */
+  opacity: 1;
 }
-
 .nav-links {
-    list-style: none;
-    padding: 0;
-    margin-top: 40px;
-    padding-left: 15px;
-    opacity: 0; /* Hide menu items */
-    transition: opacity 0.3s ease-in-out;
+  list-style: none;
+  padding: 0;
+  margin-top: 40px;
+  padding-left: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-
 .sidebar:hover .nav-links {
-    opacity: 1; /* Show menu items on hover */
+  opacity: 1;
 }
-
 .nav-links li {
-    margin: 20px 0;
+  margin: 20px 0;
 }
-
 .nav-links a {
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    padding: 15px 0px;
+  text-decoration: none;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  padding: 15px 0;
 }
-
 .nav-links a.active {
-    font-weight: bolder;
-    color: white;
+  font-weight: bolder;
+  color: white;
+  background-color: #F24505;
 }
-
-
 .nav-links a:hover {
-    width: 225px;
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    opacity: 1;
-    padding: 15px 0px;
-    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
-    border-radius: 8px; /* Soft rounded corners */
+  width: 225px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
 }
-
 .logout {
-    list-style: none;
-    position: absolute;  /* Positions it relative to the sidebar */
-    bottom: 20px;
-    padding: 0;
-    left: 15px; /* Aligns it properly */
-    margin-top: 250px;
-    padding-left: 0px;
-    opacity: 0; /* Hide item */
-    transition: opacity 0.3s ease-in-out;
+  list-style: none;
+  position: absolute;
+  bottom: 20px;
+  left: 15px;
+  margin-top: 250px;
+  padding-left: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-
 .sidebar:hover .logout {
-    opacity: 1; /* Show item on hover */
+  opacity: 1;
 }
-
 .logout a {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
 }
-
 .logout a:hover {
-    width: 225px;
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    opacity: 1;
-    padding: 15px 0px;
-    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
-    border-radius: 8px; /* Soft rounded corners */
+  width: 225px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
 }
-
 .icon {
-    font-size: 20px;
-}
-
-
-
-/* Dashboard */
-
-
-/* Program header */
-.programs-header {
-    display: flex;
-    align-items: center;  /* Align items vertically */
-    justify-content: space-between; /* Push text to left, button to right */
-    width: 100%;
-    margin-bottom: 20px; /* Add spacing below the header */
-}
-
-/* Program info */
-.program-text {
-    display: flex;
-    flex-direction: column; /* Stack title and description */
-    align-items: flex-start; /* Align them to the left */
-}
-
-.program-text h2 {
-    font-size: 1.5rem; /* Adjust font size */
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px; /* Space between title and description */
-}
-
-.program-text p {
-    font-size: 1rem; /* Description font size */
-    color: #666;
-    margin: 0; /* Remove extra margin */
+  font-size: 20px;
 }
 
 .dashboard-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
+  margin-left: 60px; 
+  display: flex;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
 }
+@media (max-width: 900px) {
+    .left-column,
+    .right-column {
+      flex: 1 1 100%;
+      min-width: auto;
+    }
+  }
 
-
-/* Containers */
-/* Maintain the same design */
-.programs-container, 
-.modules-container {
-    position: relative;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
-    backdrop-filter: blur(10px);
-    margin-top: 20px;
+.left-column {
+  flex: 3;
 }
-
-.programs-header, 
-.modules-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-/* Module List */
-/* Both program and modules container */
-.module-list {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-/* Module Card */
-/* Both program and modules container */
-.module-card {
-    border-radius: 20px;
-    box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
-    width: 250px; /* Fixed width */
-    height: 283px; /* Fixed height */
-    flex-shrink: 0;
-    padding: 20px;
-    border-left: 5px solid #1d3c5337;
-    box-sizing: border-box; /* Ensure padding is included in the width/height */
+.right-column {
+    flex: 0 0 350px; 
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: #ffffff;
+    gap: 20px;
+}
+
+
+.programs-container,
+.modules-container {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+  backdrop-filter: blur(10px);
+  margin-top: 20px;
+}
+.programs-header,
+.modules-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.module-list {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.module-card {
     border-radius: 12px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    min-height: 220px;
-    max-width: 280px;
+    width: 250px; /* Fixed width */
+    height: 320px; /* Slightly increased height for better text fit */
+    flex-shrink: 0;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out elements */
+    align-items: center;
+    background: #ffffff;
     text-align: center;
+    position: relative;
+    overflow: hidden; /* Prevent elements from overflowing */
+}
+
+/* 3D Effect: Adding subtle shadow on the left edge */
+.module-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+
 }
 
 /* Alternate colors for adjacent cards */
-/* Both program and modules container */
 .module-card:nth-child(odd) {
     background: #73C4FD;
+    border-left: 5px solid #5ca5ea; /* Blue 3D-like left edge */
 }
 
-/* Alternate colors for adjacent cards */
-/* Both program and modules container */
 .module-card:nth-child(even) {
-    background: #0148FD;
+    background: #0048FF;
+    border-left: 5px solid #012EAB; /* Blue 3D-like left edge */
 }
 
-/* Alternate colors for adjacent cards */
-/* Locked */
+.module-card:nth-child(odd) h3 {
+    color: #333;
+}
+
+.module-card:nth-child(even) h3 {
+    color: #eeebeb;
+}
+
+.module-card:nth-child(odd) p {
+    color: #333;
+}
+
 .module-card:nth-child(even) p {
-    color: #d0cfcf;
+    color: #eeebeb;
 }
 
-/* Module Title */
-/* Both program and modules container */
+/* Ensure title stays inside the card */
 .module-card h3 {
-    padding-top: 80px;
-    margin: 10px 0;
-    color: #e9e6e6;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+    white-space: normal; /* Allow text to wrap */
+    overflow: hidden;
+    max-height: 45px; /* Prevent title from being too long */
 }
 
 /* Module Description */
-/* Both program and modules container */
-
 .module-card p {
-    font-size: 0.9rem;
+    font-size: 14px;
     color: #666;
-    margin-bottom: 10px;
-}
-
-/* View All Buttons */
-/* Both program and modules container */
-.view-all-button, 
-.view-program-button {
-    font-size: 12px;
-    padding: 6px 10px;
-    background-color: #F24505;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.view-all-button:hover, 
-.view-program-button:hover {
-    background-color: #f24405a5;
-}
-
-
-/* Progress Container */
-/* Both program and modules container */
-.progress-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%; /* Ensures the same width for all progress bars */
-    height: 10px;
+    text-align: center;
     overflow: hidden;
-    background: transparent;
-    margin-top: 10px;
-    padding: 5px;
+    max-height: 60px; /* Increased height for better readability */
+    margin: 5px 10px;
+    white-space: normal; /* Allow wrapping */
 }
+
+
 
 /* Progress Bar */
-/* Both program and modules container */
-.progress-bar {
-    width: 100%;  /* Ensures full width inside container */
-    height: 10px;
-    background-color: #ddd;
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
+.progress-container {
+    width: 100%;
+    padding: 5px 0;
 }
 
-/* Progress Fill */
-/* Both program and modules container */
-.progress-fill {
-    height: 100%;
-    background: #F24505;
-    transition: width 0.5s ease-in-out;
-}
 
-/* Progress Text */
-/* Both program and modules container */
-.progress-text {
-    margin-left: 10px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    color: #333;
-    white-space: nowrap;
-    min-width: 50px;
-    background: transparent;
-    text-align: right;
-}
-
-/* Locked Module */
-.module-card.locked {
-    background: #e6e6e6;
-    color: #999;
-    pointer-events: none;
-    opacity: 0.8;
-}
-
-/* Locked Module Title */
-.module-card.locked h3 {
-    color: #555;
-    font-size: 1rem;
-}
-
-/* Locked Module Description */
-.module-card.locked p {
-    color: #777;
-    font-size: 0.9rem;
-}
-
-/* Locked Module Progress */
-.module-card.locked .progress-container {
-    width: 90%;
-    background-color: #d6d6d6;
-    border-radius: 10px;
-    height: 10px;
-    overflow: hidden;
-}
-
-.module-card.locked .progress-fill {
-    background: #aaa;
-}
-
-/* Locked Message */
-.module-card.locked .locked-message {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: bold;
-    color: #ffffff;
-}
-
-/* Start Module Button */
-/* Both program and modules container */
+/* View Module Button */
 .view-module-button {
-    display: inline-block;
     background: white;
     color: #F24505;
-    font-size: 0.8rem;
+    font-size: 14px;
     font-weight: bold;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 8px;
     text-decoration: none;
-    text-align: center;
     transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
     border: 2px solid #F24505;
 }
 
-/* Start Module Button hover */
-/* Both program and modules container */
 .view-module-button:hover {
     background: #F24505;
     color: white;
 }
 
 
-/* Locked module styling */
+
+/* trying new adjustment for different screen sizes */
+.progress-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+  margin-top: auto;
+}
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #F24505;
+  transition: width 0.5s ease-in-out;
+}
+.progress-text {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+  text-align: right;
+}
+
 .module-card.locked {
-    background: #e6e6e6 !important; /* Ensure it's a gray background */
+    background: #e6e6e6;
     color: #999;
     pointer-events: none;
-    opacity: 0.8; /* Slight fade effect */
+    opacity: 0.8;
+    border-left: 5px solid #999; 
 }
-
-/* Locked module title */
 .module-card.locked h3 {
-    color: #555;
+  color: #555;
 }
-
-/* Locked module description */
 .module-card.locked p {
-    color: #777;
+  color: #777;
 }
-
-/* Locked progress bar */
-.module-card.locked .progress-container {
-    background-color: #d6d6d6;
+.module-card.locked .progress-container,
+.module-card.locked .progress-text {
+  display: none;
 }
-
-/* Locked progress fill */
-.module-card.locked .progress-fill {
-    background: #aaa; /* Dimmed progress bar */
-}
-
-/* Locked module message */
 .module-card.locked .locked-message {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-top: auto;
+}
+
+/* Buttons */
+.view-all-button,
+.view-program-button {
+  font-size: 12px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
+}
+.view-all-button:hover,
+.view-program-button:hover {
+  background: #D43802;
+  color: white;
+}
+.view-module-button {
+  display: inline-block;
+  background: white;
+  color: #F24505;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 10px 14px;
+  border-radius: 25px;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #F24505;
+  margin-top: auto;
+}
+.view-module-button:hover {
+  background: #F24505;
+  color: white;
+}
+
+.recently-accessed {
+  width: 100%;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.recently-accessed h3 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 1px;
+}
+.recent-modules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.recent-module-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+}
+.recent-module-item:last-child {
+  border-bottom: none;
+}
+.recent-module-item a {
+  text-decoration: none;
+  font-size: 0.9rem;
+  color: #333;
+  transition: color 0.2s ease-in-out;
+}
+.recent-module-item a:hover {
+  color: #007bff;
+}
+.no-modules {
+  font-size: 0.85rem;
+  color: #888;
+}
+.quote-text {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.dashboard-container {
+    margin-left: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-width: 1400px;
+    padding: 20px;
+}
+
+.left-column {
+    flex: 3;
+    min-width: 280px;
+}
+
+.right-column {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px; 
+    box-sizing: border-box; 
+}
+
+.programs-container,
+.modules-container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.module-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+
+@media (max-width: 1200px) {
+    .dashboard-container {
+        flex-direction: column;
+        align-items: center;
+        margin-left: 60px;
+    }
+    
+    .left-column, .right-column {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .module-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 800px) {
+    body {
+        flex-direction: column;
+    }
+    .dashboard-container {
+        margin-left: 0;
+        padding: 10px;
+    }
+    .sidebar {
+        display: none; 
+    }
 }

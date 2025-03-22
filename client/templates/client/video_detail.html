@@ -1,0 +1,76 @@
+{% extends 'client/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Centered container */
+    .video-container {
+        width: 800px;
+        margin: 70px 50px 50px 240px;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+        text-align: center;
+    }
+
+    /* Styled heading */
+    .video-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: #ff6b00; /* Bright Orange */
+        margin-bottom: 15px;
+        text-transform: uppercase;
+    }
+
+    /* Video Description */
+    .video-description {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* Video Frame */
+    .video-frame {
+        width: 100%;
+        max-width: 720px;
+        height: 405px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 4px solid #ff6b00; /* Orange border */
+        margin: 20px auto;
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #fff;
+        background: #ff6b00;
+        border-radius: 8px;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-btn:hover {
+        background:  #ff6b00;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="video-container">
+    <h2 class="video-title">{{ video.title }}</h2>
+    <p class="video-description">{{ video.description }}</p>
+
+    <div class="video-frame">
+        <iframe width="100%" height="100%" src="{{ video.get_embed_url }}" frameborder="0" allowfullscreen></iframe>
+    </div>
+
+    <a href="{% url 'video_list' %}" class="back-btn">⬅ Back to Video List</a>
+</div>
+{% endblock %}

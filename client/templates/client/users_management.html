@@ -5,11 +5,11 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'client/css/users_management.css' %}">
 <div class="users-container">
-    <h2>👥 Manage Users</h2>
+    <h2>Manage Users</h2>
 
     <!-- Search & Filter Section -->
     <div class="table-controls">
-        <input type="text" id="searchInput" placeholder="🔍 Search users..." onkeyup="filterTable()">
+        <input type="text" id="searchInput" placeholder="Search users..." onkeyup="filterTable()">
         <select id="genderFilter" onchange="filterTable()">
             <option value="">All Genders</option>
             <option value="male">Male</option>
@@ -17,7 +17,7 @@
             <option value="other">Other</option>
             <option value="N/A">Prefer not to say</option>
         </select>
-        <input type="number" id="ageFilter" placeholder="📅 Min Age" onkeyup="filterTable()">
+        <input type="number" id="ageFilter" placeholder="Min Age" onkeyup="filterTable()">
     </div>
 
     <!-- Users Table -->
@@ -36,9 +36,9 @@
         </thead>
         <tbody>
             {% for user in users %}
-            <tr onclick="window.location.href='{% url 'user_detail_view' user.id %}'" style="cursor: pointer;">
-                <td>{{ user.id }}</td>
-                <td>{{ user.full_name }}</td>
+            <tr onclick="window.location.href='{% url 'user_detail_view' user.user.id %}'" style="cursor: pointer;">
+                <td>{{ user.user.id }}</td>
+                <td>{{ user.user.full_name }}</td>
                 <td>{{ user.user.email }}</td>
                 <td>{{ user.age|default:"N/A" }}</td>
                 <td>{{ user.gender|default:"N/A" }}</td>

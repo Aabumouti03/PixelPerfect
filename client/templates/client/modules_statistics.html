@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{% static 'client/css/statistics.css' %}">
     <div class="content">
         <div class="top-bar">
-            <h1>Modules Statistics 📊</h1>
+            <h1>Modules Statistics</h1>
 
             <div class="export-buttons">
                 <a href="{% url 'export_modules_statistics_csv' %}" class="custom-btn">
@@ -21,7 +21,7 @@
         <div class="charts">
             <!-- User Gender Distribution -->
             <div class="chart-box count">
-                <h3 class= count>Number of Modules 📊</h3>
+                <h3 class= count>Number of Modules</h3>
                 <h3 class= count>{{ modules_count }}</h3>
             </div>
 
@@ -46,6 +46,12 @@
             <div class="chart-box">
                 <h3>Average Module Completion Rate</h3>
                 <canvas id="completionTimeChart"></canvas>
+            </div>
+
+             <!-- Average Module Rating -->
+            <div class="chart-box">
+                <h3>Average Module Ratings </h3>
+                <canvas id="moduleRatingsChart"></canvas>
             </div>
             
         </div>
@@ -191,10 +197,58 @@
                 }
             });
 
+           // Ensure Chart.js is available
+        if (typeof Chart === 'undefined') {
+            console.error("❌ Chart.js is not loaded.");
+            return;
+        }
 
+        // ====================== BAR CHART (Average Module Ratings) ======================
+        var ratingLabels = JSON.parse('{{ rating_labels|default:"[]"|safe|escapejs }}');
+        var ratingData = JSON.parse('{{ rating_data|default:"[]"|safe|escapejs }}');
+
+        if (document.getElementById('moduleRatingsChart')) {
+            var ctx4 = document.getElementById('moduleRatingsChart').getContext('2d');
+            new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ratingLabels,  // Module titles
+                    datasets: [{
+                        label: 'Average Rating',
+                        data: ratingData,  // Ratings
+                        backgroundColor: '#FF4500',  
+                        borderColor: '#FF4500',  
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return value;  // Show stars next to numbers
+                                },
+                               
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn("⚠️ Module Ratings Chart canvas not found in the document.");
+        }
 
 
         };
+
+        
+
+
     </script>
 
 {% endblock %}

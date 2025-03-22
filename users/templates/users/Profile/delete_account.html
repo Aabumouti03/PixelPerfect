@@ -16,7 +16,7 @@
     <div class="button-group">
         <form method="POST" action="{% url 'delete_account' %}">
             {% csrf_token %}
-            <button type="submit" class="delete-btn">Yes, Delete My Account</button>
+            <button type="submit" class="delete-btn">Yes, delete My Account</button>
         </form>
         <a href="{% url 'show_profile' %}" class="cancel-btn">Cancel</a>
     </div>

@@ -13,14 +13,6 @@
         <h1>Welcome to Your Program Overview, {{ user.first_name }}</h1>
     {% endif %}
 
-    <p>This page provides a structured view of your enrolled program, 
-        displaying the sequence of modules you need to complete. 
-        You will progress through the modules in order, unlocking the next one as you complete the previous. 
-        Keep track of your progress with the progress indicators and dive into each module at your own pace.</p>
-
-
-    <!-- Program Container -->
-     
     <div class="program-container">
         <div class="program-header">
             <h2>Your Program: {{ program.title }}</h2>
@@ -29,23 +21,24 @@
 
         <div class="module-list">
             {% for program_module in program_modules %}
-                <div class="module-card {% if program_module.module.locked %}locked{% endif %}">
+                <div class="module-card {% if program_module.locked %}locked{% endif %}">
 
-                    <!-- Module Order Number -->
-
-                    <span class="module-order">#{{ program_module.module.module_order }}</span>
+                    <span class="module-order">#{{ program_module.module_order }}</span>
                     
-                    <h3>{{ program_module.module.title }}</h3>
-                    <p>{{ program_module.module.description }}</p>
+                    <h3>{{ program_module.title }}</h3>
+                    <p>{{ program_module.description }}</p>
 
-                    {% if not program_module.module.locked %}
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ program_module.module.progress_value }}%;"></div>
+                    {% if not program_module.locked %}
+                        <div class="middle-section">  
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ program_module.progress_value }}%;"></div>
+                                </div>
+                                <span class="progress-text">{{ program_module.progress_value }}% Complete</span>
                             </div>
-                            <span class="progress-text">{{ program_module.module.progress_value }}% Complete</span>
+                           
                         </div>
-                        <a href="{% url 'module_overview' program_module.module.id %}" class="view-module-button">Start Module</a>
+                        <a href="{% url 'module_overview' program_module.id %}" class="view-module-button">View Module</a>
                     {% else %}
                         <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
                     {% endif %}

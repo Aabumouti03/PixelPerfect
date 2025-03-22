@@ -2,13 +2,13 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-
+from django.views.generic import TemplateView
 from client import views as clientViews
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
 from client import views
 from client.views import delete_module
-from users.views import enroll_module, unenroll_module 
+from users.views import enroll_module, unenroll_module
 
 urlpatterns = [
 
@@ -28,9 +28,12 @@ urlpatterns = [
     path('profile/', usersViews.profile, name='profile'),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
+    path('verification_done/', usersViews.verification_done, name="verification_done"),
     path('sign-up/', usersViews.sign_up_step_1, name='sign_up_step_1'),
     path('sign-up/profile/', usersViews.sign_up_step_2, name='sign_up_step_2'),
     path('log_out_client/', clientViews.log_out_client, name="log_out_client"),
+    path('sign_up_email_verification/', usersViews.sign_up_email_verification, name="sign_up_email_verification"),
+    path('verify-email-after-sign-up/<uidb64>/<token>/', usersViews.verify_email_after_sign_up, name='verify_email_after_sign_up'),
     
     path('reset_password/', 
         authenticationViews.PasswordResetView.as_view(template_name="users/password_reset_form.html"),
@@ -44,6 +47,7 @@ urlpatterns = [
     path('reset_password_complete/',
         authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
+    
 
     # Home page
     path('about/', usersViews.about, name='about'),
@@ -67,6 +71,8 @@ urlpatterns = [
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
     path('contact_us/', usersViews.contact_us, name='contact_us'),
+    path("get_started/", usersViews.get_started, name="get_started"),
+    path('contact-success/', usersViews.contact_success, name='contact_success'),
    
     path('modules/add/', clientViews.add_module, name='add_module'),
     path('sections/add/', clientViews.add_section, name='add_section'),
@@ -80,7 +86,6 @@ urlpatterns = [
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
     path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
-
 
     # Program-related URLs
     path('programs/', clientViews.programs, name='programs'),
@@ -96,9 +101,20 @@ urlpatterns = [
     # Categories
     path('create_category/', clientViews.create_category, name='create_category'),
     path('category_list/', clientViews.category_list, name='category_list'),  
-    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'),  
+    path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'), 
+    path('categories/<int:category_id>/edit/', clientViews.edit_category, name='edit_category'),   
 
     # Statistics
+
+    #User urls for modules
+    path('userModules/', usersViews.user_modules, name='modules'),
+    path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
+    path('all_modules/', usersViews.all_modules, name='all_modules'),
+
+    # User dashboard details
+    path('dashboard/', usersViews.dashboard, name='dashboard'),
+    path('profile/', usersViews.profile, name='profile'),
+    path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', clientViews.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
     path('programs_statistics/', clientViews.programs_statistics, name='programs_statistics'),
@@ -120,6 +136,9 @@ urlpatterns = [
     path('dashboard/', usersViews.dashboard, name='dashboard'),
     path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
+    path('save-notes/', usersViews.save_notes, name='save_notes'),
+    path('get-notes/', usersViews.get_notes, name='get_notes'), 
+    path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
 
     # Questionnaire
     path('welcome/', usersViews.welcome_view, name='welcome'),
@@ -152,7 +171,15 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
-    
+    #video content
+    path('videos/', clientViews.video_list, name='video_list'),
+    path('videos/add/', clientViews.add_video, name='add_video'),
+    path('videos/<int:video_id>/', clientViews.video_detail, name='video_detail'),
+
+    # Journal URLs (moved outside debug block)
+    path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
+    path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
+    path("save_journal_entry/", usersViews.save_journal_entry, name="save_journal_entry"),
 ]
 
 # Debug settings (corrected)
@@ -160,13 +187,11 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     urlpatterns += [
-        path('programs/', clientViews.programs, name='programs'),
         path('log_out/', clientViews.log_out_client, name="log_out"),
         path('create_program/', clientViews.create_program, name='create_program'),
-        path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
-        path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
-        path('program/<int:program_id>/', usersViews.view_program, name='view_program'),
         path("journal/", usersViews.journal_view, name="journal_page"),  # Default view (today's date)
         path("journal/<str:date>/", usersViews.journal_view, name="journal_by_date"),  # View by date
         path("journal/save/", usersViews.save_journal_entry, name="journal_save"),  # Form submission
+        path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
+        path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
     ]

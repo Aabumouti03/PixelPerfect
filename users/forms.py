@@ -1,28 +1,21 @@
 import re
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
-
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from .models import User, EndUser
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model
 
 
 class UserSignUpForm(UserCreationForm):
     """Form for creating a new user account with custom placeholders and password validation."""
     
     password1 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password: *'}),
         label=""
     )
     password2 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Re-enter password'}),
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Re-enter password: *'}),
         label=""
     )
  
@@ -83,22 +76,24 @@ class UserSignUpForm(UserCreationForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username: *'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name: *'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name: *'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email: *'}),
         }
 
 class EndUserProfileForm(forms.ModelForm):
     """Form for additional user profile information with age and phone number validation."""
 
     phone_number = forms.CharField(
-        validators=[RegexValidator(r'^\+?[1-9]\d{6,14}$', message="Enter a valid phone number (7-15 digits, optional '+').")],
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'})
-    )
+    required=False,
+    validators=[RegexValidator(r'^\+?[1-9]\d{6,14}$', message="Enter a valid phone number (7-15 digits, optional '+').")],
+    widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'})
+)
+
 
     age = forms.IntegerField(
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age'}),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age: *'}),
         required=True
     )
 
@@ -123,11 +118,10 @@ class EndUserProfileForm(forms.ModelForm):
         """Convert choices to a list before modifying them."""
         super().__init__(*args, **kwargs)
 
-        self.fields['gender'].choices = [("", "Select Gender:")] + [choice for choice in self.fields['gender'].choices if choice[0] != '']
-        self.fields['sector'].choices = [("", "Select Sector:")] + [choice for choice in self.fields['sector'].choices if choice[0] != '']
+        self.fields['gender'].choices = [("", "Select Gender: *")] + [choice for choice in self.fields['gender'].choices if choice[0] != '']
+        self.fields['sector'].choices = [("", "Select Sector: *")] + [choice for choice in self.fields['sector'].choices if choice[0] != '']
         self.fields['ethnicity'].choices = [("", "Select Ethnicity:")] + [choice for choice in self.fields['ethnicity'].choices if choice[0] != '']
-        self.fields['last_time_to_work'].choices = [("", "Select Time Since Last Work:")] + [choice for choice in self.fields['last_time_to_work'].choices if choice[0] != '']
-
+        self.fields['last_time_to_work'].choices = [("", "Select Time Since Last Work: *")] + [choice for choice in self.fields['last_time_to_work'].choices if choice[0] != '']
 
 class LogInForm(AuthenticationForm):
     """Form for user log in."""
@@ -272,23 +266,26 @@ class UserProfileForm(forms.ModelForm):
         self.cleaned_data['email'] = email
         return email  
     
+
     def clean_new_email(self):
-        """Ensure new email is unique, case-insensitive, and properly formatted before verification."""
-        new_email = self.cleaned_data.get('new_email')
+        """Ensure new email is unique, but allow pending verification."""
+        new_email = self.cleaned_data.get('new_email', '').strip().lower()
 
-        if new_email:
-            new_email = new_email.strip().lower()  # Convert to lowercase
-            user_id = self.instance.user.id if hasattr(self.instance, 'user') else None  # Get the current User ID
+        # Ensure instance exists and is an EndUser before accessing user
+        if not isinstance(self.instance, EndUser) or not hasattr(self.instance, 'user') or not self.instance.user:
+            self.add_error('new_email', "Internal error: EndUser is not linked to a User.")
+            return new_email  # Prevent further validation issues
 
-            # Ensure new email is unique and not the same as the current user's email
+        user_id = self.instance.user.id
+
+        if new_email and new_email != self.instance.user.email:
+            # Exclude users who have the email in 'email' or 'new_email'
             if User.objects.exclude(id=user_id).filter(email=new_email).exists():
                 self.add_error('new_email', "A user with this email already exists.")
-
+            elif User.objects.exclude(id=user_id).filter(new_email=new_email).exists():
+                self.add_error('new_email', "This email is already pending verification.")
 
         return new_email
-
-
-
 
     def clean(self):
         """Ensure new password and confirm password match."""
@@ -325,7 +322,13 @@ class UserProfileForm(forms.ModelForm):
         return end_user  
 
 class ExerciseAnswerForm(forms.Form):
-    
+    """
+    Exercise Answer Form
+    - The form takes an `exercise` object as an argument during initialization.
+    - It dynamically creates form fields corresponding to each `ExerciseQuestion` linked to the exercise.
+    - Each question field is labeled with its `question_text` and uses a `TextInput` widget.
+    """
+ 
     def __init__(self, *args, **kwargs):
         exercise = kwargs.pop('exercise')  # Get exercise object
         super().__init__(*args, **kwargs)
@@ -334,4 +337,3 @@ class ExerciseAnswerForm(forms.Form):
                 label=question.question_text, 
                 widget=forms.TextInput(attrs={'placeholder': 'Your answer here'})
             )
-

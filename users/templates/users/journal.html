@@ -3,6 +3,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'users/css/journal.css' %}">
+    <script src="{% static 'users/js/journal.js' %}"></script>
 {% endblock %}
 
 {% block title %}Daily Journal - ReWork{% endblock %}
@@ -14,11 +15,13 @@
         <h1>Daily Journal - {{ selected_date }}</h1>
         <a href="{% url 'journal_by_date' next_day %}" class="nav-button">Next →</a>
     </div>
+    
     <p>Log your daily habits and track your progress.</p>
 
     <form id="journal-form">
-        {% csrf_token %}
-        <input type="hidden" id="journal-date" name="date" value="{{ selected_date }}">
+        <input type="date" id="journal-date" name="date" value="{{ selected_date|date:'Y-m-d' }}" required>
+
+
 
         <!-- Connected with Family -->
         <div class="journal-entry">
@@ -109,8 +112,7 @@
         <!-- Sleep Hours -->
         <div class="journal-entry">
             <label for="sleep_hours">How many hours did you sleep?</label>
-            <input type="number" id="sleep_hours" name="sleep_hours" min="0" max="24" 
-                   value="{{ journal_entry.sleep_hours|default_if_none:'' }}" required>
+            <input type="number" name="sleep_hours" value="{{ journal_entry.sleep_hours|default_if_none:'' }}">
         </div>
 
         

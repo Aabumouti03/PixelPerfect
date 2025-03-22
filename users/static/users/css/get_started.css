@@ -1,0 +1,375 @@
+/* General Page Styling */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+body {
+    margin: 0;
+    font-family: 'Manrope', sans-serif;
+    background-color: #f24505; /* Orange background */
+    color: white;
+    text-align: center;
+}
+
+/* Navigation Bar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+}
+
+/* Logo */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.logo-img {
+    width: 30px;
+    margin-right: 10px;
+}
+
+/* Buttons */
+.btn {
+    background: white;
+    color: #f24505;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn:hover {
+    background: #d63008;
+    color: white;
+}
+
+/* Main Content */
+.container {
+    max-width: 700px;
+    margin: auto;
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+/* Title & Description */
+.title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 16px;
+    margin-bottom: 25px;
+}
+
+/* OR Divider */
+.divider {
+    height: 1px;
+    width: 100%;
+    background: white;
+    margin: 10px 0;
+}
+
+.or-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Filtering Box */
+.filters-container {
+    background: white;
+    color: black;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 30px auto;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+}
+
+/* Filter Grid Layout */
+.filter-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Category List */
+.category-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 14px;
+}
+
+/* Search Box */
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.search-box {
+    display: flex;
+    width: 100%;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+}
+
+.search-box button {
+    background: #f24505;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    font-weight: bold;
+}
+
+.search-box button:hover {
+    background: #d63008;
+}
+
+/* Sorting Dropdown */
+.sorting-dropdown {
+    width: 100%;
+    text-align: center;
+}
+
+.sorting-dropdown select {
+    padding: 8px;
+    border: 2px solid #f24505;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #f24505;
+    background: white;
+}
+
+.sorting-dropdown select:hover {
+    background: #f24505;
+    color: white;
+}
+
+/* Filter and Reset Buttons */
+.button-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.button-container .btn {
+    padding: 10px 20px;
+    font-weight: bold;
+    background: #f24505;
+    color: white;
+    border: none;
+}
+
+.button-container .btn:hover {
+    background: #d63008;
+}
+
+/* Results Section */
+.results-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Result Cards */
+.result-card {
+    background: white;
+    color: black;
+    padding: 15px;
+    border-radius: 12px;
+    width: 100%; /* Ensures it matches the filtering box */
+    text-align: left;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Hover Effect */
+.result-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Title */
+.result-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Description */
+.result-description {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Buttons Section */
+.result-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* Enroll & View Buttons */
+.result-btn {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.enroll-btn {
+    background: #007bff; /* Blue */
+    color: white;
+    margin-right: 5px;
+}
+
+.enroll-btn.enrolled {
+    background: #28a745; /* Green when enrolled */
+}
+
+.enroll-btn:hover {
+    background: #0056b3;
+}
+
+.view-btn {
+    background: #ff6600; /* Orange */
+    color: white;
+    margin-left: 5px;
+}
+
+.view-btn:hover {
+    background: #cc5200;
+}
+
+/* Skip Button */
+.skip-button {
+    margin-top: 20px;
+    background: white;
+    color: #f24505;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.skip-button:hover {
+    background: #d63008;
+    color: white;
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    background: #f24505;
+    color: white;
+}
+
+
+.enroll-button.enrolled {
+    background-color: #28a745;
+}
+
+.enroll-button.enrolled:hover {
+    background-color: #218838;
+}
+
+/* Button styling */
+button, .view-program-button, .view-module-button {
+    background-color: #F24505;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover, .view-program-button:hover {
+    background-color: #d63d04;
+}
+
+/* Styling for Special Buttons */
+.special-btn {
+    background: transparent; /* Make background transparent */
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: 2px solid white; /* White border */
+    border-radius: 25px; /* Rounded */
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Inline but with padding */
+}
+
+/* Hover Effect */
+.special-btn:hover {
+    background: white;
+    color: #f24505; /* Match the orange background */
+}
+
+/* Adjustments for positioning */
+.button-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Specific Adjustments */
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+}
+
+/* Responsive Fix for Smaller Screens */
+@media screen and (max-width: 768px) {
+    .result-card, .filters-container {
+        width: 90%; /* Match width on smaller screens */
+    }
+}

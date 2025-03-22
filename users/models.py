@@ -2,14 +2,17 @@ from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question
+from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Exercise,VideoResource,AdditionalResource
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.timezone import now  # ✅ Fix: Import now
+from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
+from django.core.cache import cache
+import random
+import datetime
 
 #Choices used in more than one model
 STATUS_CHOICES = [
@@ -137,6 +140,7 @@ class UserModuleEnrollment(models.Model):
     user = models.ForeignKey(EndUser, on_delete=models.CASCADE, related_name='module_enrollments')
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='enrolled_users')
     enrolled_on = models.DateTimeField(auto_now_add=True)
+    last_accessed = models.DateTimeField(auto_now=True) 
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
@@ -168,6 +172,46 @@ class UserModuleProgress(models.Model):
     def __str__(self):
         return f"{self.user.full_name()} - {self.module.title} ({self.status})"
 
+class UserResourceProgress(models.Model):
+    """Tracks user progress for each additional resource."""
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    resource = models.ForeignKey("client.AdditionalResource", on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    class Meta:
+        unique_together = ('user', 'resource')  # Ensures a user-resource pair is unique.
+
+    def __str__(self):
+        return f"{self.user.user.username} - {self.resource.title}: {self.status}"
+
+
+class UserExerciseProgress(models.Model):
+    """Tracks user progress for each exercise."""
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    exercise = models.ForeignKey("client.Exercise", on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    class Meta:
+        unique_together = ('user', 'exercise')
+
+    def __str__(self):
+        return f"{self.user.user.username} - {self.exercise.title}: {self.status}"
+
+
+class UserVideoProgress(models.Model):
+    """Tracks user progress for each video resource."""
+    user = models.ForeignKey("users.EndUser", on_delete=models.CASCADE)
+    video = models.ForeignKey("client.VideoResource", on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+
+    class Meta:
+        unique_together = ('user', 'video')
+
+    def __str__(self):
+        return f"{self.user.user.username} - {self.video.title}: {self.status}"
+
+
+
 class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
@@ -193,7 +237,7 @@ class QuestionResponse(models.Model):
     rating_value = models.IntegerField(
     null=True, 
     blank=True, 
-    validators=[MinValueValidator(1), MaxValueValidator(5)]
+    validators=[MinValueValidator(-2), MaxValueValidator(2)]
     )
     
     def clean(self):
@@ -235,3 +279,38 @@ class JournalEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
+    
+class Quote(models.Model):
+    text = models.TextField()
+
+    def __str__(self):
+        return f'"{self.text}"'
+
+    @staticmethod
+    def get_quote_of_the_day():
+        """Returns the same quote for the entire day and updates it once per day."""
+        today = now().date()
+
+        # Check if a quote was already selected today
+        daily_quote, created = DailyQuote.objects.get_or_create(date=today)
+
+        if not created and daily_quote.quote:
+            return daily_quote.quote.text  # Return existing quote if available
+
+        # Select a new random quote
+        count = Quote.objects.count()
+        if count == 0:
+            return "No quote available today."
+
+        new_quote = Quote.objects.order_by("?").first()
+        daily_quote.quote = new_quote
+        daily_quote.save()
+
+        return new_quote.text
+    
+class DailyQuote(models.Model):
+    date = models.DateField(unique=True)
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"Daily Quote for {self.date}: {self.quote.text if self.quote else 'None'}"

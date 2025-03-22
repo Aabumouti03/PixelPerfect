@@ -6,9 +6,8 @@ django.setup()
 
 import random
 from django.contrib.auth import get_user_model
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule
-from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, BackgroundStyle
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule, BackgroundStyle, ProgramModule
+from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment, Quote
 from django.db import transaction
 from django.core.management.base import BaseCommand
 from client.models import BACKGROUND_IMAGE_CHOICES
@@ -231,6 +230,7 @@ class Command(BaseCommand):
             
             self.seed_data()
             self.seed_users()
+            self.seed_quotes()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
 
@@ -247,6 +247,7 @@ class Command(BaseCommand):
                 "email": email,
                 "is_staff": False,
                 "is_superuser": False,
+                "email_verified": True,
             })
 
             if created:
@@ -298,6 +299,7 @@ class Command(BaseCommand):
                 "email": ADMIN["email"],
                 "is_staff": ADMIN["is_staff"],
                 "is_superuser": ADMIN["is_superuser"],
+                "email_verified": True,
             })
             if created:
                 admin.set_password(PASSWORD)
@@ -396,3 +398,105 @@ class Command(BaseCommand):
                         print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
 
                 print("✅ Modules, Categories, Sections, Exercises, and Questions seeded successfully!")
+
+    def seed_quotes(self, *args, **kwargs):
+        if Quote.objects.exists(): 
+            print("⚠️ Quotes already exist. Skipping seeding.")
+            return
+    
+        quotes = [
+            {"text": "Success is not the key to happiness. Happiness is the key to success. — Albert Schweitzer"},
+            {"text": "Your limitation—it’s only your imagination."},
+            {"text": "Do what you can, with what you have, where you are. — Theodore Roosevelt"},
+            {"text": "Dream big and dare to fail. — Norman Vaughan"},
+            {"text": "Opportunities don't happen. You create them. — Chris Grosser"},
+            {"text": "Don't let yesterday take up too much of today. — Will Rogers"},
+            {"text": "The only way to do great work is to love what you do. — Steve Jobs"},
+            {"text": "Act as if what you do makes a difference. It does. — William James"},
+            {"text": "Believe you can and you're halfway there. — Theodore Roosevelt"},
+            {"text": "Every day may not be good, but there's something good in every day."},
+            {"text": "Keep your face always toward the sunshine—and shadows will fall behind you. — Walt Whitman"},
+            {"text": "You are never too old to set another goal or to dream a new dream. — C.S. Lewis"},
+            {"text": "Difficult roads often lead to beautiful destinations."},
+            {"text": "You don't have to be great to start, but you have to start to be great. — Zig Ziglar"},
+            {"text": "Happiness is not something ready-made. It comes from your own actions. — Dalai Lama"},
+            {"text": "Work hard in silence, let your success be your noise. — Frank Ocean"},
+            {"text": "Failure is simply the opportunity to begin again, this time more intelligently. — Henry Ford"},
+            {"text": "Live as if you were to die tomorrow. Learn as if you were to live forever. — Mahatma Gandhi"},
+            {"text": "Start where you are. Use what you have. Do what you can. — Arthur Ashe"},
+            {"text": "If you want to lift yourself up, lift up someone else. — Booker T. Washington"},
+            {"text": "No one is perfect—that’s why pencils have erasers. — Wolfgang Riebe"},
+            {"text": "Success is getting what you want. Happiness is wanting what you get. — Dale Carnegie"},
+            {"text": "Happiness depends upon ourselves. — Aristotle"},
+            {"text": "You are capable of amazing things."},
+            {"text": "Do what makes your soul shine."},
+            {"text": "What lies behind us and what lies before us are tiny matters compared to what lies within us. — Ralph Waldo Emerson"},
+            {"text": "Don't watch the clock; do what it does. Keep going. — Sam Levenson"},
+            {"text": "Small steps in the right direction can turn out to be the biggest step of your life."},
+            {"text": "Happiness is a direction, not a place. — Sydney J. Harris"},
+            {"text": "If opportunity doesn’t knock, build a door. — Milton Berle"},
+            {"text": "The best way to predict the future is to create it. — Peter Drucker"},
+            {"text": "Be kind whenever possible. It is always possible. — Dalai Lama"},
+            {"text": "You were born to be real, not to be perfect."},
+            {"text": "Be yourself; everyone else is already taken. — Oscar Wilde"},
+            {"text": "Stay close to anything that makes you glad you are alive. — Hafiz"},
+            {"text": "Enjoy the little things, for one day you may look back and realize they were the big things. — Robert Brault"},
+            {"text": "Your vibe attracts your tribe."},
+            {"text": "Be strong. You never know who you are inspiring."},
+            {"text": "Turn your wounds into wisdom. — Oprah Winfrey"},
+            {"text": "Be a voice, not an echo."},
+            {"text": "With the new day comes new strength and new thoughts. — Eleanor Roosevelt"},
+            {"text": "You are enough just as you are."},
+            {"text": "A champion is defined not by their wins but by how they can recover when they fall. — Serena Williams"},
+            {"text": "Your life only gets better when you get better."},
+            {"text": "Happiness is not by chance, but by choice. — Jim Rohn"},
+            {"text": "It always seems impossible until it's done. — Nelson Mandela"},
+            {"text": "Do more of what makes you happy."},
+            {"text": "Life isn’t about waiting for the storm to pass, it’s about learning to dance in the rain. — Vivian Greene"},
+            {"text": "Success is falling nine times and getting up ten. — Jon Bon Jovi"},
+            {"text": "You didn’t come this far to only come this far."},
+            {"text": "Some people want it to happen, some wish it would happen, others make it happen. — Michael Jordan"},
+            {"text": "Let your dreams be bigger than your fears."},
+            {"text": "Doubt kills more dreams than failure ever will. — Suzy Kassem"},
+            {"text": "Every day is a second chance."},
+            {"text": "You are braver than you believe, stronger than you seem, and smarter than you think. — A.A. Milne"},
+            {"text": "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle."},
+            {"text": "Never bend your head. Always hold it high. Look the world straight in the eye. — Helen Keller"},
+            {"text": "Be the reason someone smiles today."},
+            {"text": "Rise above the storm and you will find the sunshine. — Mario Fernandez"},
+            {"text": "Take the risk or lose the chance."},
+            {"text": "Happiness is letting go of what you think your life is supposed to look like."},
+            {"text": "A goal without a plan is just a wish. — Antoine de Saint-Exupéry"},
+            {"text": "Keep going. Everything you need will come to you at the perfect time."},
+            {"text": "You are stronger than you think."},
+            {"text": "The only thing you can control is your own effort."},
+            {"text": "Wake up with determination, go to bed with satisfaction."},
+            {"text": "Make today so awesome that yesterday gets jealous."},
+            {"text": "Trust the timing of your life."},
+            {"text": "Everything you can imagine is real. — Pablo Picasso"},
+            {"text": "What consumes your mind, controls your life."},
+            {"text": "Stay positive, work hard, make it happen."},
+            {"text": "Hardships often prepare ordinary people for an extraordinary destiny. — C.S. Lewis"},
+            {"text": "Kindness is a language which the deaf can hear and the blind can see. — Mark Twain"},
+            {"text": "The more you give away, the more happy you become. — Dalai Lama"},
+            {"text": "Light tomorrow with today. — Elizabeth Barrett Browning"},
+            {"text": "Sometimes when you're in a dark place you think you've been buried, but you've actually been planted. — Christine Caine"},
+            {"text": "Do what is right, not what is easy."},
+            {"text": "Learn as if you will live forever, live like you will die tomorrow. — Mahatma Gandhi"},
+            {"text": "Nothing is impossible, the word itself says 'I'm possible!' — Audrey Hepburn"},
+            {"text": "Success usually comes to those who are too busy to be looking for it. — Henry David Thoreau"},
+            {"text": "Start where you are. Use what you have. Do what you can. — Arthur Ashe"},
+            {"text": "It is during our darkest moments that we must focus to see the light. — Aristotle"},
+            {"text": "Act as if what you do makes a difference. It does. — William James"},
+            {"text": "Opportunities don’t happen, you create them. — Chris Grosser"},
+            {"text": "The best way to get started is to quit talking and begin doing. — Walt Disney"},
+            {"text": "The secret of getting ahead is getting started. — Mark Twain"},
+            {"text": "The only limit to our realization of tomorrow is our doubts of today. — Franklin D. Roosevelt"},
+            {"text": "Whatever the mind can conceive and believe, it can achieve. — Napoleon Hill"},
+        ]
+
+
+        for quote in quotes:
+            Quote.objects.get_or_create(text=quote["text"])
+
+        self.stdout.write(self.style.SUCCESS("Successfully loaded quotes"))

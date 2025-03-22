@@ -18,21 +18,73 @@
 
         <form method="post" class="card p-4 shadow-sm">
             {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Please fix the errors below:</strong>
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
             <input type="hidden" name="module_order" id="module_order">
         
             <div class="mb-3">
                 <label for="{{ form.title.id_for_label }}" class="form-label">1. Title:</label>
                 {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger">
+                        {% for error in form.title.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
+            
         
             <div class="mb-3">
                 <label for="{{ form.description.id_for_label }}" class="form-label description">2. Description:</label>
                 {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">
+                        {% for error in form.description.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
+            
+            <div class="mb-3">
+                <label class="form-label">3. Select or Create Categories:</label>
+                <div class="category-box p-3">
+                    <ul class="list-unstyled">
+                        {% for category in form.categories.field.queryset %}
+                            <li class="d-flex align-items-center">
+                                <input type="checkbox" name="categories" value="{{ category.id }}">
+                                <label class="ms-2">{{ category.name }}</label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {{ form.new_category }}
+                    {% if form.new_category.errors %}
+                        <div class="text-danger">
+                            {% for error in form.new_category.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            
         
             <!-- Filter Section -->
             <div class="mb-3 d-flex align-items-center justify-content-between">
-                <label class="form-label">3. Select Modules within the program:</label>
+                <label class="form-label">4. Select Modules within the program:</label>
 
                 <!-- Dropdown Filter Button -->
                 <div class="dropdown ms-auto">
@@ -73,7 +125,7 @@
                 </ul>
             </div>
         
-            <label class="form-label mt-3">4. Arrange Selected Modules: </label>
+            <label class="form-label mt-3">5. Arrange Selected Modules: </label>
             <ul class="list-unstyled sortable-list" id="sortableModules"></ul>
         
             <button type="submit" class="btn btn-primary saveProgram">Save Program</button>

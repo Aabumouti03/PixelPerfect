@@ -1,71 +1,52 @@
 {% extends 'users/base.html' %}
-{% load static %} 
-<<<<<<< HEAD
+{% load static %}
 
-{% block title %}Dashboard - ReWork{% endblock %}
-=======
-
-{% block extra_css %} 
-
-    <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
-    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
-    <script src="{% static 'users/js/sticky_note.js' %}"></script>
-
-
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'users/css/sticky_note.css' %}">
+  <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+  <script src="{% static 'users/js/sticky_note.js' %}"></script>
+  <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 {% endblock %}
 
-
 {% block title %}Dashboard - ReWork{% endblock %}
-
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9
 
 {% block content %}
 <div class="dashboard-container">
-    {% if user %} 
-
-        <h1>Welcome back, {{ user.first_name }}!</h1>
-        
+  
+  <!-- MAIN CONTENT COLUMN -->
+  <div class="left-column">
+    {% if user %}
+      <h1>Welcome back, {{ user.first_name }}!</h1>
     {% endif %}
 
-    <p>This is your personal dashboard where you can view your program, modules, and track your progress.</p>
-    <p>A clear mind goes a long way! Use the sticky note below to write down any thoughts on your mind.</p>
-
-
-    <!-- Programs Container -->
-
     {% if program %}
-    <div class="programs-container">
-
-        <div class="programs-header">
-
-            <div class="program-text">
-                <h2>Your Program: {{ program.title }}</h2>
-                <p>{{ program.description }}</p>
-            </div>
-
-            <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
-        </div>
-
+      <!-- Programs Section -->
+      <section class="programs-container">
+        <header class="programs-header">
+          <div class="program-text">
+            <h2>Your Program: {{ program.title }}</h2>
+            <p>{{ program.description }}</p>
+          </div>
+          <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
+        </header>
         <div class="module-list">
 
-            {% for program_module in program_modules|slice:":3" %}
+          {% for program_module in program_modules|slice:":3" %}
                 {% with module=program_module.module %}
-
-                    <div class="module-card {% if not forloop.first and module.progress_value == 0 %}locked{% endif %}">
-                        <h3>{{ module.title }}</h3>
-                        <p>{{ module.description }}</p>
+                <div class="module-card {% if not module.is_unlocked %}locked{% else %}unlocked{% endif %}">
+                  <h3>{{ module.title }}</h3>
+                  <p>{{ module.description }}</p>
 
                         <div class="progress-container">
 
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
                             </div>
-
                         </div>
                         <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
-                        {% if forloop.first or module.progress_value > 0 %}
-                            <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
+                        {% if module.is_unlocked %}
+                        <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
                         {% else %}
                             <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
                         {% endif %}
@@ -75,55 +56,70 @@
                 {% endwith %}
             {% endfor %}
         </div>
-    </div>
-
+      </section>
     {% endif %}
 
+    <!-- Modules Section -->
+    <section class="modules-container">
+      <header class="modules-header">
+        <h2>Your Modules</h2>
+        <a href="{% url 'userModules' %}" class="view-all-button">View Your Modules</a>
+      </header>
+      <div class="module-list">
+        {% for module in outside_modules|slice:":3" %}
 
-    <!-- Modules Container -->
-
-    <div class="modules-container">
-
-        <div class="modules-header">
-            <h2>Your Modules</h2>
-            <a href="{% url 'dashboard' %}" class="view-all-button">View All Modules</a>
-
-        </div>
-
-        <div class="module-list">
-            {% for module in outside_modules|slice:":3" %}
-
-                <div class="module-card">
-                    <h3>{{ module.title }}</h3>
-                    <p>{{ module.description }}</p>
-                    
-                    <div class="progress-container">
-
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
-                        </div>
-
+            <div class="module-card">
+                <h3>{{ module.title }}</h3>
+                <p>{{ module.description }}</p>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
                     </div>
+                </div>
 
                     <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
-                    <a href="{% url 'dashboard' %}" class="view-module-button">Start Module</a>
-                </div>
-
-            {% endfor %}      
-        </div>
+                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
+               
+                
+            </div>
+        {% endfor %}      
     </div>
+</div>
 
 
+  <!-- END MAIN CONTENT COLUMN -->
+
+  <!-- RIGHT SIDEBAR COLUMN -->
+  <aside class="right-column">
+    <div class="recently-accessed">
+      <h3>Recently Accessed Modules</h3>
+      <ul class="recent-modules-list">
+        {% for module in recent_modules %}
+          <li class="recent-module-item">
+            <a href="{% url 'module_overview' module.id %}">{{ module.title }}</a>
+          </li>
+        {% empty %}
+          <li class="no-modules">No recently accessed modules.</li>
+        {% endfor %}
+      </ul>
+      <h3>Quote of the Day</h3>
+      {% if quote_of_the_day %}
+        <p class="quote-text">"{{ quote_of_the_day }}"</p>
+      {% else %}
+        <p>No quote available today.</p>
+      {% endif %}
+    </div>
 
     <!-- Sticky Note -->
-
-
     <div class="sticky-note">
-        <textarea placeholder="Write your note here..."></textarea>
-        <div class="note-controls">
-            <button class="bullet-btn">•</button>
-        </div>
+      <textarea id="sticky-note" placeholder="Write your note here...">{{ sticky_note.content|default:'' }}</textarea>
+      <div class="note-controls">
+        <button class="bullet-btn">•</button>
+      </div>
     </div>
+  </aside>
+  <!-- END RIGHT SIDEBAR COLUMN -->
+
 </div>
 {% endblock %}

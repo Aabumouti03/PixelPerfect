@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* General styling */
 .container {
     max-width: 900px;
@@ -46,4 +47,110 @@ h2 {
     .col-md-6 {
         width: 100%;
     }
+=======
+@import url('users/styles.css');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+
+.exercise-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+}
+.exercise-title p {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Exercise Container */
+.exercise-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Questions Section */
+.questions-container {
+    flex: 1;
+    padding: 20px;
+    border-radius: 8px;
+    
+}
+.question-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    transition: transform 0.2s ease-in-out;
+}
+.question-item:hover {
+    transform: translateY(-3px);
+    background: #e0e7ef;
+}
+.question-item label {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.answer-field {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: border 0.2s ease-in-out;
+}
+.answer-field:focus {
+    border: 1px solid #4a90e2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+/* Submit Button */
+.submit-container {
+    text-align: center;
+    margin-top: 20px;
+}
+.submit-container button {
+    background-color: #FF6600; 
+    border: none;
+    padding: 12px 20px;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+.submit-container button:hover {
+    background: linear-gradient(135deg, #0056b3, #002e7c);
+}
+
+/* Diagram Section */
+.diagram-container {
+    flex: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.diagram-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Vertical layout for diagram above questions */
+.vertical-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+>>>>>>> e6dbdafc53c75b160d6a1dd1a9a4a9736e212d23
 }

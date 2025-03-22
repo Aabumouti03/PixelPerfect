@@ -2,7 +2,7 @@
 {% extends 'client/client_base.html' %}
 {% load static %}
 
-<!-- Content block  -->
+
 {% block content %}
 <link rel="stylesheet" href="{% static 'client/css/client_dashboard.css' %}">
     <div class="content">
@@ -18,7 +18,7 @@
                 <img src="{% static 'client/img/modules.svg' %}" alt="Modules" class="icon">
                 <h2>Manage Modules</h2>
             </div>
-            <div class="card visitors" data-url="{% url 'users_management' %}">
+            <div class="card visitors non-clickable">
                 <img src="{% static 'client/img/Icon-4.svg' %}" alt="User" class="icon user-icon">
                 <h2 class="count">{{ users_count }}</h2>
             </div>
@@ -46,10 +46,13 @@
 
     // Clickable cards 
 
-            document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".card").forEach(card => {
-            card.addEventListener("click", function() {
-                window.location.href = this.getAttribute("data-url");
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".card:not(.non-clickable)").forEach(function (card) {
+            card.addEventListener("click", function () {
+                let url = this.getAttribute("data-url");
+                if (url) {
+                    window.location.href = url; // Redirect only if data-url exists
+                }
             });
         });
     });
@@ -137,6 +140,7 @@
 
 
         };
+
     </script>
 
     {% endblock %}
