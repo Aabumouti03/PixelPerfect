@@ -138,6 +138,12 @@ class LogInForm(AuthenticationForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
+    error_messages = {
+        'invalid_login': _(
+            "Incorrect username or password. Note that the password may be case-sensitive."
+        ),
+        'inactive': _("This account is inactive."),
+    }
 
     error_messages = {
         'invalid_login': _(

@@ -128,7 +128,8 @@ class LogInFormTestCase(TestCase):
 
     def test_valid_username_and_password(self):
         """Ensure a valid username and password combination is accepted."""
-        form = LogInForm(data={'username': 'dandoe', 'password': 'Testuser123'})
+        form = LogInForm(data={'username': 'dandoe', 
+                               'password': 'Testuser123'})
         self.assertTrue(form.is_valid(), msg=form.errors)
 
         user = authenticate(username='dandoe', password='Testuser123')

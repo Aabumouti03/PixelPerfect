@@ -67,6 +67,12 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
+    def save(self, *args, **kwargs):
+        if self.username:
+            self.username = self.username.lower()
+        super().save(*args, **kwargs)
+
+
 
 class Admin(models.Model):
     user =  models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
