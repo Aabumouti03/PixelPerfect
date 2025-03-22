@@ -301,26 +301,22 @@ def contact_us(request):
         email = request.POST.get('email')
         message = request.POST.get('message')
 
-        # Combine the message content
         full_message = (
             f"Name: {name}\n"
             f"Email: {email}\n\n"
             f"Message:\n{message}"
         )
 
-        # Send the email (settings.EMAIL_HOST_USER is often used as the 'from' address)
         send_mail(
             subject="New Contact Us Submission",
             message=full_message,
             from_email=settings.EMAIL_HOST_USER,  
-            recipient_list=[settings.EMAIL_HOST_USER],  # Replace with your admin email or use settings.ADMINS
+            recipient_list=[settings.EMAIL_HOST_USER],  
             fail_silently=False,
         )
 
-        # Redirect to a success page (create a URL/path named 'contact_success' for this)
         return redirect('contact_success')
 
-    # If GET request, simply render the contact form
     return render(request, 'users/contact_us.html')
 
 def contact_success(request):
