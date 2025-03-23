@@ -9,6 +9,7 @@ TEMP_MEDIA_ROOT = tempfile.mkdtemp()
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class SectionModelTest(TestCase):
+    
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()

@@ -3,6 +3,7 @@ from client.models import Program, Module, Category, ProgramModule
 
 
 class ProgramModelTest(TestCase):
+    
     def setUp(self):
         self.category = Category.objects.create(name="Tech")
         self.module = Module.objects.create(title="Intro to Python")

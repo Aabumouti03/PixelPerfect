@@ -5,6 +5,7 @@ from users.models import User, EndUser
 
 
 class ModuleRatingModelTest(TestCase):
+    
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", email="test@example.com", password="testpass")
         self.enduser = EndUser.objects.create(user=self.user)

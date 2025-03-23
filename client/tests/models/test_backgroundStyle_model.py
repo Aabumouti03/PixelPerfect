@@ -4,6 +4,7 @@ from client.models import BackgroundStyle, BACKGROUND_IMAGE_CHOICES
 
 
 class BackgroundStyleModelTest(TestCase):
+    
     def test_str_representation(self):
         bg_style = BackgroundStyle.objects.create(
             background_color='#ffcc00',

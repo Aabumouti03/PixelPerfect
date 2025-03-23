@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from client.models import ExerciseQuestion
 
 class ExerciseQuestionModelTest(TestCase):
+    
     def test_clean_with_blank_missing_fields(self):
         """Test that clean() raises a ValidationError when both blank fields are missing."""
         question = ExerciseQuestion(

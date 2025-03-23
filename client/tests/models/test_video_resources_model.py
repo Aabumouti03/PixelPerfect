@@ -3,6 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from client.models import VideoResource
 
 class VideoResourceModelTest(TestCase):
+    
     def test_get_embed_url_standard(self):
         video = VideoResource.objects.create(
             title="Test Video",

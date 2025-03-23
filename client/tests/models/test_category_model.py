@@ -5,6 +5,7 @@ from client.models import Category
 
 
 class CategoryModelTest(TestCase):
+    
     def test_str_representation(self):
         category = Category.objects.create(name="Math")
         self.assertEqual(str(category), "Math")
