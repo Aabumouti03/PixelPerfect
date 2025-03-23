@@ -51,22 +51,20 @@ from collections import defaultdict
 
 @user_passes_test(admin_check)
 @login_required
-def CreateModule(request):
+def createModule(request):
     if request.method == "POST":
         title = request.POST.get("title")
         description = request.POST.get("description")
-        exercise_ids = request.POST.getlist("exercises")  # <-- you missed this earlier!
+        exercise_ids = request.POST.getlist("exercises")
 
         if not title:
-            return render(request, "Module/Create_Module.html", {
+            return render(request, "Module/add_module.html", {
                 "error": "Title is required.",
                 "exercises": Exercise.objects.all()
             })
 
-        # Step 1: Create the Module
         module = Module.objects.create(title=title, description=description)
 
-        # Step 2: If exercises are selected, wrap them in a Section and assign
         if exercise_ids:
             exercises = Exercise.objects.filter(id__in=exercise_ids)
             section = Section.objects.create(
@@ -78,12 +76,11 @@ def CreateModule(request):
 
         return redirect("client_modules")
 
-    # GET request: just show all exercises
+    # ✅ THIS is the critical line!
     exercises = Exercise.objects.all()
-    return render(request, "Module/Create_Module.html", {
+    return render(request, "Module/add_module.html", {
         "exercises": exercises
     })
-
 
 
 @user_passes_test(admin_check)
@@ -408,7 +405,7 @@ def add_exercise_ajax(request):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
-
+'''
 @user_passes_test(admin_check)
 @login_required
 def add_module(request):
@@ -429,6 +426,7 @@ def add_module(request):
 
     sections = Section.objects.all()
     return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
+'''
 
 @user_passes_test(admin_check)
 @login_required
