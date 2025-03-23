@@ -111,8 +111,6 @@ class LogInViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/dashboard.html')
-
-    
     
     def test_logout_without_being_logged_in(self):
         """Ensure unauthenticated users cannot log out (should be redirected to login)."""
@@ -182,6 +180,7 @@ class LogInViewTestCase(TestCase):
         response = self.client.post(login_url_with_next, form_input, follow=True)
 
         self.assertRedirects(response, protected_url)
+
 
     def test_case_insensitive_login_view(self):
         """Ensure the login view handles username case insensitivity correctly."""

@@ -42,6 +42,7 @@ class AddEQuestionViewTest(TestCase):
         response = self.client.get(self.url)
         expected_url = reverse('log_in') + "?next=" + self.url
         self.assertRedirects(response, expected_url)
+        
 
     def test_admin_user_can_access(self):
         """Test that an admin user can access the view."""

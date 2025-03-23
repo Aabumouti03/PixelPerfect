@@ -14,6 +14,7 @@ class GetSectionsViewTest(TestCase):
     def setUpTestData(cls):
         cls.client = Client()
         
+        
         # Create an admin user and associated profile
         cls.admin_user = User.objects.create_superuser(
             username='adminuser', email='admin@example.com', password='adminpass'

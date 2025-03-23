@@ -13,6 +13,7 @@ class AddExerciseToSectionViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
+        
 
         # Create an admin user
         cls.admin_user = User.objects.create_superuser(

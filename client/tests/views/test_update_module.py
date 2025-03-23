@@ -12,6 +12,7 @@ class UpdateModuleViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        
         cls.client = Client()
         
         # Create an admin user and profile

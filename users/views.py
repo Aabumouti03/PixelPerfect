@@ -568,7 +568,7 @@ def delete_account(request):
         try:
             # Delete the user account, which will cascade-delete related objects
             user.delete()
-            logout(request)  # Log out after deletion
+            logout(request)  # log after deletion
             messages.success(request, "Your account has been successfully deleted.")
             return redirect('welcome_page')  # Redirect to a safe page after deletion
 

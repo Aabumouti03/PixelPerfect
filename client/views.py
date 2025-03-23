@@ -52,8 +52,39 @@ from collections import defaultdict
 @user_passes_test(admin_check)
 @login_required
 def CreateModule(request):
-    modules = Module.objects.prefetch_related("sections__exercises__questions").all()
-    return render(request, "Module/Edit_Add_Module.html", {"modules": modules})
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        exercise_ids = request.POST.getlist("exercises")  # <-- you missed this earlier!
+
+        if not title:
+            return render(request, "Module/Create_Module.html", {
+                "error": "Title is required.",
+                "exercises": Exercise.objects.all()
+            })
+
+        # Step 1: Create the Module
+        module = Module.objects.create(title=title, description=description)
+
+        # Step 2: If exercises are selected, wrap them in a Section and assign
+        if exercise_ids:
+            exercises = Exercise.objects.filter(id__in=exercise_ids)
+            section = Section.objects.create(
+                title=f"Auto Section for {title}",
+                description="Auto-created section from selected exercises"
+            )
+            section.exercises.set(exercises)
+            module.sections.add(section)
+
+        return redirect("client_modules")
+
+    # GET request: just show all exercises
+    exercises = Exercise.objects.all()
+    return render(request, "Module/Create_Module.html", {
+        "exercises": exercises
+    })
+
+
 
 @user_passes_test(admin_check)
 @login_required
@@ -1325,7 +1356,7 @@ def add_video(request):
         "form": form,
         "next": next_url
     })
-    
+
 @login_required
 @user_passes_test(admin_check)
 def video_list(request):
