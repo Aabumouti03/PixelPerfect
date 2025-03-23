@@ -19,9 +19,6 @@ urlpatterns = [
     path('', usersViews.welcome_page, name="welcome_page"),
     path('dashboard/', usersViews.dashboard, name="dashboard"),
 
-    # Redirect "Modules" to "Edit_Add_Module"
-    #path('modules/', clientViews.CreateModule, name="modules"),
-
     path('about/', usersViews.about, name='about'),
 
     # Other Paths

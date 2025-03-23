@@ -76,7 +76,6 @@ def createModule(request):
 
         return redirect("client_modules")
 
-    # ✅ THIS is the critical line!
     exercises = Exercise.objects.all()
     return render(request, "Module/add_module.html", {
         "exercises": exercises
