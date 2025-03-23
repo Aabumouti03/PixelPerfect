@@ -183,7 +183,7 @@ def edit_exercise(request, exercise_id):
             return redirect('edit_section', exercise.sections.first().id)
     else:
         form = ExerciseForm(instance=exercise)
-    return render(request, 'Module/edit_exercise.html', {'form': form, 'exercise': exercise})
+    return render(request, 'Module/manage_exercises.html', {'form': form, 'exercise': exercise})
 
 @user_passes_test(admin_check)
 @login_required
@@ -242,24 +242,22 @@ def remove_exercise_from_section(request, section_id):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            exercise_ids = data.get("exercise_ids", [])  # ✅ Ensure it's a list
+            exercise_ids = data.get("exercise_ids", [])
 
             section = get_object_or_404(Section, id=section_id)
-
-            print(f"🔍 Received request to remove exercises: {exercise_ids}")  # Debugging
-            print(f"📌 Current exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
-
+            
             if not exercise_ids:
                 return JsonResponse({"success": False, "error": "No exercise IDs received."}, status=400)
 
-            # ✅ Remove exercises
+            exercises = Exercise.objects.filter(id__in=exercise_ids)
+            if exercises.count() != len(exercise_ids):
+                return JsonResponse({"success": False, "error": "One or more exercises do not exist."}, status=400)
+            
             section.exercises.remove(*exercise_ids)
-
-            print(f"✅ Updated exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
-
+            
             return JsonResponse({"success": True, "message": "Exercises removed successfully!"})
+        
         except Exception as e:
-            print(f"❌ Error: {e}")  # Debugging
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
@@ -275,6 +273,8 @@ def manage_exercises(request):
         'exercises': exercises
     })
 
+from django.http import Http404
+
 @user_passes_test(admin_check)
 @login_required
 @csrf_exempt
@@ -282,8 +282,13 @@ def update_exercise(request, exercise_id):
     """Updates an exercise title and adds new questions without duplicating."""
     if request.method == "POST":
         try:
-            data = json.loads(request.body)
+            # ✅ If the exercise doesn't exist, an Http404 will be raised.
             exercise = get_object_or_404(Exercise, id=exercise_id)
+        except Http404:
+            return JsonResponse({"success": False, "error": "Exercise not found."}, status=404)
+
+        try:
+            data = json.loads(request.body)
 
             # ✅ Update Exercise Title
             exercise.title = data.get("title", exercise.title)
@@ -376,11 +381,10 @@ def add_module(request):
         form = ModuleForm(request.POST)
         if form.is_valid():
             module = form.save(commit=False)
-            module.save()
-            form.save_m2m()  # Save many-to-many relationship
-            
+            module.save()  # ✅ Save the module instance first
+            form.save_m2m()  # ✅ Save the many-to-many relationship for sections
             request.session.pop('module_form_data', None)  # Clear stored data after save
-            return redirect('modules')  
+            return redirect('modules')
 
         request.session['module_form_data'] = request.POST  # Save form data if invalid
 
