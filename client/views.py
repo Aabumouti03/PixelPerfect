@@ -25,16 +25,18 @@ from django.db import transaction
 from django.db.models import Max, Avg
 from django.db.models import Q
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+
 
 from django.db.models import Max
 from client import views as clientViews
 from users import views as usersViews
 from users.views import enroll_module, unenroll_module 
 from django.contrib import messages
-from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
+from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category, AdditionalResource
 from users.models import Questionnaire_UserResponse, QuestionResponse, User
 from django.core.paginator import Paginator
-from .forms import ProgramForm 
+from .forms import ProgramForm, AdditionalResourceForm
 from django.contrib.auth.decorators import login_required
 
 def admin_check(user):
@@ -56,27 +58,35 @@ def CreateModule(request):
 @user_passes_test(admin_check)
 @login_required
 def edit_module(request, module_id):
-    """Handles editing an existing module."""
     module = get_object_or_404(Module, id=module_id)
 
-    # Get sections **NOT** already in this module
-    all_sections = Section.objects.exclude(id__in=module.sections.values_list('id', flat=True))
+    existing_exercise_ids = Exercise.objects.filter(
+        sections__in=module.sections.all()
+    ).values_list('id', flat=True).distinct()
+    available_exercises = Exercise.objects.exclude(id__in=existing_exercise_ids)
+
+    available_additional_resources = AdditionalResource.objects.exclude(
+        id__in=module.additional_resources.values_list('id', flat=True)
+    )
+
+    available_video_resources = VideoResource.objects.exclude(
+        id__in=module.video_resources.values_list('id', flat=True)
+    )
 
     if request.method == "POST":
         form = ModuleForm(request.POST, instance=module)
         if form.is_valid():
             form.save()
-            messages.success(request, "Module updated successfully!")
-            return redirect('client_modules')  # Redirect to module list
-        else:
-            messages.error(request, "Error updating module. Please check the form.")
+            return redirect('client_modules')
     else:
         form = ModuleForm(instance=module)
 
     return render(request, 'Module/edit_module.html', {
         'form': form,
         'module': module,
-        'all_sections': all_sections  # ✅ Pass sections to template
+        'available_exercises': available_exercises,
+        'available_additional_resources': available_additional_resources,
+        'available_video_resources': available_video_resources,
     })
 
 @user_passes_test(admin_check)
@@ -181,7 +191,7 @@ def edit_exercise(request, exercise_id):
             return redirect('edit_section', exercise.sections.first().id)
     else:
         form = ExerciseForm(instance=exercise)
-    return render(request, 'Module/edit_exercise.html', {'form': form, 'exercise': exercise})
+    return render(request, 'Module/manage_exercises.html', {'form': form, 'exercise': exercise})
 
 @user_passes_test(admin_check)
 @login_required
@@ -240,24 +250,22 @@ def remove_exercise_from_section(request, section_id):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            exercise_ids = data.get("exercise_ids", [])  # ✅ Ensure it's a list
+            exercise_ids = data.get("exercise_ids", [])
 
             section = get_object_or_404(Section, id=section_id)
-
-            print(f"🔍 Received request to remove exercises: {exercise_ids}")  # Debugging
-            print(f"📌 Current exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
-
+            
             if not exercise_ids:
                 return JsonResponse({"success": False, "error": "No exercise IDs received."}, status=400)
 
-            # ✅ Remove exercises
+            exercises = Exercise.objects.filter(id__in=exercise_ids)
+            if exercises.count() != len(exercise_ids):
+                return JsonResponse({"success": False, "error": "One or more exercises do not exist."}, status=400)
+            
             section.exercises.remove(*exercise_ids)
-
-            print(f"✅ Updated exercises in section: {list(section.exercises.values_list('id', flat=True))}")  # Debugging
-
+            
             return JsonResponse({"success": True, "message": "Exercises removed successfully!"})
+        
         except Exception as e:
-            print(f"❌ Error: {e}")  # Debugging
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
@@ -273,6 +281,8 @@ def manage_exercises(request):
         'exercises': exercises
     })
 
+from django.http import Http404
+
 @user_passes_test(admin_check)
 @login_required
 @csrf_exempt
@@ -280,8 +290,13 @@ def update_exercise(request, exercise_id):
     """Updates an exercise title and adds new questions without duplicating."""
     if request.method == "POST":
         try:
-            data = json.loads(request.body)
+            # ✅ If the exercise doesn't exist, an Http404 will be raised.
             exercise = get_object_or_404(Exercise, id=exercise_id)
+        except Http404:
+            return JsonResponse({"success": False, "error": "Exercise not found."}, status=404)
+
+        try:
+            data = json.loads(request.body)
 
             # ✅ Update Exercise Title
             exercise.title = data.get("title", exercise.title)
@@ -374,11 +389,10 @@ def add_module(request):
         form = ModuleForm(request.POST)
         if form.is_valid():
             module = form.save(commit=False)
-            module.save()
-            form.save_m2m()  # Save many-to-many relationship
-            
+            module.save()  # ✅ Save the module instance first
+            form.save_m2m()  # ✅ Save the many-to-many relationship for sections
             request.session.pop('module_form_data', None)  # Clear stored data after save
-            return redirect('modules')  
+            return redirect('modules')
 
         request.session['module_form_data'] = request.POST  # Save form data if invalid
 
@@ -495,7 +509,7 @@ def view_questionnaire(request, questionnaire_id):
 @login_required
 def view_responders(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-    search_query = request.GET.get('search', '').strip()  # ✅ Trim spaces
+    search_query = request.GET.get('search', '').strip()  
     responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
 
     if search_query:
@@ -504,10 +518,10 @@ def view_responders(request, questionnaire_id):
             Q(user__user__last_name__icontains=search_query)
         )
 
-    # ✅ Ensure consistent ordering for pagination
+    # Ensure consistent ordering for pagination
     responders = responders.order_by("user__user__first_name")
 
-    # ✅ Paginate (10 per page)
+    # Paginate (10 per page)
     paginator = Paginator(responders, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -516,7 +530,7 @@ def view_responders(request, questionnaire_id):
         'questionnaire': questionnaire,
         'responders': page_obj.object_list,
         'page_obj': page_obj,
-        'search_query': search_query,  # ✅ Keep search term in form
+        'search_query': search_query,
     })
 
 @user_passes_test(admin_check)
@@ -540,6 +554,25 @@ def create_questionnaire(request):
         title = request.POST.get("title")
         description = request.POST.get("description")
 
+        #Validation
+        if not title:
+            messages.error(request, "Title is required.")
+            return redirect("create_questionnaire")
+
+        if not description:
+            messages.error(request, "Description is required.")
+            return redirect("create_questionnaire")
+
+        question_index = 0
+        has_questions = False
+        while f"question_text_{question_index}" in request.POST:
+            has_questions = True
+            break
+
+        if not has_questions:
+            messages.error(request, "At least one question is required.")
+            return redirect("create_questionnaire")
+
         questionnaire = Questionnaire.objects.create(title=title, description=description)
 
         question_index = 0
@@ -549,7 +582,13 @@ def create_questionnaire(request):
             sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  
             category_id = request.POST.get(f"category_{question_index}")
             
-            category = Category.objects.get(id=category_id) if category_id else None  
+            category = None
+            if category_id:
+                try:
+                    category = Category.objects.get(id=category_id)
+                except ObjectDoesNotExist:
+                    messages.error(request, f"Category ID {category_id} does not exist. Please select a valid category.")
+                    return redirect("create_questionnaire")  
 
             Question.objects.create(
                 questionnaire=questionnaire,
@@ -561,7 +600,6 @@ def create_questionnaire(request):
 
             question_index += 1  
 
-        messages.success(request, "Questionnaire created successfully!")
         return redirect("manage_questionnaires")
 
     return render(request, "client/create_questionnaire.html", {
@@ -575,19 +613,38 @@ def edit_questionnaire(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
     categories = Category.objects.all()
-    sentiment_choices = Question.SENTIMENT_CHOICES  # ✅ Get choices from model
+    sentiment_choices = Question.SENTIMENT_CHOICES  
 
     if request.method == "POST":
-        questionnaire.title = request.POST.get("title")
-        questionnaire.description = request.POST.get("description")
+        title = request.POST.get("title", "").strip()
+        description = request.POST.get("description", "").strip()
+
+        # Validation: Ensure title and description are not empty
+        if not title:
+            messages.error(request, "Title is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        if not description:
+            messages.error(request, "Description is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        # Ensure at least one question exists
+        if not questions.exists():
+            messages.error(request, "At least one question is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        # Update questionnaire details
+        questionnaire.title = title
+        questionnaire.description = description
         questionnaire.save()
 
         for question in questions:
-            question_text = request.POST.get(f"question_text_{question.id}")
-            question_type = request.POST.get(f"question_type_{question.id}")
-            sentiment = request.POST.get(f"sentiment_{question.id}")
-            category_id = request.POST.get(f"category_{question.id}")
+            question_text = request.POST.get(f"question_text_{question.id}", "").strip()
+            question_type = request.POST.get(f"question_type_{question.id}", "").strip()
+            sentiment = request.POST.get(f"sentiment_{question.id}", "").strip()
+            category_id = request.POST.get(f"category_{question.id}", "").strip()
 
+            # Update only if fields are provided (avoids overwriting with blanks)
             if question_text:
                 question.question_text = question_text
 
@@ -595,10 +652,18 @@ def edit_questionnaire(request, questionnaire_id):
                 question.question_type = question_type
 
             if sentiment:
-                question.sentiment = int(sentiment)  
+                try:
+                    question.sentiment = int(sentiment)
+                except ValueError:
+                    messages.error(request, f"Invalid sentiment value for question {question.id}.")
+                    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
             if category_id:
-                question.category = Category.objects.get(id=category_id)
+                try:
+                    question.category = Category.objects.get(id=category_id)
+                except ObjectDoesNotExist:
+                    messages.error(request, f"Invalid category ID {category_id}.")
+                    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
             question.save()
 
@@ -608,7 +673,7 @@ def edit_questionnaire(request, questionnaire_id):
         "questionnaire": questionnaire,
         "questions": questions,
         "categories": categories,
-        "sentiment_choices": sentiment_choices,  
+        "sentiment_choices": sentiment_choices,
     })
 
 @user_passes_test(admin_check)
@@ -1205,22 +1270,6 @@ def client_modules(request):
 
     return render(request, "client/client_modules.html", {"modules": modules_list})
 
-# @login_required
-# @user_passes_test(admin_check)
-# def edit_module(request, module_id):
-#     module = get_object_or_404(Module, id=module_id)
-    
-    if request.method == "POST":
-        form = ModuleForm(request.POST, instance=module)
-        if form.is_valid():
-            form.save()
-            return redirect('client_modules')  
-    
-#     else:
-#         form = ModuleForm(instance=module)
-
-#     return render(request, 'client/edit_module.html', {'form': form, 'module': module})
-
 @login_required
 @user_passes_test(admin_check)
 def delete_module(request, module_id):
@@ -1228,34 +1277,55 @@ def delete_module(request, module_id):
     module.delete()
     return redirect("client_modules")
 
-# @login_required
-# @user_passes_test(admin_check)
-# def add_module(request):
-#     if request.method == "POST":
-#         title = request.POST.get("title")
-#         description = request.POST.get("description")
+@login_required
+@user_passes_test(admin_check)
+def add_button(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
         
-#         if title and description:  # Ensure both fields are filled
-#             new_module = Module.objects.create(title=title, description=description)
-#             new_module.save()
-#             return redirect("client_modules")  # Redirect to the Client Modules page
-#     return render(request, "client/add_module.html")
+        if title and description:  # Ensure both fields are filled
+            new_module = Module.objects.create(title=title, description=description)
+            new_module.save()
+            return redirect("client_modules")  # Redirect to the Client Modules page
+    return render(request, "Module/add_module.html")
 
 
 # For adding video content
-@login_required
 @user_passes_test(admin_check)
+@login_required
+@csrf_exempt
 def add_video(request):
-    """View for adding a new video resource."""
+    next_url = request.GET.get("next", "/")  # where to go after saving
+    module_id = request.GET.get("module_id")  # optional: module to link to
+
     if request.method == "POST":
         form = VideoResourceForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("video_list")  # Redirect to video list after saving
+            video = form.save()
+
+            # If module_id is passed, link the video to the module
+            if module_id:
+                try:
+                    module = Module.objects.get(id=module_id)
+                    module.video_resources.add(video)
+                    messages.success(request, "Video added and linked to module.")
+                except Module.DoesNotExist:
+                    messages.error(request, "Module not found. Video saved but not linked.")
+            else:
+                messages.success(request, "Video added successfully.")
+
+            return redirect(next_url)
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = VideoResourceForm()
-    return render(request, "client/add_video.html", {"form": form})
 
+    return render(request, "client/add_video.html", {
+        "form": form,
+        "next": next_url
+    })
+    
 @login_required
 @user_passes_test(admin_check)
 def video_list(request):
@@ -1269,3 +1339,110 @@ def video_detail(request, video_id):
     """View for displaying a single video."""
     video = get_object_or_404(VideoResource, id=video_id)
     return render(request, "client/video_detail.html", {"video": video})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_video_from_module(request, module_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        video_id = data.get("video_id")
+        try:
+            module = Module.objects.get(id=module_id)
+            video = VideoResource.objects.get(id=video_id)
+            module.video_resources.remove(video)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_resource_from_module(request, module_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        resource_id = data.get("resource_id")
+        try:
+            module = Module.objects.get(id=module_id)
+            resource = AdditionalResource.objects.get(id=resource_id)
+            module.additional_resources.remove(resource)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+@user_passes_test(admin_check)
+@login_required
+def add_additional_resource(request):
+    if request.method == 'POST':
+        form = AdditionalResourceForm(request.POST, request.FILES)
+        if form.is_valid():
+            resource = form.save()
+            module_id = request.GET.get('module_id')
+            next_url = request.GET.get('next', '/')
+            if module_id:
+                module = Module.objects.get(id=module_id)
+                module.additional_resources.add(resource)
+            return redirect(next_url)
+    else:
+        form = AdditionalResourceForm()
+    return render(request, "client/add_additional_resource.html", {"form": form})
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_exercise_from_module(request, module_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        exercise_ids = data.get('exercise_ids', [])
+
+        try:
+            module = Module.objects.get(id=module_id)
+            for section in module.sections.all():
+                section.exercises.remove(*exercise_ids)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def add_exercise_to_module(request, module_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            exercise_id = data.get('exercise_id')
+
+            if not exercise_id:
+                return JsonResponse({'success': False, 'error': 'Missing exercise ID'}, status=400)
+
+            module = get_object_or_404(Module, id=module_id)
+            exercise = get_object_or_404(Exercise, id=exercise_id)
+
+            # Create or get the general section
+            section_title = f"{module.title} - General Exercises"
+            section, created = Section.objects.get_or_create(
+                title=section_title,
+                defaults={'description': 'Auto-generated section for added exercises'}
+            )
+            # If new, attach to the module
+            if created:
+                module.sections.add(section)
+
+            # Add the exercise
+            section.exercises.add(exercise)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            print(f"🚨 ERROR in add_exercise_to_module: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
+

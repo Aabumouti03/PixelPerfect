@@ -67,6 +67,14 @@ urlpatterns = [
     path('update_exercise/<int:exercise_id>/', clientViews.update_exercise, name='update_exercise'),
     path('delete_exercise_questions/<int:exercise_id>/', clientViews.delete_exercise_questions, name='delete_exercise_questions'),
     path("add_exercise_ajax/", clientViews.add_exercise_ajax, name="add_exercise_ajax"),
+    path('add_exercise_to_module/<int:module_id>/', clientViews.add_exercise_to_module, name='add_exercise_to_module'),
+    path('add_additional_resource/', clientViews.add_additional_resource, name='add_additional_resource'),
+    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
+    path('remove_video_from_module/<int:module_id>/', clientViews.remove_video_from_module, name='remove_video_from_module'),
+    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
+    path('remove_exercises_from_module/<int:module_id>/', clientViews.remove_exercise_from_module, name='remove_exercises_from_module'),
+
+
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
@@ -109,7 +117,6 @@ urlpatterns = [
     #User urls for modules
     path('userModules/', usersViews.user_modules, name='modules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
-    path('all_modules/', usersViews.all_modules, name='all_modules'),
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
@@ -159,6 +166,12 @@ urlpatterns = [
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
     
+    
+    
+    
+    
+    
+    
     # Modules
     path("enroll-module/", enroll_module, name="enroll_module"),
     path("unenroll-module/", unenroll_module, name="unenroll_module"), 
@@ -171,6 +184,12 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+    
+    
+    
+    
+    
+    
     #video content
     path('videos/', clientViews.video_list, name='video_list'),
     path('videos/add/', clientViews.add_video, name='add_video'),
