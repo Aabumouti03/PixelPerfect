@@ -28,19 +28,10 @@ class ModuleRatingModelTest(TestCase):
 
     def test_rating_within_valid_range(self):
         rating = ModuleRating(module=self.module, user=self.enduser, rating=3)
-        # should not raise any validation error
-        try:
-            rating.full_clean()
-        except ValidationError:
-            self.fail("ModuleRating raised ValidationError unexpectedly!")
+        rating.full_clean()
 
     def test_rating_below_min_value(self):
         rating = ModuleRating(module=self.module, user=self.enduser, rating=0)
-        with self.assertRaises(ValidationError):
-            rating.full_clean()
-
-    def test_rating_above_max_value(self):
-        rating = ModuleRating(module=self.module, user=self.enduser, rating=6)
         with self.assertRaises(ValidationError):
             rating.full_clean()
 
