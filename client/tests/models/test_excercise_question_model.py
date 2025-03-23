@@ -23,10 +23,7 @@ class ExerciseQuestionModelTest(TestCase):
             text_before_blank="Start",
             text_after_blank=""
         )
-        try:
-            question.clean()  
-        except ValidationError:
-            self.fail("clean() raised ValidationError unexpectedly when one field was provided!")
+        question.clean()
 
     def test_str_with_blank(self):
         """Test __str__ returns the blank format when has_blank is True."""
@@ -55,10 +52,7 @@ class ExerciseQuestionModelTest(TestCase):
             text_before_blank="Good",
             text_after_blank="Morning"
         )
-        try:
-            question.clean()
-        except ValidationError:
-            self.fail("clean() raised ValidationError unexpectedly when both fields were provided!")
+        question.clean()
 
     def test_clean_when_not_blank_empty_fields(self):
         """Test that clean() passes when has_blank is False even if blank fields are empty."""
@@ -68,10 +62,7 @@ class ExerciseQuestionModelTest(TestCase):
             text_before_blank="",
             text_after_blank=""
         )
-        try:
-            question.clean()
-        except ValidationError:
-            self.fail("clean() raised ValidationError unexpectedly when has_blank is False!")
+        question.clean()
 
     def test_str_with_non_blank_ignores_blank_fields(self):
         """Test that __str__ returns question_text even if blank fields are provided when has_blank is False."""
@@ -122,10 +113,7 @@ class ExerciseQuestionModelTest(TestCase):
             text_before_blank=None,
             text_after_blank=None
         )
-        try:
-            question.clean()
-        except ValidationError:
-            self.fail("clean() raised ValidationError unexpectedly for has_blank False with null fields!")
+        question.clean()
 
     def test_str_with_null_blank_fields(self):
         """Test __str__ output when has_blank is True and one field is provided while the other is None."""
@@ -146,7 +134,4 @@ class ExerciseQuestionModelTest(TestCase):
             text_before_blank="",
             text_after_blank="End"
         )
-        try:
-            question.clean()
-        except ValidationError:
-            self.fail("clean() raised ValidationError unexpectedly when only text_after_blank was provided!")
+        question.clean()
