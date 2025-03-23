@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="{% static 'users/css/user_authentication.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/verification_email.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <script>
+        const redirectUrl = "{% url 'get_started' %}";
+    </script>
+    <script src="{% static 'users/js/verify_email_redirect.js' %}" defer></script>
 </head>
 <body class="verify-email-body">
     {% include 'users/welcome_page_navbar.html' %}
@@ -43,18 +47,5 @@
         </div>
     </div>
 
-    <script>
-        let timeLeft = 7;
-        let countdownElement = document.getElementById('countdown');
-
-        let countdown = setInterval(function () {
-            timeLeft--;
-            countdownElement.textContent = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                window.location.href = "{% url 'get_started' %}";
-            }
-        }, 1000);
-    </script>
 </body>
 </html>
