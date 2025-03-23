@@ -155,3 +155,10 @@ class SignUpFormTestCase(TestCase):
         self.form_input_for_end_user["phone_number"] = "1234567890123456789"
         form = EndUserProfileForm(data=self.form_input_for_end_user)
         self.assertFalse(form.is_valid())
+        
+    def test_username_duplicate_case_insensitive(self):
+            """Ensure duplicate usernames are rejected even if they differ in casing."""
+            User.objects.create(username='Dandoe', email='another@example.org')
+            form = UserSignUpForm(data=self.form_input_for_user)
+            self.assertFalse(form.is_valid())
+            self.assertIn('username', form.errors)

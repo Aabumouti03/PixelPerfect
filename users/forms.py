@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 from .models import User, EndUser
+from django.utils.translation import gettext_lazy as _
 
 
 class UserSignUpForm(UserCreationForm):
@@ -21,11 +22,13 @@ class UserSignUpForm(UserCreationForm):
  
     def clean_username(self):
         """Ensure username does not contain spaces and has at least 3 characters."""
-        username = self.cleaned_data.get("username")
+        username = self.cleaned_data.get("username").lower()
         if " " in username:
             raise ValidationError("Username cannot contain spaces.")
         if len(username) < 3:
             raise ValidationError("Username must be at least 3 characters long.")
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValidationError("A user with that username already exists.")
         return username
 
     def clean_password1(self):
@@ -87,7 +90,10 @@ class EndUserProfileForm(forms.ModelForm):
 
     phone_number = forms.CharField(
     required=False,
-    validators=[RegexValidator(r'^\+?[1-9]\d{6,14}$', message="Enter a valid phone number (7-15 digits, optional '+').")],
+    validators=[RegexValidator(
+        r'^\+?\d{7,15}$',
+        message="Enter a valid phone number (7-15 digits, optional '+')."
+    )],
     widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'})
 )
 
@@ -131,6 +137,12 @@ class LogInForm(AuthenticationForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
+    error_messages = {
+         'invalid_login': _(
+             "Incorrect username or password. Note that the password may be case-sensitive."
+         ),
+         'inactive': _("This account is inactive."),
+     }
 
 class UserProfileForm(forms.ModelForm):
     """This is for the user's profile section in the Profile Page."""

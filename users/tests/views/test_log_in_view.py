@@ -104,16 +104,6 @@ class LogInViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/dashboard.html')
-
-    def test_username_case_sensitivity(self):
-        """Ensure username authentication is case-sensitive."""
-        form_input = {'username': 'DANDOE', 'password': 'Testuser123'}
-        response = self.client.post(self.url, form_input)
-        self.assertEqual(response.status_code, 200)
-        
-        form = response.context['form']
-        self.assertTrue(form.errors)
-        self.assertIn('__all__', form.errors)
     
     def test_logout_without_being_logged_in(self):
         """Ensure unauthenticated users cannot log out (should be redirected to login)."""
@@ -182,3 +172,17 @@ class LogInViewTestCase(TestCase):
 
         self.assertRedirects(response, protected_url)
 
+
+    def test_case_insensitive_login_view(self):
+        """Ensure the login view handles username case insensitivity correctly."""
+        self.test_user.email_verified = True
+        self.test_user.save()
+
+        form_input = {'username': 'DANdoe', 'password': 'Testuser123'}
+        response = self.client.post(self.url, form_input, follow=True)
+
+        self.assertRedirects(response, self.dashboard_url)
+
+        user = authenticate(username='dandoe', password='Testuser123')
+        self.assertIsNotNone(user)
+        self.assertTrue(user.is_authenticated)

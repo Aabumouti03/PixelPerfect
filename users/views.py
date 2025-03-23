@@ -336,7 +336,7 @@ def log_in(request):
     if request.method == "POST":
         form = LogInForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username').strip()  # Trim spaces
+            username = form.cleaned_data.get('username').strip().lower()
             password = form.cleaned_data.get('password').strip()
 
             user = authenticate(request, username=username, password=password)
@@ -572,7 +572,7 @@ def delete_account(request):
         try:
             # Delete the user account, which will cascade-delete related objects
             user.delete()
-            logout(request)  # Log out after deletion
+            logout(request)  # log after deletion
             messages.success(request, "Your account has been successfully deleted.")
             return redirect('welcome_page')  # Redirect to a safe page after deletion
 

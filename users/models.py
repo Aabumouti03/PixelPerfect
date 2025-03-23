@@ -60,6 +60,11 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+    def save(self, *args, **kwargs):
+         if self.username:
+             self.username = self.username.lower()
+         super().save(*args, **kwargs)
 
 
 class Admin(models.Model):
