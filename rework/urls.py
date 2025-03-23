@@ -109,7 +109,6 @@ urlpatterns = [
     #User urls for modules
     path('userModules/', usersViews.user_modules, name='modules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
-    path('all_modules/', usersViews.all_modules, name='all_modules'),
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
@@ -159,6 +158,12 @@ urlpatterns = [
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
     
+    
+    
+    
+    
+    
+    
     # Modules
     path("enroll-module/", enroll_module, name="enroll_module"),
     path("unenroll-module/", unenroll_module, name="unenroll_module"), 
@@ -171,6 +176,12 @@ urlpatterns = [
     path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
+    
+    
+    
+    
+    
+    
     #video content
     path('videos/', clientViews.video_list, name='video_list'),
     path('videos/add/', clientViews.add_video, name='add_video'),
