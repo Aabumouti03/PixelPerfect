@@ -72,6 +72,13 @@ body {
     color: white;
 }
 
+/* Styling for active links */
+.nav-links a.active {
+    font-weight: bold;
+    background-color: #F24505;
+    border-radius: 8px; /* Soft rounded corners */
+}
+
 
 .nav-links a:hover {
     width: 225px;
@@ -217,7 +224,6 @@ body {
 }
 
 
-<<<<<<< HEAD
 /*---------------LOG OUT------------*/
 .modal {
     display: none;
@@ -285,5 +291,3 @@ body {
     font-size: 20px;
     line-height: 1;
 }
-=======
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9

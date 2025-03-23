@@ -9,6 +9,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
+from client.models import Badge
+
 
 from django.core.cache import cache
 import random
@@ -60,6 +62,18 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+    def save(self, *args, **kwargs):
+        if self.username:
+            self.username = self.username.lower()
+        super().save(*args, **kwargs)
+
+
+    def save(self, *args, **kwargs):
+        if self.username:
+            self.username = self.username.lower()
+        super().save(*args, **kwargs)
+
 
 
 class Admin(models.Model):
@@ -114,6 +128,7 @@ class EndUser(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='User_profile')
+    badges = models.ManyToManyField(Badge, blank=True, related_name='end_users') ####
     age = models.PositiveIntegerField(blank=False, null=True)  # Required
     gender = models.CharField(max_length=20, choices=GENDER_OPTIONS, blank=False, null = True)
     ethnicity = models.CharField(max_length=50, choices=ETHNICITY_CHOICES, blank=True, null=True)  # Optional

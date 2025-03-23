@@ -6,43 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onboarding Questionnaire</title>
     <link rel="stylesheet" href="{% static 'css/questionnaire.css' %}">
+    
+    <!-- Pass data to JavaScript -->
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="questionnaire-id" content="{{ active_questionnaire.id }}">
 </head>
 <body>
     <section class="layout">
+        <!-- HEADER -->
         <header class="header">
             <nav class="navbar">
-                <a href="#" class="nav-logo">
+                <a href="javascript:void(0);" class="nav-logo">
                     <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
                     <span class="logo-title">ReWork</span>
                 </a>
-                <a href="#" class="btn">Log out</a>
+                <button type="button" class="btn" id="logout-btn">Log out</button>
             </nav>
         </header>
 
-        <!-- MAIN CONTENT -->
+        <!-- MAIN -->
         <main class="main">
             <div class="container">
-                <!-- Progress Tracker -->
+                <!-- Progress Bar -->
                 <div class="progress-container">
                     <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
                         <div id="progress-bar" class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
-                            style="width: 0%; padding-left: 10px;"> 0%
+                             style="width: 0%; padding-left: 10px;">0%
                         </div>
                     </div>
                 </div>
 
-                <!-- Question Area -->
+                <!-- Questions -->
                 <div class="question-box">
                     <h2 id="question-text">Loading question...</h2>
-
-                    <!-- Dynamic Answer Choices -->
                     <div id="answer-options" class="answer-options"></div>
-
-                    <!-- Rating Scale (Hidden by Default) -->
                     <div id="rating-options" class="rating-options" style="display: none;"></div>
-
-                    <!-- Navigation Buttons -->
+                    
+                    <!-- Navigation -->
                     <div class="nav-buttons">
                         <button id="prev-btn" class="nav-btn left">⭠</button>
                         <button id="next-btn" class="nav-btn right">⭢</button>
@@ -52,153 +52,29 @@
         </main>
 
         <!-- FOOTER -->
-        <div class="footer">
+        <footer class="footer">
             <p>&copy;2025 ReWork. All Rights Reserved.</p>
-        </div>
+        </footer>
     </section>
 
-    <!-- Store Questions as JSON -->
+    <!-- Logout Modal -->
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <h2>Are you sure you want to log out?</h2>
+            <form method="POST" action="{% url 'log_out' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn confirm-logout">Yes, Log Out</button>
+                <button type="button" class="btn cancel-logout" id="cancel-logout">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Questions Data as JSON -->
     <script id="questions-data" type="application/json">
         {{ questions_json|safe }}
     </script>
 
-    <!-- JavaScript for Dynamic Behavior -->
-    <script>
-        // Retrieve CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    
-        const questions = JSON.parse(document.getElementById("questions-data").textContent);
-    
-        let currentQuestionIndex = 0;
-        let selectedAnswers = {};  // Store user-selected answers
-    
-        function updateQuestion() {
-            if (questions.length === 0) {
-                document.getElementById("question-text").innerText = "No questions available.";
-                document.getElementById("answer-options").innerHTML = "";
-                document.getElementById("rating-options").style.display = "none";
-                return;
-            }
-    
-            let currentQuestion = questions[currentQuestionIndex];
-    
-            // Update question text
-            document.getElementById("question-text").innerText = currentQuestion.question_text;
-    
-            // Clear previous answer options
-            document.getElementById("answer-options").innerHTML = "";
-            document.getElementById("rating-options").innerHTML = "";
-            document.getElementById("answer-options").style.display = "none";
-            document.getElementById("rating-options").style.display = "none";
-    
-            // Get the previously selected answer (if exists)
-            let selectedValue = selectedAnswers[currentQuestionIndex]?.value || null;
-    
-            // Generate answer buttons based on question type
-            if (currentQuestion.question_type === "AGREEMENT") {
-                document.getElementById("answer-options").style.display = "block";
-                let choicesHtml = `
-                   <button class="answer-btn" data-value="2">Strongly Agree</button>
-                   <button class="answer-btn" data-value="1">Agree</button>
-                   <button class="answer-btn" data-value="0">Neutral</button>
-                   <button class="answer-btn" data-value="-1">Disagree</button>
-                   <button class="answer-btn" data-value="-2">Strongly Disagree</button>  
-                `;
-                document.getElementById("answer-options").innerHTML = choicesHtml;
-            } 
-            else if (currentQuestion.question_type === "RATING") {
-                document.getElementById("rating-options").style.display = "block";
-                let ratingHtml = `
-                    <button class="rating-btn" data-value="-2">1</button>
-                    <button class="rating-btn" data-value="-1">2</button>
-                    <button class="rating-btn" data-value="0">3</button>
-                    <button class="rating-btn" data-value="1">4</button>
-                    <button class="rating-btn" data-value="2">5</button>
-                `;
-                document.getElementById("rating-options").innerHTML = ratingHtml;
-            }
-    
-            // **Automatically highlight the previously selected answer**
-            if (selectedValue !== null) {
-                document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => {
-                    if (parseInt(btn.dataset.value) === selectedValue) {
-                        btn.classList.add("selected");
-                    }
-                });
-            }
-
-            // Update progress bar
-            let progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-            document.getElementById("progress-bar").style.width = progress + "%";
-            document.getElementById("progress-bar").innerText = Math.round(progress) + "%";
-
-            // Enable/disable navigation buttons
-            document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
-            document.getElementById("next-btn").disabled = !selectedAnswers[currentQuestionIndex];
-
-            // Add event listeners for answer selection
-            document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    const value = parseInt(e.target.dataset.value);
-                    selectedAnswers[currentQuestionIndex] = {
-                        questionId: currentQuestion.id,
-                        value: value,
-                    };
-
-                    // Remove "selected" class from all buttons
-                    document.querySelectorAll(".answer-btn, .rating-btn").forEach(btn => btn.classList.remove("selected"));
-                    e.target.classList.add("selected");
-
-                    document.getElementById("next-btn").disabled = false;
-                });
-            });
-        }
-    
-        // Navigation buttons
-        document.getElementById("next-btn").addEventListener("click", () => {
-            if (currentQuestionIndex < questions.length - 1) {
-                currentQuestionIndex++;
-                updateQuestion();
-            } else {
-                submitResponses();
-            }
-        });
-    
-        document.getElementById("prev-btn").addEventListener("click", () => {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                updateQuestion();
-            }
-        });
-
-        // Submit responses
-        function submitResponses() {
-            const responseData = {
-                "questionnaireId": "{{ active_questionnaire.id }}",
-                "responses": Object.values(selectedAnswers)
-            };
-
-            fetch("{% url 'submit_responses' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify(responseData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = data.redirect_url;  // ✅ Redirect to recommended programs
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-
-        // Initialize on page load
-        window.onload = updateQuestion;
-    </script>    
+    <!-- External JS -->
+    <script src="{% static 'users/js/questionnaire.js' %}"></script>
 </body>
 </html>
