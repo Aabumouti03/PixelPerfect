@@ -503,26 +503,38 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Successfully loaded quotes"))
 
     def seed_questionnaire(self):
-        """Seeds a questionnaire with 3 questions if not already seeded."""
+
+        """Seeds a questionnaire with 3 questions if not already seeded. Ensures only one is active."""
         title = "Are you ready to return to work"
 
         questionnaire = Questionnaire.objects.filter(title=title).first()
-        
+
         if questionnaire:
             existing_questions = questionnaire.questions.count()
             if existing_questions >= 3:
                 print(f"⚠️ Questionnaire '{title}' already seeded with {existing_questions} questions. Skipping.")
-                return
             else:
                 print(f"🔁 Questionnaire '{title}' exists but has only {existing_questions} questions. Re-seeding missing ones.")
         else:
+            # ✅ Create new questionnaire and make it active
+            # But first deactivate all others to enforce uniqueness
+            Questionnaire.objects.all().update(is_active=False)
+
             questionnaire = Questionnaire.objects.create(
                 title=title,
                 description="A quick check-in to help you reflect on your readiness to return to work.",
                 is_active=True
             )
-            print(f"✅ Created Questionnaire '{title}'")
+            print(f"Created Questionnaire '{title}' and set as active")
 
+        # If it's not active (due to a logic error or manual override), make it the ONLY active one
+        if not questionnaire.is_active:
+            Questionnaire.objects.exclude(id=questionnaire.id).update(is_active=False)
+            questionnaire.is_active = True
+            questionnaire.save()
+            print(f"⚙️ Set Questionnaire '{title}' as active (after override protection)")
+
+        # Map categories
         categories_map = {
             "Career Development": Category.objects.get(name="Career Development"),
             "Personal Growth": Category.objects.get(name="Personal Growth"),
@@ -550,6 +562,7 @@ class Command(BaseCommand):
             }
         ]
 
+        #Add questions (only if they don't exist already)
         for q_data in questions_data:
             question, created = Question.objects.get_or_create(
                 questionnaire=questionnaire,
@@ -564,4 +577,4 @@ class Command(BaseCommand):
             if created:
                 print(f"   ➕ Added Question: {q_data['text'][:50]}...")
 
-        print(f"✅ Questionnaire '{questionnaire.title}' seeded successfully.")
+        print(f"✅ Questionnaire '{questionnaire.title}' seeded successfully and marked as active.")

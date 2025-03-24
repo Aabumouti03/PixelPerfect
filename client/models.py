@@ -229,6 +229,21 @@ class Questionnaire (models.Model):
 
     def __str__(self):
         return self.title
+    
+    def clean(self):
+        """Ensure only one questionnaire is active at a time."""
+        if self.is_active:
+            qs = Questionnaire.objects.filter(is_active=True)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError("Only one questionnaire can be active at a time.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # enforce validation
+        return super().save(*args, **kwargs)
+    
+    
 
 
 class Question (models.Model):
@@ -245,7 +260,7 @@ class Question (models.Model):
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
     is_required = models.BooleanField(default=True)
 
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  # 🆕 Added for categorization
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  
     sentiment = models.IntegerField(choices=SENTIMENT_CHOICES, default=1)  # +1 for positive, -1 for negative
 
     # For rating questions
@@ -256,14 +271,6 @@ class Question (models.Model):
     def __str__(self):
         return f"{self.questionnaire.title} - {self.question_text[:30]}"
     
-    
-class Badge(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-    icon = models.ImageField(upload_to='badge_icons/', blank=True)
-
-    def __str__(self):
-        return self.name
     
 
 
