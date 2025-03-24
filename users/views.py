@@ -410,6 +410,7 @@ def sign_up_step_2(request):
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
 def sign_up_email_verification(request):
+    """Showcases an html page that notifies the user of the next step after signing up."""
     return render(request, "users/sign_up_email_verification.html")
 
 def verify_email_after_sign_up(request, uidb64, token):
