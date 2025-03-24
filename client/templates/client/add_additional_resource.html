@@ -3,9 +3,13 @@
 
 {% block extra_css %}
 <style>
+
     .resource-container {
         width: 1000px;
-        margin: 60px auto;
+        margin-left: 130px ;
+        margin-right: 130px ;
+        margin-top: 30px ;
+        margin-bottom: 100px ;
         padding: 40px;
         background: #fff;
         border-radius: 12px;
@@ -135,7 +139,7 @@
         </div>
         
         <div class="form-group">
-            <label for="id_url">External URL (if any):</label>
+            <label for="id_url">External URL:</label>
             {{ form.url }}
             {% if form.url.errors %}
                 <div style="color: red;">
@@ -150,6 +154,7 @@
         <button type="submit" class="upload-btn">Save Resource</button>
     </form>
 
-    <a href="{{ next }}" class="back-btn">⬅ Back to Module</a>
+    <a href="{{ request.META.HTTP_REFERER }}" class="back-btn"> Back </a>
+    <a href="{% url 'resource_list' %}" class="back-btn">Resource list</a>
 </div>
 {% endblock %}

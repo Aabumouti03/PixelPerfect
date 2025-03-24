@@ -842,29 +842,34 @@ def module_overview(request, module_id):
 
 @login_required
 def exercise_detail(request, exercise_id):
-    """Fetch the exercise details, including questions, saved responses, and the related diagram."""
     exercise = get_object_or_404(Exercise, id=exercise_id)
-
-    user, created = EndUser.objects.get_or_create(user=request.user)
+    user, _ = EndUser.objects.get_or_create(user=request.user)
 
     diagram = None
     for section in exercise.sections.all():
-        if section.diagram:  
-            diagram = section.diagram  
-            break  
+        if section.diagram:
+            diagram = section.diagram
+            break
 
     if request.method == 'POST':
         for question in exercise.questions.all():
             answer_text = request.POST.get(f'answer_{question.id}', '').strip()
 
+            if answer_text:
+                UserResponse.objects.create(
+                    user=user,
+                    question=question,
+                    response_text=answer_text,
+                    submitted_at=now()
+                )
 
+        messages.success(request, "Your answers have been saved!")
         return redirect('exercise_detail', exercise_id=exercise.id)
 
     return render(request, 'users/exercise_detail.html', {
         'exercise': exercise,
-        'diagram': diagram, 
+        'diagram': diagram,
     })
-
 
 @csrf_exempt  
 @login_required

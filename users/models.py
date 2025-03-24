@@ -222,8 +222,9 @@ class UserVideoProgress(models.Model):
 class UserResponse(models.Model):
     """Stores user answers for exercises."""
     user = models.ForeignKey('users.EndUser', on_delete=models.CASCADE) 
-    question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE) 
+    question = models.ForeignKey('client.ExerciseQuestion', on_delete=models.CASCADE, related_name='responses') 
     response_text = models.TextField(blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)  
 
     def __str__(self):
         return f"Response by {self.user.user.username} for {self.question}"
