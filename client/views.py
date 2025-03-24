@@ -16,8 +16,6 @@ from django.views.decorators.csrf import csrf_exempt
 from client.forms import ModuleForm
 from client.models import Category, Module as Program, VideoResource
 from client.statistics import *
-
-from users import views as usersViews
 from users.models import (
     EndUser,
     QuestionResponse,
