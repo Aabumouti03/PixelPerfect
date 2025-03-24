@@ -81,6 +81,7 @@ from .utils import send_verification_email_after_sign_up
 
 
 
+@login_required
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
 
@@ -101,13 +102,14 @@ def questionnaire(request):
         "active_questionnaire": active_questionnaire,
         "questions_json": json.dumps(questions_data),
     }
-    return render(request, "questionnaire.html", context)
+    return render(request, "users/questionnaire.html", context)
 
 @csrf_protect
 @login_required
 def submit_responses(request):
     if request.method == "POST":
         try:
+            
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
@@ -129,7 +131,8 @@ def submit_responses(request):
             if not responses:
                 return JsonResponse({"success": False, "message": "No responses provided."})
 
-            questionnaire_user_response, created = Questionnaire_UserResponse.objects.get_or_create(
+            # Create a new Questionnaire_UserResponse 
+            questionnaire_user_response = Questionnaire_UserResponse.objects.create(
                 user=user,
                 questionnaire=questionnaire
             )
@@ -160,14 +163,16 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-                
-            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
+            
+            return JsonResponse({"success": True, "redirect_url": reverse("recommended_programs")})
+        
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
+
 
 @login_required
 def save_notes(request):
@@ -1048,104 +1053,6 @@ def all_modules(request):
 @login_required
 def welcome_view(request):
     return render(request, 'users/welcome.html')
-
-@login_required
-def questionnaire(request):
-    active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
-
-    if active_questionnaire:
-        questions = Question.objects.filter(questionnaire=active_questionnaire)
-        questions_data = [
-            {
-                "id": q.id,
-                "question_text": q.question_text,
-                "question_type": q.question_type  # Add question type
-            }
-            for q in questions
-        ]
-    else:
-        questions_data = []
-
-    context = {
-        "active_questionnaire": active_questionnaire,
-        "questions_json": json.dumps(questions_data),
-    }
-    return render(request, "users/questionnaire.html", context)
-
-@csrf_exempt
-@login_required
-def submit_responses(request):
-    if request.method == "POST":
-        try:
-            if not request.user.is_authenticated:
-                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
-
-            data = json.loads(request.body)
-            logger.info("Received data: %s", data)
-
-            #Ensure the user exists
-            try:
-                user = EndUser.objects.get(user=request.user)
-            except EndUser.DoesNotExist:
-                return JsonResponse({"success": False, "message": "User not found. Please sign in."})
-
-            #Ensure the questionnaire exists
-            questionnaire_id = data.get("questionnaireId")
-            if not questionnaire_id:
-                return JsonResponse({"success": False, "message": "Questionnaire ID is missing."})
-
-            try:
-                questionnaire = Questionnaire.objects.get(id=questionnaire_id)
-            except Questionnaire.DoesNotExist:
-                return JsonResponse({"success": False, "message": "Questionnaire not found."})
-
-            responses = data.get("responses", [])
-            if not responses:
-                return JsonResponse({"success": False, "message": "No responses provided."})
-
-            # Create a new Questionnaire_UserResponse 
-            questionnaire_user_response = Questionnaire_UserResponse.objects.create(
-                user=user,
-                questionnaire=questionnaire
-            )
-
-            for response in responses:
-                question_id = response.get("questionId")
-                value = response.get("value")
-
-                if not question_id or value is None:
-                    logger.error("Missing questionId or value in response: %s", response)
-                    continue
-
-                # ✅ Ensure the question exists
-                try:
-                    question = Question.objects.get(id=question_id)
-                except Question.DoesNotExist:
-                    logger.error("Question with ID %s does not exist.", question_id)
-                    continue
-
-                # ✅ Save the QuestionResponse
-                question_response = QuestionResponse(
-                    user_response=questionnaire_user_response,
-                    question=question,
-                    rating_value=int(value) if question.question_type in ["AGREEMENT", "RATING"] else None
-                )
-
-                try:
-                    question_response.full_clean()  # Validate the model instance
-                    question_response.save()
-                except ValidationError as e:
-                    logger.error("Validation error for question response: %s", str(e))
-                    continue
-
-            
-            return JsonResponse({"success": True, "redirect_url": reverse("recommended_programs")})
-        
-        except Exception as e:
-            logger.error("Error saving responses: %s", str(e))
-            return JsonResponse({"success": False, "message": str(e)})
-
-    return JsonResponse({"success": False, "message": "Invalid request method"})
 
 @login_required
 def journal_view(request, date=None):
