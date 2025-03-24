@@ -7,6 +7,7 @@ from users.models import EndUser
 User = get_user_model()
 
 class DeleteQuestionnaireTest(TestCase):
+    
     def setUp(self):
         """Set up admin and a questionnaire."""
         self.admin_user = User.objects.create_superuser(username="admin", email="admin@test.com", password="adminpass")

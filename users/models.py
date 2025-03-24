@@ -2,13 +2,14 @@ from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Exercise,VideoResource,AdditionalResource
+from client.models import Program, Module, Questionnaire, Question, Exercise, VideoResource, AdditionalResource
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
+
 
 from django.core.cache import cache
 import random
@@ -62,16 +63,9 @@ class User(AbstractUser):
         return self.gravatar(size=60)
     
     def save(self, *args, **kwargs):
-        if self.username:
-            self.username = self.username.lower()
-        super().save(*args, **kwargs)
-
-
-    def save(self, *args, **kwargs):
-        if self.username:
-            self.username = self.username.lower()
-        super().save(*args, **kwargs)
-
+         if self.username:
+             self.username = self.username.lower()
+         super().save(*args, **kwargs)
 
 
 class Admin(models.Model):
@@ -191,7 +185,7 @@ class UserResourceProgress(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
 
     class Meta:
-        unique_together = ('user', 'resource')  # Ensures a user-resource pair is unique.
+        unique_together = ('user', 'resource')
 
     def __str__(self):
         return f"{self.user.user.username} - {self.resource.title}: {self.status}"
@@ -271,10 +265,9 @@ class StickyNote(models.Model):
 
 
 class JournalEntry(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Correct user reference
-    date = models.DateField(default=now)  # Ensures each entry belongs to a specific day
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField(default=now)
 
-    # New Fields:
     connected_with_family = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
     expressed_gratitude = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
     caffeine = models.CharField(max_length=3, choices=[("yes", "Yes"), ("no", "No")], blank=True, null=True)
@@ -287,7 +280,7 @@ class JournalEntry(models.Model):
     notes = models.TextField(blank=True, null=True)
 
     class Meta:
-        unique_together = ('user', 'date')  # Ensure only one entry per day per user
+        unique_together = ('user', 'date')
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
@@ -303,13 +296,11 @@ class Quote(models.Model):
         """Returns the same quote for the entire day and updates it once per day."""
         today = now().date()
 
-        # Check if a quote was already selected today
         daily_quote, created = DailyQuote.objects.get_or_create(date=today)
 
         if not created and daily_quote.quote:
-            return daily_quote.quote.text  # Return existing quote if available
+            return daily_quote.quote.text
 
-        # Select a new random quote
         count = Quote.objects.count()
         if count == 0:
             return "No quote available today."

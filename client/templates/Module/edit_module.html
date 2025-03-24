@@ -1,199 +1,141 @@
-{% extends 'client/client_base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Module</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'client/css/edit_module.css' %}">
+</head>
+<body class="edit_module">
 
-{% block content %}
-    <div class="content">
-        <h2 class="page-title">Edit Module</h2>
-        <link rel="stylesheet" href="{% static 'client/css/edit_module_style.css' %}">
+    {% include 'client/client_base.html' %}
 
-        <!-- Module Title -->
-        <div class="module-section">
-            <h3>Module Title</h3>
-            <div class="editable-field">
-                <input type="text" id="module-title" value="{{ module.title }}" class="edit-input" readonly>
-                <button class="edit-btn" onclick="toggleEdit('module-title', this)">Edit</button>
-                <button class="save-btn hidden" onclick="saveModuleData('{{ module.id }}', 'title')">Save</button>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Edit Module</h2>
+
+        <form method="post" class="card p-4 shadow-sm">
+            {% csrf_token %}
+
+            <!-- Editable Title -->
+            <div class="mb-3">
+                <label class="form-label">1. Module Title:</label>
+                <input type="text" id="module-title" class="form-control" value="{{ module.title }}" readonly>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-secondary edit-pill w-100 mb-2" onclick="enableEdit('module-title')">Edit</button>
+                    <button type="button" class="btn btn-success d-none save-pill w-100" id="save-title" onclick="saveField('{{ module.id }}', 'title')">Save</button>
+                </div>
             </div>
-        </div>
+            
 
-        <!-- Module Description -->
-        <div class="module-section">
-            <h3>Description</h3>
-            <div class="editable-field">
-                <textarea id="module-description" class="edit-input" readonly>{{ module.description }}</textarea>
-                <button class="edit-btn" onclick="toggleEdit('module-description', this)">Edit</button>
-                <button class="save-btn hidden" onclick="saveModuleData('{{ module.id }}', 'description')">Save</button>
+            <!-- Editable Description -->
+            <div class="mb-3">
+                <label class="form-label">2. Description:</label>
+                <textarea id="module-description" class="form-control" rows="4" readonly>{{ module.description }}</textarea>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-secondary edit-pill w-100 mb-2" onclick="enableEdit('module-description')">Edit</button>
+                    <button type="button" class="btn btn-success d-none save-pill w-100" id="save-description" onclick="saveField('{{ module.id }}', 'description')">Save</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Sections -->
-        <div class="module-section">
-            <h3>Sections</h3>
 
-            <!-- Add Section Dropdown -->
-            <div class="add-section">
-                <select id="section-dropdown">
-                    <option value="">Select a section to add</option>
-                    {% for section in all_sections %}
-                        <option value="{{ section.id }}">{{ section.title }}</option>
+            <!-- Exercises Section -->
+            <div class="mb-4">
+                <label class="form-label">3. Exercises in Module:</label>
+                <div class="module-box">
+                    <ul class="list-unstyled">
+                        {% for section in module.sections.all %}
+                            {% for exercise in section.exercises.all %}
+                                <li>
+                                    <input type="checkbox" name="remove_exercise" value="{{ exercise.id }}" class="form-check-input">
+                                    {{ exercise.title }} ({{ exercise.exercise_type }})
+                                </li>
+                            {% endfor %}
+                        {% empty %}
+                            <li>No exercises in this module yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+
+                <div class="text-center mt-3">
+                    <button type="button" class="btn remove-pill w-100" onclick="removeSelectedExercises('{{ module.id }}')">
+                        🗑 Remove Selected Exercises
+                    </button>
+                </div>
+                
+            </div>
+
+            <!-- Add Exercise -->
+            <div class="mb-4">
+                <label class="form-label">4. Add Exercise:</label>
+                <div>
+                    <select id="exercise-dropdown" class="form-control mb-2">
+                        <option value="">Select an exercise</option>
+                        {% for exercise in available_exercises %}
+                            <option value="{{ exercise.id }}">{{ exercise.title }} ({{ exercise.exercise_type }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="addExercise('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add</button>
+                </div>
+                
+            </div>
+
+            <!-- Video Resources -->
+            <div class="mb-4">
+                <label class="form-label">5. Video Resources:</label>
+                <ul class="list-unstyled">
+                    {% for video in module.video_resources.all %}
+                        <li>
+                            {{ video.title }}
+                            <a href="{% url 'video_detail' video.id %}" class="btn btn-primary btn-sm">▶ Play</a>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('{{ module.id }}', '{{ video.id }}')">Remove</button>
+                        </li>
                     {% empty %}
-                        <option value="" disabled>No available sections</option>
+                        <li class="form-control">No videos linked yet.</li>
                     {% endfor %}
-                </select>
-                <button class="add-btn" onclick="addSection('{{ module.id }}')">Add Section</button>
+                </ul>
+                <a href="{% url 'add_video' %}?next={{ request.path }}&module_id={{ module.id }}" class="btn add-pill w-100 mt-3">Add New Video</a>
             </div>
 
-            <!-- Section List with Checkboxes -->
-            <form id="remove-section-form">
-                {% for section in module.sections.all %}
-                    <div class="section-card">
-                        <input type="checkbox" name="remove_section" value="{{ section.id }}">
-                        <div class="section-header">
-                            <h4>{{ section.title }}</h4>
-                            <a href="{% url 'edit_section' section.id %}" class="edit-btn">Edit</a>
-                        </div>
-                        <p>{{ section.description }}</p>
-                    </div>
-                {% empty %}
-                    <p>No sections available.</p>
-                {% endfor %}
-                <button type="button" class="remove-btn" onclick="removeSections('{{ module.id }}')">Remove Selected Sections</button>
-            </form>
-        </div>
+            <!-- Additional Resources -->
+            <div class="mb-4">
+                <label class="form-label">6. Additional Resources:</label>
+                <ul class="list-unstyled">
+                    {% for resource in module.additional_resources.all %}
+                        <li class="d-flex justify-content-between align-items-center">
+                            {{ resource.title }} ({{ resource.resource_type }})
+                            <div class="d-flex gap-2">
+                                {% if resource.url %}
+                                    <a href="{{ resource.url }}" target="_blank" class="btn btn-primary btn-sm">Open Link</a>
+                                {% elif resource.file %}
+                                    <a href="{{ resource.file.url }}" target="_blank" class="btn btn-primary btn-sm">Download File</a>
+                                {% endif %}
+                                <button type="button" class="btn  btn-sm" onclick="removeResource('{{ module.id }}', '{{ resource.id }}')">Remove</button>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class=" form-control">No resources linked yet.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'add_additional_resource' %}?next={{ request.path }}&module_id={{ module.id }}" class="btn add-pill w-100 mt-3">Add New Resource</a>
+            </div>
+
+            <div class="text-center mt-1">
+                <a href="{% url 'client_modules' %}" class="btn btn-secondary w-100 backButton">Back to Modules</a>
+            </div>
+        </form>
+    </div>
+
+
+        </form>
     </div>
 
     <script>
-        // ✅ Toggle Edit Mode for Module Title and Description
-        function toggleEdit(fieldId, editButton) {
-            const inputField = document.getElementById(fieldId);
-            const saveButton = editButton.nextElementSibling;
-
-            if (inputField.readOnly) {
-                inputField.readOnly = false;
-                inputField.classList.add('editing');
-                editButton.style.display = 'none';
-                saveButton.classList.remove('hidden');
-            }
-        }
-
-        // ✅ Save Updated Module Data (Title & Description)
-        function saveModuleData(moduleId, field) {
-            let value = document.getElementById(field === 'title' ? 'module-title' : 'module-description').value;
-
-            fetch(`/update_module/${moduleId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ field: field, value: value })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Module updated successfully!");
-                    const inputField = document.getElementById(field === 'title' ? 'module-title' : 'module-description');
-                    inputField.readOnly = true;
-                    inputField.classList.remove('editing');
-                    const saveButton = document.querySelector(`button[onclick="saveModuleData('${moduleId}', '${field}')"]`);
-                    saveButton.classList.add('hidden');
-                    saveButton.previousElementSibling.style.display = 'inline-block';
-                } else {
-                    alert("Error updating module.");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-
-        // ✅ Add Section to Module
-        function addSection(moduleId) {
-            let sectionId = document.getElementById('section-dropdown').value;
-
-            if (!sectionId) {
-                alert("Please select a section.");
-                return;
-            }
-
-            fetch(`/add_section_to_module/${moduleId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ section_id: sectionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Section added successfully!");
-                    location.reload();
-                } else {
-                    alert("Error adding section.");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-
-        // ✅ Remove Selected Sections from Module
-        function removeSections(moduleId) {
-            let selectedSections = Array.from(document.querySelectorAll('input[name="remove_section"]:checked'))
-                .map(el => el.value);
-
-            if (selectedSections.length === 0) {
-                alert("Please select at least one section to remove.");
-                return;
-            }
-
-            fetch(`/remove_section_from_module/${moduleId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ section_ids: selectedSections })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Sections removed successfully!");
-                    location.reload();
-                } else {
-                    alert("Error removing sections.");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
+        const csrfToken = '{{ csrf_token }}';
     </script>
-
-    <style>
-        .edit-input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-        }
-
-        .editing {
-            border: 1px solid #007bff;
-            background: #f8f9fa;
-            padding: 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .edit-btn, .save-btn, .add-btn, .remove-btn {
-            margin-top: 5px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border: none;
-            color: white;
-        }
-
-        .edit-btn { background: #007bff; }
-        .save-btn { background: #28a745; }
-        .add-btn { background: #17a2b8; }
-        .remove-btn { background: #dc3545; }
-    </style>
-{% endblock %}
+    <script src="{% static 'client/js/edit_module.js' %}"></script>
+    
+</body>
+</html>

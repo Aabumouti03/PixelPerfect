@@ -7,6 +7,7 @@ from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, P
 User = get_user_model()  # ✅ Use the correct user model
 
 class UserDetailViewTest(TestCase):
+    
     def setUp(self):
         """Set up test data before running each test."""
         self.user = User.objects.create_user(username="testuser", password="testpass")

@@ -10,6 +10,7 @@ class AddQuestionTest(TestCase):
         self.admin_user = User.objects.create_superuser(
             username="admin", email="admin@example.com", password="adminpass"
         )
+        
         self.client.login(username="admin", password="adminpass")
 
         # Create a sample questionnaire

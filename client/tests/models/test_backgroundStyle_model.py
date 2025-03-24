@@ -48,10 +48,7 @@ class BackgroundStyleModelTest(TestCase):
             background_color="#000000",
             background_image="pattern1"
         )
-        try:
-            style.full_clean()
-        except ValidationError:
-            self.fail("Valid hex color code raised ValidationError unexpectedly")
+        style.full_clean()
 
     def test_background_image_required(self):
         style = BackgroundStyle(background_color="#ffffff", background_image=None)

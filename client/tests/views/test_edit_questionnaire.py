@@ -16,6 +16,7 @@ class EditQuestionnaireTest(TestCase):
 
         self.category1 = Category.objects.create(name="Mental Health")
         self.category2 = Category.objects.create(name="Career Growth")
+        
 
         self.questionnaire = Questionnaire.objects.create(
             title="Work Readiness Survey",

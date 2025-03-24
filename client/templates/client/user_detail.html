@@ -94,18 +94,20 @@
                                     <!-- Agreement Scale Response -->
                                     {% if response.question.question_type == "AGREEMENT" %}
                                     <ul class="choice-list">
-                                        <li class="choice-item {% if response.rating_value == 5 %}selected-choice{% endif %}">Strongly Agree</li>
-                                        <li class="choice-item {% if response.rating_value == 4 %}selected-choice{% endif %}">Agree</li>
-                                        <li class="choice-item {% if response.rating_value == 3 %}selected-choice{% endif %}">Neutral</li>
-                                        <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Disagree</li>
-                                        <li class="choice-item {% if response.rating_value == 1 %}selected-choice{% endif %}">Strongly Disagree</li>
+                                        <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Strongly Agree</li>
+                                        <li class="choice-item {% if response.rating_value == 1 %}selected-choice{% endif %}">Agree</li>
+                                        <li class="choice-item {% if response.rating_value == 0 %}selected-choice{% endif %}">Neutral</li>
+                                        <li class="choice-item {% if response.rating_value == -1 %}selected-choice{% endif %}">Disagree</li>
+                                        <li class="choice-item {% if response.rating_value == -2 %}selected-choice{% endif %}">Strongly Disagree</li>
                                     </ul>
     
                                     <!-- Rating Scale Response -->
                                     {% elif response.question.question_type == "RATING" %}
                                     <div class="rating-scale">
                                         <span>Scale: 1 - 5</span>
-                                        <p class="selected-rating">User's Rating: <span class="highlighted-rating">{{ response.rating_value }}</span></p>
+                                        {% with user_choice=response.rating_value|add:3 %}
+                                        <p class="selected-rating">User's Rating: <span class="highlighted-rating">{{ user_choice }}</span></p>
+                                        {% endwith %}
                                     </div>
                                     {% else %}
                                         <p>No response provided</p>

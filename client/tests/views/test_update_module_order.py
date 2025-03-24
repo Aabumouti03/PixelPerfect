@@ -4,6 +4,7 @@ from django.urls import reverse
 from client.models import Program, Module, ProgramModule
 
 class UpdateModuleOrderTest(TestCase):
+    
     def setUp(self):
         """Set up a program, dummy modules, and their ProgramModule entries for testing."""
         self.program = Program.objects.create(
