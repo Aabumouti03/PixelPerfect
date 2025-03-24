@@ -3,7 +3,6 @@ from client.models import Program, Module, Category, ProgramModule
 
 
 class ProgramModelTest(TestCase):
-    
     def setUp(self):
         self.category = Category.objects.create(name="Tech")
         self.module = Module.objects.create(title="Intro to Python")
@@ -56,7 +55,4 @@ class ProgramModelTest(TestCase):
     def test_same_order_allowed_in_different_programs(self):
         program2 = Program.objects.create(title="Intermediate Programming")
         # Same order, but different program — should be OK
-        try:
-            ProgramModule.objects.create(program=program2, module=self.module, order=1)
-        except Exception:
-            self.fail("ProgramModule with same order in different program should be allowed")
+        ProgramModule.objects.create(program=program2, module=self.module, order=1)

@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
 from django.core.exceptions import ValidationError
 from urllib.parse import urlparse, parse_qs
@@ -270,6 +269,8 @@ class Question (models.Model):
 
     def __str__(self):
         return f"{self.questionnaire.title} - {self.question_text[:30]}"
+    
+
     
     
 

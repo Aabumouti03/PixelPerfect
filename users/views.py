@@ -1,46 +1,84 @@
 import json
-import logging
-from django.conf import settings
 from datetime import datetime, timedelta
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.urls import reverse
-from django.db.models import Avg, Q
-from .models import JournalEntry
-from django.contrib.auth.decorators import login_required
-from django.forms import ValidationError
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from users.helpers_modules import calculate_progress
-from django.contrib.auth.decorators import login_required 
-from client.models import Category, Program,ModuleRating,Exercise
-from django.shortcuts import redirect, render,  get_object_or_404
-from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
-from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
-from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
-logger = logging.getLogger(__name__)
-from .utils import send_verification_email_after_sign_up 
-from django.core.mail import send_mail
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.utils.timezone import now
-from django.contrib import messages
-from django.contrib.auth.tokens import default_token_generator
+from venv import logger
 from django.conf import settings
-from users.models import (
-    User, EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
-    UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
+from django.contrib import messages
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login,
+    logout,
+    update_session_auth_hash,
 )
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.db.models import Avg, Q
+from django.forms import ValidationError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+
 from client.models import (
-    Program, Module, ModuleRating, Exercise, Category,
-    AdditionalResource, Exercise,VideoResource
+    AdditionalResource,
+    Category,
+    Exercise,
+    ExerciseQuestion,
+    Module,
+    ModuleRating,
+    Program,
+    VideoResource,
 )
+from users.helpers_modules import calculate_progress
 from users.models import (
-    Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
+    EndUser,
+    JournalEntry,
+    Questionnaire,
+    Questionnaire_UserResponse,
+    Question,
+    QuestionResponse,
+    StickyNote,
+    User,
+    UserExerciseProgress,
+    UserModuleEnrollment,
+    UserModuleProgress,
+    UserProgramEnrollment,
+    UserResourceProgress,
+    UserVideoProgress,
 )
-from .models import UserResponse
-from .models import User, EndUser, Module
-from client.models import Exercise, ExerciseQuestion
-from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
+
+from .forms import (
+    EndUserProfileForm,
+    LogInForm,
+    UserProfileForm,
+    UserSignUpForm,
+)
+from .helpers_questionnaire import (
+    assess_user_responses_modules,
+    assess_user_responses_programs,
+)
+from .models import (
+    EndUser,
+    Module,
+    Program,
+    Questionnaire,
+    Questionnaire_UserResponse,
+    Question,
+    QuestionResponse,
+    StickyNote,
+    User,
+    UserModuleEnrollment,
+    UserModuleProgress,
+    UserProgramEnrollment,
+    UserResponse,
+    Quote,
+)
+from .utils import send_verification_email_after_sign_up
+
 
 
 @login_required
@@ -75,13 +113,11 @@ def submit_responses(request):
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
-            # Ensure the user exists
             try:
                 user = EndUser.objects.get(user=request.user)
             except EndUser.DoesNotExist:
                 return JsonResponse({"success": False, "message": "User not found. Please sign in."})
 
-            # Ensure the questionnaire exists
             questionnaire_id = data.get("questionnaireId")
             if not questionnaire_id:
                 return JsonResponse({"success": False, "message": "Questionnaire ID is missing."})
@@ -109,14 +145,12 @@ def submit_responses(request):
                     logger.error("Missing questionId or value in response: %s", response)
                     continue
 
-                # Ensure the question exists
                 try:
                     question = Question.objects.get(id=question_id)
                 except Question.DoesNotExist:
                     logger.error("Question with ID %s does not exist.", question_id)
                     continue
 
-                # Save the QuestionResponse
                 question_response = QuestionResponse(
                     user_response=questionnaire_user_response,
                     question=question,
@@ -146,10 +180,8 @@ def save_notes(request):
         data = json.loads(request.body)
         content = data.get('content')
 
-        # Get the EndUser instance for the logged-in user
         end_user = EndUser.objects.get(user=request.user)
 
-        # Get or create the sticky note for the current user
         sticky_note, created = StickyNote.objects.get_or_create(user=end_user)
         sticky_note.content = content
         sticky_note.save()
@@ -242,7 +274,6 @@ def view_program(request, program_id):
     except EndUser.DoesNotExist:
         return render(request, 'users/program_not_found.html')
 
-    # Get the user's enrolled program
     user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user, program_id=program_id).first()
     
     if not user_program_enrollment:
@@ -250,14 +281,13 @@ def view_program(request, program_id):
 
     program = user_program_enrollment.program
 
-    # Fetch user progress for each module
     user_progress = {
         progress.module.id: progress.completion_percentage
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    program_modules_data = []  # Store all program modules with progress and locked status
-    previous_completed = True  # The first module should be unlocked
+    program_modules_data = []
+    previous_completed = True
 
     for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
@@ -302,6 +332,7 @@ def about(request):
     return render(request, 'users/about.html')
 
 def contact_us(request):
+    """Allows visitors or users to contact the website team."""
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
@@ -329,7 +360,7 @@ def contact_success(request):
     return render(request, 'users/contact_success.html')
 
 def log_in(request):
-    """Log in page view function"""
+    """Allows the users to log in and view their dashboard."""
 
     error_message = None
     if request.method == "POST":
@@ -347,16 +378,14 @@ def log_in(request):
                 else:
                     login(request, user)
 
-                    # Redirect to `next` if available
                     next_url = request.GET.get('next') or request.POST.get('next')
                     if next_url:
                         return redirect(next_url)
 
-                    # Superuser goes to `client_dashboard`
+                    # Admin/Client are the only superusers
                     if user.is_superuser:
                         return redirect('client_dashboard')
 
-                    # Regular users go to `dashboard`
                     return redirect('dashboard')
 
     else:
@@ -414,6 +443,7 @@ def sign_up_step_2(request):
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
 def sign_up_email_verification(request):
+    """Showcases an html page that notifies the user of the next step after signing up."""
     return render(request, "users/sign_up_email_verification.html")
 
 def verify_email_after_sign_up(request, uidb64, token):
@@ -432,6 +462,7 @@ def verify_email_after_sign_up(request, uidb64, token):
     return render(request, 'users/invalid_verification.html')
 
 def verification_done(request):
+    """Shows a summary of the user's next steps and takes them to the log in page and then the get started page automatically."""
     return render(request, "users/verification_done.html")
 
 
@@ -453,12 +484,9 @@ def show_profile(request):
     """View to display the user profile"""
     user = request.user
 
-    # Check if the session variable exists
     if 'profile_update_popup' in request.session:
-        # If the session variable is set, show the pop-up message
         profile_update_popup = request.session['profile_update_popup']
 
-        # Remove the session variable after showing the message
         del request.session['profile_update_popup']
     else:
         profile_update_popup = None
@@ -540,18 +568,17 @@ def update_profile(request):
 
 
 def verify_email(request, uidb64, token):
+    """Verifies user's email when they change it in the profile section."""
     User = get_user_model()
     
     try:
-        # Decode user id
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError):
         return HttpResponse("Invalid verification link.")
     
-    # Check token validity
     if default_token_generator.check_token(user, token):
-        if user.new_email:  # Ensure there's a new email to set
+        if user.new_email:
             user.email = user.new_email 
             user.new_email = None  
             user.email_verified = True  
@@ -570,17 +597,15 @@ def delete_account(request):
 
     if request.method == "POST":
         try:
-            # Delete the user account, which will cascade-delete related objects
             user.delete()
-            logout(request)  # log after deletion
+            logout(request)
             messages.success(request, "Your account has been successfully deleted.")
-            return redirect('welcome_page')  # Redirect to a safe page after deletion
+            return redirect('welcome_page')
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('show_profile')  # Redirect back to the profile if deletion fails
+            return redirect('show_profile')
 
-    # Confirmation before deletion
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
     return render(request, 'users/Profile/delete_account.html', context)
 
@@ -593,10 +618,8 @@ def recommended_programs(request):
 
     end_user = EndUser.objects.get(user=user)
 
-    # Get the dictionary of programs categorized by category
     categorized_programs = assess_user_responses_programs(end_user)
 
-    # Flatten the dictionary values (lists of programs) into a single list
     all_programs = [program for program_list in categorized_programs.values() for program in program_list]
 
     if request.method == "POST":
@@ -608,9 +631,7 @@ def recommended_programs(request):
             program = Program.objects.get(id=program_id)
             user_profile = user.User_profile
 
-            # Unenroll the user from all programs before enrolling in the new one
             if action == "enroll":
-                # Remove enrollment from any previously enrolled program
                 UserProgramEnrollment.objects.filter(user=user_profile).delete()
                 UserProgramEnrollment.objects.create(user=user_profile, program=program)
 
@@ -636,10 +657,8 @@ def recommended_modules(request):
 
     end_user = EndUser.objects.get(user=user)
 
-    # Get the dictionary of modules categorized by category
     categorized_modules = assess_user_responses_modules(end_user)
 
-    # Flatten the dictionary values (lists of modules) into a single list
     all_modules = [module for module_list in categorized_modules.values() for module in module_list]
 
 
@@ -675,9 +694,8 @@ def get_started(request):
     filter_pressed = "filter" in request.GET
     search_pressed = "search_btn" in request.GET
 
-    # Reset everything when "Reset" or "Filter" is pressed
     if filter_pressed:
-        search_query = ""  # Reset search
+        search_query = ""
     else:
         search_query = request.GET.get("search", "").strip()
 
@@ -686,7 +704,6 @@ def get_started(request):
     selected_category_ids = request.GET.getlist("category")
     selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
 
-    # If all categories are selected, reset selection
     if len(selected_category_ids) == len(categories):
         selected_category_ids = [category.id for category in categories]
 
@@ -694,10 +711,8 @@ def get_started(request):
     programs = Program.objects.all()
     modules = Module.objects.all()
 
-    # Apply filters
     if filter_pressed:
 
-        #  Check if all categories are selected
         all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
 
         if all_categories_selected or not selected_category_ids:
@@ -710,7 +725,6 @@ def get_started(request):
                 Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
             ).distinct()
         else:
-            # Standard filtering when not all categories are selected
             programs = programs.filter(categories__id__in=selected_category_ids).distinct()
             modules = modules.filter(categories__id__in=selected_category_ids).distinct()
 
@@ -1100,8 +1114,7 @@ def save_journal_entry(request):
 
     try:
         data = json.loads(request.body)
-        print("📥 Received Data:", data)  # Debugging
-
+    
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
@@ -1114,7 +1127,6 @@ def save_journal_entry(request):
 
         
     except ValueError:
-        print(f"❌ Invalid Date Received: {date_str}")  # Debugging
         return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
     # Save the journal entry

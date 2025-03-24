@@ -46,7 +46,7 @@ class ViewRespondersTest(TestCase):
             questionnaire=self.questionnaire, user=self.end_user2
         )
 
-    def test_search_responders(self):
+    def test_search_responders_1(self):
         """Test that search filters responders correctly"""
         self.client.login(username="admin", password="adminpass")
 

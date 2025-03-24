@@ -1,5 +1,5 @@
 from django import forms
-from .models import Module, Section, Exercise, Question, ExerciseQuestion
+from .models import Module, Section, Exercise, ExerciseQuestion
 from .models import Program, Module, Category, ProgramModule, VideoResource, AdditionalResource
 
 class ModuleForm(forms.ModelForm):
@@ -33,7 +33,7 @@ class AdditionalResourceForm(forms.ModelForm):
 
 class SectionForm(forms.ModelForm):
     exercises = forms.ModelMultipleChoiceField(
-        queryset=Exercise.objects.all(),  # ✅ Show all exercises
+        queryset=Exercise.objects.all(),  #Show all exercises
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -48,7 +48,7 @@ class SectionForm(forms.ModelForm):
 
 class ExerciseForm(forms.ModelForm):
     questions = forms.ModelMultipleChoiceField(
-        queryset=ExerciseQuestion.objects.all(),  # ✅ Show all questions
+        queryset=ExerciseQuestion.objects.all(),  #Show all questions
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
