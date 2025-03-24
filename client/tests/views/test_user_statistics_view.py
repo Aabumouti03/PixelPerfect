@@ -64,10 +64,7 @@ class UserStatisticsViewTest(TestCase):
         self.assertIn("stats", response.context, "❌ 'stats' is missing in response context")
 
         # ✅ Ensure 'stats' is valid JSON
-        try:
-            stats_data = json.loads(response.context["stats"])
-        except json.JSONDecodeError:
-            self.fail("❌ Response context 'stats' is not valid JSON")
+        stats_data = json.loads(response.context["stats"])
 
         # ✅ Retrieve actual database counts
         actual_total_users = EndUser.objects.count()
@@ -97,16 +94,13 @@ class UserStatisticsViewTest(TestCase):
 
         self.assertIn("stats", response.context, "❌ 'stats' is missing in response context")
 
-        try:
-            json_data = json.loads(response.context["stats"])
-            self.assertIsInstance(json_data, dict)  # ✅ Ensure it's a dictionary
-            self.assertIn("total_users", json_data)
-            self.assertIn("active_users", json_data)
-            self.assertIn("inactive_users", json_data)
-            self.assertIn("programs_enrolled", json_data)
-            self.assertIn("gender_distribution", json_data)
-            self.assertIn("ethnicity_distribution", json_data)
-            self.assertIn("sector_distribution", json_data)
-        except json.JSONDecodeError:
-            self.fail("❌ Response context 'stats' is not valid JSON")
-
+        
+        json_data = json.loads(response.context["stats"])
+        self.assertIsInstance(json_data, dict)  # ✅ Ensure it's a dictionary
+        self.assertIn("total_users", json_data)
+        self.assertIn("active_users", json_data)
+        self.assertIn("inactive_users", json_data)
+        self.assertIn("programs_enrolled", json_data)
+        self.assertIn("gender_distribution", json_data)
+        self.assertIn("ethnicity_distribution", json_data)
+        self.assertIn("sector_distribution", json_data)

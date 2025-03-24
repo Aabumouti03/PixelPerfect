@@ -191,7 +191,7 @@ class ProgramDetailViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(UserProgramEnrollment.objects.filter(program=self.program).count(), 1)
 
-    def test_program_module_ordering(self):
+    def test_program_module_ordering_1(self):
         """Test that the module order is correctly assigned when adding multiple modules."""
         self.client.login(username="testuser", password="testpassword")
         url = reverse("program_detail", args=[self.program.id])
