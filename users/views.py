@@ -878,10 +878,6 @@ def rate_module(request, module_id):
             data = json.loads(request.body)
             rating_value = int(data.get("rating", 0))
 
-            # reject invalid ratigs
-            if not (1 <= rating_value <= 5):
-                return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
-
             end_user, created = EndUser.objects.get_or_create(user=request.user)
 
             # update or create the rating
