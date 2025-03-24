@@ -25,8 +25,8 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %}active{% endif %}">
-                <img src="{% static 'users/img/response.png' %}" alt="Response" class="icon">
+            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
+                <i class="fa-regular fa-pen-to-square icon"></i>
                 <span>Your Response</span>
             </a>
         </li>        

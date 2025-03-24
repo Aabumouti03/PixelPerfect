@@ -27,38 +27,29 @@ body {
     margin: 0 auto;
     padding: 20px;
     transition: margin-left 0.3s;
-    margin-left: 90px;
+    margin-left: 90px; /* Ensure content moves when navbar expands */
 }
 
 .sidebar:hover ~ .content {
     margin-left: 270px;
 }
 
-/* Module Grid to display modules next to each other */
-.module-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
+
 
 /* Program card styling to match dashboard */
 .program-card,
 .module-card {
     border-radius: 12px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
-    width: 250px;
-    height: 380px;
+    width: 100%;
+    max-width: 800px;
     padding: 20px;
     border-left: 5px solid #1d3c5337;
     box-sizing: border-box;
     background: #ffffff;
-    text-align: center;
+    text-align: left;
     position: relative;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
 
 .program-card:hover,
@@ -67,24 +58,198 @@ body {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Enroll Button */
-.enroll-button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 10px;
-    transition: background-color 0.3s;
+/* Program title and description */
+.program-card,
+.module-card h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
 }
 
-.enroll-button:hover {
+.program-card,
+.module-card p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+
+
+
+.module-card,
+.program-card  {
+    border-radius: 12px;
+    width: 250px; /* Fixed width */
+    height: 320px; /* Slightly increased height for better text fit */
+    flex-shrink: 0;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out elements */
+    align-items: center;
+    background: #ffffff;
+    text-align: center;
+    position: relative;
+    overflow: hidden; /* Prevent elements from overflowing */
+}
+
+/* 3D Effect: Adding subtle shadow on the left edge */
+.module-card::before,
+.program-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+
+}
+
+/* Alternate colors for adjacent cards */
+.module-card:nth-child(odd),
+.program-card:nth-child(odd)  {
+    background: #73C4FD;
+    border-left: 5px solid #5ca5ea; /* Blue 3D-like left edge */
+}
+
+.module-card:nth-child(even),
+.program-card:nth-child(even) {
+    background: #0048FF;
+    border-left: 5px solid #012EAB; /* Blue 3D-like left edge */
+}
+
+.module-card:nth-child(odd), .program-card:nth-child(odd) h3 {
+    color: #333;
+}
+
+.module-card:nth-child(even), .program-card:nth-child(even) h3 {
+    color: #eeebeb;
+}
+
+.module-card:nth-child(odd), .program-card:nth-child(odd) p {
+    color: #333;
+}
+
+.module-card:nth-child(even), .program-card:nth-child(even) p {
+    color: #eeebeb;
+}
+
+
+/* Ensure title stays inside the card */
+.module-card, .program-card h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+    white-space: normal; /* Allow text to wrap */
+    overflow: hidden;
+    max-height: 45px; /* Prevent title from being too long */
+}
+
+/* Module Description */
+.module-card, .program-card p {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    overflow: hidden;
+    max-height: 60px; /* Increased height for better readability */
+    margin: 5px 10px;
+    white-space: normal; /* Allow wrapping */
+}
+
+
+
+/* Buttons positioned at the top-right corner */
+.program-card .button-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.module-card .button-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Modules inside programs styled like dashboard */
+.program-modules {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.program-modules .module-card {
+    background: #f8f8f8;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.program-modules .module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.program-modules .module-card h4 {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.program-modules .module-card p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Container for modules - 3 per row */
+.programs-container,
+.modules-container {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+  backdrop-filter: blur(10px);
+  margin-top: 20px;
+}
+
+/* Button styling */
+button, .view-program-button {
+    background-color: #F24505;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover, .view-program-button:hover {
+    background-color: #D43802;
+}
+
+.enroll-button.enrolled {
+    background-color: #28a745;
+}
+
+.enroll-button.enrolled:hover {
     background-color: #218838;
 }
 
-/* Navigation Buttons - Back and Skip */
+/* Navigation Buttons */
 .nav-buttons {
     display: flex;
     justify-content: space-between;
@@ -93,18 +258,15 @@ body {
 
 .nav-buttons a button {
     background-color: #555;
-    color: white;
     font-size: 14px;
     padding: 10px 20px;
     border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 .nav-buttons a button:hover {
     background-color: #444;
 }
+
 
 /* View Module Button */
 .view-module-button {
@@ -117,17 +279,9 @@ body {
     text-decoration: none;
     transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
     border: 2px solid #F24505;
-    margin-top: auto;
 }
 
 .view-module-button:hover {
     background: #D43802;
     color: white;
-}
-
-.modules-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
 }

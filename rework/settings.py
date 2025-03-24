@@ -106,11 +106,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # User model for authentication and login purposes
 AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = [
-    'users.backends.CaseInsensitiveUsernameBackend',
-    'django.contrib.auth.backends.ModelBackend',
+     'users.backends.CaseInsensitiveUsernameBackend',
+     'django.contrib.auth.backends.ModelBackend',
 ]
-
-
+ 
 LOGIN_REDIRECT_URL = '/dashboard/'
 
 LOGIN_URL = "/log_in/"

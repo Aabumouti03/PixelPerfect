@@ -6,7 +6,7 @@ django.setup()
 
 import random
 from django.contrib.auth import get_user_model
-from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule, BackgroundStyle, ProgramModule, Questionnaire, Question
+from client.models import Module, Section, Exercise, ExerciseQuestion, Program, Category, ProgramModule, BackgroundStyle, ProgramModule
 from users.models import EndUser, Admin, UserModuleEnrollment, UserProgramEnrollment, Quote
 from django.db import transaction
 from django.core.management.base import BaseCommand
@@ -231,7 +231,6 @@ class Command(BaseCommand):
             self.seed_data()
             self.seed_users()
             self.seed_quotes()
-            self.seed_questionnaire()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
 
@@ -501,67 +500,3 @@ class Command(BaseCommand):
             Quote.objects.get_or_create(text=quote["text"])
 
         self.stdout.write(self.style.SUCCESS("Successfully loaded quotes"))
-
-    def seed_questionnaire(self):
-        """Seeds a questionnaire with 3 questions if not already seeded."""
-        title = "Are you ready to return to work"
-
-        questionnaire = Questionnaire.objects.filter(title=title).first()
-        
-        if questionnaire:
-            existing_questions = questionnaire.questions.count()
-            if existing_questions >= 3:
-                print(f"⚠️ Questionnaire '{title}' already seeded with {existing_questions} questions. Skipping.")
-                return
-            else:
-                print(f"🔁 Questionnaire '{title}' exists but has only {existing_questions} questions. Re-seeding missing ones.")
-        else:
-            questionnaire = Questionnaire.objects.create(
-                title=title,
-                description="A quick check-in to help you reflect on your readiness to return to work.",
-                is_active=True
-            )
-            print(f"✅ Created Questionnaire '{title}'")
-
-        categories_map = {
-            "Career Development": Category.objects.get(name="Career Development"),
-            "Personal Growth": Category.objects.get(name="Personal Growth"),
-            "Professional Skills": Category.objects.get(name="Professional Skills"),
-        }
-
-        questions_data = [
-            {
-                "text": "I feel confident about my career direction.",
-                "category": categories_map["Career Development"],
-                "sentiment": 1,
-                "question_type": "AGREEMENT"
-            },
-            {
-                "text": "I often doubt my ability to grow personally.",
-                "category": categories_map["Personal Growth"],
-                "sentiment": -1,
-                "question_type": "RATING"
-            },
-            {
-                "text": "I am well-prepared with the professional skills required for my next role.",
-                "category": categories_map["Professional Skills"],
-                "sentiment": 1,
-                "question_type": "AGREEMENT"
-            }
-        ]
-
-        for q_data in questions_data:
-            question, created = Question.objects.get_or_create(
-                questionnaire=questionnaire,
-                question_text=q_data["text"],
-                defaults={
-                    "question_type": q_data["question_type"],
-                    "is_required": True,
-                    "category": q_data["category"],
-                    "sentiment": q_data["sentiment"]
-                }
-            )
-            if created:
-                print(f"   ➕ Added Question: {q_data['text'][:50]}...")
-
-        print(f"✅ Questionnaire '{questionnaire.title}' seeded successfully.")

@@ -16,17 +16,11 @@
             <button type="submit" form="create-form" class="btn save-btn">Save Questionnaire</button>
         </div>
 
-        {% if messages %}
-        <div class="message-container">
-            {% for message in messages %}
-                <div class="alert {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
+        <!-- Create Questionnaire Form -->
         <form id="create-form" method="POST" action="{% url 'create_questionnaire' %}">
             {% csrf_token %}
 
+            <!-- Title & Description -->
             <div class="description-box">
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" required>
@@ -35,14 +29,17 @@
                 <textarea id="description" name="description" required></textarea>
             </div>
 
+            <!-- Questions Section -->
             <div class="questions-container" id="questions-container">
                 <!-- Questions will be dynamically added here -->
             </div>
 
+            <!-- Add Question Button -->
             <div class="add-question">
                 <button type="button" id="add-question-btn" class="btn add-btn">+ Add Question</button>
             </div>
         </form>
+
     </div>
 
     <script>

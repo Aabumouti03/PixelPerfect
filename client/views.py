@@ -33,10 +33,10 @@ from client import views as clientViews
 from users import views as usersViews
 from users.views import enroll_module, unenroll_module 
 from django.contrib import messages
-from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category
+from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category, AdditionalResource
 from users.models import Questionnaire_UserResponse, QuestionResponse, User
 from django.core.paginator import Paginator
-from .forms import ProgramForm 
+from .forms import ProgramForm, AdditionalResourceForm
 from django.contrib.auth.decorators import login_required
 
 def admin_check(user):
@@ -58,27 +58,35 @@ def CreateModule(request):
 @user_passes_test(admin_check)
 @login_required
 def edit_module(request, module_id):
-    """Handles editing an existing module."""
     module = get_object_or_404(Module, id=module_id)
 
-    # Get sections **NOT** already in this module
-    all_sections = Section.objects.exclude(id__in=module.sections.values_list('id', flat=True))
+    existing_exercise_ids = Exercise.objects.filter(
+        sections__in=module.sections.all()
+    ).values_list('id', flat=True).distinct()
+    available_exercises = Exercise.objects.exclude(id__in=existing_exercise_ids)
+
+    available_additional_resources = AdditionalResource.objects.exclude(
+        id__in=module.additional_resources.values_list('id', flat=True)
+    )
+
+    available_video_resources = VideoResource.objects.exclude(
+        id__in=module.video_resources.values_list('id', flat=True)
+    )
 
     if request.method == "POST":
         form = ModuleForm(request.POST, instance=module)
         if form.is_valid():
             form.save()
-            messages.success(request, "Module updated successfully!")
-            return redirect('client_modules')  # Redirect to module list
-        else:
-            messages.error(request, "Error updating module. Please check the form.")
+            return redirect('client_modules')
     else:
         form = ModuleForm(instance=module)
 
     return render(request, 'Module/edit_module.html', {
         'form': form,
         'module': module,
-        'all_sections': all_sections  # Pass sections to template
+        'available_exercises': available_exercises,
+        'available_additional_resources': available_additional_resources,
+        'available_video_resources': available_video_resources,
     })
 
 @user_passes_test(admin_check)
@@ -1284,19 +1292,40 @@ def add_button(request):
 
 
 # For adding video content
-@login_required
 @user_passes_test(admin_check)
+@login_required
+@csrf_exempt
 def add_video(request):
-    """View for adding a new video resource."""
+    next_url = request.GET.get("next", "/")  # where to go after saving
+    module_id = request.GET.get("module_id")  # optional: module to link to
+
     if request.method == "POST":
         form = VideoResourceForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("video_list")  # Redirect to video list after saving
+            video = form.save()
+
+            # If module_id is passed, link the video to the module
+            if module_id:
+                try:
+                    module = Module.objects.get(id=module_id)
+                    module.video_resources.add(video)
+                    messages.success(request, "Video added and linked to module.")
+                except Module.DoesNotExist:
+                    messages.error(request, "Module not found. Video saved but not linked.")
+            else:
+                messages.success(request, "Video added successfully.")
+
+            return redirect(next_url)
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = VideoResourceForm()
-    return render(request, "client/add_video.html", {"form": form})
 
+    return render(request, "client/add_video.html", {
+        "form": form,
+        "next": next_url
+    })
+    
 @login_required
 @user_passes_test(admin_check)
 def video_list(request):
@@ -1310,3 +1339,110 @@ def video_detail(request, video_id):
     """View for displaying a single video."""
     video = get_object_or_404(VideoResource, id=video_id)
     return render(request, "client/video_detail.html", {"video": video})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_video_from_module(request, module_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        video_id = data.get("video_id")
+        try:
+            module = Module.objects.get(id=module_id)
+            video = VideoResource.objects.get(id=video_id)
+            module.video_resources.remove(video)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_resource_from_module(request, module_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        resource_id = data.get("resource_id")
+        try:
+            module = Module.objects.get(id=module_id)
+            resource = AdditionalResource.objects.get(id=resource_id)
+            module.additional_resources.remove(resource)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+@user_passes_test(admin_check)
+@login_required
+def add_additional_resource(request):
+    if request.method == 'POST':
+        form = AdditionalResourceForm(request.POST, request.FILES)
+        if form.is_valid():
+            resource = form.save()
+            module_id = request.GET.get('module_id')
+            next_url = request.GET.get('next', '/')
+            if module_id:
+                module = Module.objects.get(id=module_id)
+                module.additional_resources.add(resource)
+            return redirect(next_url)
+    else:
+        form = AdditionalResourceForm()
+    return render(request, "client/add_additional_resource.html", {"form": form})
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_exercise_from_module(request, module_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        exercise_ids = data.get('exercise_ids', [])
+
+        try:
+            module = Module.objects.get(id=module_id)
+            for section in module.sections.all():
+                section.exercises.remove(*exercise_ids)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def add_exercise_to_module(request, module_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            exercise_id = data.get('exercise_id')
+
+            if not exercise_id:
+                return JsonResponse({'success': False, 'error': 'Missing exercise ID'}, status=400)
+
+            module = get_object_or_404(Module, id=module_id)
+            exercise = get_object_or_404(Exercise, id=exercise_id)
+
+            # Create or get the general section
+            section_title = f"{module.title} - General Exercises"
+            section, created = Section.objects.get_or_create(
+                title=section_title,
+                defaults={'description': 'Auto-generated section for added exercises'}
+            )
+            # If new, attach to the module
+            if created:
+                module.sections.add(section)
+
+            # Add the exercise
+            section.exercises.add(exercise)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            print(f"🚨 ERROR in add_exercise_to_module: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
+

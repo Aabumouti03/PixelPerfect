@@ -22,10 +22,11 @@ class AddQuestionTest(TestCase):
         """Ensure an admin can add a question to a questionnaire."""
         response = self.client.post(reverse("add_question", args=[self.questionnaire.id]))
 
+        # ✅ Confirm redirect to edit_questionnaire
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("edit_questionnaire", args=[self.questionnaire.id]))
 
-        # Ensure the question was created with default values
+        # ✅ Ensure the question was created with default values
         self.assertTrue(Question.objects.filter(questionnaire=self.questionnaire, question_text="New Question").exists())
 
     def test_non_admin_cannot_add_question(self):

@@ -11,32 +11,23 @@ User = get_user_model()
 class ClientModulesTest(TestCase):
     def setUp(self):
         """
-        Creates a test user, makes them superuser, logs them in,
-        and sets up sample modules and URLs.
+        Creates a test user, logs them in, and sets up sample modules and URLs.
         """
         self.client = Client()
-
-        # 1. Create a normal user
         self.user = User.objects.create_user(username='testuser', password='testpassword')
-        
-        # 2. Make them a superuser so they pass admin_check
-        self.user.is_superuser = True
-        self.user.save()
-
-        # 3. Log in as this superuser
         self.client.login(username='testuser', password='testpassword')
 
-        # 4. Create sample modules
+        # Create sample modules
         self.module1 = Module.objects.create(title="Module 1", description="Description 1")
         self.module2 = Module.objects.create(title="Module 2", description="Description 2")
 
-        # 5. Store the URLs we’ll need
+        # Store the URLs we’ll need
         self.client_modules_url = reverse('client_modules')
         self.module_overview_url = reverse('module_overview', args=[self.module1.id])  # Not currently tested
         self.edit_module_url = reverse('edit_module', args=[self.module1.id])
         self.delete_module_url = reverse('delete_module', args=[self.module1.id])
         self.add_module_url = reverse('add_module')
-        
+
     # 1. Test that client_modules view loads and shows modules
     def test_client_modules_view(self):
         response = self.client.get(self.client_modules_url)
@@ -59,7 +50,7 @@ class ClientModulesTest(TestCase):
     def test_edit_module_get_request(self):
         response = self.client.get(self.edit_module_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'Module/edit_module.html')
+        self.assertTemplateUsed(response, 'client/edit_module.html')
 
         form = response.context.get('form')
         self.assertIsNotNone(form)
@@ -76,14 +67,14 @@ class ClientModulesTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
     # 5. Test adding a module (POST)
-    def test_add_button_success(self):
+    def test_add_module_success(self):
         data = {"title": "New Module", "description": "New Description"}
         response = self.client.post(self.add_module_url, data)
         self.assertEqual(response.status_code, 302)  # Redirect
         self.assertTrue(Module.objects.filter(title="New Module").exists())
 
     # 6. Test adding a module with missing fields (stays on form)
-    def test_add_button_invalid(self):
+    def test_add_module_invalid(self):
         data = {"title": "", "description": "Missing Title"}
         response = self.client.post(self.add_module_url, data)
         self.assertEqual(response.status_code, 200)

@@ -2,19 +2,19 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from users.models import EndUser
-
+ 
 User = get_user_model()
 
 class StaticUserPageTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="TestPass123",
-            email_verified=True
-        )
-        EndUser.objects.create(user=self.user, age=25, gender="male", sector="it", last_time_to_work="1_month")
-        self.client.login(username="testuser", password="TestPass123")
+         self.user = User.objects.create_user(
+             username="testuser",
+             email="test@example.com",
+             password="TestPass123",
+             email_verified=True
+         )
+         EndUser.objects.create(user=self.user, age=25, gender="male", sector="it", last_time_to_work="1_month")
+         self.client.login(username="testuser", password="TestPass123")
 
     def test_modules_view(self):
         """Should render the modules page successfully."""

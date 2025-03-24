@@ -22,7 +22,7 @@ class UserSignUpForm(UserCreationForm):
  
     def clean_username(self):
         """Ensure username does not contain spaces and has at least 3 characters."""
-        username = self.cleaned_data.get("username").lower()  # Convert to lowercase
+        username = self.cleaned_data.get("username").lower()
         if " " in username:
             raise ValidationError("Username cannot contain spaces.")
         if len(username) < 3:
@@ -30,7 +30,6 @@ class UserSignUpForm(UserCreationForm):
         if User.objects.filter(username__iexact=username).exists():
             raise ValidationError("A user with that username already exists.")
         return username
-
 
     def clean_password1(self):
         """Validate password strength, including checking for common passwords and no spaces."""
@@ -139,18 +138,11 @@ class LogInForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"})
     )
     error_messages = {
-        'invalid_login': _(
-            "Incorrect username or password. Note that the password may be case-sensitive."
-        ),
-        'inactive': _("This account is inactive."),
-    }
-
-    error_messages = {
-        'invalid_login': _(
-            "Incorrect username or password. Note that the password may be case-sensitive."
-        ),
-        'inactive': _("This account is inactive."),
-    }
+         'invalid_login': _(
+             "Incorrect username or password. Note that the password may be case-sensitive."
+         ),
+         'inactive': _("This account is inactive."),
+     }
 
 class UserProfileForm(forms.ModelForm):
     """This is for the user's profile section in the Profile Page."""
