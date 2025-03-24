@@ -1,72 +1,79 @@
-from django.shortcuts import render, redirect, get_object_or_404, redirect, get_object_or_404
-from client.models import Program, Module
-from django.shortcuts import render, get_object_or_404
-from client.models import Module, Category, VideoResource
-from collections import Counter
-import json
-from users.models import EndUser, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress
-from django.shortcuts import redirect, render, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from .models import Questionnaire, Question, Module,  Program, ProgramModule
-from users.models import Questionnaire_UserResponse, QuestionResponse
-from django.core.paginator import Paginator
-from .forms import ProgramForm, CategoryForm, VideoResourceForm
-
-from client.forms import ModuleForm #
-
-from .models import Program, ProgramModule, Category
-from client.statistics import * 
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
 import csv
-from django.db import transaction 
-from django.db.models import Max, Avg
-from django.db.models import Q
-from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
+import json
+from collections import Counter, defaultdict
 
-
-from django.db.models import Max
-from client import views as clientViews
-from users import views as usersViews
-from users.views import enroll_module, unenroll_module 
 from django.contrib import messages
-from .models import Questionnaire, Question, Module,  Program, ProgramModule, Category, AdditionalResource
-from users.models import Questionnaire_UserResponse, QuestionResponse, User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from .forms import ProgramForm, AdditionalResourceForm
-from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import Avg, Max, Q
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+
+from client import views as clientViews
+from client.forms import ModuleForm as ClientModuleForm
+from client.models import Category, Module as ClientModule, Program, VideoResource
+from client.statistics import *
+
+from users import views as usersViews
+from users.models import (
+    EndUser,
+    QuestionResponse,
+    Questionnaire_UserResponse,
+    User,
+    UserModuleEnrollment,
+    UserModuleProgress,
+    UserProgramEnrollment,
+    UserProgramProgress,
+)
+from users.views import enroll_module, unenroll_module
+
+from .forms import (
+    AdditionalResourceForm,
+    CategoryForm,
+    ExerciseForm,
+    ExerciseQuestionForm,
+    ModuleForm,
+    ProgramForm,
+    SectionForm,
+)
+from .models import (
+    AdditionalResource,
+    Category as LocalCategory,
+    Exercise,
+    ExerciseQuestion,
+    Module,
+    Program,
+    ProgramModule,
+    Question,
+    Questionnaire,
+    Section,
+)
+
 
 def admin_check(user):
     return user.is_authenticated and user.is_superuser
 
-from .forms import ModuleForm, SectionForm, ExerciseForm,ExerciseQuestionForm
-from .models import Module, Section, Exercise, Question, ExerciseQuestion
-from django.db import transaction
-from django.http import JsonResponse
-from collections import defaultdict
-
-
 @user_passes_test(admin_check)
 @login_required
-def CreateModule(request):
+def createModule(request):
     if request.method == "POST":
         title = request.POST.get("title")
         description = request.POST.get("description")
-        exercise_ids = request.POST.getlist("exercises")  # <-- you missed this earlier!
+        exercise_ids = request.POST.getlist("exercises")
 
         if not title:
-            return render(request, "Module/Create_Module.html", {
+            return render(request, "Module/add_module.html", {
                 "error": "Title is required.",
                 "exercises": Exercise.objects.all()
             })
 
-        # Step 1: Create the Module
         module = Module.objects.create(title=title, description=description)
 
-        # Step 2: If exercises are selected, wrap them in a Section and assign
         if exercise_ids:
             exercises = Exercise.objects.filter(id__in=exercise_ids)
             section = Section.objects.create(
@@ -78,12 +85,10 @@ def CreateModule(request):
 
         return redirect("client_modules")
 
-    # GET request: just show all exercises
     exercises = Exercise.objects.all()
-    return render(request, "Module/Create_Module.html", {
+    return render(request, "Module/add_module.html", {
         "exercises": exercises
     })
-
 
 
 @user_passes_test(admin_check)
@@ -408,7 +413,7 @@ def add_exercise_ajax(request):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
-
+'''
 @user_passes_test(admin_check)
 @login_required
 def add_module(request):
@@ -429,6 +434,7 @@ def add_module(request):
 
     sections = Section.objects.all()
     return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
+'''
 
 @user_passes_test(admin_check)
 @login_required

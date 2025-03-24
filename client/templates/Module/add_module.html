@@ -34,45 +34,36 @@
             <textarea name="description" class="form-control" rows="4" required></textarea>
         </div>
 
-        <!-- Exercise Selection -->
+        <!-- Dropdown + Add -->
         <div class="mb-4">
-            <label class="form-label">Select Exercises to Include</label>
-            <div class="module-box border p-3 rounded">
-                <ul class="list-unstyled">
+            <label class="form-label">Add Exercise</label>
+            <div class="d-flex gap-2">
+                <select id="exercise-dropdown" class="form-control">
+                    <option value="">Select an exercise</option>
                     {% for exercise in exercises %}
-                        <li>
-                            <input type="checkbox" name="exercises" value="{{ exercise.id }}" class="form-check-input me-2">
-                            {{ exercise.title }} ({{ exercise.exercise_type }})
-                        </li>
+                        <option
+                            value="{{ exercise.id }}"
+                            data-title="{{ exercise.title }}"
+                            data-type="{{ exercise.exercise_type|default:'N/A' }}"
+                        >
+                            {{ exercise.title }} ({{ exercise.exercise_type|default:"N/A" }})
+                        </option>
                     {% empty %}
-                        <li>No exercises available.</li>
+                        <option disabled>No exercises available</option>
                     {% endfor %}
-                </ul>
+                </select>
+                <button type="button" class="btn btn-primary" onclick="addExercise()">Add</button>
             </div>
         </div>
 
-        <!-- Add Exercise -->
-<div class="mb-4">
-    <label class="form-label">Add Exercise</label>
-    <div class="d-flex gap-2">
-        <select id="exercise-dropdown" class="form-control">
-            <option value="">Select an exercise</option>
-            {% for exercise in exercises %}
-                <option value="{{ exercise.id }}" data-title="{{ exercise.title }}" data-type="{{ exercise.exercise_type }}">
-                    {{ exercise.title }} ({{ exercise.exercise_type }})
-                </option>
-            {% endfor %}
-        </select>
-        <button type="button" class="btn btn-primary" onclick="addExercise()">Add</button>
-    </div>
-</div>
+        <!-- Selected Exercises Preview -->
+        <div class="mb-4">
+            <label class="form-label">Selected Exercises</label>
+            <ul class="list-group" id="selected-exercises"></ul>
+        </div>
 
-<!-- Selected Exercise List (preview + hidden inputs for form) -->
-<div class="mb-4">
-    <label class="form-label">Selected Exercises</label>
-    <ul class="list-group" id="selected-exercises"></ul>
-</div>
-
+        <!-- Hidden inputs will be injected here -->
+        <div id="hidden-exercise-inputs"></div>
 
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-primary">Create Module</button>
@@ -80,47 +71,47 @@
         </div>
     </form>
 </div>
+
 <script>
-function addExercise(moduleId) {
-    const exerciseId = document.getElementById('exercise-dropdown').value;
-    if (!exerciseId) return alert("Select an exercise");
+    const selectedExerciseIds = new Set();
 
-    fetch(`/add_exercise_to_module/${moduleId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({ exercise_id: exerciseId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) location.reload();
-        else alert("Failed to add exercise.");
-    });
-}
+    function addExercise() {
+        const dropdown = document.getElementById('exercise-dropdown');
+        const exerciseId = dropdown.value;
 
-function removeSelectedExercises(moduleId) {
-    const selected = Array.from(document.querySelectorAll('input[name="remove_exercise"]:checked'))
-        .map(el => el.value);
-    if (selected.length === 0) return alert("Select at least one exercise to remove.");
+        if (!exerciseId || selectedExerciseIds.has(exerciseId)) return;
 
-    fetch(`/remove_exercises_from_module/${moduleId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({ exercise_ids: selected })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) location.reload();
-        else alert("Failed to remove exercise.");
-    });
-}
+        const selectedOption = dropdown.options[dropdown.selectedIndex];
+        const title = selectedOption.getAttribute('data-title');
+        const type = selectedOption.getAttribute('data-type');
+
+        // Add preview item
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.id = `exercise-preview-${exerciseId}`;
+        li.innerHTML = `
+            ${title} (${type})
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeExercise('${exerciseId}')">Remove</button>
+        `;
+        document.getElementById('selected-exercises').appendChild(li);
+
+  
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'exercises';
+        hidden.value = exerciseId;
+        hidden.id = `hidden-exercise-${exerciseId}`;
+        document.getElementById('hidden-exercise-inputs').appendChild(hidden);
+
+        selectedExerciseIds.add(exerciseId);
+    }
+
+    function removeExercise(id) {
+        selectedExerciseIds.delete(id);
+        document.getElementById(`exercise-preview-${id}`)?.remove();
+        document.getElementById(`hidden-exercise-${id}`)?.remove();
+    }
 </script>
 
 </body>
 </html>
-

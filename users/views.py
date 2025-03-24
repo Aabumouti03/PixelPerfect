@@ -1,46 +1,85 @@
 import json
 import logging
-from django.conf import settings
 from datetime import datetime, timedelta
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.urls import reverse
-from django.db.models import Avg, Q
-from .models import JournalEntry
-from django.contrib.auth.decorators import login_required
-from django.forms import ValidationError
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from users.helpers_modules import calculate_progress
-from django.contrib.auth.decorators import login_required 
-from client.models import Category, Program,ModuleRating,Exercise
-from django.shortcuts import redirect, render,  get_object_or_404
-from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
-from .forms import UserSignUpForm, EndUserProfileForm, LogInForm, UserProfileForm
-from .models import Program, Questionnaire,EndUser, Question, QuestionResponse, Questionnaire_UserResponse,EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment, UserProgramEnrollment, Program, Module, Quote
-logger = logging.getLogger(__name__)
-from .utils import send_verification_email_after_sign_up 
-from django.core.mail import send_mail
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.utils.timezone import now
-from django.contrib import messages
-from django.contrib.auth.tokens import default_token_generator
+
 from django.conf import settings
-from users.models import (
-    User, EndUser, StickyNote, UserModuleProgress, UserModuleEnrollment,
-    UserProgramEnrollment, JournalEntry,  UserExerciseProgress, UserResourceProgress,UserVideoProgress
+from django.contrib import messages
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login,
+    logout,
+    update_session_auth_hash,
 )
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.db.models import Avg, Q
+from django.forms import ValidationError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+
 from client.models import (
-    Program, Module, ModuleRating, Exercise, Category,
-    AdditionalResource, Exercise,VideoResource
+    AdditionalResource,
+    Category,
+    Exercise,
+    ExerciseQuestion,
+    Module,
+    ModuleRating,
+    Program,
+    VideoResource,
 )
+from users.helpers_modules import calculate_progress
 from users.models import (
-    Questionnaire, Question, QuestionResponse, Questionnaire_UserResponse
+    EndUser,
+    JournalEntry,
+    Questionnaire,
+    Questionnaire_UserResponse,
+    Question,
+    QuestionResponse,
+    StickyNote,
+    User,
+    UserExerciseProgress,
+    UserModuleEnrollment,
+    UserModuleProgress,
+    UserProgramEnrollment,
+    UserResourceProgress,
+    UserVideoProgress,
 )
-from .models import UserResponse
-from .models import User, EndUser, Module
-from client.models import Exercise, ExerciseQuestion
-from .helpers_questionnaire import assess_user_responses_modules, assess_user_responses_programs
+
+from .forms import (
+    EndUserProfileForm,
+    LogInForm,
+    UserProfileForm,
+    UserSignUpForm,
+)
+from .helpers_questionnaire import (
+    assess_user_responses_modules,
+    assess_user_responses_programs,
+)
+from .models import (
+    EndUser,
+    Module,
+    Program,
+    Questionnaire,
+    Questionnaire_UserResponse,
+    Question,
+    QuestionResponse,
+    StickyNote,
+    User,
+    UserModuleEnrollment,
+    UserModuleProgress,
+    UserProgramEnrollment,
+    UserResponse,
+    Quote,
+)
+from .utils import send_verification_email_after_sign_up
+
 
 
 def questionnaire(request):
@@ -410,6 +449,7 @@ def sign_up_step_2(request):
     return render(request, "users/sign_up_step_2.html", {"profile_form": profile_form})
 
 def sign_up_email_verification(request):
+    """Showcases an html page that notifies the user of the next step after signing up."""
     return render(request, "users/sign_up_email_verification.html")
 
 def verify_email_after_sign_up(request, uidb64, token):

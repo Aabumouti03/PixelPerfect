@@ -19,9 +19,6 @@ urlpatterns = [
     path('', usersViews.welcome_page, name="welcome_page"),
     path('dashboard/', usersViews.dashboard, name="dashboard"),
 
-    # Redirect "Modules" to "Edit_Add_Module"
-    path('modules/', clientViews.CreateModule, name="modules"),
-
     path('about/', usersViews.about, name='about'),
 
     # Other Paths
@@ -53,7 +50,7 @@ urlpatterns = [
     path('about/', usersViews.about, name='about'),
 
     # Modules (Client)
-    path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
+    path("modules/create/", clientViews.createModule, name="add_module"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),
     path('edit_section/<int:section_id>/', clientViews.edit_section, name='edit_section'),
     path('edit_exercise/<int:exercise_id>/', clientViews.edit_exercise, name='edit_exercise'),
@@ -82,7 +79,7 @@ urlpatterns = [
     path("get_started/", usersViews.get_started, name="get_started"),
     path('contact-success/', usersViews.contact_success, name='contact_success'),
    
-    path('modules/add/', clientViews.add_module, name='add_module'),
+   # path('modules/add/', clientViews.add_module, name='add_module'),
     path('sections/add/', clientViews.add_section, name='add_section'),
     path('sections/get_all/', clientViews.get_sections, name='get_sections'),
     path('exercises/add/', clientViews.add_exercise, name='add_exercise'), 
@@ -181,7 +178,7 @@ urlpatterns = [
     # Client Modules
     path("client_modules/", views.client_modules, name="client_modules"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  
-    path('add_module/', views.add_module, name='add_module'),
+   # path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
     

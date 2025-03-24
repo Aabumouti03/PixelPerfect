@@ -1,5 +1,5 @@
 from django import forms
-from .models import Module, Section, Exercise, Question, ExerciseQuestion
+from .models import Module, Section, Exercise, ExerciseQuestion
 from .models import Program, Module, Category, ProgramModule, VideoResource, AdditionalResource
 
 class ModuleForm(forms.ModelForm):
