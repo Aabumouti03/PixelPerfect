@@ -81,6 +81,7 @@ from .utils import send_verification_email_after_sign_up
 
 
 
+@login_required
 def questionnaire(request):
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
 
@@ -101,13 +102,14 @@ def questionnaire(request):
         "active_questionnaire": active_questionnaire,
         "questions_json": json.dumps(questions_data),
     }
-    return render(request, "questionnaire.html", context)
+    return render(request, "users/questionnaire.html", context)
 
 @csrf_protect
 @login_required
 def submit_responses(request):
     if request.method == "POST":
         try:
+            
             data = json.loads(request.body)
             logger.info("Received data: %s", data)
 
@@ -129,7 +131,8 @@ def submit_responses(request):
             if not responses:
                 return JsonResponse({"success": False, "message": "No responses provided."})
 
-            questionnaire_user_response, created = Questionnaire_UserResponse.objects.get_or_create(
+            # Create a new Questionnaire_UserResponse 
+            questionnaire_user_response = Questionnaire_UserResponse.objects.create(
                 user=user,
                 questionnaire=questionnaire
             )
@@ -160,14 +163,16 @@ def submit_responses(request):
                 except ValidationError as e:
                     logger.error("Validation error for question response: %s", str(e))
                     continue
-                
-            return JsonResponse({"success": True, "redirect_url": "/recommended_programs/"})
 
+            
+            return JsonResponse({"success": True, "redirect_url": reverse("recommended_programs")})
+        
         except Exception as e:
             logger.error("Error saving responses: %s", str(e))
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method"})
+
 
 @login_required
 def save_notes(request):
@@ -203,20 +208,16 @@ def dashboard(request):
     except EndUser.DoesNotExist:
         end_user = EndUser.objects.create(user=user)
 
-    # Fetch the program the user is enrolled in (if any)
     user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
     program = user_program_enrollment.program if user_program_enrollment else None
 
-    # Fetch program modules if the user is enrolled, sorted by order
     program_modules = program.program_modules.all().order_by("order") if program else []
 
-    # Get user progress for each module
     user_progress = {
         progress.module.id: progress.completion_percentage
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Mark only the first module as accessible
     previous_module_completed = True  # The first module is always accessible
     unlocked_modules = set()
 
@@ -319,9 +320,6 @@ def welcome_page(request):
 def modules(request):
     return render(request, 'users/modules.html')
 
-@login_required
-def profile(request):
-    return render(request, 'users/profile.html')
 
 def about(request):
     return render(request, 'users/about.html')
@@ -475,7 +473,7 @@ def log_out(request):
     return redirect('dashboard')
 
 @login_required 
-def show_profile(request):
+def profile(request):
     """View to display the user profile"""
     user = request.user
 
@@ -487,7 +485,7 @@ def show_profile(request):
         profile_update_popup = None
 
     if hasattr(user, 'User_profile'):
-        return render(request, 'users/Profile/show_profile.html', {'user': user, 'profile_update_popup': profile_update_popup})
+        return render(request, 'users/Profile/profile.html', {'user': user, 'profile_update_popup': profile_update_popup})
     else:
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
@@ -506,16 +504,15 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
-            user.User_profile.save()  #  Explicitly save the profile
-            user.refresh_from_db()  #  Ensure data in tests matches DB state
+            user.User_profile.save()  
+            user.refresh_from_db()  
 
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
             if new_email:
                 new_email = new_email.strip().lower()  # Convert to lowercase
                 
-                # Only proceed if the email has actually changed
-                if new_email != user.email.lower():  # Ensure case-insensitive comparison
+                if new_email != user.email.lower():  
                     # Save the new email for verification
                     user.new_email = new_email
                     user.save()
@@ -524,10 +521,8 @@ def update_profile(request):
                     uid = urlsafe_base64_encode(force_bytes(user.pk))
                     token = default_token_generator.make_token(user)
 
-                    # Create verification link
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
-                    # Send verification email
                     send_mail_status = send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
@@ -537,13 +532,11 @@ def update_profile(request):
                     )
 
                     request.session['profile_update_popup'] = 'verification_sent'
-                    request.session.save()  # Ensure session data is persisted before redirecting
+                    request.session.save()  
                 else:
-                    # If the email hasn't changed, just don't do anything with the email
                     user.new_email = None
                     user.save()
 
-            # Handle password update
             new_password = form.cleaned_data.get("new_password")
             if new_password:
                 user.set_password(new_password)
@@ -551,7 +544,7 @@ def update_profile(request):
                 update_session_auth_hash(request, user)
 
 
-            return redirect('show_profile')
+            return redirect('profile')
 
         else:
             messages.error(request, "There were errors in the form.")
@@ -599,7 +592,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('show_profile')
+            return redirect('profile')  # Redirect back to the profile if deletion fails
 
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
     return render(request, 'users/Profile/delete_account.html', context)
@@ -845,29 +838,34 @@ def module_overview(request, module_id):
 
 @login_required
 def exercise_detail(request, exercise_id):
-    """Fetch the exercise details, including questions, saved responses, and the related diagram."""
     exercise = get_object_or_404(Exercise, id=exercise_id)
-
-    user, created = EndUser.objects.get_or_create(user=request.user)
+    user, _ = EndUser.objects.get_or_create(user=request.user)
 
     diagram = None
     for section in exercise.sections.all():
-        if section.diagram:  
-            diagram = section.diagram  
-            break  
+        if section.diagram:
+            diagram = section.diagram
+            break
 
     if request.method == 'POST':
         for question in exercise.questions.all():
             answer_text = request.POST.get(f'answer_{question.id}', '').strip()
 
+            if answer_text:
+                UserResponse.objects.create(
+                    user=user,
+                    question=question,
+                    response_text=answer_text,
+                    submitted_at=now()
+                )
 
+        messages.success(request, "Your answers have been saved!")
         return redirect('exercise_detail', exercise_id=exercise.id)
 
     return render(request, 'users/exercise_detail.html', {
         'exercise': exercise,
-        'diagram': diagram, 
+        'diagram': diagram,
     })
-
 
 @csrf_exempt  
 @login_required
@@ -879,10 +877,6 @@ def rate_module(request, module_id):
         try:
             data = json.loads(request.body)
             rating_value = int(data.get("rating", 0))
-
-            # reject invalid ratigs
-            if not (1 <= rating_value <= 5):
-                return JsonResponse({"success": False, "message": "Invalid rating. Must be between 1 and 5."})
 
             end_user, created = EndUser.objects.get_or_create(user=request.user)
 
@@ -1048,104 +1042,6 @@ def all_modules(request):
 @login_required
 def welcome_view(request):
     return render(request, 'users/welcome.html')
-
-@login_required
-def questionnaire(request):
-    active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
-
-    if active_questionnaire:
-        questions = Question.objects.filter(questionnaire=active_questionnaire)
-        questions_data = [
-            {
-                "id": q.id,
-                "question_text": q.question_text,
-                "question_type": q.question_type  # Add question type
-            }
-            for q in questions
-        ]
-    else:
-        questions_data = []
-
-    context = {
-        "active_questionnaire": active_questionnaire,
-        "questions_json": json.dumps(questions_data),
-    }
-    return render(request, "users/questionnaire.html", context)
-
-@csrf_exempt
-@login_required
-def submit_responses(request):
-    if request.method == "POST":
-        try:
-            if not request.user.is_authenticated:
-                return JsonResponse({"success": False, "message": "User is not authenticated. Please log in."})
-
-            data = json.loads(request.body)
-            logger.info("Received data: %s", data)
-
-            #Ensure the user exists
-            try:
-                user = EndUser.objects.get(user=request.user)
-            except EndUser.DoesNotExist:
-                return JsonResponse({"success": False, "message": "User not found. Please sign in."})
-
-            #Ensure the questionnaire exists
-            questionnaire_id = data.get("questionnaireId")
-            if not questionnaire_id:
-                return JsonResponse({"success": False, "message": "Questionnaire ID is missing."})
-
-            try:
-                questionnaire = Questionnaire.objects.get(id=questionnaire_id)
-            except Questionnaire.DoesNotExist:
-                return JsonResponse({"success": False, "message": "Questionnaire not found."})
-
-            responses = data.get("responses", [])
-            if not responses:
-                return JsonResponse({"success": False, "message": "No responses provided."})
-
-            # Create a new Questionnaire_UserResponse 
-            questionnaire_user_response = Questionnaire_UserResponse.objects.create(
-                user=user,
-                questionnaire=questionnaire
-            )
-
-            for response in responses:
-                question_id = response.get("questionId")
-                value = response.get("value")
-
-                if not question_id or value is None:
-                    logger.error("Missing questionId or value in response: %s", response)
-                    continue
-
-                # ✅ Ensure the question exists
-                try:
-                    question = Question.objects.get(id=question_id)
-                except Question.DoesNotExist:
-                    logger.error("Question with ID %s does not exist.", question_id)
-                    continue
-
-                # ✅ Save the QuestionResponse
-                question_response = QuestionResponse(
-                    user_response=questionnaire_user_response,
-                    question=question,
-                    rating_value=int(value) if question.question_type in ["AGREEMENT", "RATING"] else None
-                )
-
-                try:
-                    question_response.full_clean()  # Validate the model instance
-                    question_response.save()
-                except ValidationError as e:
-                    logger.error("Validation error for question response: %s", str(e))
-                    continue
-
-            
-            return JsonResponse({"success": True, "redirect_url": reverse("recommended_programs")})
-        
-        except Exception as e:
-            logger.error("Error saving responses: %s", str(e))
-            return JsonResponse({"success": False, "message": str(e)})
-
-    return JsonResponse({"success": False, "message": "Invalid request method"})
 
 @login_required
 def journal_view(request, date=None):

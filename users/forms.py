@@ -6,6 +6,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 from .models import User, EndUser
 from django.utils.translation import gettext_lazy as _
+from django.utils.safestring import mark_safe
+
 
 
 class UserSignUpForm(UserCreationForm):
@@ -97,7 +99,7 @@ class EndUserProfileForm(forms.ModelForm):
     )],
     widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'})
 )
-
+    
 
     age = forms.IntegerField(
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age: *'}),
@@ -154,6 +156,11 @@ class UserProfileForm(forms.ModelForm):
     email = forms.EmailField(required=False, disabled=True)
     new_email = forms.EmailField(required=False)  # New email field
 
+    current_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'placeholder': 'Enter current password', 'class': 'form-control'}),
+        label="Current Password"
+    )
 
     new_password = forms.CharField(
         required=False,
@@ -169,7 +176,7 @@ class UserProfileForm(forms.ModelForm):
     # EndUser fields that need extra validation
     phone_number = forms.CharField(
         max_length=15, required=False,
-        validators=[RegexValidator(r'^\+?\d{7,15}$', message="Enter a valid phone number.")]
+        validators=[RegexValidator(r'^\+?\d{7,15}$', message="Enter a valid phone number (7-15 digits, optional '+').")]
     )
     age = forms.IntegerField(min_value=18, max_value=100, required=True)  # Ensure realistic age
 
@@ -217,6 +224,7 @@ class UserProfileForm(forms.ModelForm):
 
         return last_name
 
+
     def clean_username(self):
         """Validate username based on the provided rules."""
         username = self.cleaned_data.get('username', '').strip()
@@ -230,12 +238,19 @@ class UserProfileForm(forms.ModelForm):
         if not re.match(r'^\w+$', username):
             self.add_error('username', "Username can only contain letters, digits, and underscores.")
 
-        # Ensure username is unique (excluding the current user)
-        user_id = self.instance.user.id if hasattr(self.instance, 'user') else None
-        if User.objects.exclude(id=user_id).filter(username=username).exists():
+        # Check if user is trying to set the same username with different casing
+        user_instance = getattr(self.instance, 'user', None)
+        if user_instance and user_instance.username.lower() == username.lower() and user_instance.username != username:
+            self.add_error('username', "Your new username must be different from your current one.")
+
+        # Ensure username is unique (case-insensitive, excluding current user)
+        user_id = user_instance.id if user_instance else None
+        if User.objects.exclude(id=user_id).filter(username__iexact=username).exists():
             self.add_error('username', "This username is already taken.")
 
         return username
+
+
     
     def clean_new_password(self):
         """Validate new password using Django's built-in rules + additional requirements."""
@@ -301,16 +316,29 @@ class UserProfileForm(forms.ModelForm):
         return new_email
 
     def clean(self):
-        """Ensure new password and confirm password match."""
         cleaned_data = super().clean()
+        user = getattr(self.instance, 'user', None)
+
+        current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
         confirm_password = cleaned_data.get("confirm_password")
 
-        if new_password and confirm_password:
-            if new_password != confirm_password:
-                self.add_error('confirm_password', "Passwords do not match!")  
+        if new_password:
+            if not current_password:
+                self.add_error("current_password", "You must enter your current password to set a new one.")
+            elif not user.check_password(current_password):
+                self.add_error("current_password", mark_safe(
+                    'Your current password doesn’t match your actual password. '
+                    'Did you forget your password? <a href="/password-reset/">Forgot password?</a>'
+                ))
+            elif user.check_password(new_password):
+                self.add_error("new_password", "Your new password must be different from your current one.")
+
+        if new_password and confirm_password and new_password != confirm_password:
+            self.add_error("confirm_password", "Passwords do not match!")
 
         return cleaned_data
+
     
     def save(self, commit=True):
         """Save both the User and EndUser fields."""
@@ -329,7 +357,7 @@ class UserProfileForm(forms.ModelForm):
             user.set_password(new_password)  
 
         if commit:
-            user.save()  
+            user.save()   
             end_user.save()  
 
         return end_user  

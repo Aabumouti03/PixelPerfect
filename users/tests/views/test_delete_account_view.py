@@ -33,7 +33,7 @@ class DeleteAccountViewTest(TestCase):
         self.client.force_login(self.user)
         self.delete_url = reverse("delete_account")
         self.welcome_url = reverse("welcome_page")
-        self.profile_url = reverse("show_profile")
+        self.profile_url = reverse("profile")
 
 
     def test_delete_account_confirmation_page_loads(self):

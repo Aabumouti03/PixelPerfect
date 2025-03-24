@@ -7,21 +7,21 @@ body {
 }
 
 .sidebar {
-    width: 60px; /* Initially, a small width */
+    width: 60px;
     height: 100vh;
     background-color: #F24505;
     color: white;
     position: fixed;
     left: 0;
     top: 0;
-    border-top-right-radius: 15px; /* Rounds the top-left corner */
-    border-bottom-right-radius: 15px; /* Rounds the bottom-left corner */
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
     overflow: hidden; /* Hide content initially */
     transition: width 0.3s ease-in-out;
 }
 
 .sidebar:hover {
-    width: 250px; /* Expand when hovered */
+    width: 250px;
 }
 
 .logo {
@@ -78,47 +78,6 @@ body {
     text-decoration: none;
     color: white;
     font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    opacity: 1;
-    padding: 15px 0px;
-    background-color: rgba(255, 255, 255, 0.15); /* Light transparent white */
-    border-radius: 8px; /* Soft rounded corners */
-}
-
-.logout {
-    list-style: none;
-    position: absolute;  /* Positions it relative to the sidebar */
-    bottom: 20px;
-    padding: 0;
-    left: 15px; /* Aligns it properly */
-    margin-top: 250px;
-    padding-left: 0px;
-    opacity: 0; /* Hide item */
-    transition: opacity 0.3s ease-in-out;
-}
-
-.sidebar:hover .logout {
-    opacity: 1; /* Show item on hover */
-}
-
-.logout a {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-}
-
-.logout a:hover {
-    width: 225px;
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -258,8 +217,6 @@ body {
     background-color: #F24505;
     color: white;
 }
-<<<<<<< HEAD
-
 
 
 .nav-links .icon {
@@ -285,5 +242,3 @@ body {
     font-size: 20px;
     line-height: 1;
 }
-=======
->>>>>>> 25faf9fbb78b5daa20c2dade0924fe823fd15dc9

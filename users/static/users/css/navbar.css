@@ -225,7 +225,7 @@ body {
 
 
 /*---------------LOG OUT------------*/
-.modal {
+.logout_modal {
     display: none;
     position: fixed;
     z-index: 1000;
@@ -237,33 +237,51 @@ body {
     justify-content: center;
     align-items: center;
 }
+.logout_title{ 
+    color: #F24505 !important;
+    font-size: 25px !important;
+}
 
-.modal-content {
+.logout_modal_content {
     background-color: white;
     color: #F24505;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    width: 300px;
+    width: 300px !important;
 }
 
 
 .confirm-logout, .cancel-logout {
     margin: 10px;
     padding: 12px 20px;
-    border: 2px solid #F24505;
+    border: 2px solid #F24505 !important;
     background-color: transparent;
     color: #F24505;
-    font-size: 16px;
-    border-radius: 50px;
+    font-size: 16px !important;
+    border-radius: 25px !important;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    white-space: nowrap !important; 
+}
+
+.cancel-logout{
+    background-color: #F24505 !important;
+    color: white !important;
 }
 
 
 .confirm-logout:hover, .cancel-logout:hover {
-    background-color: #F24505;
+    background-color: #D43802 !important;
+    border: #D43802 !important;
     color: white;
+}
+
+.logout_button_group {
+    display: flex;
+    justify-content: center;
+    gap: 10px !important;
+    margin-top: 20px !important;
 }
 
 

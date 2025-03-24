@@ -24,6 +24,9 @@
                     {% for response in question.responses.all %}
                     <div class="response-box">
                         <p>{{ response.response_text }}</p>
+                        <small class="response-time">
+                            Submitted on {{ response.submitted_at|date:"F j, Y" }} at {{ response.submitted_at|time:"H:i" }}
+                        </small>
                     </div>
                     {% empty %}
                     <p class="no-response">No responses yet.</p>

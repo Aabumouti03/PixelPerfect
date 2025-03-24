@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Create Module</title>
-    <link rel="stylesheet" href="{% static 'client/css/create_category.css' %}">
+    <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="create_category">
+<body class="add_module">
 
 {% include 'client/client_base.html' %}
 
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Create New Module</h2>
+    <h2 class="mb-4 text-center">Create Module</h2>
 
     <form method="post" class="card p-4 shadow-sm">
         {% csrf_token %}
@@ -34,7 +34,7 @@
             <textarea name="description" class="form-control" rows="4" required></textarea>
         </div>
 
-        <!-- Dropdown + Add -->
+        <!-- Dropdown + Add Exercise -->
         <div class="mb-4">
             <label class="form-label">Add Exercise</label>
             <div class="d-flex gap-2">
@@ -62,56 +62,109 @@
             <ul class="list-group" id="selected-exercises"></ul>
         </div>
 
-        <!-- Hidden inputs will be injected here -->
+        <!-- Hidden inputs for exercises -->
         <div id="hidden-exercise-inputs"></div>
 
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary">Create Module</button>
-            <a href="{% url 'client_modules' %}" class="btn btn-secondary">Cancel</a>
+        <!-- Dropdown + Add Video -->
+        <div class="mb-4">
+            <label class="form-label">Add Video</label>
+            <div class="d-flex gap-2">
+                <select id="video-dropdown" class="form-control">
+                    <option value="">Select a video</option>
+                    {% for video in videos %}
+                        <option
+                            value="{{ video.id }}"
+                            data-title="{{ video.title }}"
+                        >
+                            {{ video.title }}
+                        </option>
+                    {% empty %}
+                        <option disabled>No videos available</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-primary" onclick="addVideo()">Add</button>
+            </div>
         </div>
+
+        <!-- Selected Videos Preview -->
+        <div class="mb-4">
+            <label class="form-label">Selected Videos</label>
+            <ul class="list-group" id="selected-videos"></ul>
+        </div>
+
+
+
+
+        <!-- Hidden inputs for videos -->
+        <div id="hidden-video-inputs"></div>
+
+       
+
+        <!-- Dropdown + Add Additional Resource -->
+        <div class="mb-4">
+            <label class="form-label">Add Additional Resource</label>
+            <div class="d-flex gap-2">
+                <select id="resource-dropdown" class="form-control">
+                    <option value="">Select a resource</option>
+                    {% for resource in resources %}
+                        <option
+                            value="{{ resource.id }}"
+                            data-title="{{ resource.title }}"
+                            data-type="{{ resource.resource_type|default:'N/A' }}"
+                            data-url="{{ resource.url }}"
+                        >
+                            {{ resource.title }} ({{ resource.resource_type|default:"N/A" }})
+                        </option>
+                    {% empty %}
+                        <option disabled>No resources available</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-primary" onclick="addResource()">Add</button>
+            </div>
+        </div>
+
+        <!-- Selected Additional Resources Preview -->
+        <div class="mb-4">
+            <label class="form-label">Selected Resources</label>
+            <ul class="list-group" id="selected-resources"></ul>
+        </div>
+
+
+        <!-- Hidden inputs for resources -->
+        <div id="hidden-resource-inputs"></div>
+
+        <div class="text-center mt-4">
+            <!-- Add new resource and add new video buttons -->
+            <div class="mb-3">
+                <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary w-100 mb-2">Add new resource</a>
+                <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary w-100">Add new video</a>
+            </div>
+        
+            <!-- Cancel and Save buttons side by side -->
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'client_modules' %}" class="btn btn-secondary w-20">Cancel</a>
+                <button type="submit" class="btn btn-primary w-25">Create Module</button>
+            </div>
+        </div>
+        
+
+       
     </form>
+     
+
+     <!-- Add resource Button
+     <div class="mb-4">
+        <label class="form-label">Add new resource</label>
+        <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary">Add</a>
+        <label class="form-label">Add new video</label>
+        <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary">Add</a>
+    </div>
+     -->
 </div>
 
-<script>
-    const selectedExerciseIds = new Set();
+    <script src="{% static 'client/js/add_module.js' %}"></script>
 
-    function addExercise() {
-        const dropdown = document.getElementById('exercise-dropdown');
-        const exerciseId = dropdown.value;
-
-        if (!exerciseId || selectedExerciseIds.has(exerciseId)) return;
-
-        const selectedOption = dropdown.options[dropdown.selectedIndex];
-        const title = selectedOption.getAttribute('data-title');
-        const type = selectedOption.getAttribute('data-type');
-
-        // Add preview item
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.id = `exercise-preview-${exerciseId}`;
-        li.innerHTML = `
-            ${title} (${type})
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeExercise('${exerciseId}')">Remove</button>
-        `;
-        document.getElementById('selected-exercises').appendChild(li);
-
-  
-        const hidden = document.createElement('input');
-        hidden.type = 'hidden';
-        hidden.name = 'exercises';
-        hidden.value = exerciseId;
-        hidden.id = `hidden-exercise-${exerciseId}`;
-        document.getElementById('hidden-exercise-inputs').appendChild(hidden);
-
-        selectedExerciseIds.add(exerciseId);
-    }
-
-    function removeExercise(id) {
-        selectedExerciseIds.delete(id);
-        document.getElementById(`exercise-preview-${id}`)?.remove();
-        document.getElementById(`hidden-exercise-${id}`)?.remove();
-    }
-</script>
 
 </body>
 </html>
+
