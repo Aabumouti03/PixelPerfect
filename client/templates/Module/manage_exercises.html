@@ -5,28 +5,31 @@
 <div class="content">
     <h2 class="page-title">Manage Exercises</h2>
     <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
+    <link rel="stylesheet" href="{% static 'client/css/manage_exercises.css' %}">
 
     <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
     <div class="module-list">
         {% for exercise in exercises %}
             <div class="module-card">
                 <div class="module-header">
-                    <div class="module-title">
+                    <div class="module-title numbered-title">
+                        <span class="exercise-number">{{ forloop.counter }}.</span>
                         <input type="text" value="{{ exercise.title }}" id="title-{{ exercise.id }}" class="edit-input" readonly>
                     </div>
+                    
                     <div class="module-actions">
-                        <button class="edit-btn" id="edit-btn-{{ exercise.id }}" onclick="enableEdit('{{ exercise.id }}')">Edit</button>
-                        <button class="save-btn hidden" id="save-btn-{{ exercise.id }}" onclick="saveExercise('{{ exercise.id }}')">Save</button>
+                        <button class="buttons" id="edit-btn-{{ exercise.id }}" onclick="enableEdit('{{ exercise.id }}')">Edit</button>
+                        <button class="buttons hidden" id="save-btn-{{ exercise.id }}" onclick="saveExercise('{{ exercise.id }}')">Save</button>
 
-                        <button class="add-question-btn hidden" id="add-question-btn-{{ exercise.id }}" onclick="addNewQuestion('{{ exercise.id }}')">
+                        <button class="add-question-btn hidden buttons" id="add-question-btn-{{ exercise.id }}" onclick="addNewQuestion('{{ exercise.id }}')">
                              Add Question
                         </button>
 
-                        <button class="remove-questions-btn hidden" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
+                        <button class="remove-questions-btn hidden buttons" id="remove-questions-btn-{{ exercise.id }}" onclick="showQuestionCheckboxes('{{ exercise.id }}')">
                              Remove Questions
                         </button>
 
-                        <button class="delete-selected-btn hidden" id="delete-selected-btn-{{ exercise.id }}" onclick="deleteSelectedQuestions('{{ exercise.id }}')">
+                        <button class="delete-selected-btn hidden buttons" id="delete-selected-btn-{{ exercise.id }}" onclick="deleteSelectedQuestions('{{ exercise.id }}')">
                              Delete Selected
                         </button>
 
@@ -55,118 +58,35 @@
         {% endfor %}
     </div>
 </div>
-
-<style>
-    .content {
-        flex-grow: 1;
-        padding: 30px;
-    }
-
-    .module-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .module-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 15px;
-        width: 100%;
-        transition: background 0.3s ease-in-out;
-    }
-
-    .module-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-    }
-
-    .module-title input {
-        border: none;
-        font-size: 20px;
-        width: 100%;
-        font-weight: bold;
-        outline: none;
-    }
-
-    .edit-input {
-        border: none;
-        background: transparent;
-        outline: none;
-        font-size: 18px;
-        width: 100%;
-        padding: 5px;
-    }
-
-    .editing {
-        border-bottom: 2px solid #007bff;
-        background: #f0f8ff;
-        padding: 5px;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    .module-actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .edit-btn, .save-btn {
-        background-color: #FD5402;
-        color: white;
-        padding: 7px 15px;
-        border: none;
-        border-radius: 20px;
-        font-size: 14px;
-    }
-
-    .toggle-btn {
-        background: none;
-        color: #FD5402;
-        border: none;
-        font-size: 18px;
-        cursor: pointer;
-    }
-
-    .module-content {
-        display: none;
-        padding: 15px;
-        background: white;
-    }
-
-    .module-content.show {
-        display: block;
-    }
-
-    .exercise-questions {
-        padding-left: 20px;
-        list-style: none;
-    }
-
-</style>
 <script>
     function enableEdit(exerciseId) {
+        //Show questions section if it's hidden
+        const content = document.getElementById(`exercise-${exerciseId}`);
+        const icon = document.getElementById(`toggle-icon-${exerciseId}`);
+
+        if (!content.classList.contains("show")) {
+            content.classList.add("show");
+            icon.classList.remove("fa-chevron-left");
+            icon.classList.add("fa-chevron-down");
+        }
+
+        //Make title editable
         document.getElementById(`title-${exerciseId}`).readOnly = false;
         document.getElementById(`title-${exerciseId}`).classList.add('editing');
 
+        //Make all questions editable
         document.querySelectorAll(`#exercise-${exerciseId} .edit-input`).forEach(input => {
             input.readOnly = false;
             input.classList.add('editing');
         });
 
-        // ✅ Show Save and Add Question buttons, Hide Edit button
+        //Show Save & Add Question buttons, hide Edit
         document.getElementById(`edit-btn-${exerciseId}`).classList.add('hidden');
         document.getElementById(`save-btn-${exerciseId}`).classList.remove('hidden');
         document.getElementById(`add-question-btn-${exerciseId}`).classList.remove('hidden');
         document.getElementById(`remove-questions-btn-${exerciseId}`).classList.remove('hidden');
     }
+
 
     function addNewQuestion(exerciseId) {
         let questionList = document.getElementById(`question-list-${exerciseId}`);
@@ -216,15 +136,15 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(isUpdating ? "✅ Exercise updated successfully!" : "✅ New exercise added!");
+                alert(isUpdating ? "Exercise updated successfully!" : "New exercise added!");
                 location.reload();
             } else {
-                alert("❌ Error: " + data.error);
+                alert("Error: " + data.error);
             }
         })
         .catch(error => {
-            console.error("⚠️ Error:", error);
-            alert("❌ Something went wrong.");
+            console.error("Error:", error);
+            alert("Something went wrong.");
         });
     }
 
@@ -252,7 +172,7 @@
         })
         .then(response => response.json())
         .then(() => {
-            alert("✅ Questions deleted successfully!");
+            alert("Questions deleted successfully!");
             location.reload();
         });
     }
@@ -282,30 +202,35 @@
     }
 
     function addExercise() {
-        let moduleList = document.querySelector(".module-list");
+    let moduleList = document.querySelector(".module-list");
 
-        let newExerciseId = `new-exercise-${Date.now()}`;
-        let exerciseHTML = `
-            <div class="module-card" id="${newExerciseId}">
-                <div class="module-header">
-                    <div class="module-title">
-                        <input type="text" placeholder="Enter title..." class="edit-input" id="title-${newExerciseId}">
-                    </div>
-                    <div class="module-actions">
-                        <button class="save-btn" onclick="saveExercise('${newExerciseId}')">Save</button>
-                        <button class="remove-btn" onclick="removeExercise('${newExerciseId}')">❌ Remove</button>
-                    </div>
+    let newExerciseId = `new-exercise-${Date.now()}`;
+    let exerciseHTML = `
+        <div class="module-card" id="${newExerciseId}">
+            <div class="module-header">
+                <div class="module-title">
+                    <input type="text" placeholder="Enter title..." class="edit-input" id="title-${newExerciseId}">
                 </div>
-                <div class="module-content">
-                    <h4>Questions:</h4>
-                    <ul class="exercise-questions" id="question-list-${newExerciseId}"></ul>
-                    <button class="add-question-btn" onclick="addNewQuestion('${newExerciseId}')">➕ Add Question</button>
+                <div class="module-actions">
+                    <button class="buttons" onclick="saveExercise('${newExerciseId}')">Save</button>
+                    <button class="buttons" onclick="removeExercise('${newExerciseId}')">Remove</button>
                 </div>
             </div>
-        `;
+            <div class="module-content">
+                <h4>Questions:</h4>
+                <ul class="exercise-questions" id="question-list-${newExerciseId}"></ul>
+                <button class="add-question-btn buttons" onclick="addNewQuestion('${newExerciseId}')">➕ Add Question</button>
+            </div>
+        </div>
+    `;
 
-        moduleList.insertAdjacentHTML("beforeend", exerciseHTML);
-    }
+    moduleList.insertAdjacentHTML("beforeend", exerciseHTML);
+
+    setTimeout(() => {
+        document.getElementById(newExerciseId).scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+}
+
 
     function addNewQuestion(exerciseId) {
         let questionList = document.getElementById(`question-list-${exerciseId}`);

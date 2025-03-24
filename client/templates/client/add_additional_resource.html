@@ -3,9 +3,13 @@
 
 {% block extra_css %}
 <style>
+
     .resource-container {
         width: 1000px;
-        margin: 60px auto;
+        margin-left: 130px ;
+        margin-right: 130px ;
+        margin-top: 30px ;
+        margin-bottom: 100px ;
         padding: 40px;
         background: #fff;
         border-radius: 12px;
@@ -101,27 +105,56 @@
         <div class="form-group">
             <label for="id_title">Resource Title:</label>
             {{ form.title }}
+            {% if form.title.errors %}
+                <div style="color: red;">
+                    {% for error in form.title.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-
+        
         <div class="form-group">
             <label for="id_description">Description:</label>
             {{ form.description }}
+            {% if form.description.errors %}
+                <div style="color: red;">
+                    {% for error in form.description.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-
+        
         <div class="form-group">
             <label for="id_resource_type">Resource Type:</label>
             {{ form.resource_type }}
+            {% if form.resource_type.errors %}
+                <div style="color: red;">
+                    {% for error in form.resource_type.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-
+        
         <div class="form-group">
-            <label for="id_url">External URL (if any):</label>
+            <label for="id_url">External URL:</label>
             {{ form.url }}
-        </div>
+            {% if form.url.errors %}
+                <div style="color: red;">
+                    {% for error in form.url.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>        
 
 
         <button type="submit" class="upload-btn">Save Resource</button>
     </form>
 
-    <a href="{{ next }}" class="back-btn">⬅ Back to Module</a>
+    <a href="{{ request.META.HTTP_REFERER }}" class="back-btn"> Back </a>
+    <a href="{% url 'resource_list' %}" class="back-btn">Resource list</a>
 </div>
 {% endblock %}
