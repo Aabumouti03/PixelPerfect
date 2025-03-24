@@ -272,6 +272,8 @@ def edit_module(request, module_id):
         'available_exercises': available_exercises,
         'available_additional_resources': available_additional_resources,
         'available_video_resources': available_video_resources,
+        "videos": VideoResource.objects.all(),
+        "resources": AdditionalResource.objects.all(),
     })
 
 

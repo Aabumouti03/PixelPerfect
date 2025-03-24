@@ -21,15 +21,6 @@
     {% endif %}
 </div>
 
-<div class="exercise-container vertical-layout">
-    <!-- Top: Diagram -->
-    <div class="diagram-container">
-        {% if exercise.diagram %}
-            <img src="{{ exercise.diagram.url }}" alt="Exercise Diagram">
-        {% else %}
-            <p>No diagram available for this exercise.</p>
-        {% endif %}
-    </div>
 
     <!-- Bottom: Questions -->
     <div class="questions-container">
