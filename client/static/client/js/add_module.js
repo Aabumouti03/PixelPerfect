@@ -121,3 +121,65 @@ function removeResource(id) {
     document.getElementById(`resource-preview-${id}`)?.remove();
     document.getElementById(`hidden-resource-${id}`)?.remove();
 }
+
+function deleteResource(resourceId) {
+    // Send AJAX request to delete the resource
+    fetch(`/delete_resource/${resourceId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'), // CSRF token for POST requests
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Remove the deleted resource from the resources dropdown
+            const resourceDropdown = document.getElementById('resource-dropdown');
+            const optionToRemove = document.querySelector(`#resource-dropdown option[value="${data.resource_id}"]`);
+            if (optionToRemove) {
+                optionToRemove.remove();
+            }
+        }
+    })
+    .catch(error => console.error('Error deleting resource:', error));
+}
+
+// Example of handling delete resource button click
+document.querySelectorAll('.delete-resource-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+        const resourceId = event.target.dataset.resourceId;
+        deleteResource(resourceId);  // Call the function to delete the resource
+    });
+});
+
+function deleteVideo(videoId) {
+    // Send AJAX request to delete the video
+    fetch(`/delete_video/${videoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'), // CSRF token for POST requests
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Remove the deleted video from the video dropdown
+            const videoDropdown = document.getElementById('video-dropdown');
+            const optionToRemove = document.querySelector(`#video-dropdown option[value="${data.video_id}"]`);
+            if (optionToRemove) {
+                optionToRemove.remove();
+            }
+        }
+    })
+    .catch(error => console.error('Error deleting video:', error));
+}
+
+// Example of handling delete video button click
+document.querySelectorAll('.delete-video-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+        const videoId = event.target.dataset.videoId;
+        deleteVideo(videoId);  // Call the function to delete the video
+    });
+});

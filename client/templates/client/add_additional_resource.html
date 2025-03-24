@@ -3,7 +3,7 @@
 
 {% block extra_css %}
 <style>
-    
+
     .resource-container {
         width: 1000px;
         margin-left: 130px ;
@@ -154,6 +154,7 @@
         <button type="submit" class="upload-btn">Save Resource</button>
     </form>
 
-    <a href="{{ next }}" class="back-btn">Back</a>
+    <a href="{{ request.META.HTTP_REFERER }}" class="back-btn"> Back </a>
+    <a href="{% url 'resource_list' %}" class="back-btn">Resource list</a>
 </div>
 {% endblock %}

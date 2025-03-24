@@ -69,6 +69,9 @@ urlpatterns = [
     path('remove_video_from_module/<int:module_id>/', clientViews.remove_video_from_module, name='remove_video_from_module'),
     path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
     path('remove_exercises_from_module/<int:module_id>/', clientViews.remove_exercise_from_module, name='remove_exercises_from_module'),
+    path('resource_list/', clientViews.resource_list, name='resource_list'),
+    path('delete_resource/<int:resource_id>/', clientViews.delete_resource, name='delete_resource'),
+    path('delete_video/<int:video_id>/', clientViews.delete_video, name='delete_video'),
 
 
 
