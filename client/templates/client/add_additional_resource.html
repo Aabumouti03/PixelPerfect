@@ -101,22 +101,50 @@
         <div class="form-group">
             <label for="id_title">Resource Title:</label>
             {{ form.title }}
+            {% if form.title.errors %}
+                <div style="color: red;">
+                    {% for error in form.title.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-
+        
         <div class="form-group">
             <label for="id_description">Description:</label>
             {{ form.description }}
+            {% if form.description.errors %}
+                <div style="color: red;">
+                    {% for error in form.description.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-
+        
         <div class="form-group">
             <label for="id_resource_type">Resource Type:</label>
             {{ form.resource_type }}
+            {% if form.resource_type.errors %}
+                <div style="color: red;">
+                    {% for error in form.resource_type.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-
+        
         <div class="form-group">
             <label for="id_url">External URL (if any):</label>
             {{ form.url }}
-        </div>
+            {% if form.url.errors %}
+                <div style="color: red;">
+                    {% for error in form.url.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>        
 
 
         <button type="submit" class="upload-btn">Save Resource</button>
