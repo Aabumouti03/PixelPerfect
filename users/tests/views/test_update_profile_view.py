@@ -117,9 +117,11 @@ class UpdateProfileViewTest(TestCase):
 
 
     def test_password_change(self):
-        """Test changing the password."""
+        """Test changing the password with correct current password."""
         data = {
+            "current_password": "Test@1234", 
             "new_password": "NewSecurePassword123",
+            "confirm_password": "NewSecurePassword123",  
             "first_name": "Test",
             "last_name": "User",
             "username": "testuser",
@@ -130,11 +132,9 @@ class UpdateProfileViewTest(TestCase):
             "sector": "it",
         }
         response = self.client.post(self.update_profile_url, data, follow=True)
-        
-        # Refresh user from DB
+
         self.user.refresh_from_db()
-        
-        self.assertTrue(self.user.check_password("NewSecurePassword123"))  
+        self.assertTrue(self.user.check_password("NewSecurePassword123"))
 
 
     def test_invalid_data_shows_error(self):
@@ -178,3 +178,64 @@ class UpdateProfileViewTest(TestCase):
         # Check for error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any("Profile not found." in str(m) for m in messages))
+
+    def test_password_change_wrong_current_password(self):
+        """Should not change password if current password is incorrect."""
+        data = {
+            "current_password": "WrongPassword!",
+            "new_password": "NewSecurePassword123",
+            "confirm_password": "NewSecurePassword123",
+            "first_name": "Test",
+            "last_name": "User",
+            "username": "testuser",
+            "phone_number": "+123456789",
+            "age": 25,
+            "gender": "male",
+            "last_time_to_work": "1_month",
+            "sector": "it",
+        }
+        response = self.client.post(self.update_profile_url, data, follow=True)
+
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.check_password("NewSecurePassword123"))
+        self.assertTrue(self.user.check_password("Test@1234"))  # still old password
+
+    def test_password_change_missing_current_password(self):
+        """Should not change password if current password is missing."""
+        data = {
+            "new_password": "NewSecurePassword123",
+            "confirm_password": "NewSecurePassword123",
+            "first_name": "Test",
+            "last_name": "User",
+            "username": "testuser",
+            "phone_number": "+123456789",
+            "age": 25,
+            "gender": "male",
+            "last_time_to_work": "1_month",
+            "sector": "it",
+        }
+        response = self.client.post(self.update_profile_url, data, follow=True)
+
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.check_password("NewSecurePassword123"))
+
+
+    def test_password_change_mismatched_confirmation(self):
+        """Should not change password if confirmation does not match."""
+        data = {
+            "current_password": "Test@1234",
+            "new_password": "NewSecurePassword123",
+            "confirm_password": "Mismatch123",
+            "first_name": "Test",
+            "last_name": "User",
+            "username": "testuser",
+            "phone_number": "+123456789",
+            "age": 25,
+            "gender": "male",
+            "last_time_to_work": "1_month",
+            "sector": "it",
+        }
+        response = self.client.post(self.update_profile_url, data, follow=True)
+
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.check_password("NewSecurePassword123"))

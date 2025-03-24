@@ -25,7 +25,6 @@ urlpatterns = [
     path('about/', usersViews.about, name='about'),
 
     # Other Paths
-    path('profile/', usersViews.profile, name='profile'),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
     path('verification_done/', usersViews.verification_done, name="verification_done"),
@@ -82,7 +81,7 @@ urlpatterns = [
 
  
     # Profile management
-    path('profile/', usersViews.show_profile, name='show_profile'),  
+    path('profile/', usersViews.profile, name='profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
     path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
@@ -113,7 +112,6 @@ urlpatterns = [
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
-    path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', clientViews.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
@@ -134,7 +132,6 @@ urlpatterns = [
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
-    path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
     path('save-notes/', usersViews.save_notes, name='save_notes'),
     path('get-notes/', usersViews.get_notes, name='get_notes'), 

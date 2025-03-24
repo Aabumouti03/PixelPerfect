@@ -9,15 +9,17 @@
 <section class="layout">
     <header class="header">
         <nav class="navbar">
-            <!-- Logo (Left Side) -->
-            <a href="#" class="nav-logo">
-                <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
-                <span class="logo-title">ReWork</span>
-            </a>
-        
-            <!-- Logout Button (Right Side) -->
-            <a href="#" class="special-btn logout-btn">Log out</a>
-        </nav>
+            <nav class="navbar">
+                <!-- Logo (Left Side) -->
+                <a href="#" class="nav-logo">
+                    <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
+                    <span class="logo-title">ReWork</span>
+                </a>
+            
+                <!-- Logout Button (Right Side) -->
+                <button class="special-btn logout-btn" onclick="openLogoutModal()">Log out</button>
+            </nav>
+            
         
     </header>
 
@@ -33,119 +35,150 @@
 <body>
 
     <script>
-    function toggleAllCategories() {
-        let allCheckbox = document.getElementById("category_all");
-        let categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-    
-        categoryCheckboxes.forEach(checkbox => {
-            checkbox.checked = allCheckbox.checked;
-        });
-    }
-    
-    function updateAllCheckbox() {
-        let allCheckbox = document.getElementById("category_all");
-        let categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-        
-        // If all categories are checked, check "All". Otherwise, uncheck it.
-        allCheckbox.checked = Array.from(categoryCheckboxes).every(checkbox => checkbox.checked);
-    }
-
-            function resetSearch() {
-            document.getElementById("search").value = "";  // Clear search input
+        function resetSearch() {
+            document.getElementById("search").value = ""; // Clear search input
         }
-
+    
         function resetFilters() {
-            let form = document.getElementById("filterForm");
-
+            const form = document.getElementById("filterForm");
+    
             // Reset dropdowns
             document.getElementById("filter_type").value = "all";
             document.getElementById("sort").value = "";
-
-            // Uncheck all categories
-            let categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-            categoryCheckboxes.forEach(checkbox => checkbox.checked = false);
-
-            // Reset "All" checkbox
+    
+            // Select all categories
+            const categoryCheckboxes = document.querySelectorAll('.pill-checkbox[name="category"]');
+            categoryCheckboxes.forEach(cb => cb.checked = true);
+    
+            // Sync visual state
             document.getElementById("category_all").checked = true;
-            toggleAllCategories();
-
+            updatePillSelection();
+    
             // Clear search bar
             document.getElementById("search").value = "";
-
-            // Submit form to refresh results
+    
+            // Submit form
             form.submit();
         }
+    
+        function updatePillSelection() {
+        const allCheckbox = document.getElementById("category_all");
+        const allLabel = document.getElementById("all-label");
+        const categoryCheckboxes = document.querySelectorAll('.pill-checkbox[name="category"]');
 
-        document.addEventListener("DOMContentLoaded", function () {
-        // Program Logic
-        document.querySelectorAll(".enroll-button[data-program-id]").forEach(button => {
-            button.addEventListener("click", function () {
-            const programId = this.dataset.programId;
-            const isEnrolled = this.dataset.enrolled === "true";
-            const action = isEnrolled ? "unenroll" : "enroll";
+        const allSelected = Array.from(categoryCheckboxes).every(cb => cb.checked);
 
-            // Remove "Enrolled" from all other buttons
-            document.querySelectorAll(".enroll-button[data-program-id]").forEach(b => {
-                b.textContent = "Enroll";
-                b.dataset.enrolled = "false";
-                b.classList.remove("enrolled");
-            });
-
-            // Toggle this one
-            if (!isEnrolled) {
-                this.textContent = "Enrolled";
-                this.dataset.enrolled = "true";
-                this.classList.add("enrolled");
-            }
-
-            fetch("{% url 'recommended_programs' %}", {
-                method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({
-                program_id: programId,
-                action: action
-                })
-            });
-            });
+        categoryCheckboxes.forEach(box => {
+            const label = document.querySelector(`label[for="${box.id}"]`);
+            label.classList.toggle("selected", false);
         });
 
-        //  Module Logic
+        allLabel.classList.toggle("selected", allSelected);
+        allCheckbox.checked = allSelected;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const allCheckbox = document.getElementById("category_all");
+        const categoryCheckboxes = document.querySelectorAll('.pill-checkbox[name="category"]');
+        const allLabel = document.getElementById("all-label");
+
+        // Mark all as selected on first load if nothing selected
+        const noneSelectedInitially = Array.from(categoryCheckboxes).every(cb => !cb.checked);
+        if (noneSelectedInitially) {
+            categoryCheckboxes.forEach(cb => cb.checked = true);
+        }
+        updatePillSelection();
+
+        allCheckbox.addEventListener("change", () => {
+            const isChecked = allCheckbox.checked;
+            if (isChecked) {
+                categoryCheckboxes.forEach(cb => cb.checked = true);
+            }
+            updatePillSelection();
+        });
+
+        categoryCheckboxes.forEach(box => {
+            box.addEventListener("change", () => {
+                updatePillSelection();
+            });
+        });
+    
+            // Program Logic
+            document.querySelectorAll(".enroll-button[data-program-id]").forEach(button => {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault(); // Prevent form submission or button default behavior
+
+                    const programId = this.dataset.programId;
+                    const isEnrolled = this.dataset.enrolled === "true";
+                    const action = isEnrolled ? "unenroll" : "enroll";
+
+                    // Deselect others
+                    document.querySelectorAll(".enroll-button[data-program-id]").forEach(b => {
+                        b.textContent = "Enroll";
+                        b.dataset.enrolled = "false";
+                        b.classList.remove("enrolled");
+                    });
+
+                    // Toggle this one visually
+                    if (!isEnrolled) {
+                        this.textContent = "Enrolled";
+                        this.dataset.enrolled = "true";
+                        this.classList.add("enrolled");
+                    }
+
+                    fetch("{% url 'recommended_programs' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({
+                            program_id: programId,
+                            action: action
+                        })
+                    });
+                });
+            });
+
+    
+        // Module Logic
         document.querySelectorAll(".enroll-button[data-module-id]").forEach(button => {
-            button.addEventListener("click", function () {
-            const moduleId = this.dataset.moduleId;
-            const isEnrolled = this.dataset.enrolled === "true";
-            const action = isEnrolled ? "unenroll" : "enroll";
+            button.addEventListener("click", function (e) {
+                e.preventDefault(); // Stop default button action
 
-            // Toggle this one
-            if (isEnrolled) {
-                this.textContent = "Enroll";
-                this.dataset.enrolled = "false";
-                this.classList.remove("enrolled");
-            } else {
-                this.textContent = "Enrolled";
-                this.dataset.enrolled = "true";
-                this.classList.add("enrolled");
-            }
+                const moduleId = this.dataset.moduleId;
+                const isEnrolled = this.dataset.enrolled === "true";
+                const action = isEnrolled ? "unenroll" : "enroll";
 
-            fetch("{% url 'recommended_modules' %}", {
-                method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({
-                module_id: moduleId,
-                action: action
-                })
-            });
+                if (isEnrolled) {
+                    this.textContent = "Enroll";
+                    this.dataset.enrolled = "false";
+                    this.classList.remove("enrolled");
+                } else {
+                    this.textContent = "Enrolled";
+                    this.dataset.enrolled = "true";
+                    this.classList.add("enrolled");
+                }
+
+                fetch("{% url 'recommended_modules' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        module_id: moduleId,
+                        action: action
+                    })
+                });
             });
         });
+
         });
+
 
     </script>
+    
 
                 <!-- Questionnaire Button -->
                 <div class="button-container">
@@ -155,12 +188,23 @@
                 <!-- OR Divider -->
                 <div class="divider"></div>
                 <p class="or-text"><strong>OR</strong></p>
-                <div class="divider"></div>
 
                 <!-- Filters Section -->
                 <div class="filters-container">
                     <form method="GET" action="{% url 'get_started' %}" id="filterForm">
                         <div class="filter-grid">
+
+                    <!-- Search Bar -->
+                    <div class="filter-item search-container">
+                        <label for="search">Search:</label>
+                        <div class="search-box">
+                            <input type="text" name="search" id="search" placeholder="Search by keyword..." value="{{ search_query|default:'' }}">
+                            <button type="submit" name="search_btn" class="search-btn">Search</button>
+                        </div>
+                    </div>
+
+                        <!-- Dropdowns Row -->
+                        <div class="dropdown-row">
                             <!-- Filter Type -->
                             <div class="filter-item">
                                 <label for="filter_type">Filter By:</label>
@@ -171,43 +215,33 @@
                                 </select>
                             </div>
 
+                            <!-- Sorting Dropdown -->
+                            <div class="filter-item">
+                                <label for="sort">Sort By:</label>
+                                <select name="sort" id="sort">
+                                    <option value="" {% if not sort %}selected{% endif %}>None</option>
+                                    <option value="asc" {% if sort == "asc" %}selected{% endif %}>A-Z</option>
+                                    <option value="desc" {% if sort == "desc" %}selected{% endif %}>Z-A</option>
+                                </select>
+                            </div>
+                        </div>
+
                 <!-- Category Selection -->
                 <div class="filter-item">
                     <label>Categories:</label>
-                    <div class="category-list">
-                        <!-- "All" checkbox -->
-                        <input type="checkbox" id="category_all" onchange="toggleAllCategories()" 
-                            {% if selected_category_ids|length == categories|length %}checked{% endif %}>
-                        <label for="category_all"><strong>All</strong></label>
+                    <input type="checkbox" id="category_all" class="pill-checkbox">
+                    <label for="category_all" class="pill-label" id="all-label">All</label>
 
-                        <!-- Individual categories -->
+                    <div class="category-pill-list">
                         {% for category in categories %}
-                            <input type="checkbox" name="category" value="{{ category.id }}" class="category-checkbox"
-                                {% if category.id in selected_category_ids %}checked{% endif %}
-                                onchange="updateAllCheckbox()">
-                            <label>{{ category.name }}</label>
+                            <input type="checkbox" name="category" value="{{ category.id }}" id="cat_{{ category.id }}" class="pill-checkbox" {% if category.id in selected_category_ids %}checked{% endif %}>
+                            <label for="cat_{{ category.id }}" class="pill-label {% if category.id in selected_category_ids %}selected{% endif %}">
+                                {{ category.name }}
+                            </label>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- Search Bar -->
-                <div class="filter-item search-container">
-                    <label for="search">Search:</label>
-                    <div class="search-box">
-                        <input type="text" name="search" id="search" placeholder="Search by keyword..." value="{{ search_query|default:'' }}">
-                        <button type="submit" name="search_btn" class="search-btn">Search</button>
-                    </div>
-                </div>
-
-                <!-- Sorting Dropdown -->
-                <div class="filter-item">
-                    <label for="sort">Sort By:</label>
-                    <select name="sort" id="sort">
-                        <option value="" {% if not sort %}selected{% endif %}>None</option>
-                        <option value="asc" {% if sort == "asc" %}selected{% endif %}>A-Z</option>
-                        <option value="desc" {% if sort == "desc" %}selected{% endif %}>Z-A</option>
-                    </select>
-                </div>
 
                 <!-- Action Buttons -->
                 <div class="button-container">
@@ -271,5 +305,7 @@
             <p>&copy; 2025 ReWork. All Rights Reserved.</p>
         </footer>
     </section>
+   
+
 </body>
 </html>

@@ -290,9 +290,6 @@ def welcome_page(request):
 def modules(request):
     return render(request, 'users/modules.html')
 
-@login_required
-def profile(request):
-    return render(request, 'users/profile.html')
 
 def about(request):
     return render(request, 'users/about.html')
@@ -445,22 +442,20 @@ def log_out(request):
     return redirect('dashboard')
 
 @login_required 
-def show_profile(request):
+def profile(request):
     """View to display the user profile"""
     user = request.user
 
-    # Check if the session variable exists
     if 'profile_update_popup' in request.session:
         # If the session variable is set, show the pop-up message
         profile_update_popup = request.session['profile_update_popup']
 
-        # Remove the session variable after showing the message
         del request.session['profile_update_popup']
     else:
         profile_update_popup = None
 
     if hasattr(user, 'User_profile'):
-        return render(request, 'users/Profile/show_profile.html', {'user': user, 'profile_update_popup': profile_update_popup})
+        return render(request, 'users/Profile/profile.html', {'user': user, 'profile_update_popup': profile_update_popup})
     else:
         messages.error(request, "User profile not found.")
         return redirect('welcome_page')
@@ -479,16 +474,15 @@ def update_profile(request):
         form = UserProfileForm(request.POST, instance=user.User_profile, user=user)
         if form.is_valid():
             form.save()
-            user.User_profile.save()  #  Explicitly save the profile
-            user.refresh_from_db()  #  Ensure data in tests matches DB state
+            user.User_profile.save()  
+            user.refresh_from_db()  
 
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
             if new_email:
                 new_email = new_email.strip().lower()  # Convert to lowercase
                 
-                # Only proceed if the email has actually changed
-                if new_email != user.email.lower():  # Ensure case-insensitive comparison
+                if new_email != user.email.lower():  
                     # Save the new email for verification
                     user.new_email = new_email
                     user.save()
@@ -497,10 +491,8 @@ def update_profile(request):
                     uid = urlsafe_base64_encode(force_bytes(user.pk))
                     token = default_token_generator.make_token(user)
 
-                    # Create verification link
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
-                    # Send verification email
                     send_mail_status = send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
@@ -510,13 +502,11 @@ def update_profile(request):
                     )
 
                     request.session['profile_update_popup'] = 'verification_sent'
-                    request.session.save()  # Ensure session data is persisted before redirecting
+                    request.session.save()  
                 else:
-                    # If the email hasn't changed, just don't do anything with the email
                     user.new_email = None
                     user.save()
 
-            # Handle password update
             new_password = form.cleaned_data.get("new_password")
             if new_password:
                 user.set_password(new_password)
@@ -524,7 +514,7 @@ def update_profile(request):
                 update_session_auth_hash(request, user)
 
 
-            return redirect('show_profile')
+            return redirect('profile')
 
         else:
             messages.error(request, "There were errors in the form.")
@@ -574,7 +564,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('show_profile')  # Redirect back to the profile if deletion fails
+            return redirect('profile')  # Redirect back to the profile if deletion fails
 
     # Confirmation before deletion
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
