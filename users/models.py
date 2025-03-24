@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, ExerciseQuestion, Questionnaire, Question, Exercise,VideoResource,AdditionalResource
+from client.models import Program, Module, Questionnaire, Question, Exercise, VideoResource, AdditionalResource
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.db import models

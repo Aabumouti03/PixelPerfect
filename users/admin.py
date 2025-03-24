@@ -5,7 +5,6 @@ from .models import (
     UserProgramEnrollment, UserModuleEnrollment, 
     Questionnaire_UserResponse, QuestionResponse, StickyNote, UserResponse, JournalEntry  # ✅ Updated model name
 )
-from client.models import Program, Module
 
 
 @admin.register(Questionnaire_UserResponse)
