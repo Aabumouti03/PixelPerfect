@@ -14,6 +14,7 @@ class ClientModulesTest(TestCase):
         Creates a test user, makes them superuser, logs them in,
         and sets up sample modules and URLs.
         """
+        
         self.client = Client()
 
         # 1. Create a normal user

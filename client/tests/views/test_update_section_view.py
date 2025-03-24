@@ -12,6 +12,7 @@ class UpdateSectionViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        
         cls.client = Client()
 
         # Create an admin user

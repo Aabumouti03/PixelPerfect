@@ -134,18 +134,14 @@ class LogInFormTestCase(TestCase):
 
         user = authenticate(username='dandoe', password='Testuser123')
         self.assertIsNotNone(user, "Authentication failed for valid credentials.")
-
     
     def test_username_with_leading_trailing_spaces(self):
-        """
-        Ensure the form trims whitespace from username before authentication.
-        """
+        """Ensure the form trims whitespace from username before authentication."""
         form = LogInForm(data={'username': '  dandoe  ', 
-                               'password': 'Testuser123'})
+                                'password': 'Testuser123'})
         self.assertTrue(form.is_valid(), msg=form.errors)
-
         user = authenticate(username='dandoe', 
-                            password='Testuser123')
+                             password='Testuser123')
         self.assertIsNotNone(user, "Authentication should succeed even with extra spaces.")
     
     def test_nonexistent_username_fails(self):
@@ -183,11 +179,11 @@ class LogInFormTestCase(TestCase):
         self.assertIsNone(user, "Authentication should fail with an incorrect password.")
 
     def test_username_case_insensitive_login(self):
-        """Ensure authentication works when username is typed in different cases."""
-        form = LogInForm(data={'username': 'DANDOE', 
-                               'password': 'Testuser123'})
-        self.assertTrue(form.is_valid(), msg=form.errors)
-
-        user = authenticate(username='dandoe', password='Testuser123')
-        self.assertIsNotNone(user)
-        self.assertTrue(user.is_authenticated)
+            """Ensure authentication works when username is typed in different cases."""
+            form = LogInForm(data={'username': 'DANDOE', 
+                                    'password': 'Testuser123'})
+            self.assertTrue(form.is_valid(), msg=form.errors)
+    
+            user = authenticate(username='dandoe', password='Testuser123')
+            self.assertIsNotNone(user)
+            self.assertTrue(user.is_authenticated)

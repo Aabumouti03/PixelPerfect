@@ -1,6 +1,6 @@
 from django import forms
-from .models import Module, Section, Exercise, Question, ExerciseQuestion
-from .models import Program, Module, Category, ProgramModule, VideoResource
+from .models import Module, Section, Exercise, ExerciseQuestion
+from .models import Program, Module, Category, ProgramModule, VideoResource, AdditionalResource
 
 class ModuleForm(forms.ModelForm):
     """Form to edit modules."""
@@ -18,9 +18,22 @@ class ModuleForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter module description', 'rows': 3}),
         }
 
+class AdditionalResourceForm(forms.ModelForm):
+    class Meta:
+        model = AdditionalResource
+        fields = ['title', 'description', 'resource_type', 'url', 'file']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'resource_type': forms.Select(attrs={'class': 'form-control'}),
+            'url': forms.URLInput(attrs={'class': 'form-control'}),
+            'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+
 class SectionForm(forms.ModelForm):
     exercises = forms.ModelMultipleChoiceField(
-        queryset=Exercise.objects.all(),  # ✅ Show all exercises
+        queryset=Exercise.objects.all(),  #Show all exercises
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -35,7 +48,7 @@ class SectionForm(forms.ModelForm):
 
 class ExerciseForm(forms.ModelForm):
     questions = forms.ModelMultipleChoiceField(
-        queryset=ExerciseQuestion.objects.all(),  # ✅ Show all questions
+        queryset=ExerciseQuestion.objects.all(),  #Show all questions
         widget=forms.CheckboxSelectMultiple,
         required=False
     )

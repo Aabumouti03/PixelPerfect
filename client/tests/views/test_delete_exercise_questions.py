@@ -14,7 +14,7 @@ class DeleteExerciseQuestionsViewTest(TestCase):
     def setUpTestData(cls):
         cls.client = Client()
         
-        # ✅ Create an admin user
+        # Create an admin user
         cls.admin_user = User.objects.create_superuser(
             username="adminuser", email="admin@example.com", password="adminpass"
         )
@@ -37,22 +37,23 @@ class DeleteExerciseQuestionsViewTest(TestCase):
         # ✅ Define the URL
         cls.url = reverse('delete_exercise_questions', args=[cls.exercise.id])
 
-        def test_admin_can_delete_questions(self):
-            """Test successful deletion of questions by an admin"""
-            self.client.login(username='adminuser', password='adminpass')
+    def test_admin_can_delete_questions(self):
+        """Test successful deletion of questions by an admin"""
+        self.client.login(username='adminuser', password='adminpass')
             
-            self.exercise.questions.add(self.question1)
+        response = self.client.post(self.url, json.dumps({
+            "question_ids": [self.question1.id]
+        }), content_type="application/json")
             
-            response = self.client.post(self.url, json.dumps({
-                "question_ids": [self.question1.id]
-            }), content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"success": True, "message": "1 questions deleted!"})
             
-            self.assertEqual(response.status_code, 200)
-            self.assertJSONEqual(response.content, {"success": True, "message": "1 questions deleted!"})
-            
-            self.assertFalse(ExerciseQuestion.objects.filter(id=self.question1.id).exists())
-            self.assertTrue(ExerciseQuestion.objects.filter(id=self.question2.id).exists())
-
+        # Check if the question is unlinked from the exercise, but not deleted from the database
+        self.assertFalse(self.exercise.questions.filter(id=self.question1.id).exists())
+        self.assertTrue(ExerciseQuestion.objects.filter(id=self.question1.id).exists())
+        
+        # Make sure the other question is still linked to the exercise
+        self.assertTrue(self.exercise.questions.filter(id=self.question2.id).exists())
 
     def test_non_admin_user_cannot_delete_questions(self):
         """Test that non-admin users cannot delete questions"""

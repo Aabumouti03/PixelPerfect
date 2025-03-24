@@ -18,6 +18,7 @@ class AddSectionViewTest(TestCase):
         cls.admin_user = User.objects.create_superuser(
             username='adminuser', email='admin@example.com', password='adminpass'
         )
+        
         cls.admin_profile = EndUser.objects.create(user=cls.admin_user, age=35, gender="male", sector="it")
 
         # Create a normal user

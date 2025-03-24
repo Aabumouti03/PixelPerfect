@@ -9,6 +9,7 @@ User = get_user_model()
 class EditCategoryTestCase(TestCase):
 
     def setUp(self):
+        
         """Set up initial test data."""
         self.client = Client()
 

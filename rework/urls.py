@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView 
 from client import views as clientViews
 from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
@@ -19,13 +19,9 @@ urlpatterns = [
     path('', usersViews.welcome_page, name="welcome_page"),
     path('dashboard/', usersViews.dashboard, name="dashboard"),
 
-    # Redirect "Modules" to "Edit_Add_Module"
-    path('modules/', clientViews.CreateModule, name="modules"),
-
     path('about/', usersViews.about, name='about'),
 
     # Other Paths
-    path('profile/', usersViews.profile, name='profile'),
     path('log_in/', usersViews.log_in, name="log_in"),
     path('log_out/', usersViews.log_out, name="log_out"),
     path('verification_done/', usersViews.verification_done, name="verification_done"),
@@ -48,12 +44,11 @@ urlpatterns = [
         authenticationViews.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
         name="password_reset_complete"),
     
-
     # Home page
     path('about/', usersViews.about, name='about'),
 
     # Modules (Client)
-    path("modules/edit_add/", clientViews.CreateModule, name="edit_add_module"),
+    path("modules/create/", clientViews.createModule, name="add_module"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),
     path('edit_section/<int:section_id>/', clientViews.edit_section, name='edit_section'),
     path('edit_exercise/<int:exercise_id>/', clientViews.edit_exercise, name='edit_exercise'),
@@ -67,6 +62,14 @@ urlpatterns = [
     path('update_exercise/<int:exercise_id>/', clientViews.update_exercise, name='update_exercise'),
     path('delete_exercise_questions/<int:exercise_id>/', clientViews.delete_exercise_questions, name='delete_exercise_questions'),
     path("add_exercise_ajax/", clientViews.add_exercise_ajax, name="add_exercise_ajax"),
+    path('add_exercise_to_module/<int:module_id>/', clientViews.add_exercise_to_module, name='add_exercise_to_module'),
+    path('add_additional_resource/', clientViews.add_additional_resource, name='add_additional_resource'),
+    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
+    path('remove_video_from_module/<int:module_id>/', clientViews.remove_video_from_module, name='remove_video_from_module'),
+    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
+    path('remove_exercises_from_module/<int:module_id>/', clientViews.remove_exercise_from_module, name='remove_exercises_from_module'),
+
+
 
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
     path('modules/', usersViews.modules, name='modules'),
@@ -74,7 +77,7 @@ urlpatterns = [
     path("get_started/", usersViews.get_started, name="get_started"),
     path('contact-success/', usersViews.contact_success, name='contact_success'),
    
-    path('modules/add/', clientViews.add_module, name='add_module'),
+   # path('modules/add/', clientViews.add_module, name='add_module'),
     path('sections/add/', clientViews.add_section, name='add_section'),
     path('sections/get_all/', clientViews.get_sections, name='get_sections'),
     path('exercises/add/', clientViews.add_exercise, name='add_exercise'), 
@@ -82,7 +85,7 @@ urlpatterns = [
 
  
     # Profile management
-    path('profile/', usersViews.show_profile, name='show_profile'),  
+    path('profile/', usersViews.profile, name='profile'),  
     path('profile/edit/', usersViews.update_profile, name='update_profile'),  
     path('profile/delete/', usersViews.delete_account, name='delete_account'),
     path('verify-email/<uidb64>/<token>/', usersViews.verify_email, name='verify_email'),
@@ -112,7 +115,6 @@ urlpatterns = [
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
-    path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
     path('userStatistics/', clientViews.userStatistics, name='userStatistics'),    
     path('modules_statistics/', clientViews.modules_statistics, name='modules_statistics'),
@@ -133,7 +135,6 @@ urlpatterns = [
 
     # User dashboard details
     path('dashboard/', usersViews.dashboard, name='dashboard'),
-    path('profile/', usersViews.profile, name='profile'),
     path('reports/', clientViews.reports, name='reports'),
     path('save-notes/', usersViews.save_notes, name='save_notes'),
     path('get-notes/', usersViews.get_notes, name='get_notes'), 
@@ -158,12 +159,6 @@ urlpatterns = [
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
     
-    
-    
-    
-    
-    
-    
     # Modules
     path("enroll-module/", enroll_module, name="enroll_module"),
     path("unenroll-module/", unenroll_module, name="unenroll_module"), 
@@ -173,14 +168,9 @@ urlpatterns = [
     # Client Modules
     path("client_modules/", views.client_modules, name="client_modules"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  
-    path('add_module/', views.add_module, name='add_module'),
+   # path('add_module/', views.add_module, name='add_module'),
     path("delete_module/<int:module_id>/", delete_module, name="delete_module"),
     path('client_dashboard/', clientViews.client_dashboard, name='client_dashboard'),
-    
-    
-    
-    
-    
     
     #video content
     path('videos/', clientViews.video_list, name='video_list'),

@@ -6,6 +6,7 @@ from client.models import Questionnaire, Question
 User = get_user_model()
 
 class DeleteQuestionTest(TestCase):
+    
     def setUp(self):
         """Set up admin and a question."""
         self.admin_user = User.objects.create_superuser(username="admin", email="admin@test.com", password="adminpass")

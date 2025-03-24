@@ -20,6 +20,7 @@ class DeleteProgramTest(TestCase):
             title="Program to Delete",
             description="This program will be deleted in the test."
         )
+        
         self.url = reverse("delete_program", args=[self.program.id])
 
     def test_delete_program_successfully(self):

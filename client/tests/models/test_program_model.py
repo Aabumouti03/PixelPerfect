@@ -2,6 +2,7 @@ from django.test import TestCase
 from client.models import Program, Category, Module, ProgramModule
 
 class ProgramModelTest(TestCase):
+    
     def setUp(self):
         self.category1 = Category.objects.create(name="Math")
         self.category2 = Category.objects.create(name="Science")

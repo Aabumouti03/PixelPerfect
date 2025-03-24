@@ -1,16 +1,12 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
-from users.models import EndUser  
 from users.forms import UserProfileForm
+from django.contrib.auth import get_user_model
+from users.models import EndUser
 
 User = get_user_model()
 
-
 class UserProfileFormTest(TestCase):
-
     def setUp(self):
-        """Create a user for testing unique constraints."""
         self.user = User.objects.create_user(
             username="testuser",
             first_name="Test",
@@ -18,7 +14,6 @@ class UserProfileFormTest(TestCase):
             email="test@example.com",
             password="Test@1234"
         )
-
         self.end_user = EndUser.objects.create(
             user=self.user,
             phone_number="+123456789",
@@ -29,49 +24,24 @@ class UserProfileFormTest(TestCase):
             sector="it"
         )
 
-        # Explicitly set a unique `new_email` for this test
-        self.user.email = "unique_test@example.com"
-        self.user.save()
-
     def test_valid_form(self):
-        """Test a valid form submission."""
-
         form_data = {
-            "first_name": "John",
-            "last_name": "Doe",
-            "username": "johndoe",
-            "email": self.user.email,  # Use the existing email
-            "new_email": "unique_johndoe_new@example.com",  # Ensure uniqueness
-            "new_password": "StrongPass123!",
-            "confirm_password": "StrongPass123!",
+            "first_name": "Updated",
+            "last_name": "User",
+            "username": "updateduser",
             "phone_number": "+987654321",
             "age": 30,
             "gender": "female",
-            "ethnicity": "hispanic",
-            "last_time_to_work": "1_month",
+            "ethnicity": "asian",
+            "last_time_to_work": "3_months",
             "sector": "finance",
+            "new_password": "NewPass1234",
+            "confirm_password": "NewPass1234",
+            "current_password": "Test@1234",
+            "new_email": "updated@example.com",
         }
         form = UserProfileForm(data=form_data, instance=self.end_user, user=self.user)
-             
-        self.assertTrue(form.is_valid())
-
-            # Simulate the email verification step
-        self.user.new_email = form.cleaned_data.get("new_email")
-        self.user.save()
-
-            # Ensure new_email is stored but email is unchanged
-        self.assertEqual(self.user.new_email, "unique_johndoe_new@example.com")
-        self.assertNotEqual(self.user.email, self.user.new_email)
-
-        # Now simulate email verification
-        self.user.email = self.user.new_email
-        self.user.new_email = None
-        self.user.email_verified = True
-        self.user.save()
-
-        # Ensure email is now updated
-        self.assertEqual(self.user.email, "unique_johndoe_new@example.com")
-        self.assertIsNone(self.user.new_email)
+        self.assertTrue(form.is_valid(), form.errors.as_json())  # show JSON errors if any
 
     def test_missing_required_fields(self):
         """Test form validation when required fields are missing."""
@@ -198,4 +168,59 @@ class UserProfileFormTest(TestCase):
             any("user with this email already exists" in e.lower() for e in form.errors["new_email"]),
             "Expected error message about existing email not found."
         )
+
+    def test_password_change_without_current_password(self):
+        form_data = {
+            "first_name": "Updated",
+            "last_name": "User",
+            "username": "updateduser",
+            "phone_number": "+987654321",
+            "age": 30,
+            "gender": "female",
+            "ethnicity": "asian",
+            "last_time_to_work": "3_months",
+            "sector": "finance",
+            "new_password": "NewPass1234",
+            "confirm_password": "NewPass1234",
+            "new_email": "updated@example.com",
+        }
+        form = UserProfileForm(data=form_data, instance=self.end_user, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("current_password", form.errors)
+
+    def test_password_confirmation_mismatch(self):
+        form_data = {
+            "first_name": "Updated",
+            "last_name": "User",
+            "username": "updateduser",
+            "phone_number": "+987654321",
+            "age": 30,
+            "gender": "female",
+            "ethnicity": "asian",
+            "last_time_to_work": "3_months",
+            "sector": "finance",
+            "new_password": "NewPass1234",
+            "confirm_password": "DifferentPass1234",
+            "current_password": "Test@1234",
+            "new_email": "updated@example.com",
+        }
+        form = UserProfileForm(data=form_data, instance=self.end_user, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("confirm_password", form.errors)
+
+    def test_valid_form_without_password_change(self):
+        form_data = {
+            "first_name": "Updated",
+            "last_name": "User",
+            "username": "updateduser",
+            "phone_number": "+987654321",
+            "age": 30,
+            "gender": "female",
+            "ethnicity": "asian",
+            "last_time_to_work": "3_months",
+            "sector": "finance",
+            "new_email": "updated@example.com",  # no password fields
+        }
+        form = UserProfileForm(data=form_data, instance=self.end_user, user=self.user)
+        self.assertTrue(form.is_valid(), form.errors.as_json())
 

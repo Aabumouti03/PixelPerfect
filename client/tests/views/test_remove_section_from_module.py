@@ -16,6 +16,7 @@ class RemoveSectionFromModuleViewTest(TestCase):
         cls.client = Client()
         
         # Create an admin user and profile
+        
         cls.admin_user = User.objects.create_superuser(
             username='adminuser', email='adminuser@example.com', password='adminpass'
         )

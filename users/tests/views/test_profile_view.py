@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse, resolve
 from users.models import EndUser
 from django.contrib.messages import get_messages
-from users.views import show_profile  # Importing the view for URL resolution test
+from users.views import profile  # Importing the view for URL resolution test
 
 User = get_user_model()
 
@@ -30,10 +30,10 @@ class ShowProfileViewTest(TestCase):
 
         self.client.force_login(self.user)  #  Authenticated instantly
 
-        self.profile_url = reverse("show_profile")  #  Ensure this matches your actual URL pattern
+        self.profile_url = reverse("profile")  #  Ensure this matches your actual URL pattern
 
 
-    def test_show_profile_authenticated_user(self):
+    def test_profile_authenticated_user(self):
         """Ensure the profile page loads correctly for an authenticated user."""
         response = self.client.get(self.profile_url)
         self.assertEqual(response.status_code, 200)
@@ -47,10 +47,10 @@ class ShowProfileViewTest(TestCase):
         self.assertRedirects(response, f"/log_in/?next={self.profile_url}")  #  Ensure correct redirection
 
 
-    def test_show_profile_url_resolves(self):
-        """Test if the URL correctly resolves to the show_profile view."""
+    def test_profile_url_resolves(self):
+        """Test if the URL correctly resolves to the profile view."""
         found = resolve(self.profile_url)
-        self.assertEqual(found.func, show_profile)
+        self.assertEqual(found.func, profile)
 
 
     def test_redirect_if_no_user_profile(self):
