@@ -65,15 +65,23 @@ def createModule(request):
         title = request.POST.get("title")
         description = request.POST.get("description")
         exercise_ids = request.POST.getlist("exercises")
+        video_ids = request.POST.getlist("videos")
+        resource_ids = request.POST.getlist("resources")
 
         if not title:
             return render(request, "Module/add_module.html", {
-                "error": "Title is required.",
-                "exercises": Exercise.objects.all()
+                "error": "Module title is required.",
+                "exercises": Exercise.objects.all(),
+                "videos": VideoResource.objects.all(),
+                "resources": AdditionalResource.objects.all(),
+                "title": title,
+                "description": description
             })
 
+        # Create the module
         module = Module.objects.create(title=title, description=description)
 
+        # Add exercises in a new section if any selected
         if exercise_ids:
             exercises = Exercise.objects.filter(id__in=exercise_ids)
             section = Section.objects.create(
@@ -83,12 +91,25 @@ def createModule(request):
             section.exercises.set(exercises)
             module.sections.add(section)
 
+        # Add video resources
+        if video_ids:
+            videos = VideoResource.objects.filter(id__in=video_ids)
+            module.video_resources.set(videos)
+
+        # Add additional resources
+        if resource_ids:
+            resources = AdditionalResource.objects.filter(id__in=resource_ids)
+            module.additional_resources.set(resources)
+
         return redirect("client_modules")
 
-    exercises = Exercise.objects.all()
+    # GET method — show all available options
     return render(request, "Module/add_module.html", {
-        "exercises": exercises
+        "exercises": Exercise.objects.all(),
+        "videos": VideoResource.objects.all(),
+        "resources": AdditionalResource.objects.all(),
     })
+
 
 
 @user_passes_test(admin_check)
@@ -1333,8 +1354,6 @@ def add_button(request):
             return redirect("client_modules")  # Redirect to the Client Modules page
     return render(request, "Module/add_module.html")
 
-
-# For adding video content
 @user_passes_test(admin_check)
 @login_required
 @csrf_exempt
@@ -1358,7 +1377,7 @@ def add_video(request):
             else:
                 messages.success(request, "Video added successfully.")
 
-            return redirect(next_url)
+            return redirect(next_url)  # Redirect to the next page (either module creation page or wherever the user came from)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -1366,9 +1385,11 @@ def add_video(request):
 
     return render(request, "client/add_video.html", {
         "form": form,
-        "next": next_url
+        "next": next_url  # Pass the next URL to the template so that it can be included in the form if needed
     })
 
+
+    
 @login_required
 @user_passes_test(admin_check)
 def video_list(request):
@@ -1431,19 +1452,42 @@ def remove_resource_from_module(request, module_id):
 @user_passes_test(admin_check)
 @login_required
 def add_additional_resource(request):
+    # Get next URL to redirect to after successful form submission
+    next_url = request.GET.get('next', '/')
+    module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
+
     if request.method == 'POST':
         form = AdditionalResourceForm(request.POST, request.FILES)
         if form.is_valid():
+            # Save the new additional resource
             resource = form.save()
-            module_id = request.GET.get('module_id')
-            next_url = request.GET.get('next', '/')
+
+            # If module_id is provided, link the resource to the module
             if module_id:
-                module = Module.objects.get(id=module_id)
+                module = get_object_or_404(Module, id=module_id)
                 module.additional_resources.add(resource)
+                messages.success(request, "Resource added and linked to the module.")
+            else:
+                messages.success(request, "Resource added successfully.")
+
+            # Redirect to the next URL (the previous page or specified redirect URL)
             return redirect(next_url)
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = AdditionalResourceForm()
-    return render(request, "client/add_additional_resource.html", {"form": form})
+
+    # Check if there's a module to redirect to
+    edit_module_url = None
+    if module_id:
+        edit_module_url = reverse('edit_module', args=[module_id])
+
+    return render(request, "client/add_additional_resource.html", {
+        "form": form,
+        "module_id": module_id,
+        "next": next_url,
+        "edit_module": edit_module_url
+    })
 
 @csrf_exempt
 @login_required
