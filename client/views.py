@@ -1,7 +1,6 @@
 import csv
 import json
 from collections import Counter, defaultdict
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -9,14 +8,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Avg, Max, Q
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from client import views as clientViews
-from client.forms import ModuleForm as ClientModuleForm
-from client.models import Category, Module as ClientModule, Program, VideoResource
+from client import views
+from client.forms import ModuleForm
+from client.models import Category, Module as Program, VideoResource
 from client.statistics import *
 
 from users import views as usersViews
@@ -24,13 +23,9 @@ from users.models import (
     EndUser,
     QuestionResponse,
     Questionnaire_UserResponse,
-    User,
     UserModuleEnrollment,
-    UserModuleProgress,
     UserProgramEnrollment,
-    UserProgramProgress,
 )
-from users.views import enroll_module, unenroll_module
 
 from .forms import (
     AdditionalResourceForm,
@@ -40,6 +35,7 @@ from .forms import (
     ModuleForm,
     ProgramForm,
     SectionForm,
+    VideoResourceForm,
 )
 from .models import (
     AdditionalResource,
@@ -94,6 +90,7 @@ def createModule(request):
 @user_passes_test(admin_check)
 @login_required
 def edit_module(request, module_id):
+    """Allows the client to edit the module's title, description, videos, etc."""
     module = get_object_or_404(Module, id=module_id)
 
     existing_exercise_ids = Exercise.objects.filter(
@@ -130,7 +127,6 @@ def edit_module(request, module_id):
 def edit_section(request, section_id):
     section = get_object_or_404(Section, id=section_id)
 
-    # ✅ Fetch all exercises **NOT** already in this section
     all_exercises = Exercise.objects.exclude(id__in=section.exercises.values_list('id', flat=True))
 
     if request.method == "POST":
@@ -326,7 +322,7 @@ def update_exercise(request, exercise_id):
     """Updates an exercise title and adds new questions without duplicating."""
     if request.method == "POST":
         try:
-            # ✅ If the exercise doesn't exist, an Http404 will be raised.
+            #If the exercise doesn't exist, an Http404 will be raised.
             exercise = get_object_or_404(Exercise, id=exercise_id)
         except Http404:
             return JsonResponse({"success": False, "error": "Exercise not found."}, status=404)
@@ -334,11 +330,11 @@ def update_exercise(request, exercise_id):
         try:
             data = json.loads(request.body)
 
-            # ✅ Update Exercise Title
+            #Update Exercise Title
             exercise.title = data.get("title", exercise.title)
             exercise.save()
 
-            # ✅ Get existing questions IDs
+            #Get existing questions IDs
             existing_question_ids = set(exercise.questions.values_list("id", flat=True))
             new_question_texts = set()
 
@@ -347,7 +343,7 @@ def update_exercise(request, exercise_id):
                 if question_text and question_text not in new_question_texts:
                     new_question_texts.add(question_text)
                     
-                    # ✅ Check if question already exists
+                    #Check if question already exists
                     existing_question = ExerciseQuestion.objects.filter(question_text=question_text).first()
                     if not existing_question:
                         existing_question = ExerciseQuestion.objects.create(question_text=question_text)
@@ -375,7 +371,6 @@ def delete_exercise_questions(request, exercise_id):
             if not question_ids:
                 return JsonResponse({"success": False, "error": "No questions selected"}, status=400)
 
-            # ✅ Delete selected questions
             deleted_count, _ = ExerciseQuestion.objects.filter(id__in=question_ids).delete()
 
             return JsonResponse({"success": True, "message": f"{deleted_count} questions deleted!"})
@@ -399,10 +394,8 @@ def add_exercise_ajax(request):
             if not title:
                 return JsonResponse({"success": False, "error": "Title is required"}, status=400)
 
-            # ✅ Create new exercise
             new_exercise = Exercise.objects.create(title=title)
 
-            # ✅ Add questions
             for question_text in questions_data:
                 question = ExerciseQuestion.objects.create(question_text=question_text)
                 new_exercise.questions.add(question)
@@ -445,7 +438,7 @@ def add_section(request):
         form.save()
         return redirect('add_module')
 
-    exercises = Exercise.objects.all()  # ✅ Fetch all exercises
+    exercises = Exercise.objects.all()
     return render(request, 'Module/add_section.html', {'form': form, 'exercises': exercises})
 
 @user_passes_test(admin_check)
@@ -464,7 +457,7 @@ def add_exercise(request):
         form.save()
         return redirect('add_section')
 
-    questions = ExerciseQuestion.objects.all()  # ✅ Fetch all questions
+    questions = ExerciseQuestion.objects.all()
     return render(request, 'Module/add_exercise.html', {'form': form, 'questions': questions})
   
 
@@ -475,7 +468,7 @@ def add_Equestion(request):
     form = ExerciseQuestionForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        return redirect('add_exercise')  # ✅ Redirect back to add exercise page
+        return redirect('add_exercise')
 
     return render(request, 'Module/add_question.html', {'form': form})
 
@@ -791,7 +784,7 @@ def user_detail_view(request, user_id):
         'user': user_profile,
         'enrolled_programs': enrolled_programs,
         'enrolled_modules': enrolled_modules,
-        'questionnaires_with_responses': questionnaires_with_responses,  # 👈 Fixed context structure
+        'questionnaires_with_responses': questionnaires_with_responses,
     }
     return render(request, 'client/user_detail.html', context)
 
@@ -1176,7 +1169,7 @@ def userStatistics(request):
         "sector_distribution": sector_counts,
     }
 
-    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})  # ✅ Pass JSON data
+    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
 
 
 
