@@ -1,147 +1,117 @@
-{% extends 'client/client_base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Module</title>
+    <link rel="stylesheet" href="{% static 'client/css/create_category.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="create_category">
 
-{% block content %}
-    <div class="content">
-        <h2 class="page-title">Add New Module</h2>
-        <link rel="stylesheet" href="{% static 'client/css/add_module.css' %}">
+{% include 'client/client_base.html' %}
 
-        <form method="POST" id="moduleForm">
-            {% csrf_token %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Create New Module</h2>
 
-            <div class="form-group">
-                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
-                {{ form.title }}
-            </div>
+    <form method="post" class="card p-4 shadow-sm">
+        {% csrf_token %}
 
-            <div class="form-group">
-                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-                {{ form.description }}
-            </div>
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
 
-            <!-- ✅ Display Selected Sections Here -->
-            <div class="form-group">
-                <label>Selected Sections:</label>
-                <ul id="selected-sections"></ul>
-            </div>
-
-            <!-- Section Selection (Checkboxes) -->
-            <div class="form-group">
-                <label>Select Sections:</label>
-                <div id="section-checkboxes">
-                    {{ form.sections }}
-                </div>
-            </div>
-
-            <a href="{% url 'add_section' %}" class="btn btn-secondary">+ Add New Section</a>
-
-
-            <button type="submit" class="save-btn">Save Module</button>
-        </form>
-    </div>
-
-    <!-- ✅ Add Section Modal -->
-    <div id="section-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Add New Section</h2>
-            <form id="addSectionForm">
-                {% csrf_token %}
-                {{ section_form.as_p }}
-                <button type="submit" class="save-btn">Save Section</button>
-            </form>
+        <!-- Title -->
+        <div class="mb-3">
+            <label class="form-label">Module Title</label>
+            <input type="text" name="title" class="form-control" required>
         </div>
-    </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // ✅ Update Selected Sections List
-        function updateSelectedSections() {
-            let selectedList = document.getElementById('selected-sections');
-            selectedList.innerHTML = "";
+        <!-- Description -->
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="4" required></textarea>
+        </div>
 
-            // ✅ Fix: Select checkboxes correctly even if Django wraps them in divs
-            document.querySelectorAll('input[type="checkbox"][name="sections"]:checked').forEach(checkbox => {
-                let label = document.querySelector(`label[for="${checkbox.id}"]`);
-                if (label) {
-                    let li = document.createElement('li');
-                    li.textContent = label.textContent.trim();
-                    selectedList.appendChild(li);
-                }
-            });
-        }
+        <!-- Dropdown + Add -->
+        <div class="mb-4">
+            <label class="form-label">Add Exercise</label>
+            <div class="d-flex gap-2">
+                <select id="exercise-dropdown" class="form-control">
+                    <option value="">Select an exercise</option>
+                    {% for exercise in exercises %}
+                        <option
+                            value="{{ exercise.id }}"
+                            data-title="{{ exercise.title }}"
+                            data-type="{{ exercise.exercise_type|default:'N/A' }}"
+                        >
+                            {{ exercise.title }} ({{ exercise.exercise_type|default:"N/A" }})
+                        </option>
+                    {% empty %}
+                        <option disabled>No exercises available</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-primary" onclick="addExercise()">Add</button>
+            </div>
+        </div>
 
-        // ✅ Attach event listener to checkboxes
-        document.querySelectorAll('input[type="checkbox"][name="sections"]').forEach(input => {
-            input.addEventListener('change', updateSelectedSections);
-        });
+        <!-- Selected Exercises Preview -->
+        <div class="mb-4">
+            <label class="form-label">Selected Exercises</label>
+            <ul class="list-group" id="selected-exercises"></ul>
+        </div>
 
-        // ✅ Update the selected sections list on page load
-        updateSelectedSections();
+        <!-- Hidden inputs will be injected here -->
+        <div id="hidden-exercise-inputs"></div>
 
-        // ✅ Open & Close Modal
-        let modal = document.getElementById("section-modal");
-        let openModalBtn = document.getElementById("open-section-modal");
-        let closeModalBtn = modal.querySelector(".close");
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Create Module</button>
+            <a href="{% url 'client_modules' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
 
-        openModalBtn.onclick = function() {
-            modal.style.display = "block";
-        };
-        closeModalBtn.onclick = function() {
-            modal.style.display = "none";
-        };
+<script>
+    const selectedExerciseIds = new Set();
 
-        // ✅ Handle New Section Submission
-        document.getElementById("addSectionForm").addEventListener("submit", function(event) {
-            event.preventDefault();
+    function addExercise() {
+        const dropdown = document.getElementById('exercise-dropdown');
+        const exerciseId = dropdown.value;
 
-            let formData = new FormData(this);
-            fetch("{% url 'add_section' %}", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json()) 
-            .then(data => {
-                if (data.success) {
-                    modal.style.display = "none";
-                    updateSectionsDropdown();
-                }
-            });
-        });
+        if (!exerciseId || selectedExerciseIds.has(exerciseId)) return;
 
-        // ✅ Fetch Updated Sections After Adding
-        function updateSectionsDropdown() {
-            fetch("{% url 'get_sections' %}") 
-            .then(response => response.json())
-            .then(data => {
-                let sectionContainer = document.getElementById("section-checkboxes");
-                sectionContainer.innerHTML = ""; 
+        const selectedOption = dropdown.options[dropdown.selectedIndex];
+        const title = selectedOption.getAttribute('data-title');
+        const type = selectedOption.getAttribute('data-type');
 
-                data.sections.forEach(section => {
-                    let div = document.createElement("div");
-                    div.innerHTML = `
-                        <input type="checkbox" name="sections" value="${section.id}" id="section_${section.id}">
-                        <label for="section_${section.id}">${section.title}</label>
-                    `;
-                    sectionContainer.appendChild(div);
-                });
+        // Add preview item
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.id = `exercise-preview-${exerciseId}`;
+        li.innerHTML = `
+            ${title} (${type})
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeExercise('${exerciseId}')">Remove</button>
+        `;
+        document.getElementById('selected-exercises').appendChild(li);
 
-                // Re-attach event listener to new checkboxes
-                document.querySelectorAll('input[name="sections"]').forEach(input => {
-                    input.addEventListener('change', updateSelectedSections);
-                });
-            });
-        }
+  
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'exercises';
+        hidden.value = exerciseId;
+        hidden.id = `hidden-exercise-${exerciseId}`;
+        document.getElementById('hidden-exercise-inputs').appendChild(hidden);
 
-        updateSectionsDropdown();
-    });
-    </script>
+        selectedExerciseIds.add(exerciseId);
+    }
 
-    <style>
-        /* Simple Modal Styling */
-        .modal { display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; padding: 20px; width: 50%; margin: 10% auto; border-radius: 8px; }
-        .close { float: right; font-size: 20px; cursor: pointer; }
-    </style>
+    function removeExercise(id) {
+        selectedExerciseIds.delete(id);
+        document.getElementById(`exercise-preview-${id}`)?.remove();
+        document.getElementById(`hidden-exercise-${id}`)?.remove();
+    }
+</script>
 
-{% endblock %}
+</body>
+</html>

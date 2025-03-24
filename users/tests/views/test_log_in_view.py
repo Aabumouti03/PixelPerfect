@@ -15,7 +15,8 @@ class LogInViewTestCase(TestCase):
         self.dashboard_url = reverse('dashboard')
 
 
-        self.test_user = User.objects.create_user(username='dandoe', password='Testuser123')
+        self.test_user = User.objects.create_user(username='dandoe',
+                                                   password='Testuser123')
 
     def test_log_in_url(self):
         """Ensure the login URL resolves correctly."""
@@ -35,18 +36,21 @@ class LogInViewTestCase(TestCase):
         self.test_user.email_verified = True
         self.test_user.save()
 
-        form_input = {'username': 'dandoe', 'password': 'Testuser123'}
+        form_input = {'username': 'dandoe', 
+                      'password': 'Testuser123'}
         response = self.client.post(self.url, form_input, follow=True)
 
         self.assertRedirects(response, self.dashboard_url)
 
-        user = authenticate(username='dandoe', password='Testuser123')
+        user = authenticate(username='dandoe',
+                             password='Testuser123')
         self.assertIsNotNone(user)
         self.assertTrue(user.is_authenticated)
 
     def test_unsuccessful_log_in_shows_errors(self):
         """Test that incorrect credentials result in an error message."""
-        form_input = {'username': 'dandoe', 'password': 'WrongPassword'}
+        form_input = {'username': 'dandoe', 
+                      'password': 'WrongPassword'}
         response = self.client.post(self.url, form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/log_in.html')
@@ -57,7 +61,8 @@ class LogInViewTestCase(TestCase):
 
     def test_login_with_non_existent_user_fails(self):
         """Test that login fails when user does not exist."""
-        form_input = {'username': 'unknownuser', 'password': 'SomePass123'}
+        form_input = {'username': 'unknownuser', 
+                      'password': 'SomePass123'}
         response = self.client.post(self.url, form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/log_in.html')
@@ -85,7 +90,8 @@ class LogInViewTestCase(TestCase):
 
     def test_successful_logout(self):
         """Ensure a logged-in user can log out and is redirected to login."""
-        self.client.login(username='dandoe', password='Testuser123')
+        self.client.login(username='dandoe', 
+                          password='Testuser123')
 
         response = self.client.get(reverse('log_out'), follow=True)
         self.assertEqual(response.status_code, 200)
@@ -98,7 +104,8 @@ class LogInViewTestCase(TestCase):
 
     def test_cancel_logout_stays_on_page(self):
         """Ensure user stays on the same page if they cancel logout."""
-        self.client.login(username='dandoe', password='Testuser123')
+        self.client.login(username='dandoe', 
+                          password='Testuser123')
 
         response = self.client.get(reverse('log_out'), follow=True)
 
@@ -136,7 +143,8 @@ class LogInViewTestCase(TestCase):
         admin_user.email_verified = True
         admin_user.save()
 
-        form_input = {'username': 'adminuser', 'password': 'AdminPass123'}
+        form_input = {'username': 'adminuser', 
+                      'password': 'AdminPass123'}
         response = self.client.post(self.url, form_input, follow=True)
 
         self.assertRedirects(response, reverse('client_dashboard'))
@@ -151,7 +159,8 @@ class LogInViewTestCase(TestCase):
         unverified_user.email_verified = False
         unverified_user.save()
 
-        form_input = {'username': 'unverified', 'password': 'Test1234!'}
+        form_input = {'username': 'unverified',
+                       'password': 'Test1234!'}
         response = self.client.post(self.url, form_input)
 
         self.assertEqual(response.status_code, 200)

@@ -274,3 +274,37 @@ body {
             color: white;
         }
    
+/* Modal container */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal box */
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 30px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+/* Buttons */
+.confirm-logout {
+    background-color: #dc3545;
+    color: white;
+    margin-right: 10px;
+}
+
+.cancel-logout {
+    background-color: #6c757d;
+    color: white;
+}

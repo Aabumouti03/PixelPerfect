@@ -14,6 +14,7 @@ class ManageQuestionnairesTest(TestCase):
 
     def setUp(self):
         """Create test users and sample data"""
+        
         self.client = Client()
         self.admin_user = User.objects.create_superuser(
             username="admin", email="admin@example.com", password="adminpass"
@@ -47,7 +48,6 @@ class ManageQuestionnairesTest(TestCase):
         self.client.login(username="user", password="userpass")
         response = self.client.get(reverse("manage_questionnaires"))
 
-        # ✅ Expect a redirect instead of a 403
         expected_url = reverse("log_in") + "?next=" + reverse("manage_questionnaires")
         self.assertRedirects(response, expected_url)
 

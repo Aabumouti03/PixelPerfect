@@ -51,9 +51,36 @@ from collections import defaultdict
 
 @user_passes_test(admin_check)
 @login_required
-def CreateModule(request):
-    modules = Module.objects.prefetch_related("sections__exercises__questions").all()
-    return render(request, "Module/Edit_Add_Module.html", {"modules": modules})
+def createModule(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        exercise_ids = request.POST.getlist("exercises")
+
+        if not title:
+            return render(request, "Module/add_module.html", {
+                "error": "Title is required.",
+                "exercises": Exercise.objects.all()
+            })
+
+        module = Module.objects.create(title=title, description=description)
+
+        if exercise_ids:
+            exercises = Exercise.objects.filter(id__in=exercise_ids)
+            section = Section.objects.create(
+                title=f"Auto Section for {title}",
+                description="Auto-created section from selected exercises"
+            )
+            section.exercises.set(exercises)
+            module.sections.add(section)
+
+        return redirect("client_modules")
+
+    exercises = Exercise.objects.all()
+    return render(request, "Module/add_module.html", {
+        "exercises": exercises
+    })
+
 
 @user_passes_test(admin_check)
 @login_required
@@ -377,7 +404,7 @@ def add_exercise_ajax(request):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
-
+'''
 @user_passes_test(admin_check)
 @login_required
 def add_module(request):
@@ -398,6 +425,7 @@ def add_module(request):
 
     sections = Section.objects.all()
     return render(request, 'Module/add_module.html', {'form': form, 'sections': sections})
+'''
 
 @user_passes_test(admin_check)
 @login_required
@@ -1325,7 +1353,7 @@ def add_video(request):
         "form": form,
         "next": next_url
     })
-    
+
 @login_required
 @user_passes_test(admin_check)
 def video_list(request):

@@ -31,6 +31,7 @@ class UserSignUpForm(UserCreationForm):
             raise ValidationError("A user with that username already exists.")
         return username
 
+
     def clean_password1(self):
         """Validate password strength, including checking for common passwords and no spaces."""
         password = self.cleaned_data.get("password1")

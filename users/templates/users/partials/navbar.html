@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="{% static 'users/css/navbar.css' %}">
 
 {% endblock %}
-
 <div class="sidebar">
     <div class="logo">
         <img src="{% static 'img/logo.svg' %}" alt="Logo" class="logoIcon">
@@ -25,8 +24,8 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %} active {% endif %}">
-                <i class="fa-regular fa-pen-to-square icon"></i>
+            <a href="{% url 'userResponce' %}" class="{% if request.path == '/userResponce/' %}active{% endif %}">
+                <img src="{% static 'users/img/response.png' %}" alt="Response" class="icon">
                 <span>Your Response</span>
             </a>
         </li>        

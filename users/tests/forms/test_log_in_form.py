@@ -128,7 +128,8 @@ class LogInFormTestCase(TestCase):
 
     def test_valid_username_and_password(self):
         """Ensure a valid username and password combination is accepted."""
-        form = LogInForm(data={'username': 'dandoe', 'password': 'Testuser123'})
+        form = LogInForm(data={'username': 'dandoe', 
+                               'password': 'Testuser123'})
         self.assertTrue(form.is_valid(), msg=form.errors)
 
         user = authenticate(username='dandoe', password='Testuser123')
@@ -145,18 +146,23 @@ class LogInFormTestCase(TestCase):
     
     def test_nonexistent_username_fails(self):
         """Ensure authentication fails for a username that does not exist."""
-        form = LogInForm(data={'username': 'unknownuser', 'password': 'SomePass123'})
+        form = LogInForm(data={'username': 'unknownuser',
+                                'password': 'SomePass123'})
         self.assertFalse(form.is_valid())
 
-        user = authenticate(username='unknownuser', password='SomePass123')
+        user = authenticate(username='unknownuser', 
+                            password='SomePass123')
         self.assertIsNone(user, "Authentication should fail for a non-existent user.")
 
     def test_password_with_special_characters(self):
-        """Ensure authentication succeeds when using special characters in password."""
+        """
+        Ensure authentication succeeds when using special characters in password.
+        """
         self.test_user.set_password('P@$$w0rd!')
         self.test_user.save()
 
-        form = LogInForm(data={'username': 'dandoe', 'password': 'P@$$w0rd!'})
+        form = LogInForm(data={'username': 'dandoe', 
+                               'password': 'P@$$w0rd!'})
         self.assertTrue(form.is_valid(), msg=form.errors)
 
         user = authenticate(username='dandoe', password='P@$$w0rd!')
@@ -164,10 +170,12 @@ class LogInFormTestCase(TestCase):
     
     def test_incorrect_password_fails(self):
         """Ensure authentication fails when using an incorrect password."""
-        form = LogInForm(data={'username': 'dandoe', 'password': 'WrongPassword'})
+        form = LogInForm(data={'username': 'dandoe', 
+                               'password': 'WrongPassword'})
         self.assertFalse(form.is_valid())
 
-        user = authenticate(username='dandoe', password='WrongPassword')
+        user = authenticate(username='dandoe', 
+                            password='WrongPassword')
         self.assertIsNone(user, "Authentication should fail with an incorrect password.")
 
     def test_username_case_insensitive_login(self):
