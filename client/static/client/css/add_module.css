@@ -260,3 +260,10 @@ form-label {
 .form-label:last-child {
     margin-top: 20px;
 }
+/* Ensure buttons are full width and evenly spaced */
+.btn.w-100 {
+    width: 100%;
+}
+.btn.w-50 {
+    width: 50%;
+}

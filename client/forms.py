@@ -33,7 +33,7 @@ class AdditionalResourceForm(forms.ModelForm):
 
 class SectionForm(forms.ModelForm):
     exercises = forms.ModelMultipleChoiceField(
-        queryset=Exercise.objects.all(),  #Show all exercises
+        queryset=Exercise.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -48,7 +48,7 @@ class SectionForm(forms.ModelForm):
 
 class ExerciseForm(forms.ModelForm):
     questions = forms.ModelMultipleChoiceField(
-        queryset=ExerciseQuestion.objects.all(),  #Show all questions
+        queryset=ExerciseQuestion.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )

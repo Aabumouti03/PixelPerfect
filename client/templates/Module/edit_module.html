@@ -28,7 +28,6 @@
                 </div>
             </div>
             
-
             <!-- Editable Description -->
             <div class="mb-3">
                 <label class="form-label">2. Description:</label>
@@ -38,7 +37,6 @@
                     <button type="button" class="btn btn-success d-none save-pill w-100" id="save-description" onclick="saveField('{{ module.id }}', 'description')">Save</button>
                 </div>
             </div>
-
 
             <!-- Exercises Section -->
             <div class="mb-4">
@@ -58,16 +56,14 @@
                     </ul>
                 </div>
 
-
                 <div class="text-center mt-3">
                     <button type="button" class="btn remove-pill w-100" onclick="removeSelectedExercises('{{ module.id }}')">
                         Remove Selected Exercises
                     </button>
                 </div>
-                
             </div>
 
-            <!-- Add Exercise -->
+            <!-- Add Exercise Section -->
             <div class="mb-4">
                 <label class="form-label">4. Add Exercise:</label>
                 <div>
@@ -79,54 +75,91 @@
                     </select>
                     <button type="button" onclick="addExercise('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add</button>
                 </div>
-                
             </div>
 
-            <!-- Video Resources -->
+            <!-- Video Resources Section -->
             <div class="mb-4">
-                <label class="form-label">5. Video Resources:</label>
-                <ul class="list-unstyled">
-                    {% for video in module.video_resources.all %}
-                        <li>
-                            {{ video.title }}
-                            <a href="{% url 'video_detail' video.id %}" class="btn btn-primary btn-sm">▶ Play</a>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('{{ module.id }}', '{{ video.id }}')">Remove</button>
-                        </li>
-                    {% empty %}
-                        <li class="form-control">No videos linked yet.</li>
-                    {% endfor %}
-                </ul>
-                <a href="{% url 'add_video' %}?next={{ request.path }}&module_id={{ module.id }}" class="btn add-pill w-100 mt-3">Add New Video</a>
+                <label class="form-label">5. Video Resources in Module:</label>
+                <div class="module-box">
+                    <ul class="list-unstyled" id="selected-videos">
+                        {% for video in module.video_resources.all %}
+                            <li>
+                                <input type="checkbox" name="remove_video" value="{{ video.id }}" class="form-check-input">
+                                {{ video.title }}
+                                <a href="{% url 'video_detail' video.id %}" class="btn btn-primary btn-sm">▶ Play</a>
+                            </li>
+                        {% empty %}
+                            <li>No videos linked yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button type="button" class="btn remove-pill w-100" onclick="removeSelectedVideos('{{ module.id }}')">Remove Selected Videos</button>
+                </div>
+            </div>
+            
+            <!-- Add Video Section -->
+            <div class="mb-4">
+                <label class="form-label">6. Add Video:</label>
+                <div>
+                    <select id="video-dropdown" class="form-control mb-2">
+                        <option value="">Select a video</option>
+                        {% for video in available_video_resources %}
+                            <option value="{{ video.id }}">
+                                {{ video.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="addVideo('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add Video</button>
+                </div>
             </div>
 
-            <!-- Additional Resources -->
+            <!-- Additional Resources Section -->
             <div class="mb-4">
-                <label class="form-label">6. Additional Resources:</label>
-                <ul class="list-unstyled">
-                    {% for resource in module.additional_resources.all %}
-                        <li class="d-flex justify-content-between align-items-center">
-                            {{ resource.title }} ({{ resource.resource_type }})
-                            <div class="d-flex gap-2">
-                                {% if resource.url %}
+                <label class="form-label">7. Additional Resources in Module:</label>
+                <div class="module-box">
+                    <ul class="list-unstyled" id="selected-resources">
+                        {% for resource in module.additional_resources.all %}
+                            <li>
+                                <input type="checkbox" name="remove_resource" value="{{ resource.id }}" class="form-check-input">
+                                {{ resource.title }} ({{ resource.resource_type }})
+                                <div class="d-flex gap-2">
                                     <a href="{{ resource.url }}" target="_blank" class="btn btn-primary btn-sm">Open Link</a>
-                                {% elif resource.file %}
-                                    <a href="{{ resource.file.url }}" target="_blank" class="btn btn-primary btn-sm">Download File</a>
-                                {% endif %}
-                                <button type="button" class="btn  btn-sm" onclick="removeResource('{{ module.id }}', '{{ resource.id }}')">Remove</button>
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class=" form-control">No resources linked yet.</li>
-                    {% endfor %}
-                </ul>
-                <a href="{% url 'add_additional_resource' %}?next={{ request.path }}&module_id={{ module.id }}" class="btn add-pill w-100 mt-3">Add New Resource</a>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li>No resources linked yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn remove-pill w-100" onclick="removeSelectedResources('{{ module.id }}')">Remove Selected Resources</button>
+                </div>
             </div>
 
+            <!-- Add Resource Section -->
+            <div class="mb-4">
+                <label class="form-label">8. Add Resource:</label>
+                <div>
+                    <select id="resource-dropdown" class="form-control mb-2">
+                        <option value="">Select a resource</option>
+                        {% for resource in available_additional_resources %}
+                            <option value="{{ resource.id }}">
+                                {{ resource.title }} ({{ resource.resource_type }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="addResource('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add Resource</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
             <div class="text-center mt-1">
+                <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary w-100 mb-2">Add new resource</a>
+                <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary w-100">Add new video</a>
                 <a href="{% url 'client_modules' %}" class="btn btn-secondary w-100 backButton">Back to Modules</a>
             </div>
-        </form>
-    </div>
 
         </form>
     </div>
@@ -135,6 +168,6 @@
         const csrfToken = '{{ csrf_token }}';
     </script>
     <script src="{% static 'client/js/edit_module.js' %}"></script>
-    
+
 </body>
 </html>

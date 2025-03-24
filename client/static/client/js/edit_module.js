@@ -77,32 +77,199 @@ function removeSelectedExercises(moduleId) {
     });
 }
 
-function removeVideo(moduleId, videoId) {
+
+// Function to add video to the module
+function addVideo(moduleId) {
+    const videoDropdown = document.getElementById('video-dropdown');
+    const videoId = videoDropdown.value;
+
+    if (videoId) {
+        const selectedOption = videoDropdown.querySelector(`option[value="${videoId}"]`);
+        const videoTitle = selectedOption.textContent;
+
+        // Add video to the list dynamically
+        const videoList = document.getElementById('selected-videos');
+        const li = document.createElement('li');
+        li.id = `video-${videoId}`;
+        li.innerHTML = `${videoTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('${moduleId}', '${videoId}')">Remove</button>`;
+        videoList.appendChild(li);
+
+        // Disable the option in the dropdown and reset
+        selectedOption.disabled = true;
+        videoDropdown.value = ''; // Reset dropdown
+
+        // Send AJAX request to add video to the database
+        $.ajax({
+            url: '/add_video/',  // Adjust URL accordingly
+            type: 'POST',
+            data: {
+                'module_id': moduleId,
+                'video_id': videoId,
+                'csrfmiddlewaretoken': csrfToken
+            },
+            success: function(response) {
+                console.log('Video added successfully');
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+}
+
+function addVideo(moduleId) {
+    const videoDropdown = document.getElementById('video-dropdown');
+    const videoId = videoDropdown.value;
+
+    if (videoId) {
+        const selectedOption = videoDropdown.querySelector(`option[value="${videoId}"]`);
+        const videoTitle = selectedOption.textContent;
+
+        // Add video to the list dynamically
+        const videoList = document.getElementById('selected-videos');
+        const li = document.createElement('li');
+        li.id = `video-${videoId}`;
+        li.innerHTML = `${videoTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('${moduleId}', '${videoId}')">Remove</button>`;
+        videoList.appendChild(li);
+
+        // Disable the option in the dropdown and reset
+        selectedOption.disabled = true;
+        videoDropdown.value = ''; // Reset dropdown
+
+        // Send AJAX request to add video to the database
+        $.ajax({
+            url: '/add_video/',  // Adjust URL accordingly
+            type: 'POST',
+            data: {
+                'module_id': moduleId,
+                'video_id': videoId,
+                'csrfmiddlewaretoken': csrfToken
+            },
+            success: function(response) {
+                console.log('Video added successfully');
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+}
+
+function addResource(moduleId) {
+    const resourceDropdown = document.getElementById('resource-dropdown');
+    const resourceId = resourceDropdown.value;
+
+    if (resourceId) {
+        const selectedOption = resourceDropdown.querySelector(`option[value="${resourceId}"]`);
+        const resourceTitle = selectedOption.textContent;
+
+        // Add resource to the list dynamically
+        const resourceList = document.getElementById('selected-resources');
+        const li = document.createElement('li');
+        li.id = `resource-${resourceId}`;
+        li.innerHTML = `${resourceTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeResource('${moduleId}', '${resourceId}')">Remove</button>`;
+        resourceList.appendChild(li);
+
+        // Disable the option in the dropdown and reset
+        selectedOption.disabled = true;
+        resourceDropdown.value = ''; // Reset dropdown
+
+        // Send AJAX request to add resource to the database
+        $.ajax({
+            url: '/add_resource/',  // Adjust URL accordingly
+            type: 'POST',
+            data: {
+                'module_id': moduleId,
+                'resource_id': resourceId,
+                'csrfmiddlewaretoken': csrfToken
+            },
+            success: function(response) {
+                console.log('Resource added successfully');
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+}
+
+
+
+// Function to remove resource from the module
+function removeResource(moduleId, resourceId) {
+    const resourceElement = document.getElementById(`resource-${resourceId}`);
+    if (resourceElement) {
+        resourceElement.remove();
+    }
+
+    // Send AJAX request to remove resource from the database
+    $.ajax({
+        url: '/remove_resource/',  // Adjust URL accordingly
+        type: 'POST',
+        data: {
+            'module_id': moduleId,
+            'resource_id': resourceId,
+            'csrfmiddlewaretoken': csrfToken
+        },
+        success: function(response) {
+            console.log('Resource removed successfully');
+        },
+        error: function(error) {
+            console.error('Error:', error);
+        }
+    });
+}
+
+function removeSelectedVideos(moduleId) {
+    const selectedVideos = Array.from(document.querySelectorAll('input[name="remove_video"]:checked'))
+        .map(el => el.value);
+    if (selectedVideos.length === 0) return alert("Select at least one video to remove.");
+
     fetch(`/remove_video_from_module/${moduleId}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify({ video_id: videoId })
-    }).then(res => res.json())
+        body: JSON.stringify({ video_ids: selectedVideos })
+    })
+    .then(res => res.json())
     .then(data => {
-        if (data.success) location.reload();
-        else alert("Failed to remove video.");
+        if (data.success) {
+            selectedVideos.forEach(videoId => {
+                const videoElement = document.getElementById(`video-${videoId}`);
+                if (videoElement) videoElement.remove();
+            });
+            alert("Selected videos removed.");
+        } else {
+            alert("Failed to remove selected videos.");
+        }
     });
 }
 
-function removeResource(moduleId, resourceId) {
+function removeSelectedResources(moduleId) {
+    const selectedResources = Array.from(document.querySelectorAll('input[name="remove_resource"]:checked'))
+        .map(el => el.value);
+    if (selectedResources.length === 0) return alert("Select at least one resource to remove.");
+
     fetch(`/remove_resource_from_module/${moduleId}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify({ resource_id: resourceId })
-    }).then(res => res.json())
+        body: JSON.stringify({ resource_ids: selectedResources })
+    })
+    .then(res => res.json())
     .then(data => {
-        if (data.success) location.reload();
-        else alert("Failed to remove resource.");
+        if (data.success) {
+            selectedResources.forEach(resourceId => {
+                const resourceElement = document.getElementById(`resource-${resourceId}`);
+                if (resourceElement) resourceElement.remove();
+            });
+            alert("Selected resources removed.");
+        } else {
+            alert("Failed to remove selected resources.");
+        }
     });
 }

@@ -134,21 +134,32 @@
         <div id="hidden-resource-inputs"></div>
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary">Create Module</button>
-            <a href="{% url 'client_modules' %}" class="btn btn-secondary">Cancel</a>
+            <!-- Add new resource and add new video buttons -->
+            <div class="mb-3">
+                <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary w-100 mb-2">Add new resource</a>
+                <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary w-100">Add new video</a>
+            </div>
+        
+            <!-- Cancel and Save buttons side by side -->
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'client_modules' %}" class="btn btn-secondary w-20">Cancel</a>
+                <button type="submit" class="btn btn-primary w-25">Create Module</button>
+            </div>
         </div>
+        
 
        
     </form>
      
 
-     <!-- Add resource Button -->
+     <!-- Add resource Button
      <div class="mb-4">
         <label class="form-label">Add new resource</label>
         <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary">Add</a>
         <label class="form-label">Add new video</label>
         <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary">Add</a>
     </div>
+     -->
 </div>
 
     <script src="{% static 'client/js/add_module.js' %}"></script>
