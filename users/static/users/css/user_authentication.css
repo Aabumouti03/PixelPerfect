@@ -51,6 +51,7 @@ body {
 }
 .logo:hover{
     color: rgb(239, 195, 195);
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .btn-outline {
@@ -63,46 +64,66 @@ body {
 }
 
 .orange-button{
-    color: #fff;
-    background-color: #F24505;
-    border-color: white; 
-    text-decoration: none;
-    font-size: 24px;
+    display: inline-block;
+  background: #F24505;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px 14px;
+  border-radius: 25px;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #F24505;
+  margin-top: auto;
 }
 
 .orange-button:hover {
-    background-color: #D43802;
+    background: #D43802;
     border-color: #D43802;
+    color: white;
 }
 
 .yellow-button{
-    color: #F24505;
     font-size: 18px;
-    background-color: rgb(255, 255, 180);
-    border-color: rgb(255, 219, 219); 
+    padding: 10px 14px;
+    background-color: #F24505;
+    color: white;
     text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #ffffff;
 }
 
 .yellow-button:hover {
-    background-color: #ecef68;
-    border-color: #b02a37;
+    background: #ffffff;
+  color: #F24505;
 }
 
 /* Steps Section */
 .steps{
     background-color: #F24505;
     color: white;
-    font-size: 25px;
+    font-size: 20px;
+}
+
+.mt-2{
+    color:#F24505;
 }
 
 .sub-text{
     font-size: 20px;
-    color:#F24505;
+    color:#2b2320;
 }
 
 .mid-text{
     font-size: 21px;
-    color:#F24505;
+    color:#2b2320;
 }
 
 .main-text{
@@ -158,25 +179,28 @@ body {
     padding-bottom: 7%;
     font-size: 30px;
     color: white;
-    font-style: italic;
 }
 
 button[type="submit"] {
-    background-color: rgb(255, 255, 180);
-    color:  #F24505; 
+    display: inline-block;
+    background: white;
+    color: #F24505;
+    font-size: 16px;
     font-weight: bold;
-    border: none;
-    padding: 15px;
-    border-radius: 50px;
+    padding: 10px 14px;
+    border-radius: 25px;
+    text-decoration: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;
+    margin-top: auto;
     width: 700px;
 }
 
 button[type="submit"]:hover {
-    background-color:  #ecef68;
-    color:  #F24505; 
-   
+    background: #D43802;
+    color: white;
 }
 
 .container-login input {
@@ -238,7 +262,6 @@ button[type="submit"]:hover {
 .error-custom {
     color: rgb(255, 251, 0) !important;
     font-weight: bold;
-    font-style: italic;
     text-align: center;
     padding: 8px;
     border-radius: 30px;
@@ -366,7 +389,6 @@ button[type="submit"]:hover {
     padding-bottom: 2%;
     font-size: 30px;
     color: white;
-    font-style: italic;
 }
 
 /* Input and Select Field Styling */
@@ -436,7 +458,7 @@ button[type="submit"]:hover {
 }
 
 .sign_up_card a:hover {
-    color: #ecef68;
+    color: #f0f17e;
 }
 
 /* Spacing between form fields */
@@ -454,9 +476,8 @@ button[type="submit"]:hover {
 
 /* Error messages */
 .sign_up_error {
-    color: rgb(255, 251, 0) !important;
+    color: #f0f17e !important;
     font-weight: bold;
-    font-style: italic;
     text-align: center;
     border-radius: 30px;
 }
@@ -464,21 +485,26 @@ button[type="submit"]:hover {
 /* Main Buttons */
 button[type="submit"],
 .sign_up_button {
-    background-color: rgb(255, 255, 180);
+    display: inline-block;
+    background: rgb(255, 255, 180);;
     color: #F24505;
+    font-size: 18px;
     font-weight: bold;
-    border: none;
-    border-radius: 50px;
+    padding: 10px 14px;
+    border-radius: 25px;
+    text-decoration: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;
+    margin-top: auto;
     width: 700px;
-    height: 50px;
 }
 
 button[type="submit"]:hover,
 .sign_up_button:hover {
-    background-color: #ecef68;
-    color: #F24505;
+    background: #f0f17e;
+  color: #F24505;
 }
 
 /* Previous & Sign Up Button Container */
@@ -596,7 +622,7 @@ button[type="submit"]:hover,
     background-color: #f9f9f9;
     outline: none;
     transition: all 0.3s ease-in-out;
-    color: #F24505;
+    color: #2b2320;
 }
 
 .password-reset-container p{
@@ -604,7 +630,7 @@ button[type="submit"]:hover,
 }
 
 .password-reset-card input:focus {
-    background-color: rgb(255, 210, 180);
+    background-color: rgb(255, 255, 180);
 }
 
 .password-reset-card button {
