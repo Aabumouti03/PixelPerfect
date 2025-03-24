@@ -16,11 +16,6 @@ class StaticUserPageTests(TestCase):
          EndUser.objects.create(user=self.user, age=25, gender="male", sector="it", last_time_to_work="1_month")
          self.client.login(username="testuser", password="TestPass123")
 
-    def test_modules_view(self):
-        """Should render the modules page successfully."""
-        response = self.client.get(reverse("modules"))
-        self.assertEqual(response.status_code, 200)
-
     def test_profile_view(self):
         """Should render the profile page successfully."""
         response = self.client.get(reverse("profile"))
@@ -29,4 +24,9 @@ class StaticUserPageTests(TestCase):
     def test_welcome_view(self):
         """Should render the welcome page successfully."""
         response = self.client.get(reverse("welcome"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_contact_success(self):
+        """Should render the contact success page successfully."""
+        response = self.client.get(reverse("contact_success"))
         self.assertEqual(response.status_code, 200)

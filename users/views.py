@@ -208,20 +208,16 @@ def dashboard(request):
     except EndUser.DoesNotExist:
         end_user = EndUser.objects.create(user=user)
 
-    # Fetch the program the user is enrolled in (if any)
     user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
     program = user_program_enrollment.program if user_program_enrollment else None
 
-    # Fetch program modules if the user is enrolled, sorted by order
     program_modules = program.program_modules.all().order_by("order") if program else []
 
-    # Get user progress for each module
     user_progress = {
         progress.module.id: progress.completion_percentage
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    # Mark only the first module as accessible
     previous_module_completed = True  # The first module is always accessible
     unlocked_modules = set()
 
