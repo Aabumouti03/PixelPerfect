@@ -55,6 +55,8 @@ def admin_check(user):
     """Checks if the user is a client who can have access to creating modules, programs, etc."""
     return user.is_authenticated and user.is_superuser
 
+#------------------------------------------------------- MODULE VIEWS --------------------------------------------------
+
 @user_passes_test(admin_check)
 @login_required
 def createModule(request):
