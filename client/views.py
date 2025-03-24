@@ -52,11 +52,13 @@ from .models import (
 
 
 def admin_check(user):
+    """Checks if the user is a client who can have access to creating modules, programs, etc."""
     return user.is_authenticated and user.is_superuser
 
 @user_passes_test(admin_check)
 @login_required
 def createModule(request):
+    """Allows the client to create a module with title, description, etc."""
     if request.method == "POST":
         title = request.POST.get("title")
         description = request.POST.get("description")

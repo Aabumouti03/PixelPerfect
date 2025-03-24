@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Admin, EndUser, UserProgramProgress, UserModuleProgress, 
     UserProgramEnrollment, UserModuleEnrollment, 
-    Questionnaire_UserResponse, QuestionResponse, StickyNote, UserResponse, JournalEntry  # ✅ Updated model name
+    Questionnaire_UserResponse, QuestionResponse, StickyNote, UserResponse, JournalEntry
 )
 
 
@@ -25,7 +25,7 @@ class QuestionResponseAdmin(admin.ModelAdmin):
     ordering = ('user_response',)
 
 
-# ✅ Your existing admin classes remain unchanged  
+#Your existing admin classes remain unchanged  
 @admin.register(User)
 class CustomUserAdmin(admin.ModelAdmin):
     """Admin panel for managing users."""
