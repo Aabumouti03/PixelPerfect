@@ -175,17 +175,269 @@ def create_program(request):
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
 
+
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ STATISTICS VIEWS -----------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
+
+@login_required 
+@user_passes_test(admin_check) 
+def reports(request):
+    # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
+    enrollment_labels, enrollment_data = get_module_enrollment_stats() # 1 for modules 
+    last_work_labels, last_work_data = get_users_last_work_time() #  2 for users
+    program_labels, program_data = get_program_enrollment_stats() # 3 for programs
+
+    return render(request, 'client/reports.html', {
+            'enrollment_labels': json.dumps(enrollment_labels),
+            'enrollment_data': json.dumps(enrollment_data),  
+            'last_work_labels': json.dumps(last_work_labels),
+            'last_work_data': json.dumps(last_work_data),
+            'program_labels': json.dumps(program_labels),
+            'program_data': json.dumps(program_data),
+        })
+
+
+@login_required
+@user_passes_test(admin_check)
+def modules_statistics(request):
+    """Main view function to fetch and pass module statistics."""
+    enrollment_labels, enrollment_data = get_module_enrollment_stats()
+    completion_labels, completed_data, in_progress_data = get_module_completion_stats()
+    avg_completion_labels, avg_completion_data = get_average_completion_percentage()
+    modules_count = get_modules_count()
+
+    # fetch the average rating for each module
+    module_ratings = (
+        Module.objects.annotate(avg_rating=Avg('ratings__rating'))
+        .values('title', 'avg_rating')
+    )
+
+    rating_labels = [module['title'] for module in module_ratings]
+    rating_data = [module['avg_rating'] if module['avg_rating'] else 0 for module in module_ratings]  
+
+
+    return render(request, 'client/modules_statistics.html', {
+        'modules_count': modules_count,
+        'enrollment_labels': json.dumps(enrollment_labels),
+        'enrollment_data': json.dumps(enrollment_data),
+        'completion_labels': json.dumps(completion_labels),
+        'completed_data': json.dumps(completed_data),
+        'in_progress_data': json.dumps(in_progress_data),
+        'completion_time_labels': json.dumps(avg_completion_labels),
+        'completion_time_data': json.dumps(avg_completion_data),  
+        'rating_labels': json.dumps(rating_labels),  #for the average rating 
+        'rating_data': json.dumps(rating_data),  
+    })
+
+
+@login_required
+@user_passes_test(admin_check)
+def programs_statistics(request):
+    """Main view function to fetch and pass program statistics."""
+    
+    program_labels, program_data = get_program_enrollment_stats()
+    completion_labels, completed_data, in_progress_data = get_program_completion_stats()
+    avg_completion_labels, avg_completion_data = get_average_program_completion_percentage()
+    programs_count = get_programs_count()
+
+    return render(request, 'client/programs_statistics.html', {
+        'program_labels': json.dumps(program_labels),
+        'program_data': json.dumps(program_data),
+        'completion_labels': json.dumps(completion_labels),
+        'completed_data': json.dumps(completed_data),
+        'in_progress_data': json.dumps(in_progress_data),
+        'completion_time_labels': json.dumps(avg_completion_labels),
+        'completion_time_data': json.dumps(avg_completion_data),  
+        'programs_count': programs_count
+    })
+
+
+
+@login_required
+@user_passes_test(admin_check)
+def export_modules_statistics_csv(request):
+    """Generate a CSV report of module statistics."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="modules_statistics.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(["Statistic", "Value"])
+
+    # Fetch statistics
+    modules_count = get_modules_count()
+    writer.writerow(["Total Modules", modules_count])
+
+    enrollment_labels, enrollment_data = get_module_enrollment_stats()
+    for label, value in zip(enrollment_labels, enrollment_data):
+        writer.writerow([f"Enrollment - {label}", value])
+
+    completion_labels, completed_data, in_progress_data = get_module_completion_stats()
+    for label, comp, in_prog in zip(completion_labels, completed_data, in_progress_data):
+        writer.writerow([f"Completion - {label} (Completed)", comp])
+        writer.writerow([f"Completion - {label} (In Progress)", in_prog])
+
+    avg_completion_labels, avg_completion_data = get_average_completion_percentage()
+    for label, value in zip(avg_completion_labels, avg_completion_data):
+        writer.writerow([f"Avg Completion - {label}", value])
+
+    return response
+
+
+@login_required
+@user_passes_test(admin_check)
+def export_programs_statistics_csv(request):
+    """Generate a CSV report of program statistics."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="programs_statistics.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(["Statistic", "Value"])
+
+    # Fetch statistics
+    programs_count = get_programs_count()
+    writer.writerow(["Total Programs", programs_count])
+
+    enrollment_labels, enrollment_data = get_program_enrollment_stats()
+    for label, value in zip(enrollment_labels, enrollment_data):
+        writer.writerow([f"Enrollment - {label}", value])
+
+    completion_labels, completed_data, in_progress_data = get_program_completion_stats()
+    for label, comp, in_prog in zip(completion_labels, completed_data, in_progress_data):
+        writer.writerow([f"Completion - {label} (Completed)", comp])
+        writer.writerow([f"Completion - {label} (In Progress)", in_prog])
+
+    avg_completion_labels, avg_completion_data = get_average_program_completion_percentage()
+    for label, value in zip(avg_completion_labels, avg_completion_data):
+        writer.writerow([f"Avg Completion - {label}", value])
+
+    return response
+
+
+@login_required
+@user_passes_test(admin_check)
+def export_user_statistics_csv(request):
+    """Generate a CSV report of user statistics."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="user_statistics.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Statistic", "Value"])
+
+    # Fetch statistics
+    total_users = EndUser.objects.count()
+    active_users = EndUser.objects.filter(user__is_active=True).count()
+    inactive_users = total_users - active_users
+    total_programs_enrolled = UserProgramEnrollment.objects.count()
+
+    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
+    
+    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
+    
+    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
+
+    # Writing the statistics to the CSV file
+    writer.writerow(["Total Users", total_users])
+    writer.writerow(["Active Users", active_users])
+    writer.writerow(["Inactive Users", inactive_users])
+    writer.writerow(["Total Programs Enrolled", total_programs_enrolled])
+
+    for gender, count in gender_counts.items():
+        writer.writerow([f"Gender - {gender}", count])
+
+    for ethnicity, count in ethnicity_counts.items():
+        writer.writerow([f"Ethnicity - {ethnicity}", count])
+
+    for sector, count in sector_counts.items():
+        writer.writerow([f"Sector - {sector}", count])
+
+    return response
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ USER MANAGEMENT VIEWS ------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
+@login_required 
+@user_passes_test(admin_check) 
+def users_management(request):
+    users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
+    return render(request, 'client/users_management.html', {'users': users})
+
+
+
+
+
+
+
+
+
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ CATEGORY VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+@login_required 
+@user_passes_test(admin_check) 
+def category_list(request):
+    categories = Category.objects.all()
+
+    context = {
+        'categories': categories,
+    }
+    
+    return render(request, 'client/category_list.html', context)
+
+@login_required 
+@user_passes_test(admin_check) 
+def category_detail(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    
+    programs = category.programs.all()
+    modules = category.modules.all()
+
+    context = {
+        'category': category,
+        'programs': programs,
+        'modules': modules,
+    }
+
+    return render(request, 'client/category_detail.html', context)
+
+@login_required 
+@user_passes_test(admin_check) 
+def create_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save()
+
+            modules = form.cleaned_data['modules']
+            programs = form.cleaned_data['programs']
+
+            category.modules.set(modules)
+            category.programs.set(programs)
+
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'client/create_category.html', context)
+
+
+
+
+
+
+
+
+
+
 
 
 @user_passes_test(admin_check)
@@ -1115,11 +1367,6 @@ def add_question(request, questionnaire_id):
     
     return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
-@login_required 
-@user_passes_test(admin_check) 
-def users_management(request):
-    users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
-    return render(request, 'client/users_management.html', {'users': users})
 
 @login_required
 def user_detail_view(request, user_id):
@@ -1296,56 +1543,7 @@ def delete_program(request, program_id):
     program.delete()
     return redirect('programs')
 
-@login_required 
-@user_passes_test(admin_check) 
-def category_list(request):
-    categories = Category.objects.all()
 
-    context = {
-        'categories': categories,
-    }
-    
-    return render(request, 'client/category_list.html', context)
-
-@login_required 
-@user_passes_test(admin_check) 
-def category_detail(request, category_id):
-    category = get_object_or_404(Category, id=category_id)
-    
-    programs = category.programs.all()
-    modules = category.modules.all()
-
-    context = {
-        'category': category,
-        'programs': programs,
-        'modules': modules,
-    }
-
-    return render(request, 'client/category_detail.html', context)
-
-@login_required 
-@user_passes_test(admin_check) 
-def create_category(request):
-    if request.method == 'POST':
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            category = form.save()
-
-            modules = form.cleaned_data['modules']
-            programs = form.cleaned_data['programs']
-
-            category.modules.set(modules)
-            category.programs.set(programs)
-
-            return redirect('category_list')
-    else:
-        form = CategoryForm()
-
-    context = {
-        'form': form,
-    }
-
-    return render(request, 'client/create_category.html', context)
 
 @login_required 
 @user_passes_test(admin_check) 
@@ -1368,75 +1566,6 @@ def edit_category(request, category_id):
     return render(request, 'client/edit_category.html', {'form': form, 'category': category})
 
 
-@login_required 
-@user_passes_test(admin_check) 
-def reports(request):
-    # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
-    enrollment_labels, enrollment_data = get_module_enrollment_stats() # 1 for modules 
-    last_work_labels, last_work_data = get_users_last_work_time() #  2 for users
-    program_labels, program_data = get_program_enrollment_stats() # 3 for programs
-
-    return render(request, 'client/reports.html', {
-            'enrollment_labels': json.dumps(enrollment_labels),
-            'enrollment_data': json.dumps(enrollment_data),  
-            'last_work_labels': json.dumps(last_work_labels),
-            'last_work_data': json.dumps(last_work_data),
-            'program_labels': json.dumps(program_labels),
-            'program_data': json.dumps(program_data),
-        })
-
-@login_required
-@user_passes_test(admin_check)
-def modules_statistics(request):
-    """Main view function to fetch and pass module statistics."""
-    enrollment_labels, enrollment_data = get_module_enrollment_stats()
-    completion_labels, completed_data, in_progress_data = get_module_completion_stats()
-    avg_completion_labels, avg_completion_data = get_average_completion_percentage()
-    modules_count = get_modules_count()
-
-    # fetch the average rating for each module
-    module_ratings = (
-        Module.objects.annotate(avg_rating=Avg('ratings__rating'))
-        .values('title', 'avg_rating')
-    )
-
-    rating_labels = [module['title'] for module in module_ratings]
-    rating_data = [module['avg_rating'] if module['avg_rating'] else 0 for module in module_ratings]  
-
-
-    return render(request, 'client/modules_statistics.html', {
-        'modules_count': modules_count,
-        'enrollment_labels': json.dumps(enrollment_labels),
-        'enrollment_data': json.dumps(enrollment_data),
-        'completion_labels': json.dumps(completion_labels),
-        'completed_data': json.dumps(completed_data),
-        'in_progress_data': json.dumps(in_progress_data),
-        'completion_time_labels': json.dumps(avg_completion_labels),
-        'completion_time_data': json.dumps(avg_completion_data),  
-        'rating_labels': json.dumps(rating_labels),  #for the average rating 
-        'rating_data': json.dumps(rating_data),  
-    })
-
-@login_required
-@user_passes_test(admin_check)
-def programs_statistics(request):
-    """Main view function to fetch and pass program statistics."""
-    
-    program_labels, program_data = get_program_enrollment_stats()
-    completion_labels, completed_data, in_progress_data = get_program_completion_stats()
-    avg_completion_labels, avg_completion_data = get_average_program_completion_percentage()
-    programs_count = get_programs_count()
-
-    return render(request, 'client/programs_statistics.html', {
-        'program_labels': json.dumps(program_labels),
-        'program_data': json.dumps(program_data),
-        'completion_labels': json.dumps(completion_labels),
-        'completed_data': json.dumps(completed_data),
-        'in_progress_data': json.dumps(in_progress_data),
-        'completion_time_labels': json.dumps(avg_completion_labels),
-        'completion_time_data': json.dumps(avg_completion_data),  
-        'programs_count': programs_count
-    })
 
 
 @login_required 
@@ -1469,109 +1598,6 @@ def userStatistics(request):
     return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
 
 
-
-@login_required
-@user_passes_test(admin_check)
-def export_modules_statistics_csv(request):
-    """Generate a CSV report of module statistics."""
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="modules_statistics.csv"'
-    
-    writer = csv.writer(response)
-    writer.writerow(["Statistic", "Value"])
-
-    # Fetch statistics
-    modules_count = get_modules_count()
-    writer.writerow(["Total Modules", modules_count])
-
-    enrollment_labels, enrollment_data = get_module_enrollment_stats()
-    for label, value in zip(enrollment_labels, enrollment_data):
-        writer.writerow([f"Enrollment - {label}", value])
-
-    completion_labels, completed_data, in_progress_data = get_module_completion_stats()
-    for label, comp, in_prog in zip(completion_labels, completed_data, in_progress_data):
-        writer.writerow([f"Completion - {label} (Completed)", comp])
-        writer.writerow([f"Completion - {label} (In Progress)", in_prog])
-
-    avg_completion_labels, avg_completion_data = get_average_completion_percentage()
-    for label, value in zip(avg_completion_labels, avg_completion_data):
-        writer.writerow([f"Avg Completion - {label}", value])
-
-    return response
-
-@login_required
-@user_passes_test(admin_check)
-def export_programs_statistics_csv(request):
-    """Generate a CSV report of program statistics."""
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="programs_statistics.csv"'
-    
-    writer = csv.writer(response)
-    writer.writerow(["Statistic", "Value"])
-
-    # Fetch statistics
-    programs_count = get_programs_count()
-    writer.writerow(["Total Programs", programs_count])
-
-    enrollment_labels, enrollment_data = get_program_enrollment_stats()
-    for label, value in zip(enrollment_labels, enrollment_data):
-        writer.writerow([f"Enrollment - {label}", value])
-
-    completion_labels, completed_data, in_progress_data = get_program_completion_stats()
-    for label, comp, in_prog in zip(completion_labels, completed_data, in_progress_data):
-        writer.writerow([f"Completion - {label} (Completed)", comp])
-        writer.writerow([f"Completion - {label} (In Progress)", in_prog])
-
-    avg_completion_labels, avg_completion_data = get_average_program_completion_percentage()
-    for label, value in zip(avg_completion_labels, avg_completion_data):
-        writer.writerow([f"Avg Completion - {label}", value])
-
-    return response
-
-@login_required
-@user_passes_test(admin_check)
-def export_user_statistics_csv(request):
-    """Generate a CSV report of user statistics."""
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="user_statistics.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(["Statistic", "Value"])
-
-    # Fetch statistics
-    total_users = EndUser.objects.count()
-    active_users = EndUser.objects.filter(user__is_active=True).count()
-    inactive_users = total_users - active_users
-    total_programs_enrolled = UserProgramEnrollment.objects.count()
-
-    # Get gender distribution
-    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
-    
-    # Get ethnicity distribution
-    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
-    
-    # Get sector distribution
-    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
-
-    # Writing the statistics to the CSV file
-    writer.writerow(["Total Users", total_users])
-    writer.writerow(["Active Users", active_users])
-    writer.writerow(["Inactive Users", inactive_users])
-    writer.writerow(["Total Programs Enrolled", total_programs_enrolled])
-
-    # Gender distribution
-    for gender, count in gender_counts.items():
-        writer.writerow([f"Gender - {gender}", count])
-
-    # Ethnicity distribution
-    for ethnicity, count in ethnicity_counts.items():
-        writer.writerow([f"Ethnicity - {ethnicity}", count])
-
-    # Sector distribution
-    for sector, count in sector_counts.items():
-        writer.writerow([f"Sector - {sector}", count])
-
-    return response
 
 # Client Modules Views
 @login_required
