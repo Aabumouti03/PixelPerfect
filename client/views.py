@@ -1702,36 +1702,6 @@ def add_Equestion(request):
     return render(request, 'Module/add_question.html', {'form': form})
 
 
-@login_required 
-@user_passes_test(admin_check) 
-def userStatistics(request):
-    total_users = EndUser.objects.count()
-    active_users = EndUser.objects.filter(user__is_active=True).count()
-    inactive_users = total_users - active_users
-    total_programs_enrolled = UserProgramEnrollment.objects.count()
-
-    # Get gender distribution
-    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
-    
-    # Get ethnicity distribution
-    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
-    
-    # Get sector distribution
-    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
-
-    stats_data = {
-        "total_users": total_users,
-        "active_users": active_users,
-        "inactive_users": inactive_users,
-        "programs_enrolled": total_programs_enrolled,
-        "gender_distribution": gender_counts,
-        "ethnicity_distribution": ethnicity_counts,
-        "sector_distribution": sector_counts,
-    }
-
-    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
-
-
 
 # Client Modules Views
 @login_required
