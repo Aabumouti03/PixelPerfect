@@ -140,10 +140,25 @@ def create_program(request):
         "categories": categories,
     })
 
+@login_required
+@user_passes_test(admin_check)
 def programs(request):
-    programs = Program.objects.prefetch_related('program_modules__module').all()
-    return render(request, 'client/programs.html', {'programs': programs})
+    query = request.GET.get('q', '')
 
+    if query:
+        programs = Program.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        ).prefetch_related('program_modules__module')
+    else:
+        programs = Program.objects.prefetch_related('program_modules__module').all()
+
+    return render(request, 'client/programs.html', {
+        'programs': programs,
+        'query': query  # So we can keep the search input filled
+    })
+
+@login_required
+@user_passes_test(admin_check)
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
@@ -806,7 +821,7 @@ def remove_video_from_module(request, module_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
     if request.method == 'POST':
         try:
@@ -822,7 +837,7 @@ def remove_resource_from_module(request, module_id):
             return JsonResponse({'success': False, 'error': str(e)})
 
 @user_passes_test(admin_check)
-@login_required #final version
+@login_required
 def add_additional_resource(request):
     next_url = request.GET.get('next', '/')
     module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
@@ -882,7 +897,7 @@ def delete_resource(request, resource_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def add_resource_to_module(request, module_id):
     """
     Add a resource to the specified module.
@@ -914,7 +929,7 @@ def add_resource_to_module(request, module_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def save_module_changes(request, module_id):
     try:
         data = json.loads(request.body)
