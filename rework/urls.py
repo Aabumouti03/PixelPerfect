@@ -1,10 +1,12 @@
-from django.urls import path
-from django.conf import settings
 from django.contrib import admin
-from users import views as usersViews
-from client import views as clientViews
+from django.urls import path
 from django.conf.urls.static import static
+from django.conf import settings
+from client import views as clientViews
+from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
+
+
 
 urlpatterns = [
 

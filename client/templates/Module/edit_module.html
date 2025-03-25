@@ -127,8 +127,11 @@
                     <ul class="list-unstyled" id="selected-resources">
                         {% for resource in module.additional_resources.all %}
                             <li id="resource-{{ resource.id }}">
+                                <input type="checkbox" name="remove_resource" value="{{ resource.id }}" class="form-check-input me-2">
                                 {{ resource.title }} ({{ resource.resource_type }})
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="removeResource('{{ module.id }}', '{{ resource.id }}')">Remove</button>
+                                <div class="d-flex gap-2 mt-1">
+                                    <a href="{{ resource.url }}" target="_blank" class="btn btn-primary btn-sm">Open Link</a>
+                                </div>
                             </li>
                         {% empty %}
                             <li>No resources linked yet.</li>
@@ -142,6 +145,7 @@
                     Remove Selected Resources
                 </button>
             </div>
+
 
             <!-- Add Resource Section -->
             <div class="mb-4">
