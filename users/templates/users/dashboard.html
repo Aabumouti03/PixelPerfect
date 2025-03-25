@@ -19,87 +19,72 @@
       <h1>Welcome back, {{ user.first_name }}!</h1>
     {% endif %}
 
-      <!-- Programs Section -->
-      <section class="programs-container">
-        <header class="programs-header">
-          <div class="program-text">
-            {% if program %}
-              <h2>Your Program: {{ program.title }}</h2>
-              <p>{{ program.description }}</p>
-            </div>
-            <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
-          </header>
-          <div class="module-list">
-
-            {% for program_module in program_modules|slice:":3" %}
-              {% with module=program_module.module %}
-                <div class="module-card {% if not module.is_unlocked %}locked{% else %}unlocked{% endif %}">
-                  <h3>{{ module.title }}</h3>
-                  <p>{{ module.description }}</p>
-
-                  <div class="progress-container">
-                    <div class="progress-bar">
-                      <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
-                    </div>
-                  </div>
-                  <span class="progress-text">{{ module.progress_value }}% Complete</span>
-
-                  {% if module.is_unlocked %}
-                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
-                  {% else %}
-                    <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
-                  {% endif %}
-                </div>
-              {% endwith %}
-            {% endfor %}
-
+    <!-- Programs Section -->
+    <section class="programs-container">
+      <header class="programs-header">
+        <div class="program-text">
+          {% if program %}
+            <h2>Your Program: {{ program.title }}</h2>
+            <p>{{ program.description }}</p>
           </div>
-        {% else %}
-          </div> 
-          </header>
-          <div class="module-list">
-            <div class="no-program-title">
-                <h2>No enrolled programs</h2>
-            </div>
-            <div class="no-program-content">
-                <p>It looks like you are not enrolled in a program yet! Why not take our quick questionnaire to find the perfect program tailored just for you?</p>
-                <a href="{% url 'questionnaire' %}" class="start-questionnaire-button">Start questionnaire</a>
-            </div>
+          <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
+        </header>
+
+        <div class="module-list">
+          {% for program_module in program_modules|slice:":3" %}
+            {% with module=program_module.module %}
+              <div class="module-card {% if not module.is_unlocked %}locked{% else %}unlocked{% endif %}">
+                <h3>{{ module.title }}</h3>
+                <p>{{ module.description }}</p>
+
+                <div class="progress-container">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
+                  </div>
+                </div>
+                <span class="progress-text">{{ module.progress_value }}% Complete</span>
+
+                {% if module.is_unlocked %}
+                  <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
+                {% else %}
+                  <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
+                {% endif %}
+              </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      {% else %}
+        </div> 
+        </header>
+        <div class="module-list">
+          <div class="no-program-title">
+            <h2>No enrolled programs</h2>
+          </div>
+          <div class="no-program-content">
+            <p>It looks like you are not enrolled in a program yet! Why not take our quick questionnaire to find the perfect program tailored just for you?</p>
+            <a href="{% url 'questionnaire' %}" class="start-questionnaire-button">Start questionnaire</a>
+          </div>
         </div>        
-        {% endif %}
-      </section>
+      {% endif %}
+    </section>
 
-
-    <!-- Modules Section -->
+    <!-- Modules Section (Outside Modules) -->
     <section class="modules-container">
       <header class="modules-header">
         <h2>Your Modules</h2>
         <a href="{% url 'userModules' %}" class="view-all-button">View Your Modules</a>
       </header>
+
       <div class="module-list">
         {% for module in outside_modules|slice:":3" %}
+          <!-- Use the partial for each module -->
+          {% include 'users/partials/module_card.html' with module=module %}
+        {% endfor %}
+      </div>
+    </section>
+    <!-- END MAIN CONTENT COLUMN -->
 
-            <div class="module-card">
-                <h3>{{ module.title }}</h3>
-                <p>{{ module.description }}</p>
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
-                    </div>
-                </div>
-
-                    <span class="progress-text">{{ module.progress_value }}% Complete</span>
-
-                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
-
-                
-            </div>
-        {% endfor %}      
-    </div>
-</div>
-
-
-  <!-- END MAIN CONTENT COLUMN -->
+  </div>
 
   <!-- RIGHT SIDEBAR COLUMN -->
   <aside class="right-column">
