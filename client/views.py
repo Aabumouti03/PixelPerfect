@@ -621,7 +621,8 @@ def remove_resource_from_module(request, module_id):
             resource_id = data.get("resource_id")
             
             if not resource_id:  # ✅ Check if resource_id is provided
-                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
+                return JsonResponse({"success": False, "error": "No resource_id provided"})
+
             
             module = Module.objects.get(id=module_id)
             resource = AdditionalResource.objects.get(id=resource_id)
@@ -1002,9 +1003,13 @@ def delete_exercise_questions(request, exercise_id):
             if not question_ids:
                 return JsonResponse({"success": False, "error": "No questions selected"}, status=400)
 
-            deleted_count, _ = ExerciseQuestion.objects.filter(id__in=question_ids).delete()
+            exercise = Exercise.objects.get(id=exercise_id)
+            questions_to_remove = exercise.questions.filter(id__in=question_ids)
+            removed_count = questions_to_remove.count()
 
-            return JsonResponse({"success": True, "message": f"{deleted_count} questions deleted!"})
+            exercise.questions.remove(*questions_to_remove)
+            
+            return JsonResponse({"success": True, "message": f"{removed_count} questions deleted!"})
 
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
@@ -1710,22 +1715,27 @@ def remove_video_from_module(request, module_id):
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Invalid method"})
 
-
 @csrf_exempt
 @login_required
 @user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
     if request.method == "POST":
-        data = json.loads(request.body)
-        resource_id = data.get("resource_id")
         try:
+            data = json.loads(request.body)
+            resource_id = data.get("resource_id")
+            
+            if not resource_id:
+                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
+            
             module = Module.objects.get(id=module_id)
             resource = AdditionalResource.objects.get(id=resource_id)
             module.additional_resources.remove(resource)
             return JsonResponse({"success": True})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
+            
     return JsonResponse({"success": False, "error": "Invalid method"})
+
 
 @user_passes_test(admin_check)
 @login_required
@@ -1776,24 +1786,33 @@ def add_exercise_to_module(request, module_id):
                 return JsonResponse({'success': False, 'error': 'Missing exercise ID'}, status=400)
 
             module = get_object_or_404(Module, id=module_id)
-            exercise = get_object_or_404(Exercise, id=exercise_id)
 
+            try:
+                exercise = Exercise.objects.get(id=exercise_id)
+            except Exercise.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Exercise not found'}, status=404)
+
+            # Create or get the general section
             section_title = f"{module.title} - General Exercises"
             section, created = Section.objects.get_or_create(
                 title=section_title,
                 defaults={'description': 'Auto-generated section for added exercises'}
             )
-            # If new, attach to the module
             if created:
                 module.sections.add(section)
 
-            # Add the exercise
             section.exercises.add(exercise)
 
             return JsonResponse({'success': True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON format'}, status=400)
+        except Module.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Module not found'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
 
 
