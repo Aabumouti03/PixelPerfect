@@ -366,10 +366,10 @@ def users_management(request):
     return render(request, 'client/users_management.html', {'users': users})
 
 @login_required
+@user_passes_test(admin_check) 
 def user_detail_view(request, user_id):
     user_profile = get_object_or_404(EndUser, user__id=user_id)
 
-    # Get enrolled programs & modules
     enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
     enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
 
@@ -377,7 +377,6 @@ def user_detail_view(request, user_id):
         user=user_profile
     ).prefetch_related("questionnaire", "question_responses__question")
 
-    # Group responses by questionnaire
     questionnaires_with_responses = {}
     for user_response in user_questionnaire_responses:
         if user_response.questionnaire not in questionnaires_with_responses:
