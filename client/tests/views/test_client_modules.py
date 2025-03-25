@@ -125,5 +125,4 @@ class ClientModulesTest(TestCase):
         self.client.logout()
         response = self.client.get(self.client_modules_url)
         self.assertEqual(response.status_code, 302)
-        # Adjust as needed to match your actual login URL
         self.assertIn('/log_in/', response.url)

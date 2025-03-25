@@ -29,7 +29,6 @@ class RecommendedProgramsViewTest(TestCase):
             sector="IT"
         )
 
-        # Create some programs
         self.category = Category.objects.create(name="Confidence Building")
         
         self.program1 = Program.objects.create(
@@ -60,8 +59,8 @@ class RecommendedProgramsViewTest(TestCase):
 
         response = self.client.get(self.recommended_programs_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Rebuilding Confidence for Work")  #  Ensure it appears on the page
-        self.assertContains(response, "Managing Workplace Stress")  #  Another recommended program
+        self.assertContains(response, "Rebuilding Confidence for Work") 
+        self.assertContains(response, "Managing Workplace Stress") 
 
     def test_unauthenticated_user_redirect(self):
         """Ensure unauthenticated users are redirected to the login page."""

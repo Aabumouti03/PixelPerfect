@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from client.forms import ModuleForm
 from client.models import Category, Module as Program, VideoResource
 from client.statistics import *
+from users.helpers_modules import calculate_program_progress
 from users.models import (
     EndUser,
     QuestionResponse,
@@ -139,6 +140,157 @@ def create_program(request):
         "form": form,
         "categories": categories,
     })
+
+@login_required
+@user_passes_test(admin_check)
+def programs(request):
+    programs = Program.objects.prefetch_related('program_modules__module').all()
+    return render(request, 'client/programs.html', {'programs': programs})
+
+
+@login_required
+@user_passes_test(admin_check)
+def program_detail(request, program_id): 
+    program = get_object_or_404(Program, id=program_id)
+    all_modules = Module.objects.all()
+    program_modules = program.program_modules.all()  
+    program_module_ids = list(program_modules.values_list('module_id', flat=True)) 
+
+    enrolled_users = program.enrolled_users.all()
+    enrolled_user_ids = set(enrollment.user_id for enrollment in enrolled_users)
+    all_users = EndUser.objects.all()
+
+    if request.method == "POST":
+        if "remove_module" in request.POST:
+            module_id = request.POST.get("remove_module")
+            if not module_id or not module_id.strip():
+                # Return an error message when no module ID is provided.
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "No module specified."
+                })
+            try:
+                module_id_int = int(module_id)
+            except ValueError:
+                # Return an error message when the module ID is not a valid number.
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "Invalid module id."
+                })
+
+            program_module = ProgramModule.objects.filter(program=program, module_id=module_id_int).first()
+            if program_module:
+                program_module.delete()
+            else:
+                return render(request, "client/program_detail.html", {
+                    "program": program,
+                    "all_modules": all_modules,
+                    "all_users": all_users,
+                    "enrolled_user_ids": enrolled_user_ids,
+                    "program_modules": program_modules,
+                    "program_module_ids": program_module_ids,
+                    "enrolled_users": enrolled_users,
+                    "error_message": "Module not found."
+                })
+            return redirect("program_detail", program_id=program.id)
+
+
+        if "add_modules" in request.POST:
+            modules_to_add = request.POST.getlist("modules_to_add")
+            max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
+            for index, m_id in enumerate(modules_to_add, start=1):
+                for m_id in modules_to_add:
+                    try:
+                        module_obj = Module.objects.get(id=m_id)  
+                    except Module.DoesNotExist:
+                        return HttpResponseNotFound("Module not found.")
+                    if ProgramModule.objects.filter(program=program, module=module_obj).exists():
+                        url = reverse("program_detail", args=[program.id]) + f"?error_message=Duplicate module added."
+                        return HttpResponseRedirect(url)
+                    
+                    ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
+
+            return redirect("program_detail", program_id=program.id)
+
+        if "add_users" in request.POST:
+            users_to_add = request.POST.getlist("users_to_add")
+            for user_id in users_to_add:
+                user_obj = get_object_or_404(EndUser, user_id=user_id)
+                UserProgramEnrollment.objects.create(program=program, user=user_obj)
+            return redirect("program_detail", program_id=program.id)
+        
+        if "remove_user" in request.POST:
+            user_id = request.POST.get("remove_user")
+            enrollment = UserProgramEnrollment.objects.filter(program=program, user_id=user_id).first()
+            if enrollment:
+                enrollment.delete()
+            return redirect("program_detail", program_id=program.id)
+
+        if "update_program" in request.POST:
+            program.title = request.POST.get("title", program.title)
+            program.description = request.POST.get("description", program.description)
+            program.save()
+            return redirect("program_detail", program_id=program.id)
+
+    context = {
+        "program": program,
+        "all_modules": all_modules,
+        'all_users': all_users,
+        "enrolled_user_ids": enrolled_user_ids,
+        "program_modules": program_modules,  
+        "program_module_ids": program_module_ids,
+        "enrolled_users": enrolled_users,
+    }
+
+    return render(request, "client/program_detail.html", context)
+
+@csrf_exempt
+def update_module_order(request, program_id):
+    """Handles module reordering in a program while preventing UNIQUE constraint errors."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=500)
+
+        program = get_object_or_404(Program, id=program_id)
+
+        try:
+            order_mapping = {int(item["id"]): index + 1 for index, item in enumerate(data["order"])}
+            with transaction.atomic():
+                temp_order = 1000  
+                for module_id in order_mapping.keys():
+                    ProgramModule.objects.filter(id=module_id, program=program).update(order=temp_order)
+                    temp_order += 1 
+
+                for module_id, new_order in order_mapping.items():
+                    ProgramModule.objects.filter(id=module_id, program=program).update(order=new_order)
+
+            return JsonResponse({"success": True})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@user_passes_test(admin_check)
+def delete_program(request, program_id):
+    """ Delete a program and redirect to the programs list """
+    program = get_object_or_404(Program, id=program_id)
+    program.delete()
+    return redirect('programs')
 
 
 
@@ -479,11 +631,13 @@ def edit_module(request, module_id):
     """Allows the client to edit the module's title, description, videos, etc."""
     module = get_object_or_404(Module, id=module_id)
 
+    # Get the existing exercise IDs to prevent duplication
     existing_exercise_ids = Exercise.objects.filter(
         sections__in=module.sections.all()
     ).values_list('id', flat=True).distinct()
     available_exercises = Exercise.objects.exclude(id__in=existing_exercise_ids)
 
+    # Get available resources and videos not yet assigned to the module
     available_additional_resources = AdditionalResource.objects.exclude(
         id__in=module.additional_resources.values_list('id', flat=True)
     )
@@ -496,25 +650,34 @@ def edit_module(request, module_id):
         form = ModuleForm(request.POST, instance=module)
 
         if form.is_valid():
-            # Save the form fields (title, description, etc.)
+            # Save the basic module data (title, description, etc.)
             form.save()
 
-            # Handle adding videos
+            # Handle adding videos (ensure the IDs are passed correctly)
             if "videos" in request.POST:
                 selected_video_ids = request.POST.getlist("videos")
-                module.video_resources.set(VideoResource.objects.filter(id__in=selected_video_ids))
+                if selected_video_ids:
+                    # Ensure you update the video resources with the selected ones
+                    module.video_resources.set(VideoResource.objects.filter(id__in=selected_video_ids))
+                else:
+                    # If no videos are selected, clear the video resources
+                    module.video_resources.clear()
 
-            # Handle adding resources
+            # Handle adding resources (same for resources as for videos)
             if "resources" in request.POST:
                 selected_resource_ids = request.POST.getlist("resources")
-                module.additional_resources.set(AdditionalResource.objects.filter(id__in=selected_resource_ids))
+                if selected_resource_ids:
+                    module.additional_resources.set(AdditionalResource.objects.filter(id__in=selected_resource_ids))
+                else:
+                    module.additional_resources.clear()
 
-            # Redirect back to client_modules after saving
+            # Redirect back to the module list page after saving
             return redirect('client_modules')
 
     else:
         form = ModuleForm(instance=module)
 
+    # Pass necessary context to the template
     return render(request, 'Module/edit_module.html', {
         'form': form,
         'module': module,
@@ -524,6 +687,7 @@ def edit_module(request, module_id):
         'videos': VideoResource.objects.all(),
         'resources': AdditionalResource.objects.all(),
     })
+
 
 
 
@@ -538,47 +702,30 @@ def video_list(request):
     videos = VideoResource.objects.all()
     return render(request, "client/video_list.html", {"videos": videos})
 
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        video_id = data.get("video_id")
-        try:
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
 @user_passes_test(admin_check)
 @login_required
 @csrf_exempt
 def add_video(request):
-    next_url = request.GET.get("next", "/")  # where to go after saving
-    module_id = request.GET.get("module_id")  # optional: module to link to
+    next_url = request.GET.get("next", "/") 
+    module_id = request.GET.get("module_id") 
 
     if request.method == "POST":
         form = VideoResourceForm(request.POST)
         if form.is_valid():
             video = form.save()
 
-            # If module_id is passed, link the video to the module
             if module_id:
                 try:
                     module = Module.objects.get(id=module_id)
                     module.video_resources.add(video)
+                    module.save()
                     messages.success(request, "Video added and linked to module.")
                 except Module.DoesNotExist:
                     messages.error(request, "Module not found. Video saved but not linked.")
             else:
                 messages.success(request, "Video added successfully.")
 
-            return redirect(next_url)  # Redirect to the next page (either module creation page or wherever the user came from)
+            return redirect(next_url)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -586,7 +733,7 @@ def add_video(request):
 
     return render(request, "client/add_video.html", {
         "form": form,
-        "next": next_url  # Pass the next URL to the template so that it can be included in the form if needed
+        "next": next_url 
     })
 
 @csrf_exempt
@@ -597,11 +744,10 @@ def add_video_to_module(request, module_id):
     Add a video to the specified module.
     """
     if request.method == "POST":
-        # Get the video_id from the POST data
+       
         data = json.loads(request.body)
         video_id = data.get("video_id")
         
-        # Ensure the video ID is provided
         if not video_id:
             return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
         
@@ -609,8 +755,8 @@ def add_video_to_module(request, module_id):
             module = Module.objects.get(id=module_id)
             video = VideoResource.objects.get(id=video_id)
             
-            # Add the video to the module's video_resources
             module.video_resources.add(video)
+            module.save()
             return JsonResponse({"success": True, "message": "Video added to module."})
         except Module.DoesNotExist:
             return JsonResponse({"success": False, "error": "Module not found."})
@@ -628,7 +774,6 @@ def delete_video(request, video_id):
     """View to delete a video resource permanently."""
     video = get_object_or_404(VideoResource, id=video_id)
 
-    # Delete the video
     if request.method == 'POST':
         video.delete()
         return redirect('video_list')  
@@ -646,31 +791,27 @@ def video_detail(request, video_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            video_id = data.get("video_id")
-            
-            if not video_id:
-                return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
-            
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            module.save()  # Ensure changes are saved
-            return JsonResponse({"success": True})
-        
-        except VideoResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Video not found."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"})
 
-    return JsonResponse({"success": False, "error": "Invalid method"})
+    try:
+        data = json.loads(request.body)
+        video_id = data.get("video_id")
+        if not video_id:
+            return JsonResponse({"success": False, "error": "Missing video_id"}, status=400)
 
+        module = get_object_or_404(Module, id=module_id)
+        video = VideoResource.objects.get(id=video_id)
 
+        module.video_resources.remove(video)
+        return JsonResponse({"success": True})
 
+    except VideoResource.DoesNotExist:
+        return JsonResponse({"success": False, "error": "VideoResource matching query does not exist."})
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 
@@ -682,38 +823,32 @@ def remove_video_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            resource_id = data.get("resource_id")
-            
-            if not resource_id:
-                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
-            if not resource_id:  # ✅ Check if resource_id is provided
-                return JsonResponse({"success": False, "error": "No resource_id provided"})
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
 
-            
-            module = Module.objects.get(id=module_id)
-            resource = AdditionalResource.objects.get(id=resource_id)
-            module.additional_resources.remove(resource)
-            module.save()  # Ensure changes are saved
-            return JsonResponse({"success": True})
-        
-        except AdditionalResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Resource not found."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+    try:
+        data = json.loads(request.body)
+        resource_ids = data.get('resource_ids')
 
-    return JsonResponse({"success": False, "error": "Invalid method"})
+        if not resource_ids:
+            return JsonResponse({'success': False, 'error': 'No resource_ids provided'}, status=400)
 
+        module = Module.objects.get(id=module_id)
 
+        for resource_id in resource_ids:
+            try:
+                resource = AdditionalResource.objects.get(id=resource_id)
+                module.additional_resources.remove(resource)
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'AdditionalResource matching query does not exist.'})
 
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    
 @user_passes_test(admin_check)
 @login_required
 def add_additional_resource(request):
-    # Get next URL to redirect to after successful form submission
     next_url = request.GET.get('next', '/')
     module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
 
@@ -802,9 +937,35 @@ def add_resource_to_module(request, module_id):
 
     return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def save_module_changes(request, module_id):
+    try:
+        data = json.loads(request.body)
+        video_ids = data.get("videos", "").strip(",").split(",")
+        resource_ids = data.get("resources", "").strip(",").split(",")
 
+        # Remove empty strings if input is blank
+        video_ids = [vid for vid in video_ids if vid]
+        resource_ids = [rid for rid in resource_ids if rid]
 
+        module = Module.objects.get(id=module_id)
 
+        if video_ids:
+            module.video_resources.set(VideoResource.objects.filter(id__in=video_ids))
+        else:
+            module.video_resources.clear()
+
+        if resource_ids:
+            module.additional_resources.set(AdditionalResource.objects.filter(id__in=resource_ids))
+        else:
+            module.additional_resources.clear()
+
+        return JsonResponse({'success': True})
+    except Exception as e:
+        print("Error in saving module:", e)
+        return JsonResponse({'success': False, 'error': str(e)})
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ STATISTICS VIEWS -----------------------------------------------------------------
@@ -853,8 +1014,6 @@ def userStatistics(request):
 
     return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
 
-
-
 @login_required
 @user_passes_test(admin_check)
 def modules_statistics(request):
@@ -887,7 +1046,6 @@ def modules_statistics(request):
         'rating_data': json.dumps(rating_data),  
     })
 
-
 @login_required
 @user_passes_test(admin_check)
 def programs_statistics(request):
@@ -908,8 +1066,6 @@ def programs_statistics(request):
         'completion_time_data': json.dumps(avg_completion_data),  
         'programs_count': programs_count
     })
-
-
 
 @login_required
 @user_passes_test(admin_check)
@@ -939,7 +1095,6 @@ def export_modules_statistics_csv(request):
         writer.writerow([f"Avg Completion - {label}", value])
 
     return response
-
 
 @login_required
 @user_passes_test(admin_check)
@@ -1011,7 +1166,6 @@ def export_user_statistics_csv(request):
     return response
 
 
-
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ USER MANAGEMENT VIEWS ------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -1022,13 +1176,41 @@ def users_management(request):
     users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
+
 @login_required
-@user_passes_test(admin_check) 
+@user_passes_test(admin_check)
 def user_detail_view(request, user_id):
     user_profile = get_object_or_404(EndUser, user__id=user_id)
-
     enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
+    program_progress_dict = {
+        progress.program_id: progress.completion_percentage
+        for progress in UserProgramProgress.objects.filter(user=user_profile)
+    }
+
     enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
+    module_progress_dict = {
+        progress.module_id: progress.completion_percentage
+        for progress in UserModuleProgress.objects.filter(user=user_profile)
+    }
+
+    for enrollment in enrolled_programs:
+        program = enrollment.program
+        calculated_progress = calculate_program_progress(user_profile, program)
+        program.progress_value = calculated_progress
+
+        program_progress, created = UserProgramProgress.objects.get_or_create(
+            user=user_profile,
+            program=program,
+            defaults={'completion_percentage': calculated_progress, 'status': 'in_progress' if calculated_progress < 100 else 'completed'}
+        )
+        if not created:
+            program_progress.completion_percentage = calculated_progress
+            program_progress.status = 'completed' if calculated_progress == 100 else 'in_progress'
+            program_progress.save()
+
+    for enrollment in enrolled_modules:
+        module = enrollment.module
+        module.progress_value = module_progress_dict.get(module.id, 0)
 
     user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
         user=user_profile
@@ -1050,12 +1232,9 @@ def user_detail_view(request, user_id):
     return render(request, 'client/user_detail.html', context)
 
 
-
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ CATEGORY VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
-
-
 @login_required 
 @user_passes_test(admin_check) 
 def category_list(request):
@@ -1126,9 +1305,6 @@ def edit_category(request, category_id):
         form = CategoryForm(instance=category)
 
     return render(request, 'client/edit_category.html', {'form': form, 'category': category})
-
-
-
 
 @csrf_exempt
 @login_required
@@ -1520,9 +1696,268 @@ def add_Equestion(request):
     return render(request, 'Module/add_question.html', {'form': form})
 
 
-def programs(request):
-    programs = Program.objects.prefetch_related('program_modules__module').all()
-    return render(request, 'client/programs.html', {'programs': programs})
+@user_passes_test(admin_check)
+@login_required
+def manage_questionnaires(request):
+    search_query = request.GET.get('search', '')  
+    is_active_filter = request.GET.get('is_active')
+
+    # Fetch all questionnaires
+    questionnaires = Questionnaire.objects.all()
+
+    # Apply search filter
+    if search_query:
+        questionnaires = questionnaires.filter(title__icontains=search_query)
+
+    # Apply active filter
+    if is_active_filter == 'true':
+        questionnaires = questionnaires.filter(is_active=True)
+
+    # Get response count
+    questionnaires_data = [
+        {
+            "questionnaire": q,
+            "response_count": Questionnaire_UserResponse.objects.filter(questionnaire=q).count()
+        }
+        for q in questionnaires
+    ]
+
+    # Paginate (10 per page)
+    paginator = Paginator(questionnaires_data, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'client/Manage_Questionnaires.html', {
+        'questionnaires_data': page_obj,
+        'page_obj': page_obj,
+        'is_active_filter': is_active_filter,
+        'search_query': search_query
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def activate_questionnaire(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+
+    # Ensure only one questionnaire is active
+    Questionnaire.objects.all().update(is_active=False)
+    questionnaire.is_active = True
+    questionnaire.save()
+    
+    messages.success(request, f'Activated: {questionnaire.title}')
+    return redirect('manage_questionnaires')
+
+@user_passes_test(admin_check)
+@login_required
+def view_questionnaire(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    questions = Question.objects.filter(questionnaire=questionnaire)
+
+    return render(request, 'client/view_questionnaire.html', {
+        'questionnaire': questionnaire,
+        'questions': questions
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def view_responders(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    search_query = request.GET.get('search', '').strip()  
+    responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
+
+    if search_query:
+        responders = responders.filter(
+            Q(user__user__first_name__icontains=search_query) |
+            Q(user__user__last_name__icontains=search_query)
+        )
+
+    # Ensure consistent ordering for pagination
+    responders = responders.order_by("user__user__first_name")
+
+    # Paginate (10 per page)
+    paginator = Paginator(responders, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'client/view_responders.html', {
+        'questionnaire': questionnaire,
+        'responders': page_obj.object_list,
+        'page_obj': page_obj,
+        'search_query': search_query,
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def view_user_response(request, user_response_id):
+    user_response = get_object_or_404(Questionnaire_UserResponse, id=user_response_id)
+    responses = QuestionResponse.objects.filter(user_response=user_response_id).select_related('question')
+
+    return render(request, 'client/view_user_response.html', {
+        'user_response': user_response,
+        'responses': responses,
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def create_questionnaire(request):
+    categories = Category.objects.all()
+    sentiment_choices = Question.SENTIMENT_CHOICES  
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+
+        #Validation
+        if not title:
+            messages.error(request, "Title is required.")
+            return redirect("create_questionnaire")
+
+        if not description:
+            messages.error(request, "Description is required.")
+            return redirect("create_questionnaire")
+
+        question_index = 0
+        has_questions = False
+        while f"question_text_{question_index}" in request.POST:
+            has_questions = True
+            break
+
+        if not has_questions:
+            messages.error(request, "At least one question is required.")
+            return redirect("create_questionnaire")
+
+        questionnaire = Questionnaire.objects.create(title=title, description=description)
+
+        question_index = 0
+        while f"question_text_{question_index}" in request.POST:
+            question_text = request.POST.get(f"question_text_{question_index}")
+            question_type = request.POST.get(f"question_type_{question_index}")
+            sentiment = int(request.POST.get(f"sentiment_{question_index}", 1))  
+            category_id = request.POST.get(f"category_{question_index}")
+            
+            category = None
+            if category_id:
+                try:
+                    category = Category.objects.get(id=category_id)
+                except ObjectDoesNotExist:
+                    messages.error(request, f"Category ID {category_id} does not exist. Please select a valid category.")
+                    return redirect("create_questionnaire")  
+
+            Question.objects.create(
+                questionnaire=questionnaire,
+                question_text=question_text,
+                question_type=question_type,
+                sentiment=sentiment,
+                category=category
+            )
+
+            question_index += 1  
+
+        return redirect("manage_questionnaires")
+
+    return render(request, "client/create_questionnaire.html", {
+        "categories": categories,
+        "sentiment_choices": sentiment_choices,  
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def edit_questionnaire(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    questions = Question.objects.filter(questionnaire=questionnaire)
+    categories = Category.objects.all()
+    sentiment_choices = Question.SENTIMENT_CHOICES  
+
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        description = request.POST.get("description", "").strip()
+
+        # Validation: Ensure title and description are not empty
+        if not title:
+            messages.error(request, "Title is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        if not description:
+            messages.error(request, "Description is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        # Ensure at least one question exists
+        if not questions.exists():
+            messages.error(request, "At least one question is required.")
+            return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+        # Update questionnaire details
+        questionnaire.title = title
+        questionnaire.description = description
+        questionnaire.save()
+
+        for question in questions:
+            question_text = request.POST.get(f"question_text_{question.id}", "").strip()
+            question_type = request.POST.get(f"question_type_{question.id}", "").strip()
+            sentiment = request.POST.get(f"sentiment_{question.id}", "").strip()
+            category_id = request.POST.get(f"category_{question.id}", "").strip()
+
+            # Update only if fields are provided (avoids overwriting with blanks)
+            if question_text:
+                question.question_text = question_text
+
+            if question_type:
+                question.question_type = question_type
+
+            if sentiment:
+                try:
+                    question.sentiment = int(sentiment)
+                except ValueError:
+                    messages.error(request, f"Invalid sentiment value for question {question.id}.")
+                    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+            if category_id:
+                try:
+                    question.category = Category.objects.get(id=category_id)
+                except ObjectDoesNotExist:
+                    messages.error(request, f"Invalid category ID {category_id}.")
+                    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
+
+            question.save()
+
+        return redirect("view_questionnaire", questionnaire_id=questionnaire.id)
+
+    return render(request, "client/edit_questionnaire.html", {
+        "questionnaire": questionnaire,
+        "questions": questions,
+        "categories": categories,
+        "sentiment_choices": sentiment_choices,
+    })
+
+@user_passes_test(admin_check)
+@login_required
+def delete_questionnaire(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    questionnaire.delete()
+    return redirect("manage_questionnaires")
+
+@user_passes_test(admin_check)
+@login_required
+def delete_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+    questionnaire_id = question.questionnaire.id
+    question.delete()
+    return redirect("edit_questionnaire", questionnaire_id=questionnaire_id)
+
+@user_passes_test(admin_check)
+@login_required
+def add_question(request, questionnaire_id):
+    questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+    
+    # Default to Agreement Scale when creating a new question
+    new_question = Question.objects.create(
+        questionnaire=questionnaire,
+        question_text="New Question",
+        question_type="AGREEMENT",
+        is_required=True
+    )
+    
+    return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
@@ -1630,42 +2065,35 @@ def program_detail(request, program_id):
 
     return render(request, "client/program_detail.html", context)
 
-@csrf_exempt
-def update_module_order(request, program_id):
-    """Handles module reordering in a program while preventing UNIQUE constraint errors."""
-    if request.method == "POST":
-        # First, try to parse the JSON.
-        try:
-            data = json.loads(request.body)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=500)
 
-        # Now, get the program. If it doesn't exist, Http404 is raised.
-        program = get_object_or_404(Program, id=program_id)
+@login_required 
+@user_passes_test(admin_check) 
+def userStatistics(request):
+    total_users = EndUser.objects.count()
+    active_users = EndUser.objects.filter(user__is_active=True).count()
+    inactive_users = total_users - active_users
+    total_programs_enrolled = UserProgramEnrollment.objects.count()
 
-        try:
-            order_mapping = {int(item["id"]): index + 1 for index, item in enumerate(data["order"])}
-            with transaction.atomic():
-                temp_order = 1000  
-                for module_id in order_mapping.keys():
-                    ProgramModule.objects.filter(id=module_id, program=program).update(order=temp_order)
-                    temp_order += 1 
+    # Get gender distribution
+    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
+    
+    # Get ethnicity distribution
+    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
+    
+    # Get sector distribution
+    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
 
-                for module_id, new_order in order_mapping.items():
-                    ProgramModule.objects.filter(id=module_id, program=program).update(order=new_order)
+    stats_data = {
+        "total_users": total_users,
+        "active_users": active_users,
+        "inactive_users": inactive_users,
+        "programs_enrolled": total_programs_enrolled,
+        "gender_distribution": gender_counts,
+        "ethnicity_distribution": ethnicity_counts,
+        "sector_distribution": sector_counts,
+    }
 
-            return JsonResponse({"success": True})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-
-@user_passes_test(lambda u: u.is_superuser, login_url='programs')
-def delete_program(request, program_id):
-    """ Delete a program and redirect to the programs list """
-    program = get_object_or_404(Program, id=program_id)
-    program.delete()
-    return redirect('programs')
+    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
 
 
 

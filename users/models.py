@@ -2,15 +2,12 @@ from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from libgravatar import Gravatar
-from client.models import Program, Module, Questionnaire, Question, Exercise,VideoResource,AdditionalResource
+from client.models import Program, Module, Questionnaire, Question
 from django.core.exceptions import ValidationError 
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
-from django.core.exceptions import ValidationError
-
-
 from django.core.cache import cache
 import random
 import datetime
@@ -61,11 +58,12 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
-    
+
     def save(self, *args, **kwargs):
-         if self.username:
-             self.username = self.username.lower()
-         super().save(*args, **kwargs)
+        if self.username:
+            self.username = self.username.lower()
+        super().save(*args, **kwargs)
+
 
 
 class Admin(models.Model):
@@ -139,7 +137,7 @@ class UserProgramEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} enrolled in {self.program.title}"
-    
+
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -150,7 +148,6 @@ class UserModuleEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
-
 
 class UserProgramProgress (models.Model):
 
@@ -163,7 +160,7 @@ class UserProgramProgress (models.Model):
     class Meta:
         unique_together = ('user', 'program')
     def __str__(self):
-        return f"{self.user.full_name()} - {self.program.title} ({self.status})"
+        return f"{self.user.user.full_name()} - {self.program.title} ({self.status})"
     
 class UserModuleProgress(models.Model):
 
@@ -176,7 +173,7 @@ class UserModuleProgress(models.Model):
     class Meta:
         unique_together = ('user', 'module') 
     def __str__(self):
-        return f"{self.user.full_name()} - {self.module.title} ({self.status})"
+        return f"{self.user.user.full_name()} - {self.module.title} ({self.status})"
 
 class UserResourceProgress(models.Model):
     """Tracks user progress for each additional resource."""
@@ -236,8 +233,6 @@ class Questionnaire_UserResponse(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
-        
-
 class QuestionResponse(models.Model):
     user_response = models.ForeignKey(Questionnaire_UserResponse, related_name='question_responses', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)

@@ -37,21 +37,27 @@
                 {% csrf_token %}
             
                 {% for field in form %}
-                    <div class="mb-3 position-relative">
-                        {% if field.field.widget.input_type == "password" %}
-                            <div class="password-container">
-                                {{ field }}
-                                <span class="toggle-password">
-                                    <i class="bi bi-eye-slash"></i>
-                                </span>
-                            </div>
-                        {% else %}
-                            {{ field }}
-                        {% endif %}
+                <div class="mb-3 position-relative">
+                    {% if field.field.widget.input_type == "password" %}
+                    <div class="password-container">
+                        {{ field }}
+                        <span class="toggle-password">
+                        <i class="bi bi-eye-slash"></i>
+                        </span>
                     </div>
+                    {% else %}
+                    <div class="standard-input">
+                        {{ field }}
+                    </div>
+                    {% endif %}
+                </div>
                 {% endfor %}
+
             
-                <button type="submit">Log In</button>
+                <div class="input-wrapper">
+                    <button type="submit">Log In</button>
+                </div>
+                
             </form>
             
             <a href="{% url 'sign_up_step_1' %}">Don't have an account? Sign Up</a>

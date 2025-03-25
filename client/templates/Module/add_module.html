@@ -37,7 +37,6 @@
         <!-- Dropdown + Add Exercise -->
         <div class="mb-4">
             <label class="form-label">Add Exercise</label>
-            <div class="d-flex gap-2">
                 <select id="exercise-dropdown" class="form-control">
                     <option value="">Select an exercise</option>
                     {% for exercise in exercises %}
@@ -52,8 +51,7 @@
                         <option disabled>No exercises available</option>
                     {% endfor %}
                 </select>
-                <button type="button" class="btn btn-primary" onclick="addExercise()">Add</button>
-            </div>
+                <button type="button" class="btn btn-primary w-100 mt-3" onclick="addExercise()">Add</button>
         </div>
 
         <!-- Selected Exercises Preview -->
@@ -68,7 +66,6 @@
         <!-- Dropdown + Add Video -->
         <div class="mb-4">
             <label class="form-label">Add Video</label>
-            <div class="d-flex gap-2">
                 <select id="video-dropdown" class="form-control">
                     <option value="">Select a video</option>
                     {% for video in videos %}
@@ -82,8 +79,7 @@
                         <option disabled>No videos available</option>
                     {% endfor %}
                 </select>
-                <button type="button" class="btn btn-primary" onclick="addVideo()">Add</button>
-            </div>
+                <button type="button" class="btn btn-primary w-100 mt-3" onclick="addVideo()">Add</button>
         </div>
 
         <!-- Selected Videos Preview -->
@@ -103,7 +99,6 @@
         <!-- Dropdown + Add Additional Resource -->
         <div class="mb-4">
             <label class="form-label">Add Additional Resource</label>
-            <div class="d-flex gap-2">
                 <select id="resource-dropdown" class="form-control">
                     <option value="">Select a resource</option>
                     {% for resource in resources %}
@@ -118,9 +113,9 @@
                     {% empty %}
                         <option disabled>No resources available</option>
                     {% endfor %}
-                </select>
-                <button type="button" class="btn btn-primary" onclick="addResource()">Add</button>
-            </div>
+                </select>     
+
+                <button type="button" class="btn btn-primary w-100 mt-3" onclick="addResource()">Add</button>
         </div>
 
         <!-- Selected Additional Resources Preview -->
@@ -133,22 +128,24 @@
         <!-- Hidden inputs for resources -->
         <div id="hidden-resource-inputs"></div>
 
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary">Create Module</button>
-            <a href="{% url 'client_modules' %}" class="btn btn-secondary">Cancel</a>
+            <!-- Add resource Button -->
+        <div class="mb-4">
+            <label class="form-label ">Add new resource</label>
+            <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary w-100 ">Add</a>
+            <label class="form-label">Add new video</label>
+            <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary w-100">Add</a>
         </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary w-100">Create Module</button>
+            <a href="{% url 'client_modules' %}" class="btn btn-secondary mt-3 w-100">Cancel</a>
+        </div>      
 
        
     </form>
      
 
-     <!-- Add resource Button -->
-     <div class="mb-4">
-        <label class="form-label">Add new resource</label>
-        <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary">Add</a>
-        <label class="form-label">Add new video</label>
-        <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary">Add</a>
-    </div>
+
 </div>
 
     <script src="{% static 'client/js/add_module.js' %}"></script>

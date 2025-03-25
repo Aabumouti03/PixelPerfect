@@ -25,17 +25,20 @@ class DeleteProgramTest(TestCase):
 
     def test_delete_program_successfully(self):
         """Ensure an admin can delete a program and is redirected."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)  # Redirect after delete
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse('programs'))
         self.assertFalse(Program.objects.filter(id=self.program.id).exists())
+
 
     def test_delete_program_non_admin_user(self):
         """Ensure non-admin users cannot delete a program."""
         self.client.logout()
         self.client.login(username="user", password="userpass")
+
         response = self.client.get(self.url, follow=True)
-        expected_url = reverse("programs") + "?next=" + self.url
-        self.assertRedirects(response, expected_url)
+
+        self.assertContains(response, "Log in")
+
         self.assertTrue(Program.objects.filter(id=self.program.id).exists())
 
 
@@ -44,3 +47,5 @@ class DeleteProgramTest(TestCase):
         non_existent_url = reverse("delete_program", args=[999999])
         response = self.client.get(non_existent_url)
         self.assertEqual(response.status_code, 404)
+
+

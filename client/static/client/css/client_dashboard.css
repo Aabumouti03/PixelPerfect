@@ -52,7 +52,7 @@ body {
 
 .card img {
     margin-top: 35px;
-    width: 40px; /* ✅ Adjust image size */
+    width: 40px; 
     height: 40px;
 }
 
@@ -81,9 +81,9 @@ body {
 }
 
 .chart-box {
-    flex: 1; /* ✅ Ensures all charts take equal space */
-    max-width: 48%; /* ✅ Matches width with other charts */
-    height: 350px; /* ✅ Gives more space to the pie chart */
+    flex: 1; 
+    max-width: 48%;
+    height: 350px;
     background: white;
     padding: 20px;
     border-radius: 10px;
@@ -97,7 +97,7 @@ body {
 .chart-box canvas {
     width: 100% !important;
     height: 100% !important;
-    max-width: 280px; /* ✅ Keeps it from getting too large */
+    max-width: 280px;
     max-height: 280px;
 }
 

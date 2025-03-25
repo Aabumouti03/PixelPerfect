@@ -76,6 +76,7 @@ from .utils import send_verification_email_after_sign_up
 
 @login_required
 def questionnaire(request):
+    """Render the questionnaire page for active questionnaires."""
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
 
     if active_questionnaire:
@@ -101,6 +102,7 @@ def questionnaire(request):
 @csrf_protect
 @login_required
 def submit_responses(request):
+    """Process and save user questionnaire responses."""
     if request.method == "POST":
         try:
             
@@ -177,6 +179,7 @@ def submit_responses(request):
 
 @login_required
 def save_notes(request):
+    """Process and save user notes."""
     if request.method == 'POST':
         data = json.loads(request.body)
         content = data.get('content')
@@ -192,6 +195,7 @@ def save_notes(request):
 
 @login_required
 def get_notes(request):
+    """Fetch and display user notes."""
     try:
         # Get the EndUser instance for the logged-in user
         end_user = EndUser.objects.get(user=request.user)
@@ -211,6 +215,7 @@ def get_notes(request):
 
 @login_required
 def dashboard(request):
+    """Render user dashboard page."""
     user = request.user
 
     try:
@@ -274,6 +279,7 @@ def dashboard(request):
 
 @login_required
 def view_program(request, program_id):
+    """Display user program details."""
     user = request.user
 
     try:
@@ -321,23 +327,18 @@ def view_program(request, program_id):
     
     return render(request, 'users/view_program.html', context)
 
-
-
-def welcome_page(request):
-    '''A function for displaying a page that welcomes users'''
-    return render(request, 'users/welcome_page.html')
-
-@login_required
-def modules(request):
-    return render(request, 'users/modules.html')
-
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ GENERAL SITE VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
 
+def welcome_page(request):
+    """A function for displaying a page that welcomes users"""
+    return render(request, 'users/welcome_page.html')
+
 
 def about(request):
+    """Allows users to get information about the website team"""
     return render(request, 'users/about.html')
 
 def contact_us(request):
@@ -369,9 +370,82 @@ def contact_success(request):
     return render(request, 'users/contact_success.html')
 
 
+@login_required
+def get_started(request):
+    """Provide the users with option to enroll in modules or programs or start questionnaire."""
+    categories = Category.objects.all()
+
+    filter_pressed = "filter" in request.GET
+    search_pressed = "search_btn" in request.GET
+
+    search_query = request.GET.get("search", "").strip() if search_pressed else ""
+    sort = request.GET.get("sort", None)
+    filter_type = request.GET.get("filter_type", "all")
+    selected_category_ids = request.GET.getlist("category")
+    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
+
+    # If it's a search (not a filter), reset filters visually and functionally
+    if search_pressed and not filter_pressed:
+        filter_type = "all"
+        selected_category_ids = list(Category.objects.values_list("id", flat=True))
+
+    # If still no categories selected (e.g., initial load), include all
+    if not selected_category_ids:
+        selected_category_ids = list(Category.objects.values_list("id", flat=True))
+
+    all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
+
+    # Start with all data
+    programs = Program.objects.all()
+    modules = Module.objects.all()
+
+    if filter_pressed:
+        if all_categories_selected or not selected_category_ids:
+            programs = programs.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+            modules = modules.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+        else:
+            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
+            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
+
+        if filter_type == "programs":
+            modules = Module.objects.none()
+        elif filter_type == "modules":
+            programs = Program.objects.none()
+
+    if search_pressed and search_query:
+        programs = programs.filter(title__icontains=search_query)
+        modules = modules.filter(title__icontains=search_query)
+
+    if sort == "asc":
+        programs = programs.order_by("title")
+        modules = modules.order_by("title")
+    elif sort == "desc":
+        programs = programs.order_by("-title")
+        modules = modules.order_by("-title")
+
+    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
+    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
+
+    return render(request, "users/get_started.html", {
+        "categories": categories,
+        "programs": programs,
+        "modules": modules,
+        "selected_category_ids": selected_category_ids,
+        "search_query": search_query,
+        "sort": sort,
+        "filter_type": filter_type,
+        "enrolled_programs": enrolled_programs,
+        "enrolled_modules": enrolled_modules,
+    })
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ LOGIN/SIGNUP VIEWS -------------------------------------------------------------------
+#------------------------------------------------------ LOGIN/SIGNUP/VERIFICATION VIEWS --------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -500,6 +574,28 @@ def log_out(request):
     return redirect('dashboard')
 
 
+def verify_email(request, uidb64, token):
+    """Verifies user's email when they change it in the profile section."""
+    User = get_user_model()
+    
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return HttpResponse("Invalid verification link.")
+    
+    if default_token_generator.check_token(user, token):
+        if user.new_email:
+            user.email = user.new_email 
+            user.new_email = None  
+            user.email_verified = True  
+            user.save()
+            
+            request.session['profile_update_popup'] = 'profile_updated'
+            return redirect('log_in')
+
+    return HttpResponse("Invalid or expired token.")
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ PROFILE VIEWS -------------------------------------------------------------------
@@ -544,7 +640,7 @@ def update_profile(request):
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
             if new_email:
-                new_email = new_email.strip().lower()  # Convert to lowercase
+                new_email = new_email.strip().lower() 
                 
                 if new_email != user.email.lower():  
                     # Save the new email for verification
@@ -557,7 +653,7 @@ def update_profile(request):
 
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
-                    send_mail_status = send_mail(
+                    send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
                         "noreply@example.com",
@@ -589,29 +685,6 @@ def update_profile(request):
     return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
 
 
-def verify_email(request, uidb64, token):
-    """Verifies user's email when they change it in the profile section."""
-    User = get_user_model()
-    
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (User.DoesNotExist, ValueError, TypeError):
-        return HttpResponse("Invalid verification link.")
-    
-    if default_token_generator.check_token(user, token):
-        if user.new_email:
-            user.email = user.new_email 
-            user.new_email = None  
-            user.email_verified = True  
-            user.save()
-            
-            request.session['profile_update_popup'] = 'profile_updated'
-            return redirect('log_in')
-
-    return HttpResponse("Invalid or expired token.")
-
-
 @login_required
 def delete_account(request):
     """Handle both confirmation page and actual account deletion."""
@@ -626,7 +699,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('profile')  # Redirect back to the profile if deletion fails
+            return redirect('profile')  
 
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
     return render(request, 'users/Profile/delete_account.html', context)
@@ -635,7 +708,6 @@ def delete_account(request):
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ PROGRAMS VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
-
 
 @login_required
 def recommended_programs(request):
@@ -676,6 +748,10 @@ def recommended_programs(request):
     })
 
 
+#-----------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------ MODULES VIEWS -------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
+
 @login_required
 def recommended_modules(request):
     """Displays modules for users to enroll in and handles AJAX enrollment updates."""
@@ -691,7 +767,7 @@ def recommended_modules(request):
 
     if request.method == "POST":
         try:
-            data = json.loads(request.body)  # Read AJAX request body
+            data = json.loads(request.body) 
             module_id = data.get("module_id")
             action = data.get("action")
 
@@ -715,88 +791,8 @@ def recommended_modules(request):
 
 
 @login_required
-def get_started(request):
-    categories = Category.objects.all()
-    
-    filter_pressed = "filter" in request.GET
-    search_pressed = "search_btn" in request.GET
-
-    if filter_pressed:
-        search_query = ""
-    else:
-        search_query = request.GET.get("search", "").strip()
-
-    sort = request.GET.get("sort", None)
-    filter_type = request.GET.get("filter_type", "all")
-    selected_category_ids = request.GET.getlist("category")
-    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
-
-    if len(selected_category_ids) == len(categories):
-        selected_category_ids = [category.id for category in categories]
-
-    # Fetch data
-    programs = Program.objects.all()
-    modules = Module.objects.all()
-
-    if filter_pressed:
-
-        all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
-
-        if all_categories_selected or not selected_category_ids:
-            #  If all categories are selected, include programs/modules with NO categories
-            programs = programs.filter(
-                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
-            ).distinct()
-
-            modules = modules.filter(
-                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
-            ).distinct()
-        else:
-            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
-            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
-
-
-        if filter_type == "programs":
-            modules = Module.objects.none()
-        elif filter_type == "modules":
-            programs = Program.objects.none()
-
-    # Apply search logic
-    if search_pressed and search_query:
-        programs = programs.filter(title__icontains=search_query)
-        modules = modules.filter(title__icontains=search_query)
-
-    # Apply sorting
-    if sort == "asc":
-        programs = programs.order_by("title")
-        modules = modules.order_by("title")
-    elif sort == "desc":
-        programs = programs.order_by("-title")
-        modules = modules.order_by("-title")
-
-    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
-    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
-
-    return render(request, "users/get_started.html", {
-        "categories": categories,
-        "programs": programs,
-        "modules": modules,
-        "selected_category_ids": selected_category_ids,
-        "search_query": search_query,
-        "sort": sort,
-        "filter_type": filter_type,
-        "enrolled_programs": enrolled_programs,
-        "enrolled_modules": enrolled_modules,
-    })
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ MODULES VIEWS -------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
-
-@login_required
 def user_modules(request):
+    """Display user enrolled modules."""
     user = request.user
     end_user, created = EndUser.objects.get_or_create(user=user)
     
@@ -882,6 +878,7 @@ def module_overview(request, module_id):
 
 @login_required
 def exercise_detail(request, exercise_id):
+    """Display exercise detials."""
     exercise = get_object_or_404(Exercise, id=exercise_id)
     user, _ = EndUser.objects.get_or_create(user=request.user)
 
@@ -914,6 +911,7 @@ def exercise_detail(request, exercise_id):
 @csrf_exempt  
 @login_required
 def rate_module(request, module_id):
+    """Allows users to rate modules."""
     
     module = get_object_or_404(Module, id=module_id)
 
@@ -943,6 +941,7 @@ def rate_module(request, module_id):
 @login_required
 @csrf_exempt
 def mark_done(request):
+    """Allows users to mark tasks as done"""
     if request.method == "POST":
         data = json.loads(request.body)
         item_id = data.get("id")
@@ -1000,6 +999,7 @@ def mark_done(request):
 
 @login_required
 def unenroll_module(request):
+    """Allows users to remove modules from their enrolled modules."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -1037,6 +1037,7 @@ def unenroll_module(request):
 
 @login_required
 def enroll_module(request):
+    """Allows users to add modules to their enrolled modules."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -1068,6 +1069,7 @@ def enroll_module(request):
 
 @login_required
 def all_modules(request):
+    """Display all available modules."""
     allModules = Module.objects.all()  # Fetch all modules
     user = request.user
 
@@ -1143,10 +1145,11 @@ def journal_view(request, date=None):
 
     return render(request, "users/journal.html", context)
 
+
 @login_required
 def save_journal_entry(request):
     """Handles saving/updating journal entries using JSON."""
-
+    
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
 
@@ -1156,21 +1159,35 @@ def save_journal_entry(request):
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
+    # Extract date from the request
     date_str = data.get("date")
     if not date_str:
         return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
     try:
-       entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-
-        
+        entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
-    # Save the journal entry
-    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
+    # Fetch or create the journal entry for the given date
+    journal_entry, created = JournalEntry.objects.get_or_create(user=request.user, date=entry_date)
 
-    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+    # Update the journal entry with the submitted data
+    journal_entry.sleep_hours = data.get("sleep_hours")
+    journal_entry.caffeine = data.get("caffeine")
+    journal_entry.hydration = data.get("hydration")
+    journal_entry.stress = data.get("stress")
+    journal_entry.goal_progress = data.get("goal_progress")
+    journal_entry.notes = data.get("notes")
+    journal_entry.connected_with_family = data.get("connected_with_family")
+    journal_entry.expressed_gratitude = data.get("expressed_gratitude")
+    journal_entry.outdoors = data.get("spent_time_outdoors")
+    journal_entry.sunset = data.get("watched_sunset")
+    
+    # Save the entry
+    journal_entry.save()
+
+    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
 
 
 

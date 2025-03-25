@@ -22,7 +22,7 @@ body {
 
 .card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Auto-adjust to fit 4-5 modules */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
     gap: 30px;
     justify-content: center;
     align-items: stretch;
@@ -48,7 +48,7 @@ body {
     margin-left: 5px;
 }
 
-/* .card.sales { background: #0048FF; } */
+
 
 
 .card:hover {
@@ -104,12 +104,12 @@ body {
 
 @media (max-width: 768px) {
     .card-container {
-        grid-template-columns: repeat(2, 1fr); /* Show 2 per row on smaller screens */
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 480px) {
     .card-container {
-        grid-template-columns: repeat(1, 1fr); /* Show 1 per row on mobile */
+        grid-template-columns: repeat(1, 1fr); 
     }
 }

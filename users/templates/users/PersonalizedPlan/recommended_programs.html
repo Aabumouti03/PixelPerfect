@@ -2,21 +2,25 @@
 {% load static %}
 
 {% block content %}
-    <link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
-    <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
+<link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="programs-url" content="{% url 'recommended_programs' %}">
 
-    <h1>Your Personalized Learning Journey</h1>
-    <p>Select a program that best fits your goals! You can only enroll in one program at a time.</p>
+<h1>Your Personalized Learning Journey</h1>
+<p>Select a program that best fits your goals! You can only enroll in one program at a time.</p>
 
-    <div class="nav-buttons">
-        <a href="{% url 'questionnaire' %}"><button>Back</button></a>
-        <a href="{% url 'recommended_modules' %}"><button>Skip</button></a>
-    </div>
+<div class="nav-buttons">
+    <a href="{% url 'questionnaire' %}"><button>Back</button></a>
+    <a href="{% url 'recommended_modules' %}"><button>Skip</button></a>
+</div>
 
-    {% if programs %}
-        <div class="programs-container">
-            {% for program in programs %}
-                <div class="program-card">
+{% if programs %}
+    <div class="programs-container">
+        {% for program in programs %}
+            <div class="program-card">
+                <div class="program-header">
+                    <h3 class="program-title">{{ program.title }}</h3>
                     <div class="button-container">
                         <button 
                             class="enroll-button {% if program in enrolled_programs %}enrolled{% endif %}" 
@@ -27,89 +31,27 @@
                         </button>
                         <a href="{% url 'view_program' program.id %}" class="view-program-button">View Program</a>
                     </div>
-                    <h3>{{ program.title }}</h3>
-                    <p>{{ program.description }}</p>
-                    
-                    <div class="program-modules">
-                        {% for module in program.program_modules.all|slice:":3" %}
-                            <div class="module-card">
-                                <h4>{{ module.module.title }}</h4>
-                                <p>{{ module.module.description }}</p>
-                            </div>
-                        {% endfor %}
-                    </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No programs available at the moment.</p>
-    {% endif %}
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // For the case when the page loads, ensure the correct button states
-            document.querySelectorAll(".enroll-button").forEach(button => {
-                const isEnrolled = button.getAttribute("data-enrolled") === "true";
-
-                // Toggle the button text and class based on the enrollment status
-                if (isEnrolled) {
-                    button.textContent = "Enrolled";
-                    button.classList.add("enrolled");
-                } else {
-                    button.textContent = "Enroll";
-                    button.classList.remove("enrolled");
-                }
-
-                button.addEventListener("click", function () {
-                    const programId = this.getAttribute("data-program-id");
-                    const isEnrolled = this.getAttribute("data-enrolled") === "true";
-                    const action = isEnrolled ? "unenroll" : "enroll";
-
-                    // If the user is enrolling in a new program, unenroll from the old one
-                    document.querySelectorAll(".enroll-button").forEach(b => {
-                        if (b !== this && b.getAttribute("data-enrolled") === "true") {
-                            b.textContent = "Enroll";  // Reset old program button to "Enroll"
-                            b.setAttribute("data-enrolled", "false");
-                            b.classList.remove("enrolled");
-                        }
-                    });
-
-                    // Toggle the UI for the selected program
-                    if (isEnrolled) {
-                        this.textContent = "Enroll";
-                        this.setAttribute("data-enrolled", "false");
-                        this.classList.remove("enrolled");
-                    } else {
-                        this.textContent = "Enrolled";
-                        this.setAttribute("data-enrolled", "true");
-                        this.classList.add("enrolled");
-                    }
-
-                    // Send request to update the enrollment status
-                    fetch("{% url 'recommended_programs' %}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: JSON.stringify({
-                            program_id: programId,
-                            action: action
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "success") {
-                            console.log("Enrollment updated successfully");
-                        } else {
-                            console.error("Error updating enrollment");
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-                });
-            });
-        });
-    </script>
+                <p>{{ program.description }}</p>
+                
+                <div class="program-modules">
+                    {% for module in program.program_modules.all|slice:":3" %}
+                        <div class="module-card">
+                            <h4>{{ module.module.title }}</h4>
+                            <p>{{ module.module.description }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No programs available at the moment.</p>
+{% endif %}
 
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'users/js/recommended_programs.js' %}"></script>
+{% endblock %}
+

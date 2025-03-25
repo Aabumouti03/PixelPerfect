@@ -54,10 +54,8 @@ class DeleteAccountViewTest(TestCase):
         # User should be logged out
         self.assertNotIn('_auth_user_id', self.client.session)
 
-        # Redirection to welcome page
         self.assertRedirects(response, self.welcome_url)
 
-        # Check success message
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), "Your account has been successfully deleted.")
 
@@ -67,12 +65,9 @@ class DeleteAccountViewTest(TestCase):
         with patch.object(User, "delete", side_effect=Exception("Test deletion error")):
             response = self.client.post(self.delete_url, follow=True)
 
-        # Ensure the user still exists
         self.assertTrue(User.objects.filter(username="testuser").exists())
 
-        # Ensure redirection to profile page
         self.assertRedirects(response, self.profile_url)
 
-        # Check for error message
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), "An error occurred while deleting your account: Test deletion error")

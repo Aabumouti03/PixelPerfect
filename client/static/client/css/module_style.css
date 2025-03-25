@@ -69,7 +69,7 @@ body {
     background: #f8f9fa;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-left: 6px solid #73c4fd; /* Blue left border */
+    border-left: 6px solid #73c4fd; 
     padding: 15px;
     transition: background 0.3s ease-in-out;
 }
@@ -154,11 +154,11 @@ body {
 }
 
 .section-card {
-    background: #ffffff; /* White background */
+    background: #ffffff;
     padding: 15px;
     margin-top: 15px;
-    border-radius: 10px; /* Rounded corners */
-    border-left: 6px solid #FD5402;  /* Orange left border */
+    border-radius: 10px; 
+    border-left: 6px solid #FD5402; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: background 0.3s ease-in-out;
 }
@@ -166,7 +166,7 @@ body {
 /* Section Title */
 .section-card h5 {
     font-size: 20px;
-    color: #FD5402; /* Orange color */
+    color: #FD5402;
     margin-bottom: 10px;
     font-weight: bold;
 }
@@ -179,11 +179,11 @@ body {
 
 /* Exercises inside Sections */
 .exercise-card {
-    background: #E8F4FC; /* Light blue */
+    background: #E8F4FC; 
     padding: 12px;
     margin-top: 10px;
     border-radius: 8px;
-    border-left: 5px solid #73c4fd; /* Blue left border */
+    border-left: 5px solid #73c4fd; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
