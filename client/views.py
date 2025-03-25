@@ -160,15 +160,387 @@ def create_program(request):
 #------------------------------------------------------ MODULES VIEWS --------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
+@user_passes_test(admin_check)
+@login_required
+def createModule(request):
+    """Allows the client to create a module with title, description, etc."""
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        exercise_ids = request.POST.getlist("exercises")
+        video_ids = request.POST.getlist("videos")
+        resource_ids = request.POST.getlist("resources")
+
+        if not title:
+            return render(request, "Module/add_module.html", {
+                "error": "Module title is required.",
+                "exercises": Exercise.objects.all(),
+                "videos": VideoResource.objects.all(),
+                "resources": AdditionalResource.objects.all(),
+                "title": title,
+                "description": description
+            })
+
+
+        module = Module.objects.create(title=title, description=description)
+
+        if exercise_ids:
+            exercises = Exercise.objects.filter(id__in=exercise_ids)
+            section = Section.objects.create(
+                title=f"Auto Section for {title}",
+                description="Auto-created section from selected exercises"
+            )
+            section.exercises.set(exercises)
+            module.sections.add(section)
+
+
+        if video_ids:
+            videos = VideoResource.objects.filter(id__in=video_ids)
+            module.video_resources.set(videos)
+
+        if resource_ids:
+            resources = AdditionalResource.objects.filter(id__in=resource_ids)
+            module.additional_resources.set(resources)
+
+        return redirect("client_modules")
+
+    return render(request, "Module/add_module.html", {
+        "exercises": Exercise.objects.all(),
+        "videos": VideoResource.objects.all(),
+        "resources": AdditionalResource.objects.all(),
+    })
+
+
+@user_passes_test(admin_check)
+@login_required
+def edit_module(request, module_id):
+    """Allows the client to edit the module's title, description, videos, etc."""
+    module = get_object_or_404(Module, id=module_id)
+
+    existing_exercise_ids = Exercise.objects.filter(
+        sections__in=module.sections.all()
+    ).values_list('id', flat=True).distinct()
+    available_exercises = Exercise.objects.exclude(id__in=existing_exercise_ids)
+
+    available_additional_resources = AdditionalResource.objects.exclude(
+        id__in=module.additional_resources.values_list('id', flat=True)
+    )
+
+    available_video_resources = VideoResource.objects.exclude(
+        id__in=module.video_resources.values_list('id', flat=True)
+    )
+
+    if request.method == "POST":
+        form = ModuleForm(request.POST, instance=module)
+
+        if form.is_valid():
+            # Save the form fields (title, description, etc.)
+            form.save()
+
+            # Handle adding videos
+            if "videos" in request.POST:
+                selected_video_ids = request.POST.getlist("videos")
+                module.video_resources.set(VideoResource.objects.filter(id__in=selected_video_ids))
+
+            # Handle adding resources
+            if "resources" in request.POST:
+                selected_resource_ids = request.POST.getlist("resources")
+                module.additional_resources.set(AdditionalResource.objects.filter(id__in=selected_resource_ids))
+
+            # Redirect back to client_modules after saving
+            return redirect('client_modules')
+
+    else:
+        form = ModuleForm(instance=module)
+
+    return render(request, 'Module/edit_module.html', {
+        'form': form,
+        'module': module,
+        'available_exercises': available_exercises,
+        'available_additional_resources': available_additional_resources,
+        'available_video_resources': available_video_resources,
+        'videos': VideoResource.objects.all(),
+        'resources': AdditionalResource.objects.all(),
+    })
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ VIDEOS VIEWS --------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
+@login_required
+@user_passes_test(admin_check)
+def video_list(request):
+    """View for displaying all uploaded video resources."""
+    videos = VideoResource.objects.all()
+    return render(request, "client/video_list.html", {"videos": videos})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_video_from_module(request, module_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        video_id = data.get("video_id")
+        try:
+            module = Module.objects.get(id=module_id)
+            video = VideoResource.objects.get(id=video_id)
+            module.video_resources.remove(video)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+@user_passes_test(admin_check)
+@login_required
+@csrf_exempt
+def add_video(request):
+    next_url = request.GET.get("next", "/")  # where to go after saving
+    module_id = request.GET.get("module_id")  # optional: module to link to
+
+    if request.method == "POST":
+        form = VideoResourceForm(request.POST)
+        if form.is_valid():
+            video = form.save()
+
+            # If module_id is passed, link the video to the module
+            if module_id:
+                try:
+                    module = Module.objects.get(id=module_id)
+                    module.video_resources.add(video)
+                    messages.success(request, "Video added and linked to module.")
+                except Module.DoesNotExist:
+                    messages.error(request, "Module not found. Video saved but not linked.")
+            else:
+                messages.success(request, "Video added successfully.")
+
+            return redirect(next_url)  # Redirect to the next page (either module creation page or wherever the user came from)
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = VideoResourceForm()
+
+    return render(request, "client/add_video.html", {
+        "form": form,
+        "next": next_url  # Pass the next URL to the template so that it can be included in the form if needed
+    })
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def add_video_to_module(request, module_id):
+    """
+    Add a video to the specified module.
+    """
+    if request.method == "POST":
+        # Get the video_id from the POST data
+        data = json.loads(request.body)
+        video_id = data.get("video_id")
+        
+        # Ensure the video ID is provided
+        if not video_id:
+            return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
+        
+        try:
+            module = Module.objects.get(id=module_id)
+            video = VideoResource.objects.get(id=video_id)
+            
+            # Add the video to the module's video_resources
+            module.video_resources.add(video)
+            return JsonResponse({"success": True, "message": "Video added to module."})
+        except Module.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Module not found."})
+        except VideoResource.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Video not found."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+
+
+@login_required
+@user_passes_test(admin_check)
+def delete_video(request, video_id):
+    """View to delete a video resource permanently."""
+    video = get_object_or_404(VideoResource, id=video_id)
+
+    # Delete the video
+    if request.method == 'POST':
+        video.delete()
+        return redirect('video_list')  
+
+    return redirect('video_list')  
+
+@login_required
+@user_passes_test(admin_check)
+def video_detail(request, video_id):
+    """View for displaying a single video."""
+    video = get_object_or_404(VideoResource, id=video_id)
+    return render(request, "client/video_detail.html", {"video": video})
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_video_from_module(request, module_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            video_id = data.get("video_id")
+            
+            if not video_id:
+                return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
+            
+            module = Module.objects.get(id=module_id)
+            video = VideoResource.objects.get(id=video_id)
+            module.video_resources.remove(video)
+            module.save()  # Ensure changes are saved
+            return JsonResponse({"success": True})
+        
+        except VideoResource.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Video not found."})
+        except Module.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Module not found."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+
+
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ RESOURCES VIEWS ------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_resource_from_module(request, module_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            resource_id = data.get("resource_id")
+            
+            if not resource_id:
+                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
+            if not resource_id:  # ✅ Check if resource_id is provided
+                return JsonResponse({"success": False, "error": "No resource_id provided"})
+
+            
+            module = Module.objects.get(id=module_id)
+            resource = AdditionalResource.objects.get(id=resource_id)
+            module.additional_resources.remove(resource)
+            module.save()  # Ensure changes are saved
+            return JsonResponse({"success": True})
+        
+        except AdditionalResource.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Resource not found."})
+        except Module.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Module not found."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Invalid method"})
+
+
+
+@user_passes_test(admin_check)
+@login_required
+def add_additional_resource(request):
+    # Get next URL to redirect to after successful form submission
+    next_url = request.GET.get('next', '/')
+    module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
+
+    if request.method == 'POST':
+        form = AdditionalResourceForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save the new additional resource
+            resource = form.save()
+
+            # If module_id is provided, link the resource to the module
+            if module_id:
+                module = get_object_or_404(Module, id=module_id)
+                module.additional_resources.add(resource)
+                messages.success(request, "Resource added and linked to the module.")
+            else:
+                messages.success(request, "Resource added successfully.")
+
+            # Redirect to the next URL (the previous page or specified redirect URL)
+            return redirect(next_url)
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = AdditionalResourceForm()
+
+    # Check if there's a module to redirect to
+    edit_module_url = None
+    if module_id:
+        edit_module_url = reverse('edit_module', args=[module_id])
+
+    return render(request, "client/add_additional_resource.html", {
+        "form": form,
+        "module_id": module_id,
+        "next": next_url,
+        "edit_module": edit_module_url
+    })
+
+@login_required
+@user_passes_test(admin_check)  
+def resource_list(request):
+    """View for displaying all uploaded resources."""
+    resources = AdditionalResource.objects.all()
+
+    return render(request, 'client/resource_list.html', {'resources': resources})
+
+@login_required
+@user_passes_test(admin_check)
+def delete_resource(request, resource_id):
+    """View to delete a resource permanently."""
+    resource = get_object_or_404(AdditionalResource, id=resource_id)
+
+    if request.method == 'POST':
+        resource.delete()
+        return redirect('resource_list')  
+
+    return redirect('resource_list')  
+
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def add_resource_to_module(request, module_id):
+    """
+    Add a resource to the specified module.
+    """
+    if request.method == "POST":
+        # Get the resource_id from the POST data
+        data = json.loads(request.body)
+        resource_id = data.get("resource_id")
+        
+        # Ensure the resource ID is provided
+        if not resource_id:
+            return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
+        
+        try:
+            module = Module.objects.get(id=module_id)
+            resource = AdditionalResource.objects.get(id=resource_id)
+            
+            # Add the resource to the module's additional_resources
+            module.additional_resources.add(resource)
+            return JsonResponse({"success": True, "message": "Resource added to module."})
+        except Module.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Module not found."})
+        except AdditionalResource.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Resource not found."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+
+
 
 
 
@@ -192,6 +564,33 @@ def reports(request):
             'program_labels': json.dumps(program_labels),
             'program_data': json.dumps(program_data),
         })
+
+@login_required 
+@user_passes_test(admin_check) 
+def userStatistics(request):
+    total_users = EndUser.objects.count()
+    active_users = EndUser.objects.filter(user__is_active=True).count()
+    inactive_users = total_users - active_users
+    total_programs_enrolled = UserProgramEnrollment.objects.count()
+
+    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
+
+    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
+
+    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
+
+    stats_data = {
+        "total_users": total_users,
+        "active_users": active_users,
+        "inactive_users": inactive_users,
+        "programs_enrolled": total_programs_enrolled,
+        "gender_distribution": gender_counts,
+        "ethnicity_distribution": ethnicity_counts,
+        "sector_distribution": sector_counts,
+    }
+
+    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
+
 
 
 @login_required
@@ -446,431 +845,27 @@ def create_category(request):
 
     return render(request, 'client/create_category.html', context)
 
-@user_passes_test(admin_check)
-@login_required
-def createModule(request):
-    """Allows the client to create a module with title, description, etc."""
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        exercise_ids = request.POST.getlist("exercises")
-        video_ids = request.POST.getlist("videos")
-        resource_ids = request.POST.getlist("resources")
-
-        if not title:
-            return render(request, "Module/add_module.html", {
-                "error": "Module title is required.",
-                "exercises": Exercise.objects.all(),
-                "videos": VideoResource.objects.all(),
-                "resources": AdditionalResource.objects.all(),
-                "title": title,
-                "description": description
-            })
-
-
-        module = Module.objects.create(title=title, description=description)
-
-        if exercise_ids:
-            exercises = Exercise.objects.filter(id__in=exercise_ids)
-            section = Section.objects.create(
-                title=f"Auto Section for {title}",
-                description="Auto-created section from selected exercises"
-            )
-            section.exercises.set(exercises)
-            module.sections.add(section)
-
-
-        if video_ids:
-            videos = VideoResource.objects.filter(id__in=video_ids)
-            module.video_resources.set(videos)
-
-        if resource_ids:
-            resources = AdditionalResource.objects.filter(id__in=resource_ids)
-            module.additional_resources.set(resources)
-
-        return redirect("client_modules")
-
-    return render(request, "Module/add_module.html", {
-        "exercises": Exercise.objects.all(),
-        "videos": VideoResource.objects.all(),
-        "resources": AdditionalResource.objects.all(),
-    })
-
-
-@user_passes_test(admin_check)
-@login_required
-def edit_module(request, module_id):
-    """Allows the client to edit the module's title, description, videos, etc."""
-    module = get_object_or_404(Module, id=module_id)
-
-    existing_exercise_ids = Exercise.objects.filter(
-        sections__in=module.sections.all()
-    ).values_list('id', flat=True).distinct()
-    available_exercises = Exercise.objects.exclude(id__in=existing_exercise_ids)
-
-    available_additional_resources = AdditionalResource.objects.exclude(
-        id__in=module.additional_resources.values_list('id', flat=True)
-    )
-
-    available_video_resources = VideoResource.objects.exclude(
-        id__in=module.video_resources.values_list('id', flat=True)
-    )
-
-    if request.method == "POST":
-        form = ModuleForm(request.POST, instance=module)
-
-        if form.is_valid():
-            # Save the form fields (title, description, etc.)
-            form.save()
-
-            # Handle adding videos
-            if "videos" in request.POST:
-                selected_video_ids = request.POST.getlist("videos")
-                module.video_resources.set(VideoResource.objects.filter(id__in=selected_video_ids))
-
-            # Handle adding resources
-            if "resources" in request.POST:
-                selected_resource_ids = request.POST.getlist("resources")
-                module.additional_resources.set(AdditionalResource.objects.filter(id__in=selected_resource_ids))
-
-            # Redirect back to client_modules after saving
-            return redirect('client_modules')
-
-    else:
-        form = ModuleForm(instance=module)
-
-    return render(request, 'Module/edit_module.html', {
-        'form': form,
-        'module': module,
-        'available_exercises': available_exercises,
-        'available_additional_resources': available_additional_resources,
-        'available_video_resources': available_video_resources,
-        'videos': VideoResource.objects.all(),
-        'resources': AdditionalResource.objects.all(),
-    })
-
-
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ VIDEOS VIEWS --------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
-
-@login_required
-@user_passes_test(admin_check)
-def video_list(request):
-    """View for displaying all uploaded video resources."""
-    videos = VideoResource.objects.all()
-    return render(request, "client/video_list.html", {"videos": videos})
-
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        video_id = data.get("video_id")
-        try:
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-@user_passes_test(admin_check)
-@login_required
-@csrf_exempt
-def add_video(request):
-    next_url = request.GET.get("next", "/")  # where to go after saving
-    module_id = request.GET.get("module_id")  # optional: module to link to
-
-    if request.method == "POST":
-        form = VideoResourceForm(request.POST)
-        if form.is_valid():
-            video = form.save()
-
-            # If module_id is passed, link the video to the module
-            if module_id:
-                try:
-                    module = Module.objects.get(id=module_id)
-                    module.video_resources.add(video)
-                    messages.success(request, "Video added and linked to module.")
-                except Module.DoesNotExist:
-                    messages.error(request, "Module not found. Video saved but not linked.")
-            else:
-                messages.success(request, "Video added successfully.")
-
-            return redirect(next_url)  # Redirect to the next page (either module creation page or wherever the user came from)
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = VideoResourceForm()
-
-    return render(request, "client/add_video.html", {
-        "form": form,
-        "next": next_url  # Pass the next URL to the template so that it can be included in the form if needed
-    })
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def add_video_to_module(request, module_id):
-    """
-    Add a video to the specified module.
-    """
-    if request.method == "POST":
-        # Get the video_id from the POST data
-        data = json.loads(request.body)
-        video_id = data.get("video_id")
-        
-        # Ensure the video ID is provided
-        if not video_id:
-            return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
-        
-        try:
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            
-            # Add the video to the module's video_resources
-            module.video_resources.add(video)
-            return JsonResponse({"success": True, "message": "Video added to module."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except VideoResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Video not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
-
-
-@login_required
-@user_passes_test(admin_check)
-def delete_video(request, video_id):
-    """View to delete a video resource permanently."""
-    video = get_object_or_404(VideoResource, id=video_id)
-
-    # Delete the video
-    if request.method == 'POST':
-        video.delete()
-        return redirect('video_list')  
-
-    return redirect('video_list')  
-
-@login_required
-@user_passes_test(admin_check)
-def video_detail(request, video_id):
-    """View for displaying a single video."""
-    video = get_object_or_404(VideoResource, id=video_id)
-    return render(request, "client/video_detail.html", {"video": video})
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            video_id = data.get("video_id")
-            
-            if not video_id:
-                return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
-            
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            module.save()  # Ensure changes are saved
-            return JsonResponse({"success": True})
-        
-        except VideoResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Video not found."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-
-
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ RESOURCES VIEWS ------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_resource_from_module(request, module_id):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            resource_id = data.get("resource_id")
-            
-            if not resource_id:
-                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
-            if not resource_id:  # ✅ Check if resource_id is provided
-                return JsonResponse({"success": False, "error": "No resource_id provided"})
-
-            
-            module = Module.objects.get(id=module_id)
-            resource = AdditionalResource.objects.get(id=resource_id)
-            module.additional_resources.remove(resource)
-            module.save()  # Ensure changes are saved
-            return JsonResponse({"success": True})
-        
-        except AdditionalResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Resource not found."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-
-
-@user_passes_test(admin_check)
-@login_required
-def add_additional_resource(request):
-    # Get next URL to redirect to after successful form submission
-    next_url = request.GET.get('next', '/')
-    module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
-
-    if request.method == 'POST':
-        form = AdditionalResourceForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Save the new additional resource
-            resource = form.save()
-
-            # If module_id is provided, link the resource to the module
-            if module_id:
-                module = get_object_or_404(Module, id=module_id)
-                module.additional_resources.add(resource)
-                messages.success(request, "Resource added and linked to the module.")
-            else:
-                messages.success(request, "Resource added successfully.")
-
-            # Redirect to the next URL (the previous page or specified redirect URL)
-            return redirect(next_url)
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = AdditionalResourceForm()
-
-    # Check if there's a module to redirect to
-    edit_module_url = None
-    if module_id:
-        edit_module_url = reverse('edit_module', args=[module_id])
-
-    return render(request, "client/add_additional_resource.html", {
-        "form": form,
-        "module_id": module_id,
-        "next": next_url,
-        "edit_module": edit_module_url
-    })
-
-@login_required
-@user_passes_test(admin_check)  
-def resource_list(request):
-    """View for displaying all uploaded resources."""
-    resources = AdditionalResource.objects.all()
-
-    return render(request, 'client/resource_list.html', {'resources': resources})
-
-@login_required
-@user_passes_test(admin_check)
-def delete_resource(request, resource_id):
-    """View to delete a resource permanently."""
-    resource = get_object_or_404(AdditionalResource, id=resource_id)
-
-    if request.method == 'POST':
-        resource.delete()
-        return redirect('resource_list')  
-
-    return redirect('resource_list')  
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def add_resource_to_module(request, module_id):
-    """
-    Add a resource to the specified module.
-    """
-    if request.method == "POST":
-        # Get the resource_id from the POST data
-        data = json.loads(request.body)
-        resource_id = data.get("resource_id")
-        
-        # Ensure the resource ID is provided
-        if not resource_id:
-            return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
-        
-        try:
-            module = Module.objects.get(id=module_id)
-            resource = AdditionalResource.objects.get(id=resource_id)
-            
-            # Add the resource to the module's additional_resources
-            module.additional_resources.add(resource)
-            return JsonResponse({"success": True, "message": "Resource added to module."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except AdditionalResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Resource not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
-
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ STATISTICS VIEWS -----------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
 @login_required 
 @user_passes_test(admin_check) 
-def userStatistics(request):
-    total_users = EndUser.objects.count()
-    active_users = EndUser.objects.filter(user__is_active=True).count()
-    inactive_users = total_users - active_users
-    total_programs_enrolled = UserProgramEnrollment.objects.count()
+def edit_category(request, category_id):
+    """View to edit a category's modules and programs."""
+    category = get_object_or_404(Category, id=category_id)
 
-    # Get gender distribution
-    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
-    
-    # Get ethnicity distribution
-    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
-    
-    # Get sector distribution
-    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
+    if request.method == 'POST':
 
-    stats_data = {
-        "total_users": total_users,
-        "active_users": active_users,
-        "inactive_users": inactive_users,
-        "programs_enrolled": total_programs_enrolled,
-        "gender_distribution": gender_counts,
-        "ethnicity_distribution": ethnicity_counts,
-        "sector_distribution": sector_counts,
-    }
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            category = form.save()
+            category.modules.set(form.cleaned_data['modules'])
+            category.programs.set(form.cleaned_data['programs'])
+            return redirect('category_list')  
+            
+    else:
+        form = CategoryForm(instance=category)
 
-    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
+    return render(request, 'client/edit_category.html', {'form': form, 'category': category})
 
 
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ USER MANAGEMENT VIEWS ------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ CATEGORY VIEWS -------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
 
 
 @csrf_exempt
@@ -1675,60 +1670,6 @@ def delete_program(request, program_id):
 
 
 
-@login_required 
-@user_passes_test(admin_check) 
-def edit_category(request, category_id):
-    """View to edit a category's modules and programs."""
-    category = get_object_or_404(Category, id=category_id)
-
-    if request.method == 'POST':
-
-        form = CategoryForm(request.POST, instance=category)
-        if form.is_valid():
-            category = form.save()
-            category.modules.set(form.cleaned_data['modules'])
-            category.programs.set(form.cleaned_data['programs'])
-            return redirect('category_list')  
-            
-    else:
-        form = CategoryForm(instance=category)
-
-    return render(request, 'client/edit_category.html', {'form': form, 'category': category})
-
-
-
-
-@login_required 
-@user_passes_test(admin_check) 
-def userStatistics(request):
-    total_users = EndUser.objects.count()
-    active_users = EndUser.objects.filter(user__is_active=True).count()
-    inactive_users = total_users - active_users
-    total_programs_enrolled = UserProgramEnrollment.objects.count()
-
-    # Get gender distribution
-    gender_counts = dict(Counter(EndUser.objects.values_list('gender', flat=True)))
-    
-    # Get ethnicity distribution
-    ethnicity_counts = dict(Counter(EndUser.objects.values_list('ethnicity', flat=True)))
-    
-    # Get sector distribution
-    sector_counts = dict(Counter(EndUser.objects.values_list('sector', flat=True)))
-
-    stats_data = {
-        "total_users": total_users,
-        "active_users": active_users,
-        "inactive_users": inactive_users,
-        "programs_enrolled": total_programs_enrolled,
-        "gender_distribution": gender_counts,
-        "ethnicity_distribution": ethnicity_counts,
-        "sector_distribution": sector_counts,
-    }
-
-    return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
-
-
-
 # Client Modules Views
 @login_required
 def module_overview(request, module_id):
@@ -1773,129 +1714,6 @@ def add_button(request):
             return redirect("client_modules")  # Redirect to the Client Modules page
     return render(request, "Module/add_module.html")
 
-
-# For adding video content
-@user_passes_test(admin_check)
-@login_required
-@csrf_exempt
-def add_video(request):
-    next_url = request.GET.get("next", "/")  # where to go after saving
-    module_id = request.GET.get("module_id")  # optional: module to link to
-
-    if request.method == "POST":
-        form = VideoResourceForm(request.POST)
-        if form.is_valid():
-            video = form.save()
-
-            # If module_id is passed, link the video to the module
-            if module_id:
-                try:
-                    module = Module.objects.get(id=module_id)
-                    module.video_resources.add(video)
-                    messages.success(request, "Video added and linked to module.")
-                except Module.DoesNotExist:
-                    messages.error(request, "Module not found. Video saved but not linked.")
-            else:
-                messages.success(request, "Video added successfully.")
-
-            return redirect(next_url)
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = VideoResourceForm()
-
-    return render(request, "client/add_video.html", {
-        "form": form,
-        "next": next_url
-    })
-
-@login_required
-@user_passes_test(admin_check)
-def video_list(request):
-    """View for displaying all uploaded video resources."""
-    videos = VideoResource.objects.all()
-    return render(request, "client/video_list.html", {"videos": videos})
-
-@login_required
-@user_passes_test(admin_check)
-def video_detail(request, video_id):
-    """View for displaying a single video."""
-    video = get_object_or_404(VideoResource, id=video_id)
-    return render(request, "client/video_detail.html", {"video": video})
-
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        video_id = data.get("video_id")
-        try:
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_resource_from_module(request, module_id):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            resource_id = data.get("resource_id")
-            
-            if not resource_id:
-                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
-            
-            module = Module.objects.get(id=module_id)
-            resource = AdditionalResource.objects.get(id=resource_id)
-            module.additional_resources.remove(resource)
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-            
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-
-@user_passes_test(admin_check)
-@login_required
-def add_additional_resource(request):
-    if request.method == 'POST':
-        form = AdditionalResourceForm(request.POST, request.FILES)
-        if form.is_valid():
-            resource = form.save()
-            module_id = request.GET.get('module_id')
-            next_url = request.GET.get('next', '/')
-            if module_id:
-                module = Module.objects.get(id=module_id)
-                module.additional_resources.add(resource)
-            return redirect(next_url)
-    else:
-        form = AdditionalResourceForm()
-    return render(request, "client/add_additional_resource.html", {"form": form})
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_exercise_from_module(request, module_id):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        exercise_ids = data.get('exercise_ids', [])
-
-        try:
-            module = Module.objects.get(id=module_id)
-            for section in module.sections.all():
-                section.exercises.remove(*exercise_ids)
-
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 
 @csrf_exempt
