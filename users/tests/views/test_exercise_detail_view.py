@@ -1,55 +1,66 @@
 from django.test import TestCase
 from django.urls import reverse
-from users.models import User  
-from users.models import EndUser
-from client.models import Exercise, Section, ExerciseQuestion
+from users.models import User, EndUser, UserResponse
+from client.models import Exercise, ExerciseQuestion
 
 
-class ExerciseDetailViewTest(TestCase):
+class ExerciseDetailViewViewTest(TestCase):
+
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
 
-        # Create an exercise instance and SAVE it first before adding ManyToMany fields
-        self.exercise = Exercise.objects.create(title='Test Exercise', exercise_type='multiple_choice', status='not_started')
+        self.exercise = Exercise.objects.create(title='Test Exercise View', exercise_type='multiple_choice', status='not_started')
 
-        # Create a section with a diagram
-        self.section = Section.objects.create(title='Test Section', diagram='diagrams/test_diagram.png')
-        self.exercise.sections.add(self.section)  # Now we can add ManyToMany fields
+        self.question = ExerciseQuestion.objects.create(question_text="What is Django?", has_blank=False)
+        self.exercise.questions.add(self.question)
 
-        # Create a test question using the correct model (ExerciseQuestion)
-        self.question = ExerciseQuestion.objects.create(question_text="Sample question?", has_blank=False)
-        self.exercise.questions.add(self.question)  # Add question to exercise
-
-        # Create an EndUser instance
         self.end_user = EndUser.objects.create(user=self.user)
 
-        # URL for the test
-        self.url = reverse('exercise_detail', kwargs={'exercise_id': self.exercise.id})
+        self.user_response = UserResponse.objects.create(
+            user=self.end_user,
+            question=self.question,
+            response_text="Django is a web framework.",
+            submitted_at="2025-03-25 10:00:00"
+        )
+
+        self.url = reverse('exercise_detail_view', kwargs={'exercise_id': self.exercise.id})
 
 
-    def test_exercise_detail_authenticated_user(self):
-        """Test that an authenticated user can access the exercise detail page."""
+    def test_exercise_detail_view_authenticated_user(self):
+        """Test that an authenticated user can access the exercise detail view and see their responses."""
         self.client.login(username='testuser', password='testpassword')
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'users/exercise_detail.html')
+        self.assertTemplateUsed(response, 'UserResponce/exercise_detail.html')
         self.assertIn('exercise', response.context)
         self.assertEqual(response.context['exercise'], self.exercise)
-        self.assertIn('diagram', response.context)
-        self.assertEqual(response.context['diagram'], self.section.diagram)
+        self.assertIn('questions_with_responses', response.context)
+        
+        questions_with_responses = response.context['questions_with_responses']
+        self.assertEqual(len(questions_with_responses), 1)
+        
+        question_data = questions_with_responses[0]
+        self.assertEqual(question_data['question'], self.question)
+        self.assertEqual(len(question_data['responses']), 1)
+        self.assertEqual(question_data['responses'][0].response_text, "Django is a web framework.")
 
-    def test_exercise_detail_unauthenticated_user_redirect(self):
+    def test_exercise_detail_view_unauthenticated_user(self):
         """Test that an unauthenticated user is redirected to the login page."""
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/log_in'))
 
+    def test_exercise_detail_view_without_user_profile(self):
+        """Test that a logged-in user without a profile is redirected to the dashboard."""
+        new_user = User.objects.create_user(
+            username='anotheruser', 
+            password='anotherpassword', 
+            email='anotheruser@example.com'
+        )
+        self.client.login(username='anotheruser', password='anotherpassword')
 
-    def test_exercise_detail_post_request(self):
-        """Test that a POST request redirects back to the same page."""
-        self.client.login(username='testuser', password='testpassword')
-        response = self.client.post(self.url, {f'answer_{self.question.id}': 'Sample answer'})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302) 
+        self.assertTrue(response.url.startswith('/dashboard'))
 
-        self.assertEqual(response.status_code, 302)  # Expecting a redirect
-        self.assertRedirects(response, self.url)

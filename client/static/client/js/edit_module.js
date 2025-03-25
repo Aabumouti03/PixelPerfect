@@ -266,13 +266,23 @@ function removeSelectedVideos(moduleId) {
 
 
 function saveModuleChanges(moduleId) {
+
+    const selectedVideos = Array.from(document.querySelectorAll('#selected-videos input[type="checkbox"]'))
+        .map(el => el.value);
+
+    const selectedResources = Array.from(document.querySelectorAll('#selected-resources input[type="checkbox"]'))
+        .map(el => el.value);
+
     fetch(`/save_module_changes/${moduleId}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({
+            videos: selectedVideos.join(","),
+            resources: selectedResources.join(",")
+        })
     })
     .then(res => res.json())
     .then(data => {

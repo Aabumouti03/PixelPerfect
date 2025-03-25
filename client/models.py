@@ -242,9 +242,6 @@ class Questionnaire (models.Model):
         self.full_clean()  # enforce validation
         return super().save(*args, **kwargs)
     
-    
-
-
 class Question (models.Model):
     QUESTION_TYPES = [
         ('AGREEMENT', 'Agreement Scale'),

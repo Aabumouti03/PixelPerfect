@@ -17,7 +17,7 @@
     width: 100%;
 }
 
-/* 📌 Header Section */
+/* Header Section */
 .header {
     display: flex;
     justify-content: space-between;
@@ -43,7 +43,7 @@
     cursor: pointer;
 }
 
-/* 📌 Search Bar */
+/* Search Bar */
 .search-bar {
     width: 250px;
     padding: 10px;
@@ -58,7 +58,7 @@
     border-color: #4da6ff;
 }
 
-/* 📌 Modules Container */
+/* Modules Container */
 .modules-container {
     background: white;
     padding: 30px;
@@ -70,7 +70,7 @@
     flex-direction: column;
 }
 
-/* 📌 Modules Header */
+/* Modules Header */
 .modules-header {
     display: flex;
     justify-content: space-between;
@@ -78,7 +78,7 @@
     margin-bottom: 20px;
 }
 
-/* 📌 Unified Module Grid Layout */
+/* Unified Module Grid Layout */
 .module-grid {
     display: flex;
     gap: 20px;
@@ -87,11 +87,11 @@
     width: 100%;
 }
 
-/* 📌 Unified Module Card (Same as Dashboard) */
+/* Unified Module Card */
 .module-card {
     border-radius: 12px;
-    width: 250px; /* Fixed width */
-    height: 300px; /* Same height as dashboard */
+    width: 250px;
+    height: 300px; 
     flex-shrink: 0;
     padding: 20px;
     box-sizing: border-box;
@@ -106,7 +106,7 @@
     transition: transform 0.2s ease-in-out;
 }
 
-/* 📌 3D Effect: Left Edge */
+/* 3D Effect: Left Edge */
 .module-card:nth-child(odd) {
     background: #73C4FD;
     border-left: 5px solid #5ca5ea;
@@ -132,7 +132,7 @@
     overflow: hidden;
 }
 
-/* 📌 Progress Bar */
+/* Progress Bar */
 .progress-container {
     width: 100%;
     padding: 5px 0;
@@ -153,7 +153,7 @@
     transition: width 0.5s ease-in-out;
 }
 
-/* 📌 Action Button (Add Module) */
+/* Action Button (Add Module) */
 .action-button {
     position: absolute;
     top: 10px;
@@ -173,7 +173,7 @@
     color: white;
 }
 
-/* 📌 View All Button */
+/* View All Button */
 .view-all-container {
     text-align: center;
     margin-top: 30px;

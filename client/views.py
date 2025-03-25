@@ -140,10 +140,25 @@ def create_program(request):
         "categories": categories,
     })
 
+@login_required
+@user_passes_test(admin_check)
 def programs(request):
-    programs = Program.objects.prefetch_related('program_modules__module').all()
-    return render(request, 'client/programs.html', {'programs': programs})
+    query = request.GET.get('q', '')
 
+    if query:
+        programs = Program.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        ).prefetch_related('program_modules__module')
+    else:
+        programs = Program.objects.prefetch_related('program_modules__module').all()
+
+    return render(request, 'client/programs.html', {
+        'programs': programs,
+        'query': query  # So we can keep the search input filled
+    })
+
+@login_required
+@user_passes_test(admin_check)
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
@@ -806,7 +821,7 @@ def remove_video_from_module(request, module_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
     if request.method == 'POST':
         try:
@@ -822,7 +837,7 @@ def remove_resource_from_module(request, module_id):
             return JsonResponse({'success': False, 'error': str(e)})
 
 @user_passes_test(admin_check)
-@login_required #final version
+@login_required
 def add_additional_resource(request):
     next_url = request.GET.get('next', '/')
     module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
@@ -882,7 +897,7 @@ def delete_resource(request, resource_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def add_resource_to_module(request, module_id):
     """
     Add a resource to the specified module.
@@ -914,7 +929,7 @@ def add_resource_to_module(request, module_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def save_module_changes(request, module_id):
     try:
         data = json.loads(request.body)
@@ -1151,13 +1166,44 @@ def users_management(request):
     users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
+
+
+from users.helpers_modules import calculate_program_progress
+
 @login_required
-@user_passes_test(admin_check) 
+@user_passes_test(admin_check)
 def user_detail_view(request, user_id):
     user_profile = get_object_or_404(EndUser, user__id=user_id)
-
     enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
+    program_progress_dict = {
+        progress.program_id: progress.completion_percentage
+        for progress in UserProgramProgress.objects.filter(user=user_profile)
+    }
+
     enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
+    module_progress_dict = {
+        progress.module_id: progress.completion_percentage
+        for progress in UserModuleProgress.objects.filter(user=user_profile)
+    }
+
+    for enrollment in enrolled_programs:
+        program = enrollment.program
+        calculated_progress = calculate_program_progress(user_profile, program)
+        program.progress_value = calculated_progress
+
+        program_progress, created = UserProgramProgress.objects.get_or_create(
+            user=user_profile,
+            program=program,
+            defaults={'completion_percentage': calculated_progress, 'status': 'in_progress' if calculated_progress < 100 else 'completed'}
+        )
+        if not created:
+            program_progress.completion_percentage = calculated_progress
+            program_progress.status = 'completed' if calculated_progress == 100 else 'in_progress'
+            program_progress.save()
+
+    for enrollment in enrolled_modules:
+        module = enrollment.module
+        module.progress_value = module_progress_dict.get(module.id, 0)
 
     user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
         user=user_profile

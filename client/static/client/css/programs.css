@@ -141,3 +141,44 @@ h1 {
     background: #D43802;
   color: white;
 }
+
+.title-search-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.page-title {
+    margin: 0;
+}
+
+.search-bar-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-bar-input {
+    padding: 0.6rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 999px;
+    font-size: 1rem;
+    max-width: 250px;
+}
+
+
+.search-bar-button {
+    background-color: #F24505;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-bar-button:hover {
+    background-color: #D43802;
+}
