@@ -649,7 +649,7 @@ def update_profile(request):
 
                     verification_link = request.build_absolute_uri(f"/verify-email/{uid}/{token}/")
 
-                    send_mail_status = send_mail(
+                    send_mail(
                         "Confirm Your Email Change",
                         f"Click the link to confirm your email change: {verification_link}",
                         "noreply@example.com",
