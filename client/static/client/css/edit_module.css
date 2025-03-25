@@ -29,7 +29,7 @@ body.edit_module {
 
 .form-control:focus {
     border-color:  #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(226, 255, 81, 0.569);
 }
 
 .form-check-input {

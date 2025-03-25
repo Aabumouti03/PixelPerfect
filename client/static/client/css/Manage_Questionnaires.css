@@ -74,14 +74,14 @@ body {
 /* Button Colors */
 .view-btn {
     background-color: white;
-    color: #3498db;
-    border-color: #3498db;
+    color: #F24505 !important;
+    border-color:#F24505 !important;
 }
 
 .edit-btn {
     background-color: white;
-    color: #f39c12;
-    border-color: #f39c12;
+    color: #F24505;
+    border-color: #F24505;
 }
 
 .activate-btn {
@@ -97,7 +97,7 @@ body {
 
 .view-btn:hover {
     background: #ebeaea;
-    color: #3498db;
+    color: #F24505;
 }
 
 .activate-btn:hover {
