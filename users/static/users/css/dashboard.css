@@ -431,8 +431,41 @@ body {
     gap: 20px;
     flex-wrap: wrap;
     justify-content: flex-start;
+    text-align: center;
 }
 
+/* Align the title to the left */
+.no-program-title {
+  align-self: flex-start;
+}
+
+/* Style the description and button container */
+.no-program-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Space between the description and button */
+}
+
+.start-questionnaire-button {
+  font-size: 12px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
+}
+
+.start-questionnaire-button:hover {
+  background: #D43802;
+  color: white;
+}
 
 @media (max-width: 1200px) {
     .dashboard-container {
