@@ -4,7 +4,7 @@
 body {
     margin: 0;
     font-family: 'Manrope', sans-serif;
-    background-color: #F24505; /* Orange background */
+    background-color: #F24505;
     color: white;
     text-align: center;
 }
@@ -230,7 +230,7 @@ select {
     color: black;
     padding: 15px;
     border-radius: 12px;
-    width: 100%; /* Ensures it matches the filtering box */
+    width: 100%;
     text-align: left;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease-in-out;
@@ -278,13 +278,13 @@ select {
 }
 
 .enroll-btn {
-    background: #007bff; /* Blue */
+    background: #007bff;
     color: white;
     margin-right: 5px;
 }
 
 .enroll-btn.enrolled {
-    background: #28a745; /* Green when enrolled */
+    background: #28a745;
 }
 
 .enroll-btn:hover {
@@ -292,7 +292,7 @@ select {
 }
 
 .view-btn {
-    background: #F24505; /* Orange */
+    background: #F24505; 
     color: white;
     margin-left: 5px;
 }
@@ -357,22 +357,22 @@ button:hover, .view-program-button:hover {
 
 /* Styling for Special Buttons */
 .special-btn {
-    background: transparent; /* Make background transparent */
+    background: transparent;
     color: white;
     font-weight: bold;
     padding: 10px 20px;
-    border: 2px solid white; /* White border */
-    border-radius: 25px; /* Rounded */
+    border: 2px solid white; 
+    border-radius: 25px; 
     cursor: pointer;
     transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    text-decoration: none; /* Remove underline */
-    display: inline-block; /* Inline but with padding */
+    text-decoration: none;
+    display: inline-block; 
 }
 
 /* Hover Effect */
 .special-btn:hover {
     background: white;
-    color: #D43802; /* Match the orange background */
+    color: #D43802;
 }
 
 /* Adjustments for positioning */
@@ -545,7 +545,7 @@ button:hover, .view-program-button:hover {
 /* Responsive Fix for Smaller Screens */
 @media screen and (max-width: 768px) {
     .result-card, .filters-container {
-        width: 90%; /* Match width on smaller screens */
+        width: 90%; 
     }
 
   .pill-label {

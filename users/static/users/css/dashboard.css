@@ -152,19 +152,19 @@ body {
 
 .module-card {
     border-radius: 12px;
-    width: 250px; /* Fixed width */
-    height: 320px; /* Slightly increased height for better text fit */
+    width: 250px;
+    height: 320px;
     flex-shrink: 0;
     padding: 15px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Space out elements */
+    justify-content: space-between; 
     align-items: center;
     background: #ffffff;
     text-align: center;
     position: relative;
-    overflow: hidden; /* Prevent elements from overflowing */
+    overflow: hidden; 
 }
 
 /* 3D Effect: Adding subtle shadow on the left edge */
@@ -181,12 +181,12 @@ body {
 /* Alternate colors for adjacent cards */
 .module-card:nth-child(odd) {
     background: #73C4FD;
-    border-left: 5px solid #5ca5ea; /* Blue 3D-like left edge */
+    border-left: 5px solid #5ca5ea;
 }
 
 .module-card:nth-child(even) {
     background: #0048FF;
-    border-left: 5px solid #012EAB; /* Blue 3D-like left edge */
+    border-left: 5px solid #012EAB; 
     color: #eeebeb;
 }
 
@@ -211,9 +211,9 @@ body {
     font-size: 18px;
     color: #333;
     margin-bottom: 8px;
-    white-space: normal; /* Allow text to wrap */
+    white-space: normal;
     overflow: hidden;
-    max-height: 45px; /* Prevent title from being too long */
+    max-height: 45px;
 }
 
 /* Module Description */
@@ -222,11 +222,10 @@ body {
     color: #666;
     text-align: center;
     overflow: hidden;
-    max-height: 60px; /* Increased height for better readability */
+    max-height: 60px;
     margin: 5px 10px;
-    white-space: normal; /* Allow wrapping */
+    white-space: normal; 
 }
-
 
 
 /* Progress Bar */
