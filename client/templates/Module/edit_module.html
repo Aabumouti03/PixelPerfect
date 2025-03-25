@@ -18,9 +18,13 @@
         <form method="post" class="card p-4 shadow-sm">
             {% csrf_token %}
 
+            <!-- Hidden input for resources -->
+            <input type="hidden" name="resources" id="hidden-resources">
+
+
             <!-- Editable Title -->
             <div class="mb-3">
-                <label class="form-label">1. Module Title:</label>
+                <label class="form-label">1. Title:</label>
                 <input type="text" id="module-title" class="form-control" value="{{ module.title }}" readonly>
                 <div class="mt-2">
                     <button type="button" class="btn btn-secondary edit-pill w-100 mb-2" onclick="enableEdit('module-title')">Edit</button>
@@ -28,7 +32,6 @@
                 </div>
             </div>
             
-
             <!-- Editable Description -->
             <div class="mb-3">
                 <label class="form-label">2. Description:</label>
@@ -39,10 +42,23 @@
                 </div>
             </div>
 
+            <!-- Add Exercise Section -->
+            <div class="mb-4">
+                <label class="form-label">3. Add Exercise:</label>
+                <div>
+                    <select id="exercise-dropdown" class="form-control mb-2">
+                        <option value="">Select an exercise</option>
+                        {% for exercise in available_exercises %}
+                            <option value="{{ exercise.id }}">{{ exercise.title }} ({{ exercise.exercise_type }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="addExercise('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add</button>
+                </div>
+            </div>
 
             <!-- Exercises Section -->
             <div class="mb-4">
-                <label class="form-label">3. Exercises in Module:</label>
+                <label class="form-label">4. Exercises in the Module:</label>
                 <div class="module-box">
                     <ul class="list-unstyled">
                         {% for section in module.sections.all %}
@@ -58,75 +74,103 @@
                     </ul>
                 </div>
 
-
                 <div class="text-center mt-3">
                     <button type="button" class="btn remove-pill w-100" onclick="removeSelectedExercises('{{ module.id }}')">
-                        🗑 Remove Selected Exercises
+                        Remove Selected Exercises
                     </button>
                 </div>
-                
             </div>
 
-            <!-- Add Exercise -->
-            <div class="mb-4">
-                <label class="form-label">4. Add Exercise:</label>
+             <!-- Add Video Section -->
+             <div class="mb-4">
+                <label class="form-label">5. Add Videos:</label>
                 <div>
-                    <select id="exercise-dropdown" class="form-control mb-2">
-                        <option value="">Select an exercise</option>
-                        {% for exercise in available_exercises %}
-                            <option value="{{ exercise.id }}">{{ exercise.title }} ({{ exercise.exercise_type }})</option>
+                    <select id="video-dropdown" class="form-control mb-2">
+                        <option value="">Select a video</option>
+                        {% for video in available_video_resources %}
+                            <option value="{{ video.id }}">{{ video.title }}</option>
                         {% endfor %}
                     </select>
-                    <button type="button" onclick="addExercise('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add</button>
+                    <button type="button" onclick="addVideo('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add Video</button>
+                </div>
+            </div>
+
+            <!-- Video Resources Section -->
+            <div class="mb-4">
+                <label class="form-label">6. Videos in the Module:</label>
+                <div class="module-box">
+                    <ul class="list-unstyled" id="selected-videos">
+                        {% for video in module.video_resources.all %}
+                            <li id="video-{{ video.id }}">
+                                <input type="checkbox" name="remove_video" value="{{ video.id }}" class="form-check-input me-2">
+                                {{ video.title }}
+                            </li>
+                        {% empty %}
+                            <li id="no-videos-msg">No videos linked yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="button" class="btn remove-pill w-100" onclick="removeSelectedVideos('{{ module.id }}')">
+                    Remove Selected Videos
+                </button>
+            </div>
+
+
+            <!-- Add Resource Section -->
+            <div class="mb-4 mt-4">
+                <label class="form-label">7. Add Resource:</label>
+                <div>
+                    <select id="resource-dropdown" class="form-control mb-2">
+                        <option value="">Select a resource</option>
+                        {% for resource in available_additional_resources %}
+                            {% if resource not in module.additional_resources.all %}
+                                <option value="{{ resource.id }}">{{ resource.title }} ({{ resource.resource_type }})</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="addResource('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add Resource</button>
+                </div>
+            </div>
+
+            <!-- Additional Resources Section -->
+            <div class="mb-4">
+                <label class="form-label">8. Additional Resources in the Module:</label>
+                <div class="module-box">
+                    <ul class="list-unstyled" id="selected-resources">
+                        {% for resource in module.additional_resources.all %}
+                            <li id="resource-{{ resource.id }}">
+                                <input type="checkbox" name="remove_resource" value="{{ resource.id }}" class="form-check-input me-2">
+                                {{ resource.title }} ({{ resource.resource_type }})
+                            </li>
+                        {% empty %}
+                            <li id="no-resources-msg">No resources linked yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="button" class="btn remove-pill w-100" onclick="removeSelectedResources('{{ module.id }}')">
+                    Remove Selected Resources
+                </button>
+            </div>
+
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-3">
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <a href="{% url 'add_additional_resource' %}?next={{ request.path }}" class="btn btn-primary w-50 add_resource">Add a new resource</a>
+                    <a href="{% url 'add_video' %}?next={{ request.path }}" class="btn btn-primary w-50 add_video">Add a new video</a>
                 </div>
                 
+                <button type="button" onclick="saveModuleChanges('{{ module.id }}')" class="btn btn-secondary  w-100 mb-2 save_changes">Save All Changes</button>
+                
+                <a href="{% url 'client_modules' %}" class="btn btn-secondary w-100 backButton ">Back to All Modules</a>
+                
             </div>
-
-            <!-- Video Resources -->
-            <div class="mb-4">
-                <label class="form-label">5. Video Resources:</label>
-                <ul class="list-unstyled">
-                    {% for video in module.video_resources.all %}
-                        <li>
-                            {{ video.title }}
-                            <a href="{% url 'video_detail' video.id %}" class="btn btn-primary btn-sm">▶ Play</a>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('{{ module.id }}', '{{ video.id }}')">Remove</button>
-                        </li>
-                    {% empty %}
-                        <li class="form-control">No videos linked yet.</li>
-                    {% endfor %}
-                </ul>
-                <a href="{% url 'add_video' %}?next={{ request.path }}&module_id={{ module.id }}" class="btn add-pill w-100 mt-3">Add New Video</a>
-            </div>
-
-            <!-- Additional Resources -->
-            <div class="mb-4">
-                <label class="form-label">6. Additional Resources:</label>
-                <ul class="list-unstyled">
-                    {% for resource in module.additional_resources.all %}
-                        <li class="d-flex justify-content-between align-items-center">
-                            {{ resource.title }} ({{ resource.resource_type }})
-                            <div class="d-flex gap-2">
-                                {% if resource.url %}
-                                    <a href="{{ resource.url }}" target="_blank" class="btn btn-primary btn-sm">Open Link</a>
-                                {% elif resource.file %}
-                                    <a href="{{ resource.file.url }}" target="_blank" class="btn btn-primary btn-sm">Download File</a>
-                                {% endif %}
-                                <button type="button" class="btn  btn-sm" onclick="removeResource('{{ module.id }}', '{{ resource.id }}')">Remove</button>
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class=" form-control">No resources linked yet.</li>
-                    {% endfor %}
-                </ul>
-                <a href="{% url 'add_additional_resource' %}?next={{ request.path }}&module_id={{ module.id }}" class="btn add-pill w-100 mt-3">Add New Resource</a>
-            </div>
-
-            <div class="text-center mt-1">
-                <a href="{% url 'client_modules' %}" class="btn btn-secondary w-100 backButton">Back to Modules</a>
-            </div>
-        </form>
-    </div>
 
 
         </form>
@@ -136,6 +180,6 @@
         const csrfToken = '{{ csrf_token }}';
     </script>
     <script src="{% static 'client/js/edit_module.js' %}"></script>
-    
+
 </body>
 </html>

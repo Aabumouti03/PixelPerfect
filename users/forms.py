@@ -357,7 +357,7 @@ class UserProfileForm(forms.ModelForm):
             user.set_password(new_password)  
 
         if commit:
-            user.save()  
+            user.save()   
             end_user.save()  
 
         return end_user  

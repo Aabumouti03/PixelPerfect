@@ -1,4 +1,4 @@
-{% extends 'client/base.html' %}
+{% extends 'client/client_base.html' %}
 {% load static %}
 
 {% block extra_css %}
@@ -154,6 +154,8 @@
         </form>
 
 
-    <a href="{% url 'video_list' %}" class="back-btn"> Back to Video List</a>
+        <a href="{{ request.META.HTTP_REFERER }}" class="back-btn"> Back </a>
+        <a href="{% url 'video_list' %}" class="back-btn">Video List</a>
+
 </div>
 {% endblock %}

@@ -1,160 +1,275 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
-body {
-    font-family: 'Manrope', sans-serif;
-    background-color: white;
-    margin: 0;
-    padding: 0;
-    display: flex;
-}
-
-/* Full Page Content */
-.content {
-    flex-grow: 1;
-    padding: 30px;
-    max-width: 900px;
-    margin: auto;
-}
-
-/* Page Title */
-.page-title {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 25px;
-    text-align: left;
-    padding-left: 20px;
-    color: #FD5402;
-    border-left: 5px solid #FD5402;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-/* FORM STYLES */
-form {
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Form Group */
-.form-group {
-    margin-bottom: 15px;
-}
-
-/* Form Labels */
-.form-group label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-/* Form Inputs */
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-/* Checkboxes (Stylized) */
-.form-group input[type="checkbox"] {
-    margin-right: 10px;
-    transform: scale(1.2);
-}
-
-/* Selected Items List */
-ul#selected-sections,
-ul#selected-exercises,
-ul#selected-questions {
-    list-style: none;
-    padding: 0;
-}
-
-ul#selected-sections li,
-ul#selected-exercises li,
-ul#selected-questions li {
-    background: #f8f9fa;
-    padding: 8px;
-    margin-bottom: 5px;
-    border-radius: 5px;
-    font-weight: bold;
-    border-left: 5px solid #73c4fd;
-}
-
-/* Buttons */
-button.save-btn,
-.btn {
-    background-color: #FD5402;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    display: inline-block;
-    text-decoration: none;
-}
-
-button.save-btn:hover,
-.btn:hover {
-    background-color: #d94402;
-}
-
-/* Section Groups for Exercises & Questions */
-.exercise-group {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+body.add_module {
     background-color: #f8f9fa;
+    font-family: 'Manrope', sans-serif;
+    padding-bottom: 20px;
 }
 
-.question-item {
-    padding-left: 10px;
-}
-
-/* MODAL STYLES */
-.modal {
-    display: none;
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    width: 50%;
-    margin: 10% auto;
-    border-radius: 8px;
-}
-
-.close {
-    float: right;
+.form-label {
+    font-weight: bold;
+    color: #000000;
     font-size: 20px;
+    margin-top: 10px;
+    
+}
+.add_module h2 {
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 36px;
+}
+
+.form-control {
+    border-radius: 20px !important;
+    padding: 12px 20px;
+    border: 2px solid #F24505 !important;
+    transition: all 0.3s ease-in-out;
+}
+
+.form-control:focus {
+    border-color:  #F24505;
+    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+}
+
+.form-check-input {
+    accent-color: #F24505;
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
     cursor: pointer;
 }
 
-/* RESPONSIVE DESIGN */
-@media (max-width: 768px) {
-    .content {
-        width: 100%;
-        padding: 15px;
-    }
+.btn-primary {
+    padding: 12px 18px;
+    background: #F24505;
+    color: white;
+    font-family: Manrope;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    transition: background 0.3s ease-in-out;
+}
 
-    form {
-        padding: 20px;
-    }
+.btn-primary:hover {
+    background: #D43802;
+}
 
-    .page-title {
-        font-size: 24px;
-    }
+
+.card {
+    border-radius: 20px !important;
+    background-color: #f9f9f9;
+    border: 2px solid #F24505 !important;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.module-box {
+    border: 2px solid #F24505;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.edit-pill {
+    background-color: #F24505;
+    color: #fff;
+}
+
+.edit-pill:hover {
+    background-color: #D43802;
+}
+
+.remove-pill {
+    background-color:#F24505;
+    color: #fff;
+}
+
+.remove-pill:hover {
+    background-color: #D43802;
+    color: #fff;
+}
+
+.edit-pill,
+.remove-pill,
+.save-pill {
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #fff;
+    border: none;
+    transition: background 0.3s ease-in-out;
+    display: block;
+    
+}
+
+.save-pill {
+    background-color: #018749;
+}
+
+.save-pill:hover {
+    background-color: #00693E;
+}
+
+.add-pill {
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    background-color: #F24505;
+    color: #fff;
+    border: none;
+    transition: background 0.3s ease-in-out;
+}
+
+.add-pill:hover {
+    background-color: #D43802;
+}
+
+.backButton {
+    font-size: 16px;
+    background: #bbb;
+}
+
+.module-box {
+    border: 2px solid #F24505;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.list-unstyled {
+    padding: 0;
+    margin: 0;
+}
+
+.list-unstyled li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(227, 69, 7, 0.766);
+    margin-bottom: 8px;
+}
+
+.form-check-input {
+    accent-color: #F24505;
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+/* Add Button Styling */
+button[type="button"] {
+    background: #F24505; /* Orange background */
+    color: white;
+    font-family: 'Manrope', sans-serif;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    padding: 12px 18px;
+    transition: background 0.3s ease-in-out;
+}
+
+button[type="button"]:hover {
+    background: #D43802; /* Darker orange on hover */
+}
+
+/* Add Button Styling for Anchor Tags */
+a.btn.btn-primary {
+    background: #F24505; /* Orange background */
+    color: white;
+    font-family: 'Manrope', sans-serif;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    padding: 12px 18px;
+    border: none;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out;
+}
+
+a.btn.btn-primary:hover {
+    background: #D43802; /* Darker orange on hover */
+}
+
+/* Submit Button Styling */
+button[type="submit"].btn.btn-primary {
+    background: #F24505; /* Orange background */
+    color: white;
+    font-family: 'Manrope', sans-serif;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    padding: 12px 18px;
+    transition: background 0.3s ease-in-out;
+}
+
+button[type="submit"].btn.btn-primary:hover {
+    background: #D43802; 
+}
+
+/* Space between the buttons */
+a.btn.btn-primary {
+    margin-right: 20px;
+    margin-top: 1cqb; 
+}
+
+a.btn.btn-primary:last-child {
+    margin-bottom: 0; 
+    margin-top: 10px; 
+}
+
+form-label {
+    margin-top: 20px; 
+    display: block; 
+}
+
+/* Adds margin to the bottom of the last label */
+.form-label:last-child {
+    margin-top: 20px;
+}
+/* Ensure buttons are full width and evenly spaced */
+.btn.w-100 {
+    width: 100%;
+}
+.btn.w-50 {
+    width: 50%;
+}
+
+.btn.btn-secondary {
+    padding: 12px 18px;
+    background: #ddd;
+    color: black;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
+}
+
+.btn.btn-secondary:hover {
+    background: #bbb;
 }
