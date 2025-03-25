@@ -169,6 +169,7 @@ urlpatterns = [
 
     # Other
     path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
+    path('user_response_main/', usersViews.user_responses_main, name="user_responses_main"),
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
 
