@@ -63,7 +63,7 @@
             </div>
             <div class="no-program-content">
                 <p>It looks like you are not enrolled in a program yet! Why not take our quick questionnaire to find the perfect program tailored just for you?</p>
-                <a href="{% url 'questionnaire' %}" class="start-questionnaire-button">Start questionnaire</a>
+                <a href="{% url 'get_started' %}" class="start-questionnaire-button">Get started</a>
             </div>
         </div>        
         {% endif %}
@@ -91,7 +91,7 @@
                     <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
                     <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
-               
+
                 
             </div>
         {% endfor %}      

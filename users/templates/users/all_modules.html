@@ -203,7 +203,7 @@
             let isEnrolled = icon.getAttribute("name") === "remove-outline";
             let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
         
-            console.log("Clicked module:", `"${moduleTitle}"`, "Detected as enrolled?", isEnrolled, "Calling API:", url);
+            console.log("Clicked module:", "${moduleTitle}", "Detected as enrolled?", isEnrolled, "Calling API:", url);
         
             let requestData = JSON.stringify({ title: moduleTitle });
         

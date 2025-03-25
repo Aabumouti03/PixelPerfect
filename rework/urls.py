@@ -94,7 +94,6 @@ urlpatterns = [
     # Program urls for the client
     path('programs/', clientViews.programs, name='programs'),
     path('create_program/', clientViews.create_program, name='create_program'),
-    path('logout/', clientViews.log_out_client, name='logout'),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
@@ -113,7 +112,6 @@ urlpatterns = [
     path('userModules/', usersViews.user_modules, name='modules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
-    path('modules/', usersViews.modules, name='modules'),
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
@@ -171,6 +169,7 @@ urlpatterns = [
 
     # Other
     path('user_response/<int:user_response_id>/', clientViews.view_user_response, name='view_user_response'),
+    path('user_response_main/', usersViews.user_responses_main, name="user_responses_main"),
     path('export/users_statistics/', clientViews.export_user_statistics_csv, name='export_user_statistics_csv'),
     path('user/<int:user_id>/', clientViews.user_detail_view, name='user_detail_view'),
 
