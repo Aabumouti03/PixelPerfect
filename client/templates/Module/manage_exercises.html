@@ -3,11 +3,13 @@
 
 {% block content %}
 <div class="content">
-    <h2 class="page-title">Manage Exercises</h2>
+    <div class="top-bar">
+        <h2>Manage Exercises</h2>
+        <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
+    </div>
     <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
     <link rel="stylesheet" href="{% static 'client/css/manage_exercises.css' %}">
 
-    <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
     <div class="module-list">
         {% for exercise in exercises %}
             <div class="module-card">

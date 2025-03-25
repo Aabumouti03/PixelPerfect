@@ -1,10 +1,12 @@
-from django.urls import path
-from django.conf import settings
 from django.contrib import admin
-from users import views as usersViews
-from client import views as clientViews
+from django.urls import path
 from django.conf.urls.static import static
+from django.conf import settings
+from client import views as clientViews
+from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
+
+
 
 urlpatterns = [
 
@@ -71,6 +73,9 @@ urlpatterns = [
     path("client_modules/", clientViews.client_modules, name="client_modules"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  
     path("delete_module/<int:module_id>/", clientViews.delete_module, name="delete_module"),
+    path('add_video_to_module/<int:module_id>/', clientViews.add_video_to_module, name='add_video_to_module'),
+    path('add_resource_to_module/<int:module_id>/', clientViews.add_resource_to_module, name='add_resource_to_module'),
+
     
 
     #Additional Section and Exercise urls

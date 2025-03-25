@@ -9,22 +9,20 @@ body {
     text-align: center;
 }
 
-/* Navigation Bar */
+/* NAVBAR */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
+    background: #f24505;
+    padding: 10px 20px; 
 }
 
-/* Logo */
 .nav-logo {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
     color: white;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
+    text-decoration: none;
 }
 
 .logo-img {
@@ -494,6 +492,7 @@ button:hover, .view-program-button:hover {
     color: white;
 }
 
+
 /* Modal container */
 .modal {
     display: none;
@@ -507,56 +506,39 @@ button:hover, .view-program-button:hover {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    padding-top: 100px;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
+/* Modal box */
 .modal-content {
     background-color: #fff;
-    margin: auto;
+    color: black;
+    margin: 15% auto;
     padding: 30px;
-    border: 1px solid #888;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
+    border-radius: 8px;
+    width: 300px;
     text-align: center;
 }
 
+/* Buttons */
 .confirm-logout {
-    background-color: #F24505;
+    background-color: #f24505;
     color: white;
-    font-weight: bold;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
     margin-right: 10px;
-    cursor: pointer;
 }
 
 .cancel-logout {
-    background-color: white;
-    color: #F24505;
-    font-weight: bold;
-    padding: 10px 20px;
-    border: 2px solid #F24505;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.confirm-logout:hover {
-    background-color: #D43802;
-}
-
-.cancel-logout:hover {
-    background-color: #F24505;
+    background-color: #6c757d;
     color: white;
+}
+
+.logout-btn{
+    background: transparent; /* Transparent background */
+    color: white; /* White text */
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: 2px solid white; /* White border */
+    border-radius: 20px; /* Rounded corners */
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s, border-color 0.3s; /* Smooth transitions */
 }
 
 

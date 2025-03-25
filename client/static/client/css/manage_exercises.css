@@ -1,6 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 .content {
     flex-grow: 1;
-    padding: 30px;
+    padding-left: 10px;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .module-list {
@@ -29,6 +37,8 @@
 
 .module-title input {
     border: none;
+    font-family: 'Manrope';
+    color: #2b2320;
     font-size: 20px;
     width: 100%;
     font-weight: bold;
@@ -37,6 +47,7 @@
 
 .edit-input {
     border: none;
+    font-family: 'Manrope';
     background: transparent;
     outline: none;
     font-size: 18px;
@@ -62,21 +73,29 @@
 }
 
 .buttons {
-    background-color: #FD5402;
-    color: white;
-    padding: 7px 15px;
-    border: none;
-    border-radius: 20px;
     font-size: 14px;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  font-family: 'Manrope';
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 .buttons:hover {
-    background-color: #D43802;
+    background: #D43802;
+  color: white;
 }
 
 .toggle-btn {
     background: none;
-    color: #FD5402;
+    color: #F24505;
     border: none;
     font-size: 18px;
     cursor: pointer;
@@ -113,17 +132,22 @@
 }
 
 .add-btn {
-    background-color: #FD5402;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
     font-size: 16px;
-    margin-bottom: 20px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+  padding: 10px 14px;
+  background-color: #F24505;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  font-family: 'Manrope';
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #ffffff;
 }
 
 .add-btn:hover {
-    background-color: #D43802;
+    background: #D43802;
+  color: white;
 }
