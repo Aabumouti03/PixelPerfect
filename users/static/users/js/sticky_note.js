@@ -3,14 +3,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const textarea = stickyNote.querySelector('textarea');
     const bulletBtn = stickyNote.querySelector('.bullet-btn');
 
-    let isBulleted = false; // Track whether the text is bulleted
+    let isBulleted = false;
 
-    // ✅ Fetch user's notes when page loads
     fetch('/get-notes/')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.content) {
-                textarea.value = data.content; // Populate textarea with saved notes
+                textarea.value = data.content;
                 console.log("Fetched sticky note:", data.content);
             }
         })
@@ -18,17 +17,24 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error fetching notes:', error);
         });
 
-    // ✅ Save notes to backend whenever text changes
-    textarea.addEventListener('input', () => {
-        saveNotesToBackend(textarea.value);
-    });
+        textarea.addEventListener('input', (event) => {
+            saveNotesToBackend(textarea.value);
+    
+            if (isBulleted && event.inputType === 'insertLineBreak') {
+                const position = textarea.selectionStart;
+                const textBefore = textarea.value.substring(0, position);
+                const textAfter = textarea.value.substring(position);
+    
+                textarea.value = textBefore + "• " + textAfter;
+    
+                textarea.selectionStart = textarea.selectionEnd = position + 2;
+            }
+        });
 
-    // ✅ Save notes when losing focus
     textarea.addEventListener('blur', () => {
         saveNotesToBackend(textarea.value);
     });
 
-    // ✅ Toggle bulleted list
     bulletBtn.addEventListener('click', () => {
         isBulleted = !isBulleted;
         updateTextarea();
@@ -46,13 +52,12 @@ document.addEventListener('DOMContentLoaded', function () {
         saveNotesToBackend(textarea.value);
     }
 
-    // ✅ Save notes to backend
     function saveNotesToBackend(content) {
         fetch('/save-notes/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()  // ✅ Fetch CSRF token from hidden input
+                'X-CSRFToken': getCSRFToken() 
             },
             body: JSON.stringify({ content: textarea.value }),
         })
