@@ -624,11 +624,13 @@ def edit_module(request, module_id):
     """Allows the client to edit the module's title, description, videos, etc."""
     module = get_object_or_404(Module, id=module_id)
 
+    # Get the existing exercise IDs to prevent duplication
     existing_exercise_ids = Exercise.objects.filter(
         sections__in=module.sections.all()
     ).values_list('id', flat=True).distinct()
     available_exercises = Exercise.objects.exclude(id__in=existing_exercise_ids)
 
+    # Get available resources and videos not yet assigned to the module
     available_additional_resources = AdditionalResource.objects.exclude(
         id__in=module.additional_resources.values_list('id', flat=True)
     )
@@ -641,25 +643,34 @@ def edit_module(request, module_id):
         form = ModuleForm(request.POST, instance=module)
 
         if form.is_valid():
-            # Save the form fields (title, description, etc.)
+            # Save the basic module data (title, description, etc.)
             form.save()
 
-            # Handle adding videos
+            # Handle adding videos (ensure the IDs are passed correctly)
             if "videos" in request.POST:
                 selected_video_ids = request.POST.getlist("videos")
-                module.video_resources.set(VideoResource.objects.filter(id__in=selected_video_ids))
+                if selected_video_ids:
+                    # Ensure you update the video resources with the selected ones
+                    module.video_resources.set(VideoResource.objects.filter(id__in=selected_video_ids))
+                else:
+                    # If no videos are selected, clear the video resources
+                    module.video_resources.clear()
 
-            # Handle adding resources
+            # Handle adding resources (same for resources as for videos)
             if "resources" in request.POST:
                 selected_resource_ids = request.POST.getlist("resources")
-                module.additional_resources.set(AdditionalResource.objects.filter(id__in=selected_resource_ids))
+                if selected_resource_ids:
+                    module.additional_resources.set(AdditionalResource.objects.filter(id__in=selected_resource_ids))
+                else:
+                    module.additional_resources.clear()
 
-            # Redirect back to client_modules after saving
+            # Redirect back to the module list page after saving
             return redirect('client_modules')
 
     else:
         form = ModuleForm(instance=module)
 
+    # Pass necessary context to the template
     return render(request, 'Module/edit_module.html', {
         'form': form,
         'module': module,
@@ -669,6 +680,7 @@ def edit_module(request, module_id):
         'videos': VideoResource.objects.all(),
         'resources': AdditionalResource.objects.all(),
     })
+
 
 
 
@@ -717,6 +729,7 @@ def add_video(request):
                 try:
                     module = Module.objects.get(id=module_id)
                     module.video_resources.add(video)
+                    module.save()
                     messages.success(request, "Video added and linked to module.")
                 except Module.DoesNotExist:
                     messages.error(request, "Module not found. Video saved but not linked.")
@@ -756,6 +769,7 @@ def add_video_to_module(request, module_id):
             
             # Add the video to the module's video_resources
             module.video_resources.add(video)
+            module.save()
             return JsonResponse({"success": True, "message": "Video added to module."})
         except Module.DoesNotExist:
             return JsonResponse({"success": False, "error": "Module not found."})
