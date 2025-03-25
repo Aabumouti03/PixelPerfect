@@ -10,6 +10,7 @@ body.add_module {
     font-weight: bold;
     color: #000000;
     font-size: 20px;
+    margin-top: 10px;
     
 }
 .add_module h2 {
@@ -58,19 +59,6 @@ body.add_module {
     background: #D43802;
 }
 
-.btn-secondary {
-    padding: 12px 18px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    transition: background 0.3s ease-in-out;
-}
-
-.btn-secondary:hover {
-    background: #6d6c6c;
-}
 
 .card {
     border-radius: 20px !important;
@@ -266,4 +254,22 @@ form-label {
 }
 .btn.w-50 {
     width: 50%;
+}
+
+.btn.btn-secondary {
+    padding: 12px 18px;
+    background: #ddd;
+    color: black;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
+}
+
+.btn.btn-secondary:hover {
+    background: #bbb;
 }
