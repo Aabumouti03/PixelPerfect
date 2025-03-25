@@ -140,6 +140,7 @@
 }
 .module-card:nth-child(even) {
     background: #0148FD;
+    color: #e0e0e0;
 }
 
 /* Title Consistency in Module Cards (Kept Smaller) */
@@ -178,12 +179,22 @@
     transition: width 0.5s ease-in-out;
 }
 
+<<<<<<< Updated upstream
 /* Progress Percentage Text */
+=======
+.progress-fill-module {
+    height: 100%;
+    background: linear-gradient(90deg, #ffbb00, #f9c430); /* Blue gradient */
+    border-radius: 6px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* ✅ Progress Percentage Text */
+>>>>>>> Stashed changes
 .progress-text {
     font-size: 12px;
     font-weight: bold;
     margin-top: 5px;
-    color: #333;
 }
 
 /* Top Bar */

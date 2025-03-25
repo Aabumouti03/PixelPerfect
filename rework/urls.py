@@ -118,6 +118,7 @@ urlpatterns = [
     path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
     path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
+    path('exercise/<int:exercise_id>/view/', usersViews.exercise_detail_view, name='exercise_detail_view'),
     path('mark_done/', usersViews.mark_done, name='mark_done'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
     
