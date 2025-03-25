@@ -2071,45 +2071,6 @@ def program_detail(request, program_id):
 
     return render(request, "client/program_detail.html", context)
 
-@csrf_exempt
-def update_module_order(request, program_id):
-    """Handles module reordering in a program while preventing UNIQUE constraint errors."""
-    if request.method == "POST":
-        # First, try to parse the JSON.
-        try:
-            data = json.loads(request.body)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=500)
-
-        # Now, get the program. If it doesn't exist, Http404 is raised.
-        program = get_object_or_404(Program, id=program_id)
-
-        try:
-            order_mapping = {int(item["id"]): index + 1 for index, item in enumerate(data["order"])}
-            with transaction.atomic():
-                temp_order = 1000  
-                for module_id in order_mapping.keys():
-                    ProgramModule.objects.filter(id=module_id, program=program).update(order=temp_order)
-                    temp_order += 1 
-
-                for module_id, new_order in order_mapping.items():
-                    ProgramModule.objects.filter(id=module_id, program=program).update(order=new_order)
-
-            return JsonResponse({"success": True})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-
-@user_passes_test(lambda u: u.is_superuser, login_url='programs')
-def delete_program(request, program_id):
-    """ Delete a program and redirect to the programs list """
-    program = get_object_or_404(Program, id=program_id)
-    program.delete()
-    return redirect('programs')
-
-
-
 @login_required 
 @user_passes_test(admin_check) 
 def edit_category(request, category_id):
