@@ -365,11 +365,33 @@ def users_management(request):
     users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
+@login_required
+def user_detail_view(request, user_id):
+    user_profile = get_object_or_404(EndUser, user__id=user_id)
 
+    # Get enrolled programs & modules
+    enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
+    enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
 
+    user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
+        user=user_profile
+    ).prefetch_related("questionnaire", "question_responses__question")
 
+    # Group responses by questionnaire
+    questionnaires_with_responses = {}
+    for user_response in user_questionnaire_responses:
+        if user_response.questionnaire not in questionnaires_with_responses:
+            questionnaires_with_responses[user_response.questionnaire] = []
+        for response in user_response.question_responses.all():
+            questionnaires_with_responses[user_response.questionnaire].append(response)
 
-
+    context = {
+        'user': user_profile,
+        'enrolled_programs': enrolled_programs,
+        'enrolled_modules': enrolled_modules,
+        'questionnaires_with_responses': questionnaires_with_responses,
+    }
+    return render(request, 'client/user_detail.html', context)
 
 
 
@@ -428,17 +450,6 @@ def create_category(request):
     }
 
     return render(request, 'client/create_category.html', context)
-
-
-
-
-
-
-
-
-
-
-
 
 @user_passes_test(admin_check)
 @login_required
@@ -1371,35 +1382,6 @@ def add_question(request, questionnaire_id):
     )
     
     return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
-
-
-@login_required
-def user_detail_view(request, user_id):
-    user_profile = get_object_or_404(EndUser, user__id=user_id)
-
-    # Get enrolled programs & modules
-    enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
-    enrolled_modules = UserModuleEnrollment.objects.filter(user=user_profile).select_related('module')
-
-    user_questionnaire_responses = Questionnaire_UserResponse.objects.filter(
-        user=user_profile
-    ).prefetch_related("questionnaire", "question_responses__question")
-
-    # Group responses by questionnaire
-    questionnaires_with_responses = {}
-    for user_response in user_questionnaire_responses:
-        if user_response.questionnaire not in questionnaires_with_responses:
-            questionnaires_with_responses[user_response.questionnaire] = []
-        for response in user_response.question_responses.all():
-            questionnaires_with_responses[user_response.questionnaire].append(response)
-
-    context = {
-        'user': user_profile,
-        'enrolled_programs': enrolled_programs,
-        'enrolled_modules': enrolled_modules,
-        'questionnaires_with_responses': questionnaires_with_responses,
-    }
-    return render(request, 'client/user_detail.html', context)
 
 def programs(request):
     programs = Program.objects.prefetch_related('program_modules__module').all()
