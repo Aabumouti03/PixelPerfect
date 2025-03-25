@@ -18,10 +18,6 @@
                 <h3>Users Last-Working-Time</h3>
                 <canvas id="lineChart"></canvas>
 
-                <!-- More User Statistics Button -->
-                <div class="more-stats-btn">
-                    More Users Statistics →
-                </div>
             </div>
 
             <!-- Module Enrollment (Horizontal Bar Chart) -->
@@ -29,10 +25,7 @@
                 <h3>Modules Enrollment</h3>
                 <canvas id="horizontalBarChart"></canvas>
 
-                <!-- More Module Statistics Button -->
-                <div class="more-stats-btn">
-                    More Modules Statistics →
-                </div>
+
             </div>
 
             <!-- New User Activity Trend Chart (Bar Chart) -->
@@ -40,29 +33,49 @@
                 <h3>Programs Enrollment</h3>
                 <canvas id="activityChart"></canvas>
 
-                <!-- More Activity Statistics Button -->
-                <div class="more-stats-btn">
-                    More Programms Statistics →
-                </div>
             </div>
         </div>
+
+            <!-- Charts Section -->
+            <div class="charts2">
+                <!-- User Registration Trend (Line Chart) -->
+
+                    <!-- More User Statistics Button -->
+                    <div class="more-stats-btn" data-url="{% url 'userStatistics' %}" >
+                        More Users Statistics →
+                    </div>
+    
+
+                    <!-- More Module Statistics Button -->
+                    <div class="more-stats-btn" data-url="{% url 'modules_statistics' %}">
+                        More Modules Statistics →
+                    </div>
+    
+                <!-- New User Activity Trend Chart (Bar Chart) -->
+                    <!-- More Activity Statistics Button -->
+                    <div class="more-stats-btn " data-url="{% url 'programs_statistics' %}">
+                        More Programms Statistics →
+                    </div>
+            </div>
+
     </div>
 
         <!-- Js Charts -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
+        
         <!-- JavaScript -->
         <script>
 
         // Clickable cards
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll(".chart-box").forEach(card => {
+                document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".more-stats-btn").forEach(card => {
                 card.addEventListener("click", function() {
                     window.location.href = this.getAttribute("data-url");
                 });
             });
         });
+
 
         // LAST WORKING TIME CHART (Line Chart)
         var lastWorkLabels = JSON.parse('{{ last_work_labels|default:"[]"|safe|escapejs }}');  // Work time categories

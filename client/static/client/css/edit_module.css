@@ -29,7 +29,7 @@ body.edit_module {
 
 .form-control:focus {
     border-color:  #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(226, 255, 81, 0.569);
 }
 
 .form-check-input {
@@ -38,6 +38,7 @@ body.edit_module {
     height: 22px;
     margin-right: 10px;
     cursor: pointer;
+    border-radius: 40px !important;
 }
 
 .btn-primary {
@@ -146,6 +147,8 @@ body.edit_module {
 .backButton {
     font-size: 16px;
     background: #bbb;
+    padding: 14px 24px;
+    border-radius: 40px !important;
 }
 
 .module-box {
@@ -168,7 +171,7 @@ body.edit_module {
     gap: 10px;
     padding: 8px 12px;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 40px;
     box-shadow: 0 1px 3px rgba(227, 69, 7, 0.766);
     margin-bottom: 8px;
 }
@@ -181,3 +184,57 @@ body.edit_module {
     cursor: pointer;
 }
 
+
+:root {
+    --common-radius: 40px;
+}
+.form-control {
+    border-radius: var(--common-radius) !important;
+}
+
+.module-box {
+    border-radius: var(--common-radius);
+}
+
+.card {
+    border-radius: var(--common-radius) !important;
+}
+
+.btn,
+.edit-pill,
+.remove-pill,
+.save-pill,
+.add-pill {
+    border-radius: var(--common-radius);
+}
+
+.add_resource, 
+.add_video{
+    background-color: transparent;
+    border: 2px solid #F24505;
+    color: #F24505;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 14px 24px;
+    border-radius: 40px;
+    transition: background-color 0.3s ease;
+
+}
+.add_resource:hover,
+.add_video:hover{
+    border: 2px solid transparent;
+}
+
+.save_changes{
+    background-color: #0e945c;
+    color: white;
+    border-radius: 40px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 14px 24px;
+}
+
+.save_changes:hover{
+    background-color: #00693E;
+    color: white;
+}

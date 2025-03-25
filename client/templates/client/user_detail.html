@@ -1,4 +1,4 @@
-{% extends 'client/base.html' %}
+{% extends 'client/client_base.html' %}
 {% load static %} 
 
 {% block extra_css %} 
@@ -30,17 +30,22 @@
     <!-- ✅ Right Section (Programs, Modules, Questionnaire) -->
     <div class="right-section">
         
+
     <!-- Programs Container -->
     <div class="programs-container card {% if not enrolled_programs %}empty-card{% endif %}">
-        <h2>Enrolled Program</h2>
+        <h2>Enrolled Programs</h2>
         {% if enrolled_programs %}
             {% for enrollment in enrolled_programs %}
                 <div class="program-card">
                     <h3>{{ enrollment.program.title }}</h3>
+                    
+                    <!-- Progress Bar -->
                     <div class="progress-container">
-                        <div class="progress-fill" style="width: {{ enrollment.program.progress_value|default:0 }}%;"></div>
+                            <div class="progress-fill" style="width: {{ enrollment.program.progress_value|floatformat:0 }}%"></div>
                     </div>
-                    <span class="progress-text">{{ enrollment.program.progress_value|default:0 }}% Complete</span>
+                    
+                    <!-- Progress Text -->
+                    <span class="progress-text">{{ enrollment.program.progress_value|floatformat:0 }}% Complete</span>
                 </div>
             {% endfor %}
         {% else %}
@@ -48,50 +53,49 @@
         {% endif %}
     </div>
 
-<!-- Modules Container -->
-<div class="modules-container card {% if not enrolled_programs %}empty-card{% endif %}">
-    <h2>Enrolled Modules</h2>
-    
-    <div class="module-list" id="moduleList">
-        {% for enrollment in enrolled_modules %}
-            <div class="module-card {% if forloop.counter > 4 %}hidden-module{% endif %}">
-                <h3>{{ enrollment.module.title }}</h3>
-                <div class="progress-container">
-                    <div class="progress-fill" style="width: {{ enrollment.module.progress_value|default:0 }}%;"></div>
-                </div>
-                <span class="progress-text">{{ enrollment.module.progress_value|default:0 }}% Complete</span>
+
+    <!-- Modules Container -->
+    <div class="modules-container card {% if not enrolled_modules %}empty-card{% endif %}">
+        <h2>Enrolled Modules</h2>
+        {% if enrolled_modules %}
+            <div class="module-list" id="moduleList">
+                {% for enrollment in enrolled_modules %}
+                    <div class="module-card">
+                        <h3>{{ enrollment.module.title }}</h3>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress-container">
+                                <div class="progress-fill-module" style="width: {{ enrollment.module.progress_value|floatformat:0 }}%"></div>
+                        </div>
+                        
+                        <!-- Progress Text -->
+                        <span class="progress-text">{{ enrollment.module.progress_value|floatformat:0 }}% Complete</span>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+        {% else %}
+            <p>No enrolled modules</p>
+        {% endif %}
     </div>
 
-    {% if enrolled_modules|length > 4 %}
-        <button id="toggleModules" class="view-all-button">View All</button>
-    {% endif %}
-</div>
 
-
-
-    <!-- Questionnaire Responses -->
     <div class="questionnaire-container card {% if not questionnaires_with_responses %}empty-card{% endif %}">
-        <h2>📝 Questionnaire Responses</h2>
+        <h2>Questionnaire Responses</h2>
     
         {% if questionnaires_with_responses %}
             <div class="questionnaire-list">
                 {% for questionnaire, responses in questionnaires_with_responses.items %}
                     <div class="questionnaire-section">
-                        <!-- ✅ Show Questionnaire Name -->
                         <div class="questionnaire-header">
                             <h3>{{ questionnaire.title }}</h3>
                             <button class="view-answers-btn" onclick="toggleAnswers('{{ questionnaire.id }}')">View Answers</button>
                         </div>
     
-                        <!-- ✅ Answers (Initially Hidden) -->
                         <div id="answers-{{ questionnaire.id }}" class="answers-container hidden">
                             {% for response in responses %}
                                 <div class="questionnaire-item">
                                     <strong>Question:</strong> {{ response.question.question_text }} <br>
     
-                                    <!-- Agreement Scale Response -->
                                     {% if response.question.question_type == "AGREEMENT" %}
                                     <ul class="choice-list">
                                         <li class="choice-item {% if response.rating_value == 2 %}selected-choice{% endif %}">Strongly Agree</li>
@@ -101,7 +105,6 @@
                                         <li class="choice-item {% if response.rating_value == -2 %}selected-choice{% endif %}">Strongly Disagree</li>
                                     </ul>
     
-                                    <!-- Rating Scale Response -->
                                     {% elif response.question.question_type == "RATING" %}
                                     <div class="rating-scale">
                                         <span>Scale: 1 - 5</span>

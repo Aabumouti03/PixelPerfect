@@ -9,7 +9,7 @@
   border-radius: 8px;
   box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
   position: relative;
-  margin: 0 auto 20px auto; /* Adds gap at bottom */
+  margin: 0 auto 20px auto; 
   box-sizing: border-box;
   overflow: hidden;
   display: flex;
@@ -18,7 +18,7 @@
 
 /* Add consistent margin around the entire sticky-note element */
 .right-column .sticky-note {
-  margin: 0 10px 20px 10px; /* Matches spacing of other elements */
+  margin: 0 10px 20px 10px;
 }
 
 .right-column .sticky-note textarea {

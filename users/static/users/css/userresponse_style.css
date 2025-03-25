@@ -6,12 +6,19 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
+<<<<<<< HEAD
     flex-direction: column; /* ✅ Stacks nicely on small screens */
+=======
+>>>>>>> 9b106fb54820aad15ec486c764745c5792f4acfb
 }
 
 /* Page Container */
 .content {
+<<<<<<< HEAD
     flex-grow: 1;
+=======
+    flex-grow: 1; 
+>>>>>>> 9b106fb54820aad15ec486c764745c5792f4acfb
     padding: 30px;
     width: 100%;
     box-sizing: border-box;
@@ -23,9 +30,7 @@ body {
     font-weight: bold;
     margin-bottom: 25px;
     text-align: left;
-    padding-left: 20px;
-    color: #FD5402;
-    border-left: 5px solid #FD5402;
+    color: #2b2320;
     padding-top: 5px;
     padding-bottom: 5px;
 }
@@ -54,7 +59,11 @@ body {
 }
 
 .exercise-header:hover {
+<<<<<<< HEAD
     background: rgba(115, 196, 253, 0.2);
+=======
+    background: rgba(115, 196, 253, 0.2); 
+>>>>>>> 9b106fb54820aad15ec486c764745c5792f4acfb
 }
 
 .exercise-header h3 {
@@ -98,7 +107,11 @@ body {
     border-radius: 10px;
     margin-top: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+<<<<<<< HEAD
     border-left: 5px solid #73c4fd;
+=======
+    border-left: 5px solid #73c4fd; 
+>>>>>>> 9b106fb54820aad15ec486c764745c5792f4acfb
 }
 
 /* Response Box */

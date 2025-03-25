@@ -10,6 +10,7 @@ body.add_module {
     font-weight: bold;
     color: #000000;
     font-size: 20px;
+    margin-top: 10px;
     
 }
 .add_module h2 {
@@ -29,7 +30,7 @@ body.add_module {
 
 .form-control:focus {
     border-color:  #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(241, 255, 81, 0.682);
 }
 
 .form-check-input {
@@ -58,19 +59,6 @@ body.add_module {
     background: #D43802;
 }
 
-.btn-secondary {
-    padding: 12px 18px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    transition: background 0.3s ease-in-out;
-}
-
-.btn-secondary:hover {
-    background: #6d6c6c;
-}
 
 .card {
     border-radius: 20px !important;
@@ -259,4 +247,29 @@ form-label {
 /* Adds margin to the bottom of the last label */
 .form-label:last-child {
     margin-top: 20px;
+}
+/* Ensure buttons are full width and evenly spaced */
+.btn.w-100 {
+    width: 100%;
+}
+.btn.w-50 {
+    width: 50%;
+}
+
+.btn.btn-secondary {
+    padding: 12px 18px;
+    background: #ddd;
+    color: black;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: none;
+}
+
+.btn.btn-secondary:hover {
+    background: #bbb;
 }

@@ -9,64 +9,47 @@ class JournalViewTest(TestCase):
 
     def setUp(self):
         """Create a test user and log in."""
-        print("🔍 Setting up the test environment...")
         self.user = User.objects.create_user(username="testuser", password="testpass")
         login_success = self.client.login(username="testuser", password="testpass")
-        print(f"✅ Login successful: {login_success}")
         
         self.today = now().date()
         self.yesterday = self.today - timedelta(days=1)
         self.tomorrow = self.today + timedelta(days=1)
-        print(f"📅 Test Dates - Today: {self.today}, Yesterday: {self.yesterday}, Tomorrow: {self.tomorrow}")
 
     def test_journal_view_no_date(self):
         """Test accessing the journal view with no date provided."""
-        print("\n📌 Running: test_journal_view_no_date")
         
         response = self.client.get(reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]))
-        print(f"📥 Request made to URL: {reverse('journal_by_date', args=[self.today.strftime('%Y-%m-%d')])}")
         
         self.assertEqual(response.status_code, 200)
-        print(f"✅ Response status code: {response.status_code}")
         
         self.assertContains(response, self.today.strftime("%Y-%m-%d"))
-        print("✅ Found today's date in the response content.")
 
     def test_journal_view_ajax_no_entry(self):
         """Test AJAX request when no journal entry exists for the date."""
-        print("\n📌 Running: test_journal_view_ajax_no_entry")
         
         response = self.client.get(
             reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]),
             HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
-        
-        print(f"📥 AJAX Request made to URL: {reverse('journal_by_date', args=[self.today.strftime('%Y-%m-%d')])}")
-        print(f"✅ Response status code: {response.status_code}")
-        print(f"✅ Response content: {response.content}")
-        
+
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(response.content, {"success": False, "error": "No entry found."})
-        print("✅ AJAX No Entry Test Passed.")
 
     def test_journal_view_ajax_with_entry(self):
         """Test AJAX request when a journal entry exists for the date."""
-        print("\n📌 Running: test_journal_view_ajax_with_entry")
         
         journal_entry = JournalEntry.objects.create(
             user=self.user, date=self.today, sleep_hours=7, caffeine="yes"
         )
         
-        print(f"✅ Journal entry created: {journal_entry}")
         
         response = self.client.get(
             reverse("journal_by_date", args=[self.today.strftime("%Y-%m-%d")]),
             HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
         
-        print(f"📥 AJAX Request made to URL: {reverse('journal_by_date', args=[self.today.strftime('%Y-%m-%d')])}")
-        print(f"✅ Response status code: {response.status_code}")
-        print(f"✅ Response content: {response.content}")
+
         
         self.assertEqual(response.status_code, 200)
         self.assertIn("sleep_hours", response.json()["data"])
@@ -90,4 +73,3 @@ class JournalViewTest(TestCase):
         
         
         self.assertJSONEqual(response.content, expected_response)
-        print("✅ AJAX With Entry Test Passed.")

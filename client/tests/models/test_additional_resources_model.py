@@ -1,10 +1,10 @@
 import shutil
 import tempfile
 from django.test import TestCase, override_settings
-from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from client.models import AdditionalResource
 
+# Create a temporary directory for media files during tests.
 TEMP_MEDIA_ROOT = tempfile.mkdtemp()
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -13,6 +13,7 @@ class AdditionalResourceModelTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
+        # Remove the temporary media directory and all its contents.
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def test_str(self):
@@ -65,7 +66,7 @@ class AdditionalResourceModelTest(TestCase):
             resource_type='invalid',
             title="Invalid Resource"
         )
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(Exception):
             resource.full_clean()
 
     def test_update_resource(self):

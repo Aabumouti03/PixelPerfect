@@ -19,7 +19,7 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
-    color: #000000;
+    color: #2b2320;
 }
 
 /* Table Styling */
@@ -74,14 +74,14 @@ body {
 /* Button Colors */
 .view-btn {
     background-color: white;
-    color: #3498db;
-    border-color: #3498db;
+    color: #F24505 !important;
+    border-color:#F24505 !important;
 }
 
 .edit-btn {
     background-color: white;
-    color: #f39c12;
-    border-color: #f39c12;
+    color: #F24505;
+    border-color: #F24505;
 }
 
 .activate-btn {
@@ -97,7 +97,7 @@ body {
 
 .view-btn:hover {
     background: #ebeaea;
-    color: #3498db;
+    color: #F24505;
 }
 
 .activate-btn:hover {
@@ -142,7 +142,7 @@ body {
 /* Top Bar Adjustments */
 .top-bar {
     display: flex;
-    justify-content: space-between; /* Spread title & button */
+    justify-content: space-between; 
     align-items: center;
     padding: 10px 20px;
 }
@@ -171,7 +171,7 @@ body {
 .center-text {
     text-align: center; 
     vertical-align: middle; 
-    font-weight: bold; /* Makes the number stand out */
+    font-weight: bold; 
 }
 /* Pagination Styles */
 .pagination {

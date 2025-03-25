@@ -46,7 +46,7 @@ body {
 
 
 .count {
-    color:white;
+    color: #2b2320;
 }
 
 .count {
@@ -55,17 +55,17 @@ body {
 }
 
 .chart-box.count {
-    background-color: #0048ffd0;
+    background-color: #f2f20557;
 }
 
 .card img {
     margin-top: 35px;
-    width: 40px; /* ✅ Adjust image size */
+    width: 40px; 
     height: 40px;
 }
 
 
-.card.sales { background: #0048FF; }
+.card.sales { background: #f2f20557; }
 .card.orders { background: #F24505; }
 .card.visitors { background: #CEE7F2; }
 
@@ -89,9 +89,9 @@ body {
 }
 
 .chart-box {
-    flex: 1; /* ✅ Ensures all charts take equal space */
-    max-width: 48%; /* ✅ Matches width with other charts */
-    height: 350px; /* ✅ Gives more space to the pie chart */
+    flex: 1; 
+    max-width: 48%; 
+    height: 350px; 
     background: white;
     padding: 20px;
     border-radius: 10px;
@@ -107,7 +107,7 @@ body {
 .chart-box canvas {
     width: 100% !important;
     height: 100% !important;
-    max-width: 280px; /* ✅ Keeps it from getting too large */
+    max-width: 280px; 
     max-height: 280px;
 }
 
@@ -119,19 +119,19 @@ body {
 }
 
 #completionChart {
-    width: 75% !important;  /* Makes it responsive */
+    width: 75% !important;  
     height: 75%;
-    max-width: 700px;  /* Limits maximum width */
-    border-radius: 10px;  /* Rounded corners */
+    max-width: 700px;  
+    border-radius: 10px;  
     padding: 10px;
     margin-right: 40px;
 }
 
 #completionTimeChart {
-    width: 75% !important;  /* Makes it responsive */
+    width: 75% !important; 
     height: 75%;
-    max-width: 700px;  /* Limits maximum width */
-    border-radius: 10px;  /* Rounded corners */
+    max-width: 700px;  
+    border-radius: 10px; 
     padding: 10px;
     margin-right: 40px;
 }

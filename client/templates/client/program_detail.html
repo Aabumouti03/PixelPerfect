@@ -7,99 +7,101 @@
     <title>Edit Program</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-    <link rel="stylesheet" href="{% static 'client/css/create_program.css' %}">
+    <link rel="stylesheet" href="{% static 'client/css/program_detail.css' %}">
 </head>
-
-<body class="create_program">
-
+<body class="create_category">
     {% include 'client/client_base.html' %}
 
     <div class="container mt-5">
-        <h2 class="mb-4">Edit Program</h2>
-
-        <!-- Form for updating Title & Description -->
-        <form method="post" class="card p-4 shadow-sm">
-            {% csrf_token %}
-            <input type="hidden" name="update_program" value="1">
-
-            <div class="mb-3">
-                <label for="program-title" class="form-label">1. Title:</label>
-                <input type="text" name="title" id="program-title" value="{{ program.title }}" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="program-description" class="form-label">2. Description:</label>
-                <textarea name="description" id="program-description" class="form-control" rows="5" required>{{ program.description }}</textarea>
-            </div>
-
-            <!-- Save Changes Button (Placed under the Description) -->
-            <button type="submit" class="btn btn-primary saveProgram mt-3">Save Changes</button>
-        </form>
+        <div class="card p-4 shadow-sm">
+            <h2 class="text-center text-danger fw-bold">Edit Program</h2>
+            <form method="POST" action="{% url 'program_detail' program.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="update_program" value="1">
+                <div class="mb-3">
+                    <label for="program-title" class="form-label">1. Title:</label>
+                    <input type="text" name="title" id="program-title" value="{{ program.title }}" class="form-control" required>
+                </div>
+    
+                <div class="mb-3">
+                    <label for="program-description" class="form-label">2. Description:</label>
+                    <textarea name="description" id="program-description" class="form-control" rows="5" required>{{ program.description }}</textarea>
+                </div>
+    
+                <button type="submit" class="btn btn-danger w-100">Save Changes</button>
+            </form>
+            
+        </div>
 
         
-
-         <!-- Modules Section -->
-         <label class="form-label mt-3">3. Selected Modules:</label>
-         <div class="module-box p-3">
-             <ul class="list-unstyled sortable-list" id="sortableModules">
-                 {% for program_module in program_modules %}
-                     <li class="d-flex align-items-center justify-content-between sortable-item" data-id="{{ program_module.id }}">
-                         <span class="drag-handle">☰</span> 
-                         <span>{{ program_module.module.title }}</span>
-                         <form method="POST" class="d-inline">
-                             {% csrf_token %}
-                             <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
-                             <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                         </form>
-                     </li>
-                 {% empty %}
-                     <li class="text-center text-muted">No modules added yet.</li>
-                 {% endfor %}
-             </ul>
-         </div>
- 
-         <!-- Add More Modules Button -->
-         <button type="button" class="btn btn-primary w-100 mt-3" onclick="openModal('moduleModal')">Add More Modules</button>
-         <button class="btn btn-primary w-100 mt-3" onclick="saveModuleOrder()">Save Module Order</button>
- 
-        
-        <!-- Users Section -->
-        <label class="form-label mt-4">4. Enrolled Users:</label>
-        <div class="module-box p-3">
-            <ul class="list-unstyled">
-                {% for enrollment in enrolled_users %}
-                    <li class="d-flex align-items-center justify-content-between">
-                        <span>{{ enrollment.user.user.username }} ({{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }})</span>
+        <div class="mt-4">
+            <h2 class="text-danger">Modules in this Program:</h2>
+            <ul class="list-group" id="sortableModules">
+                {% for program_module in program_modules %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ program_module.id }}">
+                        {{ program_module.module.title }}
                         <form method="POST" class="d-inline">
                             {% csrf_token %}
-                            <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
+                            <input type="hidden" name="remove_module" value="{{ program_module.module.id }}">
                             <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                         </form>
                     </li>
                 {% empty %}
-                    <li class="text-center text-muted">No users enrolled yet.</li>
+                    <li class="list-group-item">No modules available.</li>
                 {% endfor %}
             </ul>
+            <button class="btn btn-outline-danger w-100 mt-3" onclick="openModal('moduleModal')">Add More Modules</button>
+            <button class="btn btn-danger w-100 mt-3" onclick="saveModuleOrder()">Save Module Order</button>
         </div>
 
-        <!-- Add More Users Button -->
-        <button type="button" class="btn btn-primary w-100 mt-3" onclick="openModal('userModal')">Add More Users</button>
 
-        <a href="{% url 'programs' %}" class="btn btn-primary mt-3">Go Back</a>
+        <div class="mt-4">
+            <h2 class="text-danger">Enrolled Users:</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrolled_users %}
+                        <tr>
+                            <td>{{ enrollment.user.user.username }}</td>
+                            <td>{{ enrollment.user.user.first_name }} {{ enrollment.user.user.last_name }}</td>
+                            <td>
+                                <form method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">No users enrolled yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button class="btn btn-outline-danger w-100" onclick="openModal('userModal')">Add More Users</button>
+        </div>
+
+        <a href="{% url 'programs' %}" class="btn btn-secondary w-100 mt-3">Back to Programs</a>
     </div>
 
-    <!-- Add Modules Modal -->
     <div id="moduleModal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('moduleModal')">&times;</span>
-            <h2 class="text-center">Add More Modules</h2>
+            <h2>Add More Modules</h2>
             <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="add_modules" value="1">
-                <div class="checkbox-list text-start">
+                <div class="checkbox-list">
                     {% for module in all_modules %}
                         {% if module.id not in program_module_ids %}
-                            <label class="d-block">
+                            <label>
                                 <input type="checkbox" name="modules_to_add" value="{{ module.id }}">
                                 {{ module.title }}
                             </label>
@@ -111,20 +113,17 @@
         </div>
     </div>
 
-
-
-    <!-- Add Users Modal -->
     <div id="userModal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('userModal')">&times;</span>
-            <h2 class="text-center">Add More Users</h2>
-            <form method="POST">
+            <h2>Add More Users</h2>
+            <form method="POST" action="{% url 'program_detail' program.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="add_users" value="1">
-                <div class="checkbox-list text-start">
+                <div class="checkbox-list">
                     {% for enduser in all_users %}
                         {% if enduser.id not in enrolled_user_ids %}
-                            <label class="d-block">
+                            <label>
                                 <input type="checkbox" name="users_to_add" value="{{ enduser.id }}">
                                 {{ enduser.user.username }}
                             </label>
@@ -135,11 +134,17 @@
             </form>
         </div>
     </div>
+    
 
     <script>
+        new Sortable(document.getElementById('sortableModules'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+        });
+
         function saveModuleOrder() {
             let orderData = [];
-            document.querySelectorAll('#sortableModules .sortable-item').forEach((item, index) => {
+            document.querySelectorAll('#sortableModules .list-group-item').forEach((item, index) => {
                 orderData.push({ id: item.dataset.id, order: index + 1 });
             });
 
@@ -156,22 +161,31 @@
                 if (data.success) {
                     alert("Module order updated successfully!");
                 } else {
-                    alert("Error updating order.");
+                    alert("Error updating order: " + data.error);
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                alert("Request failed: " + error);
+            });
         }
+        window.openModal = function(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
 
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
+        // Disable sortable interaction only on modal open
+        sortable.option('disabled', true);
+    };
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
+    window.closeModal = function(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        document.body.style.overflow = 'auto';
+
+        // Re-enable sortable interaction when modal is closed
+        sortable.option('disabled', false);
+    };
+
     </script>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'client/js/module_order_and_filter_categories.js' %}"></script>
 </body>
 </html>
-

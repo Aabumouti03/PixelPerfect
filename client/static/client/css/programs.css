@@ -22,8 +22,8 @@ h1 {
 }
 
 .program-card {
-    background: #3A88F6;
-    color: white;
+    background: #f2f20557;
+    color: 2b2320;
     border-radius: 10px;
     padding: 20px;
     min-height: 220px;
@@ -45,7 +45,7 @@ h1 {
     align-items: center;
     font-size: 40px;
     font-weight: bold;
-    color: #3A88F6;
+    color: #ccc;
     cursor: pointer;
     height: 220px;
     width: 100%;
@@ -77,19 +77,19 @@ h1 {
 }
 
 .add-card {
-    background: #e4efff;
+    background: #cccccc91;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 40px;
     font-weight: bold;
-    color: #3A88F6;
+    color: #949494;
     cursor: pointer;
     text-decoration: none;
 }
 
 .add-card:hover {
-    background: #94BFF8;
+    background: #ccc;
 }
 
 .buttons {
