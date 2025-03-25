@@ -19,7 +19,7 @@
 }
 
 .header-right {
-    flex: 1; /* ✅ Takes right space */
+    flex: 1; 
     text-align: right;
 }
 
@@ -27,7 +27,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    justify-content: flex-end; /* ✅ Push stars to the right */
+    justify-content: flex-end; 
 }
 
 .star-rating {
@@ -44,11 +44,11 @@
 }
 
 .star.selected {
-    color: #FFD700; /* ✅ Gold for selected stars */
+    color: #FFD700;
 }
 
 .star:hover {
-    color: #FFC107; /* ✅ Highlight stars on hover */
+    color: #FFC107; 
 }
 
 
@@ -162,19 +162,18 @@ canvas#progressChart {
 
 .exercise-container {
     display: flex;
-    flex-direction: row; /* Keep horizontal layout */
-    align-items: flex-start; /* Aligns items at the top */
-    justify-content: space-between; /* Pushes left and right sections apart */
+    flex-direction: row; 
+    align-items: flex-start; 
+    justify-content: space-between; 
     max-width: 1000px;
     margin-left: 100px;
     padding: 5px;
-    gap: 60px; /* Increase space between questions and diagram */
+    gap: 60px; 
 }
 
-/* Left Side - Questions */
 .questions-container {
-    flex: 2; /* Takes more space */
-    width: 60%; /* Ensures it stays on the left */
+    flex: 2; 
+    width: 60%;
     padding-left: 0;
 }
 
@@ -190,29 +189,29 @@ canvas#progressChart {
 
 .answer-field {
     width: 100%;
-    min-height: 100px; /* Increase height */
-    min-width: 100px; /* Increase height */
-    padding: 15px; /* More padding inside */
+    min-height: 100px; 
+    min-width: 100px; 
+    padding: 15px; 
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #69b0e7; /* Light blue background */
-    resize: vertical; /* Allows user to resize */
+    background-color: #69b0e7; 
+    resize: vertical; 
     font-family: 'Montserrat', sans-serif;
-    font-size: 18px; /* Bigger text */
-    color: #fffafa; /* Light text */
+    font-size: 18px;
+    color: #fffafa;
     text-align: left;
     vertical-align: top;
-    white-space: pre-wrap; /* Preserve spaces and wrap text */
-    line-height: 1.5; /* Improve readability */
+    white-space: pre-wrap;
+    line-height: 1.5; 
 }
 
 /* Right Side - Diagram */
 .diagram-container {
-    flex: 1;  /* Smaller than questions */
+    flex: 1; 
     display: flex;
-    justify-content: center; /* Centers image */
+    justify-content: center;
     align-items: center;
-    margin-top: 140px; /* Add upper margin */
+    margin-top: 140px; 
 }
 
 .diagram-container img {
@@ -234,8 +233,8 @@ canvas#progressChart {
 }
 
 .submit-container button {
-    background-color: #F24505; /* Bright orange */
-    color: white; /* White text for contrast */
+    background-color: #F24505; 
+    color: white; 
     font-size: 16px;
     font-weight: bold;
     padding: 12px 24px;
@@ -246,13 +245,13 @@ canvas#progressChart {
 }
 
 .submit-container button:hover {
-    background-color: #D43802; /* Slightly darker orange for hover effect */
-    transform: scale(1.05); /* Slight zoom effect */
+    background-color: #D43802; 
+    transform: scale(1.05); 
 }
 
 .submit-container button:active {
-    background-color: #D43802; /* Even darker orange when clicked */
-    transform: scale(0.98); /* Slight press-in effect */
+    background-color: #D43802; 
+    transform: scale(0.98); 
 }
 
 .exercise-diagram-container {
@@ -276,7 +275,7 @@ canvas#progressChart {
 
 .module-diagram {
     width: 100%;
-    max-width: 400px; /* Adjust size */
+    max-width: 400px;
     border-radius: 10px;
 }
 
@@ -316,7 +315,7 @@ canvas#progressChart {
     background-color: #ccc;
     color: white;
     padding: 10px 20px;
-    margin-left: 15px; /* ✅ Adds spacing to move it right */
+    margin-left: 15px; 
 }
 
 /* Style for "Undo" state (green) */
@@ -324,5 +323,5 @@ canvas#progressChart {
     background-color: green;
     color: white;
     padding: 10px 20px;
-    margin-left: 15px; /* ✅ Adds spacing to move it right */
+    margin-left: 15px; 
 }

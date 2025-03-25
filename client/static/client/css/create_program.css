@@ -56,7 +56,7 @@ body {
     color: white;
     font-family: Manrope;
     border-radius: 25px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     text-align: center;
@@ -75,7 +75,7 @@ body {
     background: #ddd;
     color: black;
     border-radius: 25px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     text-align: center;
@@ -234,18 +234,18 @@ textarea.form-control {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+    background: rgba(0, 0, 0, 0.5); 
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it appears on top */
+    z-index: 1000; 
 }
 
 .modal-content {
     background: white;
     padding: 20px;
     border-radius: 10px;
-    width: 50%; /* Set width */
-    max-width: 500px; /* Avoids getting too large */
+    width: 50%; 
+    max-width: 500px; 
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
 }

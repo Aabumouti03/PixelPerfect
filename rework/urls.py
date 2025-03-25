@@ -1,10 +1,12 @@
-from django.urls import path
-from django.conf import settings
 from django.contrib import admin
-from users import views as usersViews
-from client import views as clientViews
+from django.urls import path
 from django.conf.urls.static import static
+from django.conf import settings
+from client import views as clientViews
+from users import views as usersViews
 from django.contrib.auth import views as authenticationViews
+
+
 
 urlpatterns = [
 
@@ -60,17 +62,21 @@ urlpatterns = [
     path('delete_exercise_questions/<int:exercise_id>/', clientViews.delete_exercise_questions, name='delete_exercise_questions'),
     path("add_exercise_ajax/", clientViews.add_exercise_ajax, name="add_exercise_ajax"),
     path('add_exercise_to_module/<int:module_id>/', clientViews.add_exercise_to_module, name='add_exercise_to_module'),
-    path('add_additional_resource/', clientViews.add_additional_resource, name='add_additional_resource'),
-    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
     path('remove_video_from_module/<int:module_id>/', clientViews.remove_video_from_module, name='remove_video_from_module'),
-    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
     path('remove_exercises_from_module/<int:module_id>/', clientViews.remove_exercise_from_module, name='remove_exercises_from_module'),
-    path('resource_list/', clientViews.resource_list, name='resource_list'),
-    path('delete_resource/<int:resource_id>/', clientViews.delete_resource, name='delete_resource'),
     path('delete_video/<int:video_id>/', clientViews.delete_video, name='delete_video'),
     path("client_modules/", clientViews.client_modules, name="client_modules"),
     path('edit_module/<int:module_id>/', clientViews.edit_module, name='edit_module'),  
     path("delete_module/<int:module_id>/", clientViews.delete_module, name="delete_module"),
+    path('add_video_to_module/<int:module_id>/', clientViews.add_video_to_module, name='add_video_to_module'),
+
+    #Resources urls for the client
+    path('add_additional_resource/', clientViews.add_additional_resource, name='add_additional_resource'),
+    path('remove_resource_from_module/<int:module_id>/', clientViews.remove_resource_from_module, name='remove_resource_from_module'),
+    path('resource_list/', clientViews.resource_list, name='resource_list'),
+    path('delete_resource/<int:resource_id>/', clientViews.delete_resource, name='delete_resource'),
+    path('add_resource_to_module/<int:module_id>/', clientViews.add_resource_to_module, name='add_resource_to_module'),
+    path('save_module_changes/<int:module_id>/', clientViews.save_module_changes, name='save_module_changes'),
     
 
     #Additional Section and Exercise urls
@@ -112,6 +118,7 @@ urlpatterns = [
     path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
     path('exercise/<int:exercise_id>/', usersViews.exercise_detail, name='exercise_detail'),
+    path('exercise/<int:exercise_id>/view/', usersViews.exercise_detail_view, name='exercise_detail_view'),
     path('mark_done/', usersViews.mark_done, name='mark_done'),
     path('all_modules/', usersViews.all_modules, name='all_modules'),
     

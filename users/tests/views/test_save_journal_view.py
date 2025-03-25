@@ -16,7 +16,6 @@ class SaveJournalEntryTest(TestCase):
     def test_create_new_journal_entry(self):
         """Test creating a new journal entry"""
         payload = {"date": "2025-03-15", "sleep_hours": 7, "caffeine": "yes", "hydration": 8}
-        print(f"\n📤 Sending Request: {payload}")  # Debugging
 
         response = self.client.post(
             self.url,
@@ -24,8 +23,7 @@ class SaveJournalEntryTest(TestCase):
             content_type="application/json"
         )
         
-        print(f"📥 Response Status Code: {response.status_code}")
-        print(f"📥 Response Data: {response.json()}")  # Debugging
+
 
         self.assertEqual(response.status_code, 201)
         self.assertJSONEqual(response.content, {"success": True, "message": "Journal entry saved."})
@@ -33,7 +31,6 @@ class SaveJournalEntryTest(TestCase):
     def test_invalid_date_format(self):
         """Test handling of invalid date format"""
         payload = {"date": "15-03-2025"}  # Invalid format
-        print(f"\n📤 Sending Request: {payload}")  # Debugging
 
         response = self.client.post(
             self.url,
@@ -41,8 +38,7 @@ class SaveJournalEntryTest(TestCase):
             content_type="application/json"
         )
 
-        print(f"📥 Response Status Code: {response.status_code}")
-        print(f"📥 Response Data: {response.json()}")  # Debugging
+
 
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {"success": False, "error": "Invalid date format. Use YYYY-MM-DD."})
@@ -50,7 +46,6 @@ class SaveJournalEntryTest(TestCase):
     def test_missing_date_field(self):
         """Test handling of missing date field"""
         payload = {"sleep_hours": 6}  # Missing date
-        print(f"\n📤 Sending Request: {payload}")  # Debugging
 
         response = self.client.post(
             self.url,
@@ -58,27 +53,23 @@ class SaveJournalEntryTest(TestCase):
             content_type="application/json"
         )
         
-        print(f"📥 Response Status Code: {response.status_code}")
-        print(f"📥 Response Data: {response.json()}")  # Debugging
+
 
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {"success": False, "error": "Date is required."})
 
     def test_invalid_request_method(self):
         """Test handling of invalid request methods"""
-        print("\n📤 Sending GET request to URL instead of POST")  # Debugging
 
         response = self.client.get(self.url)
         
-        print(f"📥 Response Status Code: {response.status_code}")
-        print(f"📥 Response Data: {response.json()}")  # Debugging
+
 
         self.assertEqual(response.status_code, 405)
         self.assertJSONEqual(response.content, {"success": False, "error": "Invalid request method."})
 
     def test_invalid_json_format(self):
         """Test handling of invalid JSON format"""
-        print("\n📤 Sending Invalid JSON Request")  # Debugging
 
         response = self.client.post(
             self.url,
@@ -86,8 +77,7 @@ class SaveJournalEntryTest(TestCase):
             content_type="application/json"
         )
         
-        print(f"📥 Response Status Code: {response.status_code}")
-        print(f"📥 Response Data: {response.json()}")  # Debugging
+
 
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {"success": False, "error": "Invalid JSON format."})

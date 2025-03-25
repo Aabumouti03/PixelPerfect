@@ -55,7 +55,6 @@ class UpdateProfileViewTest(TestCase):
         }
         response = self.client.post(self.update_profile_url, data, follow=True)
         
-        # Refresh from DB to get latest changes
         self.user.refresh_from_db()
         self.end_user.refresh_from_db() 
 
@@ -81,14 +80,12 @@ class UpdateProfileViewTest(TestCase):
         }
         response = self.client.post(self.update_profile_url, data, follow=True)
 
-        # Refresh user from DB
         self.user.refresh_from_db()
         
-        self.assertEqual(self.user.email, "test@example.com")  # Email should not change yet
-        self.assertEqual(self.user.new_email, "newemail@example.com")  # new_email should be set
+        self.assertEqual(self.user.email, "test@example.com")  
+        self.assertEqual(self.user.new_email, "newemail@example.com")  
         self.assertTrue(mock_send_mail.called)
 
-        #  Check if an email was actually sent
         self.assertEqual(mock_send_mail.call_count, 1, "Expected send_mail to be called once but wasn't")
 
 
@@ -111,9 +108,9 @@ class UpdateProfileViewTest(TestCase):
         # Refresh user from DB
         self.user.refresh_from_db()
 
-        self.assertEqual(self.user.email, "test@example.com")  # Email remains the same
-        self.assertIsNone(self.user.new_email)  # new_email should not be set
-        self.assertFalse(mail.outbox)  # No email should be sent
+        self.assertEqual(self.user.email, "test@example.com")  
+        self.assertIsNone(self.user.new_email)  
+        self.assertFalse(mail.outbox)  
 
 
     def test_password_change(self):
@@ -172,10 +169,8 @@ class UpdateProfileViewTest(TestCase):
 
         response = self.client.get(self.update_profile_url, follow=True)
         
-        # Check redirection
         self.assertRedirects(response, reverse('welcome_page'))
 
-        # Check for error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any("Profile not found." in str(m) for m in messages))
 

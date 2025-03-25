@@ -67,7 +67,7 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    height: 100%;  /* Make sure it fills available space */
+    height: 100%; 
     width: 100%;
     background-color: #f24505;
 }
@@ -83,9 +83,8 @@ body {
 
 /* CONTAINER */
 .container {
-    width: 100%;  /* Full width */
-    height: 100%; /* Full height to fill .main */
-    /* max-width: none; Remove max-width restriction */
+    width: 100%; 
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -93,7 +92,6 @@ body {
     text-align: center;
     background-color: #f24505;
     color: white;
-    /* padding: 20px; */
 }
 /* TITLE */
 .title {
@@ -106,9 +104,9 @@ body {
 /* DESCRIPTION */
 .description {
     font-size: 18px;
-    line-height: 1.6; /* Improve readability */
+    line-height: 1.6;
     margin-bottom: 20px;
-    max-width: 600px; /* Limit width for better readability */
+    max-width: 600px; 
 }
 
 /* SUBTEXT */
@@ -116,7 +114,7 @@ body {
     font-size: 16px;
     font-style: italic;
     margin-bottom: 30px;
-    color: rgba(255, 255, 255, 0.8); /* Slightly transparent white */
+    color: rgba(255, 255, 255, 0.8); 
 }
 
 /* BUTTONS */
@@ -128,15 +126,15 @@ body {
 }
 
 .btn {
-    background: transparent; /* Transparent background */
-    color: white; /* White text */
+    background: transparent; 
+    color: white; 
     font-size: 18px;
     font-weight: bold;
     padding: 12px 24px;
-    border: 2px solid white; /* White border */
-    border-radius: 20px; /* Rounded corners */
+    border: 2px solid white; 
+    border-radius: 20px; 
     cursor: pointer;
-    transition: background 0.3s, color 0.3s, border-color 0.3s; /* Smooth transitions */
+    transition: background 0.3s, color 0.3s, border-color 0.3s; 
 }
 
 .btn:hover {
@@ -205,7 +203,6 @@ body {
     background: white;
     padding: 15px;
     width: 80%;
-    /* border: 2px solid #007bff; */
     border-radius: 30px;
     cursor: pointer;
     font-size: 18px;
@@ -299,7 +296,7 @@ body {
 
 /* Buttons */
 .confirm-logout {
-    background-color: #dc3545;
+    background-color: #f24505;
     color: white;
     margin-right: 10px;
 }

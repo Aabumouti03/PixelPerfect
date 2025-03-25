@@ -134,6 +134,6 @@ body {
 }
 .action-buttons {
     display: flex;
-    gap: 10px; /* Adds space between the buttons */
-    align-items: center; /* Aligns buttons vertically */
+    gap: 10px; 
+    align-items: center; 
 }

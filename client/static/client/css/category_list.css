@@ -15,9 +15,9 @@ h1 {
 
 .category-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);  /* Default for larger screens */
-    column-gap: 30px;  /* Gap between columns */
-    row-gap: 40px;     /* Gap between rows */
+    grid-template-columns: repeat(4, 1fr);  
+    column-gap: 30px;  
+    row-gap: 40px;   
     justify-content: center;
     align-items: stretch;
 }
@@ -32,10 +32,10 @@ h1 {
     flex-direction: column;
     justify-content: space-between;
     transition: transform 0.2s ease-in-out;
-    min-width: 280px;  /* Minimum width of category card */
-    max-width: 350px;  /* Maximum width of category card */
-    height: 300px;     /* Height of the category card */
-    box-sizing: border-box;  /* Ensure padding does not affect width */
+    min-width: 280px; 
+    max-width: 350px; 
+    height: 300px;   
+    box-sizing: border-box;  
 }
 
 .add-card {
@@ -50,7 +50,7 @@ h1 {
     height: 220px;
     width: 100%;
     text-decoration: none;
-    border-radius: 10px;  /* Add border radius to match category card */
+    border-radius: 10px; 
 }
 
 .category-card:hover {
@@ -133,62 +133,62 @@ h1 {
 /* Mobile responsiveness: Adjustments for smaller screens */
 @media (max-width: 768px) {
     h1 {
-        font-size: 20px;  /* Slightly smaller font size for mobile */
+        font-size: 20px;  
         margin-bottom: 30px;
     }
 
     .category-grid {
-        grid-template-columns: repeat(2, 1fr);  /* Two columns for smaller screens */
-        column-gap: 20px;  /* Smaller gap between columns */
-        row-gap: 30px;     /* Smaller gap between rows */
+        grid-template-columns: repeat(2, 1fr);  
+        column-gap: 20px; 
+        row-gap: 30px;     
     }
 
     .category-card {
-        min-width: 250px;  /* Reduce the minimum width of category card */
-        max-width: 300px;  /* Reduce the maximum width of category card */
-        height: 250px;     /* Adjust the height of the category card */
+        min-width: 250px; 
+        max-width: 300px;  
+        height: 250px;     
     }
 
     .add-card {
-        height: 180px;  /* Adjust the height of the add card */
+        height: 180px; 
     }
 
     .category-card h2 {
-        font-size: 20px;  /* Smaller title font for mobile */
+        font-size: 20px; 
     }
 
     .category-card p {
-        font-size: 12px;  /* Smaller text for descriptions */
+        font-size: 12px; 
     }
 }
 
 @media (max-width: 480px) {
     h1 {
-        font-size: 18px;  /* Further reduce font size on smaller screens */
+        font-size: 18px;  
         margin-bottom: 20px;
     }
 
     .category-grid {
-        grid-template-columns: 1fr;  /* One column for very small screens */
-        column-gap: 15px;  /* Even smaller gap */
+        grid-template-columns: 1fr;  
+        column-gap: 15px; 
         row-gap: 20px;
     }
 
     .category-card {
-        min-width: 200px;  /* Even smaller category card width */
+        min-width: 200px; 
         max-width: 250px;
-        height: 220px;     /* Further adjust card height */
+        height: 220px;    
     }
 
     .add-card {
-        height: 160px;  /* Smaller add card on very small screens */
+        height: 160px; 
     }
 
     .category-card h2 {
-        font-size: 18px;  /* Even smaller title font */
+        font-size: 18px;  
     }
 
     .category-card p {
-        font-size: 10px;  /* Smallest font size for descriptions */
+        font-size: 10px;  
     }
 }

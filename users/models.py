@@ -8,9 +8,6 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
-from django.core.exceptions import ValidationError
-
-
 from django.core.cache import cache
 import random
 import datetime
@@ -140,7 +137,7 @@ class UserProgramEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} enrolled in {self.program.title}"
-    
+
 
 class UserModuleEnrollment(models.Model):
     """Tracks when a user starts a standalone module."""
@@ -151,7 +148,6 @@ class UserModuleEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.user.username} started {self.module.title}"
-
 
 class UserProgramProgress (models.Model):
 

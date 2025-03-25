@@ -5,12 +5,12 @@ body {
     background-color: white;
     margin: 0;
     padding: 0;
-    display: flex; /* Align sidebar and content */
+    display: flex;
 }
 
 /* Full Page Content */
 .content {
-    flex-grow: 1; /* Takes up all available space */
+    flex-grow: 1; 
     padding: 30px;
 }
 
@@ -20,9 +20,7 @@ body {
     font-weight: bold;
     margin-bottom: 25px;
     text-align: left;
-    padding-left: 20px;
-    color: #FD5402;
-    border-left: 5px solid #FD5402;
+    color: #2b2320;
     padding-top: 5px;
     padding-bottom: 5px;
 }
@@ -51,7 +49,7 @@ body {
 }
 
 .exercise-header:hover {
-    background: rgba(115, 196, 253, 0.2); /* Light blue hover */
+    background: rgba(115, 196, 253, 0.2); 
 }
 
 .exercise-header h3 {
@@ -97,7 +95,7 @@ body {
     border-radius: 10px;
     margin-top: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #73c4fd; /* Blue left border */
+    border-left: 5px solid #73c4fd; 
 }
 
 /* Response Box (Styled as a sub-box inside question) */
@@ -106,7 +104,7 @@ body {
     padding: 12px;
     border-radius: 8px;
     margin-top: 8px;
-    border-left: 4px solid #FD5402; /* Orange left border */
+    border-left: 4px solid #FD5402;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 

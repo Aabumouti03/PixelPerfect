@@ -3,11 +3,11 @@
 /* Make the content fit the full viewport */
 .content {
     width: 100%;
-    min-height: 100vh; /* Ensures full height */
+    min-height: 100vh; 
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Keeps content at the top */
+    justify-content: flex-start; 
     background: white;
     padding: 20px;
 }
@@ -33,9 +33,9 @@ h2 {
 /* Improve Search & Filter Layout */
 .table-controls {
     display: flex;
-    justify-content: space-between; /* Spread elements evenly */
+    justify-content: space-between; 
     align-items: center;
-    flex-wrap: wrap; /* Wrap controls on small screens */
+    flex-wrap: wrap; 
     gap: 15px;
     width: 100%;
     max-width: 1200px;
@@ -45,7 +45,7 @@ h2 {
 /* Style input fields and select dropdown */
 .table-controls input,
 .table-controls select {
-    flex: 1; /* Make all inputs take equal space */
+    flex: 1;
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
