@@ -145,9 +145,7 @@ def create_program(request):
 @user_passes_test(admin_check)
 def programs(request):
     programs = Program.objects.prefetch_related('program_modules__module').all()
-    return render(request, 'client/programs.html', {
-        'programs': programs
-    })
+    return render(request, 'client/programs.html', {'programs': programs})
 
 
 @login_required
@@ -286,7 +284,8 @@ def update_module_order(request, program_id):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-@user_passes_test(lambda u: u.is_superuser, login_url='programs')
+@login_required
+@user_passes_test(admin_check)
 def delete_program(request, program_id):
     """ Delete a program and redirect to the programs list """
     program = get_object_or_404(Program, id=program_id)
@@ -1960,11 +1959,6 @@ def add_question(request, questionnaire_id):
     
     return redirect("edit_questionnaire", questionnaire_id=questionnaire.id)
 
-
-def programs(request):
-    programs = Program.objects.prefetch_related('program_modules__module').all()
-    return render(request, 'client/programs.html', {'programs': programs})
-
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
@@ -2070,28 +2064,6 @@ def program_detail(request, program_id):
     }
 
     return render(request, "client/program_detail.html", context)
-
-@login_required 
-@user_passes_test(admin_check) 
-def edit_category(request, category_id):
-    """View to edit a category's modules and programs."""
-    category = get_object_or_404(Category, id=category_id)
-
-    if request.method == 'POST':
-
-        form = CategoryForm(request.POST, instance=category)
-        if form.is_valid():
-            category = form.save()
-            category.modules.set(form.cleaned_data['modules'])
-            category.programs.set(form.cleaned_data['programs'])
-            return redirect('category_list')  
-            
-    else:
-        form = CategoryForm(instance=category)
-
-    return render(request, 'client/edit_category.html', {'form': form, 'category': category})
-
-
 
 
 @login_required 

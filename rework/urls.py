@@ -94,7 +94,6 @@ urlpatterns = [
     # Program urls for the client
     path('programs/', clientViews.programs, name='programs'),
     path('create_program/', clientViews.create_program, name='create_program'),
-    path('logout/', clientViews.log_out_client, name='logout'),
     path('create_program/', clientViews.create_program, name='create_program'),
     path('programs/<int:program_id>/', clientViews.program_detail, name='program_detail'),
     path('programs/<int:program_id>/delete/', clientViews.delete_program, name='delete_program'),
@@ -113,7 +112,6 @@ urlpatterns = [
     path('userModules/', usersViews.user_modules, name='modules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('userResponce/', usersViews.user_responses_main, name='userResponce'),
-    path('modules/', usersViews.modules, name='modules'),
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
