@@ -144,8 +144,14 @@ def create_program(request):
 @login_required
 @user_passes_test(admin_check)
 def programs(request):
-    programs = Program.objects.prefetch_related('program_modules__module').all()
-    return render(request, 'client/programs.html', {'programs': programs})
+    query = request.GET.get('q', '')
+    programs = Program.objects.prefetch_related('program_modules__module')
+    
+    if query:
+        programs = programs.filter(Q(title__icontains=query))
+
+    
+    return render(request, 'client/programs.html', {'programs': programs, 'query': query})
 
 
 

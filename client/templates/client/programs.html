@@ -8,11 +8,24 @@
     <link rel="stylesheet" href="{% static 'client/css/programs.css' %}">
 {% endblock %}
 
-
 {% block content %}
     <body class="container">
         <h1>Programs</h1>
 
+        <!-- 🔍 Search Form -->
+        <form method="get" class="d-flex justify-content-center mb-4">
+            <input
+                type="text"
+                name="q"
+                class="form-control me-2"
+                style="max-width: 400px;"
+                placeholder="Search programs..."
+                value="{{ query|default:'' }}"
+            >
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+        </form>
+
+        <!-- 💠 Program Cards -->
         <main class="program-grid">
             {% for program in programs %}
             <div class="program-card">
@@ -42,4 +55,3 @@
         </main>
     </body>
 {% endblock %}
-
