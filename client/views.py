@@ -695,23 +695,6 @@ def video_list(request):
     videos = VideoResource.objects.all()
     return render(request, "client/video_list.html", {"videos": videos})
 
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        video_id = data.get("video_id")
-        try:
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
 @user_passes_test(admin_check)
 @login_required
 @csrf_exempt
@@ -749,7 +732,7 @@ def add_video(request):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check)
+@user_passes_test(admin_check) #final version
 def add_video_to_module(request, module_id):
     """
     Add a video to the specified module.
@@ -805,32 +788,16 @@ def video_detail(request, video_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_video_from_module(request, module_id):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            video_id = data.get("video_id")
-            
-            if not video_id:
-                return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
-            
-            module = Module.objects.get(id=module_id)
-            video = VideoResource.objects.get(id=video_id)
-            module.video_resources.remove(video)
-            module.save()  # Ensure changes are saved
-            return JsonResponse({"success": True})
-        
-        except VideoResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Video not found."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-
-
-
+    data = json.loads(request.body)
+    video_ids = data.get("video_ids", [])
+    
+    try:
+        module = get_object_or_404(Module, id=module_id)
+        for vid in video_ids:
+            module.video_resources.remove(vid)
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -839,40 +806,24 @@ def remove_video_from_module(request, module_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check)
+@user_passes_test(admin_check) #final version
 def remove_resource_from_module(request, module_id):
-    if request.method == "POST":
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            resource_id = data.get("resource_id")
-            
-            if not resource_id:
-                return JsonResponse({"success": False, "error": "No resource_id provided"}, status=400)
-            if not resource_id:  # ✅ Check if resource_id is provided
-                return JsonResponse({"success": False, "error": "No resource_id provided"})
+            resource_ids = data.get('resource_ids', [])
 
-            
             module = Module.objects.get(id=module_id)
-            resource = AdditionalResource.objects.get(id=resource_id)
-            module.additional_resources.remove(resource)
-            module.save()  # Ensure changes are saved
-            return JsonResponse({"success": True})
-        
-        except AdditionalResource.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Resource not found."})
-        except Module.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Module not found."})
+            for resource_id in resource_ids:
+                module.additional_resources.remove(resource_id)
+
+            return JsonResponse({'success': True})
         except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid method"})
-
-
+            return JsonResponse({'success': False, 'error': str(e)})
 
 @user_passes_test(admin_check)
-@login_required
+@login_required #final version
 def add_additional_resource(request):
-    # Get next URL to redirect to after successful form submission
     next_url = request.GET.get('next', '/')
     module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
 
@@ -931,7 +882,7 @@ def delete_resource(request, resource_id):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check)
+@user_passes_test(admin_check) #final version
 def add_resource_to_module(request, module_id):
     """
     Add a resource to the specified module.
@@ -961,9 +912,35 @@ def add_resource_to_module(request, module_id):
 
     return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check) #final version
+def save_module_changes(request, module_id):
+    try:
+        data = json.loads(request.body)
+        video_ids = data.get("videos", "").strip(",").split(",")
+        resource_ids = data.get("resources", "").strip(",").split(",")
 
+        # Remove empty strings if input is blank
+        video_ids = [vid for vid in video_ids if vid]
+        resource_ids = [rid for rid in resource_ids if rid]
 
+        module = Module.objects.get(id=module_id)
 
+        if video_ids:
+            module.video_resources.set(VideoResource.objects.filter(id__in=video_ids))
+        else:
+            module.video_resources.clear()
+
+        if resource_ids:
+            module.additional_resources.set(AdditionalResource.objects.filter(id__in=resource_ids))
+        else:
+            module.additional_resources.clear()
+
+        return JsonResponse({'success': True})
+    except Exception as e:
+        print("Error in saving module:", e)
+        return JsonResponse({'success': False, 'error': str(e)})
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ STATISTICS VIEWS -----------------------------------------------------------------
@@ -1012,8 +989,6 @@ def userStatistics(request):
 
     return render(request, "client/userStatistics.html", {"stats": json.dumps(stats_data)})
 
-
-
 @login_required
 @user_passes_test(admin_check)
 def modules_statistics(request):
@@ -1046,7 +1021,6 @@ def modules_statistics(request):
         'rating_data': json.dumps(rating_data),  
     })
 
-
 @login_required
 @user_passes_test(admin_check)
 def programs_statistics(request):
@@ -1067,8 +1041,6 @@ def programs_statistics(request):
         'completion_time_data': json.dumps(avg_completion_data),  
         'programs_count': programs_count
     })
-
-
 
 @login_required
 @user_passes_test(admin_check)
@@ -1098,7 +1070,6 @@ def export_modules_statistics_csv(request):
         writer.writerow([f"Avg Completion - {label}", value])
 
     return response
-
 
 @login_required
 @user_passes_test(admin_check)
@@ -1170,7 +1141,6 @@ def export_user_statistics_csv(request):
     return response
 
 
-
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ USER MANAGEMENT VIEWS ------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -1209,12 +1179,9 @@ def user_detail_view(request, user_id):
     return render(request, 'client/user_detail.html', context)
 
 
-
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ CATEGORY VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
-
-
 @login_required 
 @user_passes_test(admin_check) 
 def category_list(request):
@@ -1285,9 +1252,6 @@ def edit_category(request, category_id):
         form = CategoryForm(instance=category)
 
     return render(request, 'client/edit_category.html', {'form': form, 'category': category})
-
-
-
 
 @csrf_exempt
 @login_required

@@ -321,12 +321,6 @@ def view_program(request, program_id):
     
     return render(request, 'users/view_program.html', context)
 
-
-
-def welcome_page(request):
-    '''A function for displaying a page that welcomes users'''
-    return render(request, 'users/welcome_page.html')
-
 @login_required
 def modules(request):
     return render(request, 'users/modules.html')
@@ -335,6 +329,10 @@ def modules(request):
 #------------------------------------------------------ GENERAL SITE VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
+
+def welcome_page(request):
+    '''A function for displaying a page that welcomes users'''
+    return render(request, 'users/welcome_page.html')
 
 
 def about(request):
@@ -371,7 +369,7 @@ def contact_success(request):
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ LOGIN/SIGNUP VIEWS -------------------------------------------------------------------
+#------------------------------------------------------ LOGIN/SIGNUP/VERIFICATION VIEWS --------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -498,7 +496,6 @@ def log_out(request):
         return redirect(referer_url)
     
     return redirect('dashboard')
-
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
