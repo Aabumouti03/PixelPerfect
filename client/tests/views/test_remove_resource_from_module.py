@@ -32,7 +32,7 @@ class RemoveResourceFromModuleTest(TestCase):
         """Test successful removal of a resource by an admin."""
         self.client.login(username='adminuser', password='adminpass')
         
-        data = json.dumps({"resource_id": self.resource1.id})
+        data = json.dumps({"resource_ids": [self.resource1.id]})
         response = self.client.post(self.url, data, content_type='application/json')
         
         self.assertEqual(response.status_code, 200)
@@ -45,11 +45,14 @@ class RemoveResourceFromModuleTest(TestCase):
         """Test trying to remove a resource that doesn't exist."""
         self.client.login(username='adminuser', password='adminpass')
         
-        data = json.dumps({"resource_id": 9999})
+        data = json.dumps({"resource_ids": [9999]})
         response = self.client.post(self.url, data, content_type='application/json')
         
         self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"success": False, "error": "AdditionalResource matching query does not exist."})
+        self.assertJSONEqual(response.content, {
+            "success": False,
+            "error": "AdditionalResource matching query does not exist."
+        })
 
     def test_non_admin_user_cannot_remove_resource(self):
         """Test that a non-admin user is denied access."""
@@ -58,7 +61,7 @@ class RemoveResourceFromModuleTest(TestCase):
 
         self.client.login(username='normaluser', password='userpass')
         
-        data = json.dumps({"resource_id": self.resource2.id})
+        data = json.dumps({"resource_ids": [self.resource2.id]})
         response = self.client.post(self.url, data, content_type='application/json')
         
         expected_url = reverse('log_in') + f"?next={self.url}"
@@ -68,23 +71,23 @@ class RemoveResourceFromModuleTest(TestCase):
         self.assertIn(self.resource2, self.module.additional_resources.all())
     
     def test_no_resource_id_provided(self):
-        """Test if the request body doesn't contain a resource_id."""
+        """Test if the request body doesn't contain resource_ids."""
         self.client.login(username="adminuser", password="adminpass")
         response = self.client.post(
             self.url,
-            json.dumps({}),  # No resource_id in the payload
+            json.dumps({}),
             content_type="application/json",
         )
-        # Check for the 400 status code
         self.assertEqual(response.status_code, 400)
-        self.assertJSONEqual(response.content, {"success": False, "error": "No resource_id provided"})
+        self.assertJSONEqual(response.content, {
+            "success": False,
+            "error": "No resource_ids provided"
+        })
 
-  
     def test_get_request_instead_of_post(self):
         """Test if a GET request is sent instead of a POST request."""
         self.client.login(username='adminuser', password='adminpass')
         
         response = self.client.get(self.url)
-        
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 405)
         self.assertJSONEqual(response.content, {"success": False, "error": "Invalid method"})
