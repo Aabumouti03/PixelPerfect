@@ -78,119 +78,103 @@ function removeSelectedExercises(moduleId) {
 }
 
 
-// Function to add video to the module
-function addVideo(moduleId) {
-    const videoDropdown = document.getElementById('video-dropdown');
-    const videoId = videoDropdown.value;
-
-    if (videoId) {
-        const selectedOption = videoDropdown.querySelector(`option[value="${videoId}"]`);
-        const videoTitle = selectedOption.textContent;
-
-        // Add video to the list dynamically
-        const videoList = document.getElementById('selected-videos');
-        const li = document.createElement('li');
-        li.id = `video-${videoId}`;
-        li.innerHTML = `${videoTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('${moduleId}', '${videoId}')">Remove</button>`;
-        videoList.appendChild(li);
-
-        // Disable the option in the dropdown and reset
-        selectedOption.disabled = true;
-        videoDropdown.value = ''; // Reset dropdown
-
-        // Send AJAX request to add video to the database
-        $.ajax({
-            url: '/add_video/',  // Adjust URL accordingly
-            type: 'POST',
-            data: {
-                'module_id': moduleId,
-                'video_id': videoId,
-                'csrfmiddlewaretoken': csrfToken
-            },
-            success: function(response) {
-                console.log('Video added successfully');
-            },
-            error: function(error) {
-                console.error('Error:', error);
-            }
-        });
-    }
-}
 
 function addVideo(moduleId) {
     const videoDropdown = document.getElementById('video-dropdown');
     const videoId = videoDropdown.value;
 
-    if (videoId) {
-        const selectedOption = videoDropdown.querySelector(`option[value="${videoId}"]`);
-        const videoTitle = selectedOption.textContent;
+    if (!videoId) return alert("Select a video");
 
-        // Add video to the list dynamically
-        const videoList = document.getElementById('selected-videos');
-        const li = document.createElement('li');
-        li.id = `video-${videoId}`;
-        li.innerHTML = `${videoTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('${moduleId}', '${videoId}')">Remove</button>`;
-        videoList.appendChild(li);
-
-        // Disable the option in the dropdown and reset
-        selectedOption.disabled = true;
-        videoDropdown.value = ''; // Reset dropdown
-
-        // Send AJAX request to add video to the database
-        $.ajax({
-            url: '/add_video/',  // Adjust URL accordingly
-            type: 'POST',
-            data: {
-                'module_id': moduleId,
-                'video_id': videoId,
-                'csrfmiddlewaretoken': csrfToken
-            },
-            success: function(response) {
-                console.log('Video added successfully');
-            },
-            error: function(error) {
-                console.error('Error:', error);
-            }
-        });
+    // Add video ID to hidden input
+    const hiddenVideosInput = document.getElementById('hidden-videos');
+    if (!hiddenVideosInput.value.includes(videoId)) {
+        hiddenVideosInput.value += videoId + ",";
     }
+
+    // Proceed with AJAX request
+    fetch(`/add_video_to_module/${moduleId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ video_id: videoId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // On success, update the UI
+            const selectedOption = videoDropdown.querySelector(`option[value="${videoId}"]`);
+            const videoTitle = selectedOption.textContent;
+
+            // Add video to the list dynamically
+            const videoList = document.getElementById('selected-videos');
+            const li = document.createElement('li');
+            li.id = `video-${videoId}`;
+            li.innerHTML = `${videoTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeVideo('${moduleId}', '${videoId}')">Remove</button>`;
+            videoList.appendChild(li);
+
+            // Disable the option in the dropdown and reset
+            selectedOption.disabled = true;
+            videoDropdown.value = ''; // Reset dropdown
+        } else {
+            alert(data.error || "Failed to add video.");
+        }
+    })
+    .catch(err => {
+        alert("Something went wrong.");
+        console.error(err);
+    });
 }
+
+
+
 
 function addResource(moduleId) {
     const resourceDropdown = document.getElementById('resource-dropdown');
     const resourceId = resourceDropdown.value;
 
-    if (resourceId) {
-        const selectedOption = resourceDropdown.querySelector(`option[value="${resourceId}"]`);
-        const resourceTitle = selectedOption.textContent;
+    if (!resourceId) return alert("Select a resource");
 
-        // Add resource to the list dynamically
-        const resourceList = document.getElementById('selected-resources');
-        const li = document.createElement('li');
-        li.id = `resource-${resourceId}`;
-        li.innerHTML = `${resourceTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeResource('${moduleId}', '${resourceId}')">Remove</button>`;
-        resourceList.appendChild(li);
-
-        // Disable the option in the dropdown and reset
-        selectedOption.disabled = true;
-        resourceDropdown.value = ''; // Reset dropdown
-
-        // Send AJAX request to add resource to the database
-        $.ajax({
-            url: '/add_resource/',  // Adjust URL accordingly
-            type: 'POST',
-            data: {
-                'module_id': moduleId,
-                'resource_id': resourceId,
-                'csrfmiddlewaretoken': csrfToken
-            },
-            success: function(response) {
-                console.log('Resource added successfully');
-            },
-            error: function(error) {
-                console.error('Error:', error);
-            }
-        });
+    // Add resource ID to hidden input
+    const hiddenResourcesInput = document.getElementById('hidden-resources');
+    if (!hiddenResourcesInput.value.includes(resourceId)) {
+        hiddenResourcesInput.value += resourceId + ",";
     }
+
+    // Proceed with AJAX request
+    fetch(`/add_resource_to_module/${moduleId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ resource_id: resourceId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const selectedOption = resourceDropdown.querySelector(`option[value="${resourceId}"]`);
+            const resourceTitle = selectedOption.textContent;
+
+            // Add resource to the list dynamically
+            const resourceList = document.getElementById('selected-resources');
+            const li = document.createElement('li');
+            li.id = `resource-${resourceId}`;
+            li.innerHTML = `${resourceTitle} <button type="button" class="btn btn-secondary btn-sm" onclick="removeResource('${moduleId}', '${resourceId}')">Remove</button>`;
+            resourceList.appendChild(li);
+
+            // Disable the option in the dropdown and reset
+            selectedOption.disabled = true;
+            resourceDropdown.value = ''; // Reset dropdown
+        } else {
+            alert(data.error || "Failed to add resource.");
+        }
+    })
+    .catch(err => {
+        alert("Something went wrong.");
+        console.error(err);
+    });
 }
 
 
