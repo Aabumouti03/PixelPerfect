@@ -514,7 +514,7 @@ def update_profile(request):
             # Handle email change verification
             new_email = form.cleaned_data.get("new_email")
             if new_email:
-                new_email = new_email.strip().lower()  # Convert to lowercase
+                new_email = new_email.strip().lower() 
                 
                 if new_email != user.email.lower():  
                     # Save the new email for verification
@@ -596,7 +596,7 @@ def delete_account(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while deleting your account: {e}")
-            return redirect('profile')  # Redirect back to the profile if deletion fails
+            return redirect('profile')  
 
     context = {'confirmation_text': "Are you sure you want to delete your account? This action cannot be undone."}
     return render(request, 'users/Profile/delete_account.html', context)
@@ -656,7 +656,7 @@ def recommended_modules(request):
 
     if request.method == "POST":
         try:
-            data = json.loads(request.body)  # Read AJAX request body
+            data = json.loads(request.body) 
             module_id = data.get("module_id")
             action = data.get("action")
 

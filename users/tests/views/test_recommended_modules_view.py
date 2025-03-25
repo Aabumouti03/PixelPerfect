@@ -28,7 +28,6 @@ class RecommendedModulesViewTest(TestCase):
             sector="IT"
         )
 
-        # 📌 Create some modules
         self.module1 = Module.objects.create(
             title="Rebuilding Confidence for Work",
             description="A guided program to help individuals regain self-confidence."
@@ -38,7 +37,7 @@ class RecommendedModulesViewTest(TestCase):
             description="Learn techniques to handle stress, anxiety, and pressure."
         )
 
-        # 📌 Enroll the user in one module
+        # Enroll the user in one module
         self.enrollment = UserModuleEnrollment.objects.create(user=self.end_user, module=self.module1)
 
         self.client.force_login(self.user)
@@ -82,7 +81,7 @@ class RecommendedModulesViewTest(TestCase):
 
     def test_invalid_module_id_in_ajax_request(self):
         """Test handling of invalid module ID in AJAX request."""
-        data = {"module_id": 9999, "action": "enroll"}  # Non-existent module ID
+        data = {"module_id": 9999, "action": "enroll"} 
         response = self.client.post(self.recommended_modules_url, json.dumps(data), content_type="application/json")
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {"status": "error", "message": "Module matching query does not exist."})

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse, resolve
 from users.models import EndUser
 from django.contrib.messages import get_messages
-from users.views import profile  # Importing the view for URL resolution test
+from users.views import profile 
 
 User = get_user_model()
 
@@ -28,23 +28,23 @@ class ShowProfileViewTest(TestCase):
             sector="IT"
         )
 
-        self.client.force_login(self.user)  #  Authenticated instantly
+        self.client.force_login(self.user)  
 
-        self.profile_url = reverse("profile")  #  Ensure this matches your actual URL pattern
+        self.profile_url = reverse("profile") 
 
 
     def test_profile_authenticated_user(self):
         """Ensure the profile page loads correctly for an authenticated user."""
         response = self.client.get(self.profile_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Test User")  #  Check if the name appears on the profile page
+        self.assertContains(response, "Test User") 
 
 
     def test_redirect_if_not_logged_in(self):
         """Ensure unauthenticated users are redirected to the login page."""
-        self.client.logout()  #  Simulate a logged-out user
+        self.client.logout() 
         response = self.client.get(self.profile_url)
-        self.assertRedirects(response, f"/log_in/?next={self.profile_url}")  #  Ensure correct redirection
+        self.assertRedirects(response, f"/log_in/?next={self.profile_url}")  
 
 
     def test_profile_url_resolves(self):
@@ -57,13 +57,11 @@ class ShowProfileViewTest(TestCase):
         """Test that users without a User_profile are redirected with an error."""
         self.client.login(username="testuser", password="Test@1234")
 
-        # Delete the EndUser profile
         self.end_user.delete()
 
         response = self.client.get(self.profile_url)
         self.assertRedirects(response, reverse("welcome_page"))
 
-        # Check error message is set
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), "User profile not found.")
 
@@ -71,15 +69,12 @@ class ShowProfileViewTest(TestCase):
     def test_profile_update_popup_displayed(self):
         """Test that the email update pop-up appears after email verification."""
 
-        # Set session data
         session = self.client.session
         session["profile_update_popup"] = "profile_updated"  # Must match the template condition
         session.save()
 
-        # Fetch the profile page
         response = self.client.get(self.profile_url)
 
-        # Assert the message is in the response
         self.assertContains(response, "Your email was successfully updated!")
 
 
@@ -90,7 +85,7 @@ class ShowProfileViewTest(TestCase):
         self.user.save()
         response = self.client.get(self.profile_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "User")  # Ensures the last name is still displayed
+        self.assertContains(response, "User") 
 
 
     def test_edge_case_empty_name(self):
@@ -102,4 +97,4 @@ class ShowProfileViewTest(TestCase):
         
         response = self.client.get(self.profile_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "N/A")  # Ensure fallback behavior
+        self.assertContains(response, "N/A")  

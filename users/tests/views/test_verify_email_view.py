@@ -35,8 +35,8 @@ class VerifyEmailViewTest(TestCase):
         response = self.client.get(verification_url, follow=True)
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "newemail@example.com")  # Email should now be updated
-        self.assertIsNone(self.user.new_email)  # new_email should be cleared
-        self.assertTrue(self.user.email_verified)  # Mark email as verified
+        self.assertIsNone(self.user.new_email) 
+        self.assertTrue(self.user.email_verified) 
         session = self.client.session
         self.assertEqual(session.get('profile_update_popup'), 'profile_updated')
         self.assertRedirects(response, reverse("log_in"))
@@ -47,15 +47,15 @@ class VerifyEmailViewTest(TestCase):
         invalid_url = reverse("verify_email", args=[invalid_uid, "invalid-token"])        
         response = self.client.get(invalid_url)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "test@example.com")  # Email should not change
+        self.assertEqual(self.user.email, "test@example.com")
         self.assertEqual(response.content.decode(), "Invalid verification link.")
 
     def test_expired_verification_link(self):
         """Test expired token does not verify email."""
         uid = urlsafe_base64_encode(force_bytes(self.user.pk))
-        expired_token = "invalidtoken"  # Simulate an expired token
+        expired_token = "invalidtoken"  
         expired_url = reverse("verify_email", kwargs={"uidb64": uid, "token": expired_token})
         response = self.client.get(expired_url)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "test@example.com")  # Email should not change
+        self.assertEqual(self.user.email, "test@example.com") 
         self.assertEqual(response.content.decode(), "Invalid or expired token.")
