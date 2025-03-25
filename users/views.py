@@ -367,6 +367,78 @@ def contact_success(request):
     return render(request, 'users/contact_success.html')
 
 
+@login_required
+def get_started(request):
+    categories = Category.objects.all()
+
+    filter_pressed = "filter" in request.GET
+    search_pressed = "search_btn" in request.GET
+
+    search_query = request.GET.get("search", "").strip() if search_pressed else ""
+    sort = request.GET.get("sort", None)
+    filter_type = request.GET.get("filter_type", "all")
+    selected_category_ids = request.GET.getlist("category")
+    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
+
+    # If it's a search (not a filter), reset filters visually and functionally
+    if search_pressed and not filter_pressed:
+        filter_type = "all"
+        selected_category_ids = list(Category.objects.values_list("id", flat=True))
+
+    # If still no categories selected (e.g., initial load), include all
+    if not selected_category_ids:
+        selected_category_ids = list(Category.objects.values_list("id", flat=True))
+
+    all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
+
+    # Start with all data
+    programs = Program.objects.all()
+    modules = Module.objects.all()
+
+    if filter_pressed:
+        if all_categories_selected or not selected_category_ids:
+            programs = programs.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+            modules = modules.filter(
+                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
+            ).distinct()
+        else:
+            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
+            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
+
+        if filter_type == "programs":
+            modules = Module.objects.none()
+        elif filter_type == "modules":
+            programs = Program.objects.none()
+
+    if search_pressed and search_query:
+        programs = programs.filter(title__icontains=search_query)
+        modules = modules.filter(title__icontains=search_query)
+
+    if sort == "asc":
+        programs = programs.order_by("title")
+        modules = modules.order_by("title")
+    elif sort == "desc":
+        programs = programs.order_by("-title")
+        modules = modules.order_by("-title")
+
+    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
+    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
+
+    return render(request, "users/get_started.html", {
+        "categories": categories,
+        "programs": programs,
+        "modules": modules,
+        "selected_category_ids": selected_category_ids,
+        "search_query": search_query,
+        "sort": sort,
+        "filter_type": filter_type,
+        "enrolled_programs": enrolled_programs,
+        "enrolled_modules": enrolled_modules,
+    })
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ LOGIN/SIGNUP/VERIFICATION VIEWS --------------------------------------------------
@@ -498,6 +570,29 @@ def log_out(request):
     return redirect('dashboard')
 
 
+def verify_email(request, uidb64, token):
+    """Verifies user's email when they change it in the profile section."""
+    User = get_user_model()
+    
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        return HttpResponse("Invalid verification link.")
+    
+    if default_token_generator.check_token(user, token):
+        if user.new_email:
+            user.email = user.new_email 
+            user.new_email = None  
+            user.email_verified = True  
+            user.save()
+            
+            request.session['profile_update_popup'] = 'profile_updated'
+            return redirect('log_in')
+
+    return HttpResponse("Invalid or expired token.")
+
+
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ PROFILE VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -586,29 +681,6 @@ def update_profile(request):
     return render(request, 'users/Profile/update_profile.html', {'form': form, 'user': user})
 
 
-def verify_email(request, uidb64, token):
-    """Verifies user's email when they change it in the profile section."""
-    User = get_user_model()
-    
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (User.DoesNotExist, ValueError, TypeError):
-        return HttpResponse("Invalid verification link.")
-    
-    if default_token_generator.check_token(user, token):
-        if user.new_email:
-            user.email = user.new_email 
-            user.new_email = None  
-            user.email_verified = True  
-            user.save()
-            
-            request.session['profile_update_popup'] = 'profile_updated'
-            return redirect('log_in')
-
-    return HttpResponse("Invalid or expired token.")
-
-
 @login_required
 def delete_account(request):
     """Handle both confirmation page and actual account deletion."""
@@ -632,7 +704,6 @@ def delete_account(request):
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ PROGRAMS VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
-
 
 @login_required
 def recommended_programs(request):
@@ -673,6 +744,10 @@ def recommended_programs(request):
     })
 
 
+#-----------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------ MODULES VIEWS -------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
+
 @login_required
 def recommended_modules(request):
     """Displays modules for users to enroll in and handles AJAX enrollment updates."""
@@ -709,87 +784,6 @@ def recommended_modules(request):
         "modules": all_modules or [],
         "enrolled_modules": enrolled_modules
     })
-
-
-@login_required
-def get_started(request):
-    categories = Category.objects.all()
-    
-    filter_pressed = "filter" in request.GET
-    search_pressed = "search_btn" in request.GET
-
-    if filter_pressed:
-        search_query = ""
-    else:
-        search_query = request.GET.get("search", "").strip()
-
-    sort = request.GET.get("sort", None)
-    filter_type = request.GET.get("filter_type", "all")
-    selected_category_ids = request.GET.getlist("category")
-    selected_category_ids = [int(cat_id) for cat_id in selected_category_ids if cat_id.isdigit()]
-
-    if len(selected_category_ids) == len(categories):
-        selected_category_ids = [category.id for category in categories]
-
-    # Fetch data
-    programs = Program.objects.all()
-    modules = Module.objects.all()
-
-    if filter_pressed:
-
-        all_categories_selected = set(selected_category_ids) == set(Category.objects.values_list("id", flat=True))
-
-        if all_categories_selected or not selected_category_ids:
-            #  If all categories are selected, include programs/modules with NO categories
-            programs = programs.filter(
-                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
-            ).distinct()
-
-            modules = modules.filter(
-                Q(categories__id__in=selected_category_ids) | Q(categories__isnull=True)
-            ).distinct()
-        else:
-            programs = programs.filter(categories__id__in=selected_category_ids).distinct()
-            modules = modules.filter(categories__id__in=selected_category_ids).distinct()
-
-
-        if filter_type == "programs":
-            modules = Module.objects.none()
-        elif filter_type == "modules":
-            programs = Program.objects.none()
-
-    # Apply search logic
-    if search_pressed and search_query:
-        programs = programs.filter(title__icontains=search_query)
-        modules = modules.filter(title__icontains=search_query)
-
-    # Apply sorting
-    if sort == "asc":
-        programs = programs.order_by("title")
-        modules = modules.order_by("title")
-    elif sort == "desc":
-        programs = programs.order_by("-title")
-        modules = modules.order_by("-title")
-
-    enrolled_programs = Program.objects.filter(enrolled_users__user=request.user.User_profile)
-    enrolled_modules = Module.objects.filter(enrolled_users__user=request.user.User_profile)
-
-    return render(request, "users/get_started.html", {
-        "categories": categories,
-        "programs": programs,
-        "modules": modules,
-        "selected_category_ids": selected_category_ids,
-        "search_query": search_query,
-        "sort": sort,
-        "filter_type": filter_type,
-        "enrolled_programs": enrolled_programs,
-        "enrolled_modules": enrolled_modules,
-    })
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------ MODULES VIEWS -------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------
 
 
 @login_required

@@ -2,46 +2,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/get_started.css' %}">
-
     <title>Get Started</title>
 </head>
-<section class="layout">
-    <header class="header">
-        <nav class="navbar">
-            <a href="javascript:void(0);" class="nav-logo">
-                <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
-                <span class="logo-title">ReWork</span>
-            </a>
-            <button type="button" class="logout-btn" id="logout-btn">Log out</button>
-        </nav>
-            
-        
-    </header>
-
-    <main class="main">
-        <div class="container">
-            <h1 class="title">Welcome to ReWork</h1>
-            <p class="description">
-                We’re glad to have you here. Our goal is to help you assess your readiness
-                to return to work and connect you with the most relevant support.
-            </p>
-            <h2 class="title">Let's Tailor Your Experience</h2>
-
-
-         <!-- Logout Modal -->
-    <div id="logout-modal" class="modal">
-        <div class="modal-content">
-            <h2>Are you sure you want to log out?</h2>
-            <form method="POST" action="{% url 'log_out' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn confirm-logout">Yes, Log Out</button>
-                <button type="button" class="btn cancel-logout" id="cancel-logout">Cancel</button>
-            </form>
-        </div>
-    </div>
-    
 <body>
+    <section class="layout">
+        <header class="header">
+            <nav class="navbar">
+                <a href="javascript:void(0);" class="nav-logo">
+                    <img src="{% static 'img/logo.svg' %}" alt="ReWork Logo" class="logo-img" />
+                    <span class="logo-title">ReWork</span>
+                </a>
+                <button type="button" class="logout-btn" id="logout-btn">Log out</button>
+            </nav>
+        </header>
+
+        <main class="main">
+            <div class="container">
+                <h1 class="title">Welcome to ReWork</h1>
+                <p class="description">
+                    We’re glad to have you here. Our goal is to help you assess your readiness
+                    to return to work and connect you with the most relevant support.
+                </p>
+                <h2 class="title">Let's Tailor Your Experience</h2>
+
+                <!-- Logout Modal -->
+                <div id="logout-modal" class="modal">
+                    <div class="modal-content">
+                        <h2>Are you sure you want to log out?</h2>
+                        <form method="POST" action="{% url 'log_out' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn confirm-logout">Yes, Log Out</button>
+                            <button type="button" class="btn cancel-logout" id="cancel-logout">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <a href="{% url 'questionnaire' %}" class="special-btn">Take the Questionnaire</a>
+                </div>
+
+                <div class="divider"></div>
+                <p class="or-text"><strong>OR</strong></p>
+
+                <!-- Filters Section -->
+                <div class="filters-container">
+                    <form method="GET" action="{% url 'get_started' %}" id="filterForm">
+                        <div class="filter-grid">
+                            <!-- Search Bar -->
+                            <div class="filter-item search-container">
+                                <label for="search">Search:</label>
+                                <div class="search-box">
+                                    <input type="text" name="search" id="search" placeholder="Search by keyword..." value="{{ search_query|default:'' }}">
+                                    <button type="submit" name="search_btn" class="search-btn">Search</button>
+                                </div>
+                            </div>
+
+                            <!-- Dropdowns Row -->
+                            <div class="dropdown-row">
+                                <div class="filter-item">
+                                    <label for="filter_type">Filter By:</label>
+                                    <select name="filter_type" id="filter_type">
+                                        <option value="all" {% if filter_type == "all" %}selected{% endif %}>All</option>
+                                        <option value="programs" {% if filter_type == "programs" %}selected{% endif %}>Programs</option>
+                                        <option value="modules" {% if filter_type == "modules" %}selected{% endif %}>Modules</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <label for="sort">Sort By:</label>
+                                    <select name="sort" id="sort">
+                                        <option value="" {% if not sort %}selected{% endif %}>None</option>
+                                        <option value="asc" {% if sort == "asc" %}selected{% endif %}>A-Z</option>
+                                        <option value="desc" {% if sort == "desc" %}selected{% endif %}>Z-A</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Categories -->
+                            <div class="filter-item">
+                                <label>Categories:</label>
+                                <input type="checkbox" id="category_all" class="pill-checkbox">
+                                <label for="category_all" class="pill-label" id="all-label">All</label>
+
+                                <div class="category-pill-list">
+                                    {% for category in categories %}
+                                        <input type="checkbox" name="category" value="{{ category.id }}" id="cat_{{ category.id }}" class="pill-checkbox" {% if category.id in selected_category_ids %}checked{% endif %}>
+                                        <label for="cat_{{ category.id }}" class="pill-label {% if category.id in selected_category_ids %}selected{% endif %}">
+                                            {{ category.name }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Filter Buttons -->
+                            <div class="button-container">
+                                <button type="submit" name="filter" class="btn" onclick="resetSearch()">Apply Filter</button>
+                                <button type="button" class="btn reset-btn" onclick="resetFilters()">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-container">
+                    {% if programs or modules %}
+                        {% for program in programs %}
+                            <div class="result-card">
+                                <div class="result-title">{{ program.title }}</div>
+                                <div class="result-description">Type: Program</div>
+                                <div class="result-buttons">
+                                    <button class="enroll-button {% if program in enrolled_programs %}enrolled{% endif %}" data-program-id="{{ program.id }}" data-enrolled="{% if program in enrolled_programs %}true{% else %}false{% endif %}">{% if program in enrolled_programs %}Enrolled{% else %}Enroll{% endif %}</button>
+                                    <a href="{% url 'view_program' program.id %}" class="view-program-button">View</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% for module in modules %}
+                            <div class="result-card">
+                                <div class="result-title">{{ module.title }}</div>
+                                <div class="result-description">Type: Module</div>
+                                <div class="result-buttons">
+                                    <button class="enroll-button {% if module in enrolled_modules %}enrolled{% endif %}" data-module-id="{{ module.id }}" data-enrolled="{% if module in enrolled_modules %}true{% else %}false{% endif %}">{% if module in enrolled_modules %}Enrolled{% else %}Enroll{% endif %}</button>
+                                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No programs or modules found.</p>
+                    {% endif %}
+                </div>
+
+                <div class="button-container">
+                    <a href="{% url 'dashboard' %}" class="special-btn">Skip for Now</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 ReWork. All Rights Reserved.</p>
+        </footer>
+    </section>
 
     <script>
         function resetSearch() {
@@ -51,11 +152,9 @@
         function resetFilters() {
             const form = document.getElementById("filterForm");
     
-            // Reset dropdowns
             document.getElementById("filter_type").value = "all";
             document.getElementById("sort").value = "";
     
-            // Select all categories
             const categoryCheckboxes = document.querySelectorAll('.pill-checkbox[name="category"]');
             categoryCheckboxes.forEach(cb => cb.checked = true);
     
@@ -63,10 +162,8 @@
             document.getElementById("category_all").checked = true;
             updatePillSelection();
     
-            // Clear search bar
             document.getElementById("search").value = "";
     
-            // Submit form
             form.submit();
         }
     
@@ -199,134 +296,5 @@
     };
 
     </script>
-    
-
-                <!-- Questionnaire Button -->
-                <div class="button-container">
-                    <a href="{% url 'questionnaire' %}" class="special-btn">Take the Questionnaire</a>
-                </div>
-
-                <!-- OR Divider -->
-                <div class="divider"></div>
-                <p class="or-text"><strong>OR</strong></p>
-
-                <!-- Filters Section -->
-                <div class="filters-container">
-                    <form method="GET" action="{% url 'get_started' %}" id="filterForm">
-                        <div class="filter-grid">
-
-                    <!-- Search Bar -->
-                    <div class="filter-item search-container">
-                        <label for="search">Search:</label>
-                        <div class="search-box">
-                            <input type="text" name="search" id="search" placeholder="Search by keyword..." value="{{ search_query|default:'' }}">
-                            <button type="submit" name="search_btn" class="search-btn">Search</button>
-                        </div>
-                    </div>
-
-                        <!-- Dropdowns Row -->
-                        <div class="dropdown-row">
-                            <!-- Filter Type -->
-                            <div class="filter-item">
-                                <label for="filter_type">Filter By:</label>
-                                <select name="filter_type" id="filter_type">
-                                    <option value="all" {% if filter_type == "all" %}selected{% endif %}>All</option>
-                                    <option value="programs" {% if filter_type == "programs" %}selected{% endif %}>Programs</option>
-                                    <option value="modules" {% if filter_type == "modules" %}selected{% endif %}>Modules</option>
-                                </select>
-                            </div>
-
-                            <!-- Sorting Dropdown -->
-                            <div class="filter-item">
-                                <label for="sort">Sort By:</label>
-                                <select name="sort" id="sort">
-                                    <option value="" {% if not sort %}selected{% endif %}>None</option>
-                                    <option value="asc" {% if sort == "asc" %}selected{% endif %}>A-Z</option>
-                                    <option value="desc" {% if sort == "desc" %}selected{% endif %}>Z-A</option>
-                                </select>
-                            </div>
-                        </div>
-
-                <!-- Category Selection -->
-                <div class="filter-item">
-                    <label>Categories:</label>
-                    <input type="checkbox" id="category_all" class="pill-checkbox">
-                    <label for="category_all" class="pill-label" id="all-label">All</label>
-
-                    <div class="category-pill-list">
-                        {% for category in categories %}
-                            <input type="checkbox" name="category" value="{{ category.id }}" id="cat_{{ category.id }}" class="pill-checkbox" {% if category.id in selected_category_ids %}checked{% endif %}>
-                            <label for="cat_{{ category.id }}" class="pill-label {% if category.id in selected_category_ids %}selected{% endif %}">
-                                {{ category.name }}
-                            </label>
-                        {% endfor %}
-                    </div>
-                </div>
-
-
-                <!-- Action Buttons -->
-                <div class="button-container">
-                    <button type="submit" name="filter" class="btn" onclick="resetSearch()">Apply Filter</button>
-                    <button type="button" class="btn reset-btn" onclick="resetFilters()">Reset</button>
-                </div>
-
-
-                <!-- Results Section -->
-                <div class="results-container">
-                    {% if programs or modules %}
-                        {% for program in programs %}
-                            <div class="result-card">
-                                <div class="result-title">{{ program.title }}</div>
-                                <div class="result-description">Type: Program</div>
-                                <div class="result-buttons">
-                                    <button
-                                    class="enroll-button {% if program in enrolled_programs %}enrolled{% endif %}"
-                                    data-program-id="{{ program.id }}"
-                                    data-enrolled="{% if program in enrolled_programs %}true{% else %}false{% endif %}"
-                                  >
-                                    {% if program in enrolled_programs %}Enrolled{% else %}Enroll{% endif %}
-                                  </button>
-                                  <a href="{% url 'view_program' program.id %}" class="view-program-button">View</a>
-                                  
-                                </div>
-                            </div>
-                        {% endfor %}
-                        {% for module in modules %}
-                            <div class="result-card">
-                                <div class="result-title">{{ module.title }}</div>
-                                <div class="result-description">Type: Module</div>
-                                <div class="result-buttons">
-                                    <button
-                                    class="enroll-button {% if module in enrolled_modules %}enrolled{% endif %}"
-                                    data-module-id="{{ module.id }}"
-                                    data-enrolled="{% if module in enrolled_modules %}true{% else %}false{% endif %}"
-                                  >
-                                    {% if module in enrolled_modules %}Enrolled{% else %}Enroll{% endif %}
-                                  </button>
-                                  <a href="{% url 'module_overview' module.id %}" class="view-module-button">View</a>
-                                  
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p>No programs or modules found.</p>
-                    {% endif %}
-                </div>
-
-            </div>
-            
-        </main>
-
-                        <!-- Skip Button -->
-                        <div class="button-container">
-                            <a href="{% url 'dashboard' %}" class="special-btn">Skip for Now</a>
-                        </div>
-
-        <footer class="footer">
-            <p>&copy; 2025 ReWork. All Rights Reserved.</p>
-        </footer>
-    </section>
-   
-
 </body>
 </html>
