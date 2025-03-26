@@ -230,7 +230,7 @@ button[type="submit"]:hover {
 
 }
 .container-login a:hover {
-    color:  #ecef68;
+    color:  #f2f20557;
 
 }
 
@@ -260,7 +260,7 @@ button[type="submit"]:hover {
 }
 
 .error-custom {
-    color: rgb(255, 251, 0) !important;
+    color: #f2f20557!important;
     font-weight: bold;
     text-align: center;
     padding: 8px;
@@ -392,9 +392,6 @@ button[type="submit"]:hover {
         width: 100% !important;
     }
 }
-
-
-
 /* -------------------- SIGN-UP PAGE -------------------- */
 
 .sign_up_body {
@@ -479,7 +476,7 @@ button[type="submit"]:hover {
 /* Focus effect for inputs and select */
 .sign_up_card input:focus,
 .sign_up_card select:focus {
-    background-color: rgb(255, 255, 180);
+    background-color: #f2f20557;
     border-color: #F24505;
 }
 
@@ -511,7 +508,7 @@ button[type="submit"]:hover {
 }
 
 .sign_up_card a:hover {
-    color: #f0f17e;
+    color: #f2f20557;
 }
 
 /* Spacing between form fields */
@@ -539,7 +536,7 @@ button[type="submit"]:hover {
 button[type="submit"],
 .sign_up_button {
     display: inline-block;
-    background: rgb(255, 255, 180);;
+    background: #f2f20557;
     color: #F24505;
     font-size: 18px;
     font-weight: bold;
@@ -556,7 +553,7 @@ button[type="submit"],
 
 button[type="submit"]:hover,
 .sign_up_button:hover {
-    background: #f0f17e;
+    background: #f2f20557;
   color: #F24505;
 }
 
@@ -573,7 +570,7 @@ button[type="submit"]:hover,
 
 .previous_button,
 .sign_up_button {
-    background-color: rgb(255, 255, 180);
+    background-color: #f2f20557;
     color: #F24505;
     font-weight: bold;
     border: none;
@@ -598,7 +595,7 @@ button[type="submit"]:hover,
 }
 
 .previous_button:hover {
-    background-color: #ecef68;
+    background-color: #f2f20557;
     color: #F24505;
 }
 
@@ -747,7 +744,7 @@ button[type="submit"]:hover,
 }
 
 .password-reset-card input:focus {
-    background-color: rgb(255, 255, 180);
+    background-color: #f2f20557;
 }
 
 .password-reset-card button {
@@ -755,7 +752,7 @@ button[type="submit"]:hover,
     padding: 12px;
     font-size: 18px;
     font-weight: bold;
-    background-color: rgb(255, 255, 180);
+    background-color: #f2f20557;
     color:  #F24505; 
     border: none;
     cursor: pointer;
@@ -764,7 +761,7 @@ button[type="submit"]:hover,
 }
 
 .password-reset-card button:hover {
-    background-color: #ecef68;
+    background-color: #f2f20557;
 }
 
 .password-reset-card a {
@@ -775,7 +772,7 @@ button[type="submit"]:hover,
 }
 
 .password-reset-card a:hover {
-    color: #ffe66d;
+    color: #f2f20557;
 }
 
 @media (max-width: 768px) {
@@ -807,7 +804,7 @@ button[type="submit"]:hover,
 }
 
 .password-reset-btn {
-    background-color: rgb(255, 255, 180);
+    background-color: #f2f20557;
     color: #F24505 !important;
     font-weight: bold;
     border: none;
@@ -824,7 +821,7 @@ button[type="submit"]:hover,
 }
 
 .password-reset-btn:hover {
-    background-color: #ecef68;
+    background-color: #f2f20557;
     color: #F24505;
 }
 

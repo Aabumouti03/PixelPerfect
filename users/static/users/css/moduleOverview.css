@@ -111,7 +111,7 @@ canvas#progressChart {
 .collapsible {
     background-color: white;
     cursor: pointer;
-    border-bottom: 3px solid #4A90E2;
+    border-bottom: 3px solid #f2f20557;
     border-right: 3px solid #ffffff;
     padding: 30px;
     width: 100%;
@@ -145,7 +145,7 @@ canvas#progressChart {
 
 
 .start-btn {
-    background-color: #4A90E2;
+    background-color: #f2f20557;
     color: white;
     border: none;
     padding: 5px 15px;
@@ -157,7 +157,7 @@ canvas#progressChart {
 }
 
 .start-btn:hover {
-    background-color: #2e6bbd;
+    background-color: #f2f20557;
 }
 
 .exercise-container {
@@ -194,7 +194,7 @@ canvas#progressChart {
     padding: 15px; 
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #69b0e7; 
+    background-color: #f2f20557; 
     resize: vertical; 
     font-family: 'Montserrat', sans-serif;
     font-size: 18px;
@@ -294,7 +294,6 @@ canvas#progressChart {
   border: 2px solid #ffffff;
 }
 
-/* Style for "Done" state (orange) */
 .done-button {
     font-size: 12px;
   padding: 10px 14px;
@@ -310,7 +309,6 @@ canvas#progressChart {
   border: 2px solid #ffffff;
 }
 
-/* Style for "Done" state (orange) */
 .done-button.undo {
     background-color: #ccc;
     color: white;
@@ -318,7 +316,6 @@ canvas#progressChart {
     margin-left: 15px; 
 }
 
-/* Style for "Undo" state (green) */
 .done-button.done {
     background-color: green;
     color: white;
