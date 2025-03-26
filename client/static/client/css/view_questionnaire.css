@@ -131,3 +131,50 @@ body {
     gap: 10px; 
     align-items: center; 
 }
+
+@media (max-width: 480px) {
+    .top-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      text-align: center;
+    }
+  
+    .edit-btn,
+    .delete-btn,
+    .back-btn {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+  
+    .description-box {
+      font-size: 16px;
+      padding: 12px;
+    }
+  
+    .question-card h3 {
+      font-size: 16px;
+    }
+  
+    .choice-item {
+      font-size: 14px;
+      padding: 6px;
+    }
+  
+    .rating-scale {
+      font-size: 14px;
+    }
+  
+    .content {
+      padding: 20px;
+      margin-left: 0;
+    }
+  
+    .action-buttons {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+  

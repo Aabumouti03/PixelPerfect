@@ -17,7 +17,6 @@
     width: 100%;
 }
 
-/* Header Section */
 .header {
     display: flex;
     justify-content: space-between;
@@ -55,10 +54,9 @@
 .search-bar:focus {
     width: 350px;
     outline: none;
-    border-color: #4da6ff;
+    border-color: #f2f20557;
 }
 
-/* Modules Container */
 .modules-container {
     background: white;
     padding: 30px;
@@ -70,7 +68,6 @@
     flex-direction: column;
 }
 
-/* Modules Header */
 .modules-header {
     display: flex;
     justify-content: space-between;
@@ -78,7 +75,6 @@
     margin-bottom: 20px;
 }
 
-/* Unified Module Grid Layout */
 .module-grid {
     display: flex;
     gap: 20px;
@@ -87,7 +83,6 @@
     width: 100%;
 }
 
-/* Unified Module Card */
 .module-card {
     border-radius: 12px;
     width: 250px;
@@ -106,28 +101,27 @@
     transition: transform 0.2s ease-in-out;
 }
 
-/* 3D Effect: Left Edge */
 .module-card:nth-child(odd) {
-    background: #73C4FD;
-    border-left: 5px solid #5ca5ea;
+    background: #f2f20557;
+    border-left: 5px solid #f2f20557;
 }
 
 .module-card:nth-child(even) {
-    background: #0148FD;
-    border-left: 5px solid #012EAB;
+    background: #f2f20557;
+    border-left: 5px solid #f2f20557;
 }
 
 .module-card h5 {
     font-size: 18px;
     font-weight: bold;
-    color: #fff;
+    color: #2b2320;
     margin-bottom: 5px;
     white-space: normal;
 }
 
 .module-card p {
     font-size: 14px;
-    color: #f5f5f5;
+    color: #2b2320;
     max-height: 60px;
     overflow: hidden;
 }

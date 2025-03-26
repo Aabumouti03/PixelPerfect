@@ -51,7 +51,6 @@
             cursor: pointer;
         }
 
-        /* Profile Icon */
         .profile-icon {
             width: 35px;
             height: 35px;
@@ -59,8 +58,7 @@
             object-fit: cover;
             cursor: pointer;
         }
-
-        /* Search Bar */
+        
         .search-bar {
             width: 250px;
             padding: 10px;
@@ -72,7 +70,7 @@
         .search-bar:focus {
             width: 350px;
             outline: none;
-            border-color: #4da6ff;
+            border-color: #2b2320;
         }
 
         /* Modules Container */
@@ -98,7 +96,7 @@
         .module-card {
             padding: 20px;
             border-radius: 10px;
-            color: white;
+            color: #2b2320;
             text-align: left;
             position: relative;
             height: 220px;
@@ -114,13 +112,13 @@
         .module-card:nth-child(6n+1),
         .module-card:nth-child(6n+3),
         .module-card:nth-child(6n+5) {
-            background-color: #0148FD;
+            background-color: #f2f20557;
         }
 
         .module-card:nth-child(6n+2),
         .module-card:nth-child(6n+4),
         .module-card:nth-child(6n+6) {
-            background-color: #73C4FD;
+            background-color: #f2f20557;
         }
 
         /* Action Button */
@@ -146,20 +144,12 @@
     </style>
 
     <div class="content">
-        <!-- Header Section -->
         <div class="header">
             <div class="header-left">
                 <h1>Modules</h1>
             </div>
             <div class="header-icons">
-                <!-- Search Bar -->
                 <input type="text" class="search-bar" placeholder="Search..." onkeyup="searchModules(event)">
-
-                <!-- Notification Bell -->
-                <ion-icon name="notifications-outline"></ion-icon>
-
-                <!-- Profile Picture -->
-                <img src="{% static 'profile.jpg' %}" alt="Profile" class="profile-icon">
             </div>
         </div>
 
@@ -190,14 +180,11 @@
             document.querySelectorAll('.module-card').forEach(card => {
                 let icon = card.querySelector("ion-icon");
                 let title = card.querySelector("h5") ? card.querySelector("h5").innerText : "No Title";
-        
-                // ✅ Debugging - Check if the initial icons are correct
-                console.log("Module:", title, "Initial Icon:", icon.getAttribute("name"));
             });
         });
         
         function toggleModule(button, moduleTitle) {
-            moduleTitle = moduleTitle.trim(); // ✅ Trim spaces
+            moduleTitle = moduleTitle.trim();
         
             let icon = button.querySelector("ion-icon");
             let isEnrolled = icon.getAttribute("name") === "remove-outline";
