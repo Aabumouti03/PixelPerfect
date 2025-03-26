@@ -1,0 +1,118 @@
+body {
+    font-family: Manrope, sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;   
+    align-items: center;
+    min-height: 100vh;          
+    margin: 0; 
+}
+
+.main-container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 40px auto;
+    max-width: 800px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    text-align: center;
+    color: #2b2320;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.video-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.add-video-btn {
+    display: inline-block !important;
+    margin-top: 30px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+    background: #F24505;
+    border-radius: 20px;
+    transition: background 0.3s;
+    margin: 20px auto;
+}
+
+.add-video-btn:hover {
+    background-color: #D43802;
+}
+
+.video-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.video-list form {
+    display: inline-block;
+}
+
+.video-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.video-list li:hover {
+    background: #e0e0e0;
+}
+
+.video-list a {
+    color: #D43802;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.video-list a:hover {
+    text-decoration: underline;
+}
+
+.delete-btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+    background: #F24505;
+    border-radius: 20px;
+    transition: background 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: #D43802;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+    background: #F24505;
+    border-radius: 20px;
+    transition: background 0.3s;
+}
+
+.back-btn:hover {
+    background: #D43802;
+}
