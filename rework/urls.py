@@ -113,7 +113,7 @@ urlpatterns = [
     # Module urls for the users
     path('userModules/', usersViews.user_modules, name='modules'),
     path('module_overview/<int:module_id>/', usersViews.module_overview, name='module_overview'),
-    path('userResponce/', usersViews.user_responses_main, name='userResponce'),
+    path('responses/', usersViews.user_responses_main, name='userResponce'),
     path('userModules/', usersViews.user_modules, name='userModules'),
     path('module/<int:module_id>/', usersViews.module_overview, name='module_overview'),
     path('module/<int:module_id>/rate/', usersViews.rate_module, name='rate_module'),
