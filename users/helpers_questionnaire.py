@@ -113,4 +113,3 @@ def assess_user_responses_modules(user):
 
     return suggested_modules
 
-# 
