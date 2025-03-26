@@ -76,6 +76,17 @@
             });
         });
 
+        // Make chart-boxes clickable too
+        document.querySelectorAll(".chart-box").forEach(box => {
+            box.addEventListener("click", function() {
+                const url = this.getAttribute("data-url");
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
+
+
 
         // LAST WORKING TIME CHART (Line Chart)
         var lastWorkLabels = JSON.parse('{{ last_work_labels|default:"[]"|safe|escapejs }}');  // Work time categories

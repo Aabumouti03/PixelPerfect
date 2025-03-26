@@ -9,14 +9,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Avg, Max, Q
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, JsonResponse, Http404
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from client.forms import ModuleForm
 from client.models import Category, Module as Program, VideoResource
 from client.statistics import *
-from users.helpers_modules import calculate_program_progress
 from users.models import (
     EndUser,
     QuestionResponse,
@@ -153,8 +153,13 @@ def programs(request):
     
     return render(request, 'client/programs.html', {'programs': programs, 'query': query})
 
+    return render(request, 'client/programs.html', {
+        'programs': programs,
+        'query': query  # So we can keep the search input filled
+    })
 
-
+@login_required
+@user_passes_test(admin_check)
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
@@ -289,8 +294,7 @@ def update_module_order(request, program_id):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-@login_required
-@user_passes_test(admin_check)
+@user_passes_test(lambda u: u.is_superuser, login_url='programs')
 def delete_program(request, program_id):
     """ Delete a program and redirect to the programs list """
     program = get_object_or_404(Program, id=program_id)
@@ -301,8 +305,7 @@ def delete_program(request, program_id):
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ QUESTIONNAIRE VIEWS --------------------------------------------------------------
-#---------------------------------------------------------------------------
-# --------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
 
 @user_passes_test(admin_check)
 @login_required
@@ -712,14 +715,15 @@ def video_list(request):
 @login_required
 @csrf_exempt
 def add_video(request):
-    next_url = request.GET.get("next", "/") 
-    module_id = request.GET.get("module_id") 
+    next_url = request.GET.get("next", "/")  # where to go after saving
+    module_id = request.GET.get("module_id")  # optional: module to link to
 
     if request.method == "POST":
         form = VideoResourceForm(request.POST)
         if form.is_valid():
             video = form.save()
 
+            # If module_id is passed, link the video to the module
             if module_id:
                 try:
                     module = Module.objects.get(id=module_id)
@@ -731,7 +735,7 @@ def add_video(request):
             else:
                 messages.success(request, "Video added successfully.")
 
-            return redirect(next_url)
+            return redirect(next_url)  # Redirect to the next page (either module creation page or wherever the user came from)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -739,21 +743,22 @@ def add_video(request):
 
     return render(request, "client/add_video.html", {
         "form": form,
-        "next": next_url 
+        "next": next_url  # Pass the next URL to the template so that it can be included in the form if needed
     })
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check)
+@user_passes_test(admin_check) #final version
 def add_video_to_module(request, module_id):
     """
     Add a video to the specified module.
     """
     if request.method == "POST":
-       
+        # Get the video_id from the POST data
         data = json.loads(request.body)
         video_id = data.get("video_id")
         
+        # Ensure the video ID is provided
         if not video_id:
             return JsonResponse({"success": False, "error": "No video_id provided"}, status=400)
         
@@ -761,6 +766,7 @@ def add_video_to_module(request, module_id):
             module = Module.objects.get(id=module_id)
             video = VideoResource.objects.get(id=video_id)
             
+            # Add the video to the module's video_resources
             module.video_resources.add(video)
             module.save()
             return JsonResponse({"success": True, "message": "Video added to module."})
@@ -780,6 +786,7 @@ def delete_video(request, video_id):
     """View to delete a video resource permanently."""
     video = get_object_or_404(VideoResource, id=video_id)
 
+    # Delete the video
     if request.method == 'POST':
         video.delete()
         return redirect('video_list')  
@@ -797,28 +804,16 @@ def video_detail(request, video_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_video_from_module(request, module_id):
-    if request.method != "POST":
-        return JsonResponse({"success": False, "error": "Invalid method"})
-
+    data = json.loads(request.body)
+    video_ids = data.get("video_ids", [])
+    
     try:
-        data = json.loads(request.body)
-        video_id = data.get("video_id")
-        if not video_id:
-            return JsonResponse({"success": False, "error": "Missing video_id"}, status=400)
-
         module = get_object_or_404(Module, id=module_id)
-        video = VideoResource.objects.get(id=video_id)
-
-        module.video_resources.remove(video)
+        for vid in video_ids:
+            module.video_resources.remove(vid)
         return JsonResponse({"success": True})
-
-    except VideoResource.DoesNotExist:
-        return JsonResponse({"success": False, "error": "VideoResource matching query does not exist."})
-    except json.JSONDecodeError:
-        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
     except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
-
+        return JsonResponse({"success": False, "error": str(e)})
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -829,29 +824,19 @@ def remove_video_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            resource_ids = data.get('resource_ids', [])
 
-    try:
-        data = json.loads(request.body)
-        resource_ids = data.get('resource_ids')
+            module = Module.objects.get(id=module_id)
+            for resource_id in resource_ids:
+                module.additional_resources.remove(resource_id)
 
-        if not resource_ids:
-            return JsonResponse({'success': False, 'error': 'No resource_ids provided'}, status=400)
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
 
-        module = Module.objects.get(id=module_id)
-
-        for resource_id in resource_ids:
-            try:
-                resource = AdditionalResource.objects.get(id=resource_id)
-                module.additional_resources.remove(resource)
-            except AdditionalResource.DoesNotExist:
-                return JsonResponse({'success': False, 'error': 'AdditionalResource matching query does not exist.'})
-
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-    
 @user_passes_test(admin_check)
 @login_required
 def add_additional_resource(request):
@@ -943,10 +928,15 @@ def add_resource_to_module(request, module_id):
 
     return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
+
+
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check)
+@user_passes_test(admin_check, login_url='/log_in/')
 def save_module_changes(request, module_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied  # Ensure only admins can access this view
+
     try:
         data = json.loads(request.body)
         video_ids = data.get("videos", "").strip(",").split(",")
@@ -956,7 +946,8 @@ def save_module_changes(request, module_id):
         video_ids = [vid for vid in video_ids if vid]
         resource_ids = [rid for rid in resource_ids if rid]
 
-        module = Module.objects.get(id=module_id)
+        # Attempt to get the module
+        module = Module.objects.get(id=module_id)  # This will raise Http404 if not found
 
         if video_ids:
             module.video_resources.set(VideoResource.objects.filter(id__in=video_ids))
@@ -969,9 +960,9 @@ def save_module_changes(request, module_id):
             module.additional_resources.clear()
 
         return JsonResponse({'success': True})
-    except Exception as e:
-        print("Error in saving module:", e)
-        return JsonResponse({'success': False, 'error': str(e)})
+        
+    except Module.DoesNotExist:
+        raise Http404("Module does not exist")  # Properly raise 404 if the module doesn't exist
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ STATISTICS VIEWS -----------------------------------------------------------------
@@ -1099,6 +1090,14 @@ def export_modules_statistics_csv(request):
     avg_completion_labels, avg_completion_data = get_average_completion_percentage()
     for label, value in zip(avg_completion_labels, avg_completion_data):
         writer.writerow([f"Avg Completion - {label}", value])
+    
+    module_ratings = (
+        Module.objects.annotate(avg_rating=Avg('ratings__rating'))
+        .values('title', 'avg_rating')
+    )
+    for module in module_ratings:
+        rating = module['avg_rating'] if module['avg_rating'] is not None else 0
+        writer.writerow([f"Avg Rating - {module['title']}", rating])
 
     return response
 
@@ -1182,6 +1181,9 @@ def users_management(request):
     users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
+
+
+from users.helpers_modules import calculate_program_progress
 
 @login_required
 @user_passes_test(admin_check)
@@ -1559,11 +1561,17 @@ def remove_exercise_from_section(request, section_id):
 @login_required
 def manage_exercises(request):
     """Renders a page displaying all exercises with their questions."""
-    exercises = Exercise.objects.prefetch_related('questions').all()
+    query = request.GET.get('q', '')
+    exercises = Exercise.objects.prefetch_related('questions')
+
+    if query:
+        exercises = exercises.filter(Q(title__icontains=query))
 
     return render(request, 'Module/manage_exercises.html', {
-        'exercises': exercises
+        'exercises': exercises,
+        'query': query,
     })
+
 
 @user_passes_test(admin_check)
 @login_required
@@ -1739,14 +1747,14 @@ def delete_module(request, module_id):
     return redirect("client_modules")
 
 @login_required
-@user_passes_test(admin_check)
+@user_passes_test(admin_check, login_url=None)
 def add_button(request):
     if request.method == "POST":
         title = request.POST.get("title")
         description = request.POST.get("description")
         
-        if title and description:  # Ensure both fields are filled
+        if title and description:  
             new_module = Module.objects.create(title=title, description=description)
             new_module.save()
-            return redirect("client_modules")  # Redirect to the Client Modules page
+            return redirect("client_modules") 
     return render(request, "Module/add_module.html")

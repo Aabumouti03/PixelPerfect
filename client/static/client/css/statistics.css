@@ -160,3 +160,110 @@ body {
     background: #D43802;
     color: white;
 }
+
+@media screen and (max-width: 768px) {
+
+    .content {
+        margin-left: 25px;
+        padding: 15px;
+    }
+
+    .top-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .top-bar h1 {
+        font-size: 20px;
+    }
+
+    .export-buttons {
+        display: none; /* Hide on mobile */
+    }
+
+    .chart-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .chart-box {
+        flex: 1 1 100%;
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    .chart-box canvas {
+        max-width: 100% !important;
+        max-height: 260px !important;
+        height: auto !important;
+    }
+
+    h3 {
+        font-size: 16px;
+        margin-top: 0;
+    }
+
+    .custom-btn {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .content {
+        margin-left: 25px;
+        padding: 15px;
+    }
+
+    .top-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .top-bar h1 {
+        font-size: 20px;
+    }
+
+    .export-buttons {
+        display: none; /* Or reposition as needed */
+    }
+
+    .charts {
+        flex-direction: column !important;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .chart-box {
+        flex: 1 1 100%;
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    .chart-box canvas {
+        max-width: 100% !important;
+        max-height: 260px !important;
+        height: auto !important;
+    }
+
+    h3 {
+        font-size: 16px;
+        margin-top: 0;
+    }
+
+    .custom-btn {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+}
