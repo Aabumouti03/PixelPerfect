@@ -22,19 +22,19 @@ body {
     font-size: 18px;
     text-decoration: underline;
     cursor: pointer;
-    color: #4da6ff;
+    color: #f2f20557;
     transition: color 0.3s ease;
     display: inline-block;
     margin: 10px 20px;
 }
 
 .view-all-button:hover {
-    color: #3b8ab8;
+    color: #f2f20557;
     text-decoration: none;
 }
 
 .module-card {
-    background-color: #ADD8E6;
+    background-color: #f2f20557;
     background-size: cover;
     background-position: center;
     padding: 20px;
@@ -104,7 +104,7 @@ body {
 }
 
 .module-card a {
-    color: rgb(107, 120, 255);
+    color: #f2f20557;
     font-size: 1rem;
     text-decoration: underline;
     cursor: pointer;
@@ -119,12 +119,12 @@ body {
     text-decoration: underline;
     cursor: pointer;
     transition: transform 0.3s ease;
-    color: #4da6ff;
+    color: #ccc;
 }
 
 .add-module:hover {
     transform: scale(1.05);
-    color: #3b8ab8;
+    color: #cccccc6f;
     text-decoration: none;
 }
 
@@ -139,7 +139,7 @@ body {
 .search-bar:focus {
     width: 350px;
     outline: none;
-    border-color: #4da6ff;
+    border-color: #f2f20557;
 }
 
 .header-left h1 {

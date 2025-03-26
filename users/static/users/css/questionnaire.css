@@ -160,7 +160,7 @@ body {
 }
 
 .bg-blue-600 {
-    background-color: #2563eb;
+    background-color: #f2f20557;
     height: 100%;
     border-radius: 50px;
     transition: width 0.3s ease-in-out;
@@ -213,7 +213,7 @@ body {
 
 .answer-btn:hover,
 .answer-btn.selected {
-    background: #007bff;
+    background: #f2f20557;
     color: white;
 }
 
@@ -240,7 +240,7 @@ body {
 }
 
 .nav-btn:hover {
-    background: #007bff;
+    background: #f2f20557;
 }
 
 /*Rating Scaler*/
@@ -262,12 +262,12 @@ body {
             margin-right: 5px;
         }
         .rating-btn:hover {
-            background-color: #007bff;
+            background-color: #f2f20557;
             color: white;
             transform: scale(1.1);
         }
         .rating-btn.selected {
-            background-color: #007bff;
+            background-color: #f2f20557;
             color: white;
         }
    

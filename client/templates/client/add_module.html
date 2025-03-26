@@ -38,6 +38,17 @@
                 <textarea name="description" class="form-control" rows="4"></textarea>
             </div>
 
+            <!-- Category Selection -->
+            <div class="mb-4">
+                <label class="form-label">Categories</label>
+                <select name="categories" class="form-control" multiple>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
             <!-- Video Resources -->
             <div class="mb-4">
                 <label class="form-label">Video Resources</label>

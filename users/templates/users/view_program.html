@@ -13,38 +13,49 @@
         <h1>Welcome to Your Program Overview, {{ user.first_name }}</h1>
     {% endif %}
 
-    <div class="program-container">
-        <div class="program-header">
-            <h2>Your Program: {{ program.title }}</h2>
-            <p>{{ program.description }}</p>
-        </div>
+    <div class="program-header">
+        <h2>Your Program: {{ program.title }}</h2>
+        <p>{{ program.description }}</p>
+    </div>
 
-        <div class="module-list">
-            {% for program_module in program_modules %}
-                <div class="module-card {% if program_module.locked %}locked{% endif %}">
-
-                    <span class="module-order">#{{ program_module.module_order }}</span>
-                    
-                    <h3>{{ program_module.title }}</h3>
-                    <p>{{ program_module.description }}</p>
-
-                    {% if not program_module.locked %}
-                        <div class="middle-section">  
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: {{ program_module.progress_value }}%;"></div>
-                                </div>
-                                <span class="progress-text">{{ program_module.progress_value }}% Complete</span>
-                            </div>
-                           
-                        </div>
-                        <a href="{% url 'module_overview' program_module.id %}" class="view-module-button">View Module</a>
-                    {% else %}
-                        <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
-                    {% endif %}
-                </div>
+    <!-- Displaying the program's categories (Moved outside of the program-header) -->
+    <div class="program-category">
+        <strong>Category:</strong> 
+        {% if program_categories %}
+            {% for category in program_categories %}
+                {{ category.name }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
-        </div>
+        {% else %}
+            No Category Assigned
+        {% endif %}
+    </div>
+    
+    <div class="module-list">
+        {% for program_module in program_modules %}
+            <div class="module-card {% if program_module.locked %}locked{% endif %}">
+
+                <span class="module-order">#{{ program_module.module_order }}</span>
+                
+                <h3>{{ program_module.title }}</h3>
+                <p>{{ program_module.description }}</p>
+
+                {% if not program_module.locked %}
+                    <div class="middle-section">  
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ program_module.progress_value }}%;"></div>
+                            </div>
+                            <span class="progress-text">{{ program_module.progress_value }}% Complete</span>
+                        </div>
+                       
+                    </div>
+                    <a href="{% url 'module_overview' program_module.id %}" class="view-module-button">View Module</a>
+                {% else %}
+                    <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 </div>
+
 {% endblock %}

@@ -2,6 +2,7 @@ const selectedExerciseIds = new Set();
 const selectedVideoIds = new Set();
 const selectedResourceIds = new Set();
 
+
 // Add selected exercise to preview and hidden inputs
 function addExercise() {
     const dropdown = document.getElementById('exercise-dropdown');
@@ -183,3 +184,81 @@ document.querySelectorAll('.delete-video-btn').forEach(button => {
         deleteVideo(videoId);  // Call the function to delete the video
     });
 });
+
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Add selected category to preview and hidden inputs
+function addCategory() {
+    const dropdown = document.getElementById('category-dropdown');
+    const categoryId = dropdown.value;
+
+    // Validate selection
+    if (!categoryId) {
+        alert('Please select a category first');
+        return;
+    }
+
+    // Check if already added
+    if (selectedCategoryIds.has(categoryId)) {
+        alert('This category is already added');
+        return;
+    }
+
+    // Get the selected option
+    const selectedOption = dropdown.options[dropdown.selectedIndex];
+    const title = selectedOption.text;
+
+    // Add to preview list
+    const previewList = document.getElementById('selected-categories');
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+    li.id = `category-preview-${categoryId}`;
+    li.innerHTML = `
+        ${title}
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeCategory('${categoryId}')">Remove</button>
+    `;
+    previewList.appendChild(li);
+
+    // Add hidden input
+    const hiddenInputsContainer = document.getElementById('hidden-category-inputs');
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'categories';
+    hiddenInput.value = categoryId;
+    hiddenInput.id = `hidden-category-${categoryId}`;
+    hiddenInputsContainer.appendChild(hiddenInput);
+
+    // Add to selected set
+    selectedCategoryIds.add(categoryId);
+
+    // Reset dropdown
+    dropdown.selectedIndex = 0;
+}
+
+// Remove selected category
+function removeCategory(id) {
+    // Remove from UI
+    document.getElementById(`category-preview-${id}`)?.remove();
+    document.getElementById(`hidden-category-${id}`)?.remove();
+    
+    // Remove from selected set
+    selectedCategoryIds.delete(id);
+}
+
+// Rest of your existing functions (addExercise, removeExercise, etc.)...
+// Keep all your other existing functions as they were

@@ -48,11 +48,12 @@ class RemoveResourceFromModuleTest(TestCase):
         data = json.dumps({"resource_ids": [9999]})
         response = self.client.post(self.url, data, content_type='application/json')
         
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(response.content, {
             "success": False,
-            "error": "AdditionalResource matching query does not exist."
+            "error": "Resource with ID 9999 does not exist."
         })
+
 
     def test_non_admin_user_cannot_remove_resource(self):
         """Test that a non-admin user is denied access."""
@@ -91,3 +92,4 @@ class RemoveResourceFromModuleTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
         self.assertJSONEqual(response.content, {"success": False, "error": "Invalid method"})
+
