@@ -18,7 +18,9 @@
     
     <p>Log your daily habits and track your progress.</p>
 
-    <form id="journal-form">
+    <form id="journal-form" method="POST" action="{% url 'save_journal_entry' %}">
+        {% csrf_token %}
+    
 
 
         <!-- Connected with Family -->
