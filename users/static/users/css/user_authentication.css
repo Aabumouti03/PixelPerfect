@@ -883,7 +883,7 @@ button[type="submit"]:hover,
 
 @media (max-width: 768px) {
     .main-content {
-        margin-top: 120px; /* Space under navbar */
+        margin-top: 120px !important;
         padding: 0 20px;
     }
 

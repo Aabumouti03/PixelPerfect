@@ -59,6 +59,7 @@ def admin_check(user):
 @login_required 
 @user_passes_test(admin_check) 
 def client_dashboard(request):
+    """Render client dashboard page."""
 
     # GENERAL STATISTICS IN THE DASHBOARD
     enrollment_labels, enrollment_data = get_module_enrollment_stats()  
@@ -94,6 +95,7 @@ def log_out_client(request):
 @login_required
 @user_passes_test(admin_check)
 def create_program(request):
+    """Allows the admin to create a new program."""
     categories = Category.objects.all()
 
     if request.method == "POST":
@@ -144,41 +146,41 @@ def create_program(request):
 @login_required
 @user_passes_test(admin_check)
 def programs(request):
+    """Allows the admin to view programs."""
     query = request.GET.get('q', '')
     programs = Program.objects.prefetch_related('program_modules__module')
     
     if query:
         programs = programs.filter(Q(title__icontains=query))
 
-    
-    return render(request, 'client/programs.html', {'programs': programs, 'query': query})
 
     return render(request, 'client/programs.html', {
         'programs': programs,
-        'query': query  # So we can keep the search input filled
+        'query': query 
     })
 
 @login_required
 @user_passes_test(admin_check)
-def program_detail(request, program_id): 
+def program_detail(request, program_id):
+    """Allows the admin to view program details."""
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
-    program_modules = program.program_modules.all()  
-    program_module_ids = list(program_modules.values_list('module_id', flat=True)) 
-
+    program_modules = program.program_modules.all()
+    program_module_ids = list(program_modules.values_list('module_id', flat=True))
     enrolled_users = program.enrolled_users.all()
     enrolled_user_ids = set(enrollment.user_id for enrollment in enrolled_users)
     all_users = EndUser.objects.all()
+    all_categories = Category.objects.all()
 
     if request.method == "POST":
         if "remove_module" in request.POST:
             module_id = request.POST.get("remove_module")
             if not module_id or not module_id.strip():
-                # Return an error message when no module ID is provided.
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -188,11 +190,11 @@ def program_detail(request, program_id):
             try:
                 module_id_int = int(module_id)
             except ValueError:
-                # Return an error message when the module ID is not a valid number.
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -208,6 +210,7 @@ def program_detail(request, program_id):
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -216,22 +219,18 @@ def program_detail(request, program_id):
                 })
             return redirect("program_detail", program_id=program.id)
 
-
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
             max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
             for index, m_id in enumerate(modules_to_add, start=1):
-                for m_id in modules_to_add:
-                    try:
-                        module_obj = Module.objects.get(id=m_id)  
-                    except Module.DoesNotExist:
-                        return HttpResponseNotFound("Module not found.")
-                    if ProgramModule.objects.filter(program=program, module=module_obj).exists():
-                        url = reverse("program_detail", args=[program.id]) + f"?error_message=Duplicate module added."
-                        return HttpResponseRedirect(url)
-                    
-                    ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
-
+                try:
+                    module_obj = Module.objects.get(id=m_id)
+                except Module.DoesNotExist:
+                    return HttpResponseNotFound("Module not found.")
+                if ProgramModule.objects.filter(program=program, module=module_obj).exists():
+                    url = reverse("program_detail", args=[program.id]) + "?error_message=Duplicate module added."
+                    return HttpResponseRedirect(url)
+                ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
             return redirect("program_detail", program_id=program.id)
 
         if "add_users" in request.POST:
@@ -240,7 +239,7 @@ def program_detail(request, program_id):
                 user_obj = get_object_or_404(EndUser, user_id=user_id)
                 UserProgramEnrollment.objects.create(program=program, user=user_obj)
             return redirect("program_detail", program_id=program.id)
-        
+
         if "remove_user" in request.POST:
             user_id = request.POST.get("remove_user")
             enrollment = UserProgramEnrollment.objects.filter(program=program, user_id=user_id).first()
@@ -251,15 +250,27 @@ def program_detail(request, program_id):
         if "update_program" in request.POST:
             program.title = request.POST.get("title", program.title)
             program.description = request.POST.get("description", program.description)
+
+            category_ids = request.POST.getlist("categories")
+            program.categories.set(category_ids)
+
             program.save()
             return redirect("program_detail", program_id=program.id)
+        if "update_categories" in request.POST:
+            category_ids = request.POST.getlist("categories")
+            program.categories.set(category_ids)
+            program.save()
+            return redirect("program_detail", program_id=program.id)
+
+
 
     context = {
         "program": program,
         "all_modules": all_modules,
-        'all_users': all_users,
+        "all_users": all_users,
+        "all_categories": all_categories,
         "enrolled_user_ids": enrolled_user_ids,
-        "program_modules": program_modules,  
+        "program_modules": program_modules,
         "program_module_ids": program_module_ids,
         "enrolled_users": enrolled_users,
     }
@@ -296,7 +307,7 @@ def update_module_order(request, program_id):
 
 @user_passes_test(lambda u: u.is_superuser, login_url='programs')
 def delete_program(request, program_id):
-    """ Delete a program and redirect to the programs list """
+    """Delete a program and redirect to the programs list."""
     program = get_object_or_404(Program, id=program_id)
     program.delete()
     return redirect('programs')
@@ -310,6 +321,7 @@ def delete_program(request, program_id):
 @user_passes_test(admin_check)
 @login_required
 def manage_questionnaires(request):
+    """Allows the admin to manage and edit questionnaires."""
     search_query = request.GET.get('search', '')  
     is_active_filter = request.GET.get('is_active')
 
@@ -348,6 +360,7 @@ def manage_questionnaires(request):
 @user_passes_test(admin_check)
 @login_required
 def activate_questionnaire(request, questionnaire_id):
+    """A view to make the questionnaire available for users."""
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
 
     # Ensure only one questionnaire is active
@@ -361,6 +374,7 @@ def activate_questionnaire(request, questionnaire_id):
 @user_passes_test(admin_check)
 @login_required
 def view_questionnaire(request, questionnaire_id):
+    """Allows the admin to view questionnaires."""
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
 
@@ -372,6 +386,7 @@ def view_questionnaire(request, questionnaire_id):
 @user_passes_test(admin_check)
 @login_required
 def view_responders(request, questionnaire_id):
+    """Allows the admin to view which users responded to the questionnaire."""
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     search_query = request.GET.get('search', '').strip()  
     responders = Questionnaire_UserResponse.objects.filter(questionnaire=questionnaire).select_related('user')
@@ -400,6 +415,7 @@ def view_responders(request, questionnaire_id):
 @user_passes_test(admin_check)
 @login_required
 def view_user_response(request, user_response_id):
+    """Allows the admin to view users responses to a specific questionnare."""
     user_response = get_object_or_404(Questionnaire_UserResponse, id=user_response_id)
     responses = QuestionResponse.objects.filter(user_response=user_response_id).select_related('question')
 
@@ -411,6 +427,7 @@ def view_user_response(request, user_response_id):
 @user_passes_test(admin_check)
 @login_required
 def create_questionnaire(request):
+    """Allows the admin to create a new questionnaire."""
     categories = Category.objects.all()
     sentiment_choices = Question.SENTIMENT_CHOICES  
 
@@ -474,6 +491,7 @@ def create_questionnaire(request):
 @user_passes_test(admin_check)
 @login_required
 def edit_questionnaire(request, questionnaire_id):
+    """Allows the admin to edit a specific questionnaire."""
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questions = Question.objects.filter(questionnaire=questionnaire)
     categories = Category.objects.all()
@@ -543,6 +561,7 @@ def edit_questionnaire(request, questionnaire_id):
 @user_passes_test(admin_check)
 @login_required
 def delete_questionnaire(request, questionnaire_id):
+    """Allows the admin to delete a specific questionnaire."""
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     questionnaire.delete()
     return redirect("manage_questionnaires")
@@ -550,6 +569,7 @@ def delete_questionnaire(request, questionnaire_id):
 @user_passes_test(admin_check)
 @login_required
 def delete_question(request, question_id):
+    """Allows the admin to delete a specific question in a questionnaire."""
     question = get_object_or_404(Question, id=question_id)
     questionnaire_id = question.questionnaire.id
     question.delete()
@@ -558,6 +578,7 @@ def delete_question(request, question_id):
 @user_passes_test(admin_check)
 @login_required
 def add_question(request, questionnaire_id):
+    """Allows the admin to add a question to a specific questionnaire."""
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
     
     # Default to Agreement Scale when creating a new question
@@ -728,6 +749,7 @@ def video_list(request):
 @login_required
 @csrf_exempt
 def add_video(request):
+    """Allows the admin to add a video."""
     next_url = request.GET.get("next", "/")  # where to go after saving
     module_id = request.GET.get("module_id")  # optional: module to link to
 
@@ -763,9 +785,7 @@ def add_video(request):
 @login_required
 @user_passes_test(admin_check) #final version
 def add_video_to_module(request, module_id):
-    """
-    Add a video to the specified module.
-    """
+    """Add a video to the specified module."""
     if request.method == "POST":
         # Get the video_id from the POST data
         data = json.loads(request.body)
@@ -827,6 +847,7 @@ def admin_check(user):
 @login_required
 @user_passes_test(admin_check)
 def remove_video_from_module(request, module_id):
+    """View to remove a video resource temporarily from a module."""
     if request.method != 'POST':
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
@@ -861,19 +882,7 @@ def remove_video_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
-    from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from client.models import Module, AdditionalResource
-import json
-
-def admin_check(user):
-    return user.is_staff or user.is_superuser
-
-@csrf_exempt
-@login_required
-@user_passes_test(admin_check)
-def remove_resource_from_module(request, module_id):
+    """View to remove a resource from a module."""
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
 
@@ -906,6 +915,7 @@ def remove_resource_from_module(request, module_id):
 @user_passes_test(admin_check)
 @login_required
 def add_additional_resource(request):
+    """View to add a resource to a module."""
     next_url = request.GET.get('next', '/')
     module_id = request.GET.get('module_id')  # Optionally, module to link the resource to
 
@@ -966,9 +976,7 @@ def delete_resource(request, resource_id):
 @login_required
 @user_passes_test(admin_check)
 def add_resource_to_module(request, module_id):
-    """
-    Add a resource to the specified module.
-    """
+    """Add a resource to the specified module."""
     if request.method == "POST":
         # Get the resource_id from the POST data
         data = json.loads(request.body)
@@ -1000,6 +1008,7 @@ def add_resource_to_module(request, module_id):
 @login_required
 @user_passes_test(admin_check, login_url='/log_in/')
 def save_module_changes(request, module_id):
+    """View to save changes to a module."""
     if not request.user.is_superuser:
         raise PermissionDenied  # Ensure only admins can access this view
 
@@ -1037,6 +1046,7 @@ def save_module_changes(request, module_id):
 @login_required 
 @user_passes_test(admin_check) 
 def reports(request):
+    """View to generate reports."""
     # THREE CATEGORIES USERS - MODULES - PROGRAMMS 
     enrollment_labels, enrollment_data = get_module_enrollment_stats() # 1 for modules 
     last_work_labels, last_work_data = get_users_last_work_time() #  2 for users
@@ -1054,6 +1064,7 @@ def reports(request):
 @login_required 
 @user_passes_test(admin_check) 
 def userStatistics(request):
+    """View to display statistics about users."""
     total_users = EndUser.objects.count()
     active_users = EndUser.objects.filter(user__is_active=True).count()
     inactive_users = total_users - active_users
@@ -1244,16 +1255,17 @@ def export_user_statistics_csv(request):
 @login_required 
 @user_passes_test(admin_check) 
 def users_management(request):
+    """Allows the admin to manage users."""
     users = EndUser.objects.filter(user__is_staff=False, user__is_superuser=False)
     return render(request, 'client/users_management.html', {'users': users})
 
 
 
-from users.helpers_modules import calculate_program_progress
 
 @login_required
 @user_passes_test(admin_check)
 def user_detail_view(request, user_id):
+    """Allows the admin to view user details."""
     user_profile = get_object_or_404(EndUser, user__id=user_id)
     enrolled_programs = UserProgramEnrollment.objects.filter(user=user_profile).select_related('program')
     program_progress_dict = {
@@ -1312,6 +1324,7 @@ def user_detail_view(request, user_id):
 @login_required 
 @user_passes_test(admin_check) 
 def category_list(request):
+    """View for program categories."""
     query = request.GET.get('q', '')
     categories = Category.objects.all()
 
@@ -1327,6 +1340,7 @@ def category_list(request):
 @login_required 
 @user_passes_test(admin_check) 
 def category_detail(request, category_id):
+    """View for program category details."""
     category = get_object_or_404(Category, id=category_id)
     
     programs = category.programs.all()
@@ -1343,6 +1357,7 @@ def category_detail(request, category_id):
 @login_required 
 @user_passes_test(admin_check) 
 def create_category(request):
+    """Allows the admin to create a new program category."""
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -1388,6 +1403,7 @@ def edit_category(request, category_id):
 @user_passes_test(admin_check)
 @login_required
 def add_category_to_module(request, module_id):
+    """Allows the admin to add a category to a module."""
     module = get_object_or_404(Module, id=module_id)
     data = json.loads(request.body)
     category_id = data.get('category_id')
@@ -1409,6 +1425,7 @@ def add_category_to_module(request, module_id):
 @user_passes_test(admin_check)
 @login_required
 def remove_categories_from_module(request, module_id):
+    """Allows the admin to remove a category from a module."""
     module = get_object_or_404(Module, id=module_id)
     data = json.loads(request.body)
     category_ids = data.get('category_ids', [])
@@ -1433,6 +1450,7 @@ def remove_categories_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_exercise_from_module(request, module_id):
+    """Allows the admin to remove an exercise from a module."""
     if request.method == 'POST':
         data = json.loads(request.body)
         exercise_ids = data.get('exercise_ids', [])
@@ -1451,6 +1469,7 @@ def remove_exercise_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def add_exercise_to_module(request, module_id):
+    """Allows the admin to add an exercise to a module."""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -1490,6 +1509,7 @@ def add_exercise_to_module(request, module_id):
 @user_passes_test(admin_check)
 @login_required
 def edit_section(request, section_id):
+    """Allows the admin to edit a section in a module."""
     section = get_object_or_404(Section, id=section_id)
 
     all_exercises = Exercise.objects.exclude(id__in=section.exercises.values_list('id', flat=True))
@@ -1579,6 +1599,7 @@ def remove_section_from_module(request, module_id):
 @user_passes_test(admin_check)
 @login_required
 def edit_exercise(request, exercise_id):
+    """Allows the admin to edit an exercise in a module."""
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == "POST":
         form = ExerciseForm(request.POST, instance=exercise)
@@ -1829,12 +1850,14 @@ def add_Equestion(request):
 # Client Modules Views
 @login_required
 def module_overview(request, module_id):
+    """View for a module."""
     module = get_object_or_404(Module, id=module_id)
     return render(request, "client/edit_module.html", {"module": module})
 
 @login_required
 @user_passes_test(admin_check)
 def client_modules(request):
+    """View to display all client modules."""
     modules = Module.objects.all().values("id", "title", "description") 
     module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
     
@@ -1853,6 +1876,7 @@ def client_modules(request):
 @login_required
 @user_passes_test(admin_check)
 def delete_module(request, module_id):
+    """View to delete a module."""
     module = get_object_or_404(Module, id=module_id)
     module.delete()
     return redirect("client_modules")
@@ -1860,6 +1884,7 @@ def delete_module(request, module_id):
 @login_required
 @user_passes_test(admin_check, login_url=None)
 def add_button(request):
+    """View to add media to a module."""
     if request.method == "POST":
         title = request.POST.get("title")
         description = request.POST.get("description")
