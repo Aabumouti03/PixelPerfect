@@ -28,6 +28,8 @@ class DeleteVideoTestCase(TestCase):
 
         self.assertEqual(response.status_code, 302) 
     
+class DeleteVideoAsAdminTestCase(TestCase):
+
     def setUp(self):
         """Create an admin user, video resource, and log in."""
         self.admin_user = User.objects.create_user(
@@ -60,6 +62,8 @@ class DeleteVideoTestCase(TestCase):
         response = self.client.get(reverse("video_list"))
 
         self.assertEqual(response.status_code, 302) 
+        
+class DeleteVideoNoPermissionTestCase(TestCase):
     
     def setUp(self):
         """Create a non-admin user, video resource, and log in."""
