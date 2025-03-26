@@ -1553,11 +1553,17 @@ def remove_exercise_from_section(request, section_id):
 @login_required
 def manage_exercises(request):
     """Renders a page displaying all exercises with their questions."""
-    exercises = Exercise.objects.prefetch_related('questions').all()
+    query = request.GET.get('q', '')
+    exercises = Exercise.objects.prefetch_related('questions')
+
+    if query:
+        exercises = exercises.filter(Q(title__icontains=query))
 
     return render(request, 'Module/manage_exercises.html', {
-        'exercises': exercises
+        'exercises': exercises,
+        'query': query,
     })
+
 
 @user_passes_test(admin_check)
 @login_required
