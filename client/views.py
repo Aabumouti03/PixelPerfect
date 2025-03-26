@@ -148,7 +148,8 @@ def programs(request):
     return render(request, 'client/programs.html', {'programs': programs})
 
 
-
+@login_required
+@user_passes_test(admin_check)
 def program_detail(request, program_id): 
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
