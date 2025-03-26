@@ -593,6 +593,8 @@ def createModule(request):
         exercise_ids = request.POST.getlist("exercises")
         video_ids = request.POST.getlist("videos")
         resource_ids = request.POST.getlist("resources")
+        category_ids = request.POST.getlist("categories")
+
 
         if not title:
             return render(request, "Module/add_module.html", {
@@ -600,6 +602,7 @@ def createModule(request):
                 "exercises": Exercise.objects.all(),
                 "videos": VideoResource.objects.all(),
                 "resources": AdditionalResource.objects.all(),
+                "categories": Category.objects.all(),
                 "title": title,
                 "description": description
             })
@@ -624,6 +627,10 @@ def createModule(request):
         if resource_ids:
             resources = AdditionalResource.objects.filter(id__in=resource_ids)
             module.additional_resources.set(resources)
+        
+        if category_ids:  
+            categories = Category.objects.filter(id__in=category_ids)
+            module.categories.set(categories)
 
         return redirect("client_modules")
 
@@ -631,6 +638,7 @@ def createModule(request):
         "exercises": Exercise.objects.all(),
         "videos": VideoResource.objects.all(),
         "resources": AdditionalResource.objects.all(),
+        "categories": Category.objects.all(),
     })
 
 
@@ -653,6 +661,10 @@ def edit_module(request, module_id):
 
     available_video_resources = VideoResource.objects.exclude(
         id__in=module.video_resources.values_list('id', flat=True)
+    )
+
+    available_categories = Category.objects.exclude(
+        id__in=module.categories.values_list('id', flat=True)
     )
 
     if request.method == "POST":
@@ -693,6 +705,7 @@ def edit_module(request, module_id):
         'available_exercises': available_exercises,
         'available_additional_resources': available_additional_resources,
         'available_video_resources': available_video_resources,
+        'available_categories': available_categories,
         'videos': VideoResource.objects.all(),
         'resources': AdditionalResource.objects.all(),
     })
@@ -1370,6 +1383,51 @@ def edit_category(request, category_id):
         form = CategoryForm(instance=category)
 
     return render(request, 'client/edit_category.html', {'form': form, 'category': category})
+
+
+@user_passes_test(admin_check)
+@login_required
+def add_category_to_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    data = json.loads(request.body)
+    category_id = data.get('category_id')
+    
+    try:
+        category = Category.objects.get(id=category_id)
+        module.categories.add(category)
+        return JsonResponse({
+            'status': 'success',
+            'category_name': category.name
+        })
+    except Category.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Category not found'
+        }, status=404)
+
+
+@user_passes_test(admin_check)
+@login_required
+def remove_categories_from_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    data = json.loads(request.body)
+    category_ids = data.get('category_ids', [])
+    
+    categories = Category.objects.filter(id__in=category_ids)
+    removed_categories = []
+    
+    for category in categories:
+        removed_categories.append({
+            'id': category.id,
+            'name': category.name
+        })
+    
+    module.categories.remove(*categories)
+    
+    return JsonResponse({
+        'status': 'success',
+        'removed_categories': removed_categories
+    })
 
 @csrf_exempt
 @login_required
