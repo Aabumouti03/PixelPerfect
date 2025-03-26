@@ -130,8 +130,6 @@ body {
     color: white;
 }
 
-
-
 .nav-links .icon {
     width: 20px;
     height: 20px;
@@ -233,12 +231,10 @@ body {
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Show toggle when sidebar is collapsed */
 .sidebar:hover .toggle {
     opacity: 0;
 }
 
-/* Ensure toggle is visible when sidebar is hidden */
 .sidebar:not(:hover) .toggle {
     opacity: 1;
 }

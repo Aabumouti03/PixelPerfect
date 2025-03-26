@@ -6,25 +6,22 @@ body {
     display: flex;
 }
 
-/* Container to match the layout */
 .view_program-container {
     max-width: 1100px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* Program Container */
 .program-container {
     position: relative;
     background: rgba(255, 255, 255, 0.8); 
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+    box-shadow: 0 4px 6px #f2f20557;
     backdrop-filter: blur(10px);
     margin-top: 20px;
 }
 
-/* Program Header */
 .program-header {
     display: flex;
     align-items: center;
@@ -33,28 +30,24 @@ body {
     margin-bottom: 20px;
 }
 
-/* Program Title */
 .program-header h2 {
     font-size: 1.8rem;
     color: #333;
     margin: 0;
 }
 
-/* Program Description */
 .program-header p {
     font-size: 1rem;
     color: #666;
     margin-top: 5px;
 }
 
-/* Module List */
 .module-list {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
 }
 
-/* Module Card */
 .module-card {
     display: flex;
     flex-direction: column;
@@ -69,20 +62,18 @@ body {
     text-align: center;
 }
 
-/* Alternate Colors for Cards */
 .module-card:nth-child(odd) {
-    background: #73C4FD;
+    background: #f2f20557;
 }
 
 .module-card:nth-child(even) {
-    background: #0148FD;
+    background: #f2f20557;
 }
 
 .module-card:nth-child(even) p {
     color: #d0cfcf;
 }
 
-/* Module Title */
 .module-card h3 {
     font-size: 1.2rem;
     font-weight: bold;
@@ -90,15 +81,12 @@ body {
     margin-bottom: 10px;
 }
 
-/* Module Description */
 .module-card p {
     font-size: 0.9rem;
     color: #666;
     margin-bottom: 10px;
 }
 
-
-/* Locked Modules */
 .module-card.locked {
     background: #e6e6e6;
     color: #999;
@@ -114,7 +102,6 @@ body {
     color: #777;
 }
 
-/* Locked Progress Bar */
 .module-card.locked .progress-container {
     background-color: #d6d6d6;
 }
@@ -123,7 +110,6 @@ body {
     background: #aaa;
 }
 
-/* Locked Message */
 .locked-message {
     font-size: 0.85rem;
     color: #666;
@@ -132,7 +118,6 @@ body {
     margin-top: 10px;
 }
 
-/* View Module Button */
 .view-module-button {
     display: inline-block;
     background: white;
@@ -152,8 +137,6 @@ body {
     color: white;
 }
 
-
-/* Style for Module Order Number */
 .module-order {
     font-size: 1rem;
     font-weight: bold;
@@ -166,7 +149,6 @@ body {
     text-align: center;
     margin-bottom: 5px;
 }
-
 
 .module-card {
     border-radius: 12px;
@@ -185,7 +167,6 @@ body {
     overflow: hidden; 
 }
 
-/* 3D Effect: Adding subtle shadow on the left edge */
 .module-card::before {
     content: "";
     position: absolute;
@@ -196,15 +177,14 @@ body {
 
 }
 
-/* Alternate colors for adjacent cards */
 .module-card:nth-child(odd) {
-    background: #73C4FD;
-    border-left: 5px solid #5ca5ea; 
+    background: #f2f20557;
+    border-left: 5px solid #f2f20557; 
 }
 
 .module-card:nth-child(even) {
-    background: #0048FF;
-    border-left: 5px solid #012EAB; 
+    background: #f2f20557;
+    border-left: 5px solid #f2f20557; 
 }
 
 .module-card:nth-child(odd) h3 {
@@ -223,7 +203,6 @@ body {
     color: #eeebeb;
 }
 
-/* Ensure title stays inside the card */
 .module-card h3 {
     font-size: 18px;
     color: #333;
@@ -233,7 +212,6 @@ body {
     max-height: 45px;
 }
 
-/* Module Description */
 .module-card p {
     font-size: 14px;
     color: #666;
@@ -244,8 +222,6 @@ body {
     white-space: normal;
 }
 
-
-/* View Module Button */
 .view-module-button {
     background: white;
     color: #F24505;
@@ -262,8 +238,6 @@ body {
     background: #F24505;
     color: white;
 }
-
-
 
 .progress-container {
     width: 90%;
@@ -293,7 +267,6 @@ body {
     color: #333;
     margin-top: 5px;
 }
-
 
 .module-card.locked {
     background: #e6e6e6;
@@ -328,7 +301,6 @@ body {
     margin-top: auto;
     margin-bottom: auto;
 }
-
 
 .view-module-button {
     display: inline-block;
