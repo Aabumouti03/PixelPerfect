@@ -239,7 +239,7 @@ class Command(BaseCommand):
         """Creates 5 EndUsers with random attributes and 1 Admin."""
         # existing_users = User.objects.filter(username__startswith="EndUser").count()
         # start_index = existing_users + 1
-
+        #    
         # for i in range(start_index, start_index + 5):
         #     username = f"EndUser{i}"
         #     email = f"enduser{i}@example.com"

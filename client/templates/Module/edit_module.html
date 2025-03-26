@@ -42,6 +42,45 @@
                 </div>
             </div>
 
+            <!-- Add Category Section -->
+            <div class="mb-4">
+                <label class="form-label">3. Add Categories:</label>
+                <div>
+                    <select id="category-dropdown" class="form-control mb-2">
+                        <option value="">Select a category</option>
+                        {% for category in available_categories %}
+                            {% if category not in module.categories.all %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="addCategory('{{ module.id }}')" class="btn btn-primary w-100 add-pill">Add Category</button>
+                </div>
+            </div>
+
+            <!-- Current Categories Section -->
+            <div class="mb-4">
+                <label class="form-label">4. Current Categories:</label>
+                <div class="module-box">
+                    <ul class="list-unstyled" id="selected-categories">
+                        {% for category in module.categories.all %}
+                            <li id="category-{{ category.id }}">
+                                <input type="checkbox" name="remove_category" value="{{ category.id }}" class="form-check-input me-2">
+                                {{ category.name }}
+                            </li>
+                        {% empty %}
+                            <li id="no-categories-msg">No categories assigned yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="button" class="btn remove-pill w-100" onclick="removeSelectedCategories('{{ module.id }}')">
+                    Remove Selected Categories
+                </button>
+            </div>
+
             <!-- Add Exercise Section -->
             <div class="mb-4">
                 <label class="form-label">3. Add Exercise:</label>
@@ -180,6 +219,109 @@
         const csrfToken = '{{ csrf_token }}';
     </script>
     <script src="{% static 'client/js/edit_module.js' %}"></script>
+    <script>
+        // Add category to module
+function addCategory(moduleId) {
+    const dropdown = document.getElementById('category-dropdown');
+    const categoryId = dropdown.value;
+
+    if (!categoryId) {
+        alert('Please select a category first');
+        return;
+    }
+
+    fetch(`/modules/${moduleId}/add_category/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ category_id: categoryId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Add to the UI
+            const categoriesList = document.getElementById('selected-categories');
+            
+            // Remove "no categories" message if it exists
+            const noCategoriesMsg = document.getElementById('no-categories-msg');
+            if (noCategoriesMsg) noCategoriesMsg.remove();
+            
+            // Add new category to the list
+            const li = document.createElement('li');
+            li.id = `category-${categoryId}`;
+            li.innerHTML = `
+                <input type="checkbox" name="remove_category" value="${categoryId}" class="form-check-input me-2">
+                ${data.category_name}
+            `;
+            categoriesList.appendChild(li);
+            
+            // Remove from dropdown
+            dropdown.remove(dropdown.selectedIndex);
+            dropdown.selectedIndex = 0;
+        } else {
+            alert(data.message || 'Failed to add category');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while adding the category');
+    });
+}
+
+// Remove selected categories
+function removeSelectedCategories(moduleId) {
+    const checkboxes = document.querySelectorAll('input[name="remove_category"]:checked');
+    if (checkboxes.length === 0) {
+        alert('Please select at least one category to remove');
+        return;
+    }
+
+    const categoryIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    fetch(`/modules/${moduleId}/remove_categories/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ category_ids: categoryIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Remove from UI
+            categoryIds.forEach(id => {
+                const element = document.getElementById(`category-${id}`);
+                if (element) element.remove();
+            });
+            
+            // Add back to dropdown
+            const dropdown = document.getElementById('category-dropdown');
+            data.removed_categories.forEach(category => {
+                const option = new Option(category.name, category.id);
+                dropdown.add(option);
+            });
+            
+            // Show "no categories" message if list is empty
+            const categoriesList = document.getElementById('selected-categories');
+            if (categoriesList.children.length === 0) {
+                const li = document.createElement('li');
+                li.id = 'no-categories-msg';
+                li.textContent = 'No categories assigned yet.';
+                categoriesList.appendChild(li);
+            }
+        } else {
+            alert(data.message || 'Failed to remove categories');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while removing categories');
+    });
+}
+    </script>
 
 </body>
 </html>

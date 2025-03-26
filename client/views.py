@@ -150,35 +150,33 @@ def programs(request):
     if query:
         programs = programs.filter(Q(title__icontains=query))
 
-    
-    return render(request, 'client/programs.html', {'programs': programs, 'query': query})
 
     return render(request, 'client/programs.html', {
         'programs': programs,
-        'query': query  # So we can keep the search input filled
+        'query': query 
     })
 
 @login_required
 @user_passes_test(admin_check)
-def program_detail(request, program_id): 
+def program_detail(request, program_id):
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
-    program_modules = program.program_modules.all()  
-    program_module_ids = list(program_modules.values_list('module_id', flat=True)) 
-
+    program_modules = program.program_modules.all()
+    program_module_ids = list(program_modules.values_list('module_id', flat=True))
     enrolled_users = program.enrolled_users.all()
     enrolled_user_ids = set(enrollment.user_id for enrollment in enrolled_users)
     all_users = EndUser.objects.all()
+    all_categories = Category.objects.all()
 
     if request.method == "POST":
         if "remove_module" in request.POST:
             module_id = request.POST.get("remove_module")
             if not module_id or not module_id.strip():
-                # Return an error message when no module ID is provided.
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -188,11 +186,11 @@ def program_detail(request, program_id):
             try:
                 module_id_int = int(module_id)
             except ValueError:
-                # Return an error message when the module ID is not a valid number.
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -208,6 +206,7 @@ def program_detail(request, program_id):
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -216,22 +215,18 @@ def program_detail(request, program_id):
                 })
             return redirect("program_detail", program_id=program.id)
 
-
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
             max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
             for index, m_id in enumerate(modules_to_add, start=1):
-                for m_id in modules_to_add:
-                    try:
-                        module_obj = Module.objects.get(id=m_id)  
-                    except Module.DoesNotExist:
-                        return HttpResponseNotFound("Module not found.")
-                    if ProgramModule.objects.filter(program=program, module=module_obj).exists():
-                        url = reverse("program_detail", args=[program.id]) + f"?error_message=Duplicate module added."
-                        return HttpResponseRedirect(url)
-                    
-                    ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
-
+                try:
+                    module_obj = Module.objects.get(id=m_id)
+                except Module.DoesNotExist:
+                    return HttpResponseNotFound("Module not found.")
+                if ProgramModule.objects.filter(program=program, module=module_obj).exists():
+                    url = reverse("program_detail", args=[program.id]) + "?error_message=Duplicate module added."
+                    return HttpResponseRedirect(url)
+                ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
             return redirect("program_detail", program_id=program.id)
 
         if "add_users" in request.POST:
@@ -240,7 +235,7 @@ def program_detail(request, program_id):
                 user_obj = get_object_or_404(EndUser, user_id=user_id)
                 UserProgramEnrollment.objects.create(program=program, user=user_obj)
             return redirect("program_detail", program_id=program.id)
-        
+
         if "remove_user" in request.POST:
             user_id = request.POST.get("remove_user")
             enrollment = UserProgramEnrollment.objects.filter(program=program, user_id=user_id).first()
@@ -251,15 +246,27 @@ def program_detail(request, program_id):
         if "update_program" in request.POST:
             program.title = request.POST.get("title", program.title)
             program.description = request.POST.get("description", program.description)
+
+            category_ids = request.POST.getlist("categories")
+            program.categories.set(category_ids)
+
             program.save()
             return redirect("program_detail", program_id=program.id)
+        if "update_categories" in request.POST:
+            category_ids = request.POST.getlist("categories")
+            program.categories.set(category_ids)
+            program.save()
+            return redirect("program_detail", program_id=program.id)
+
+
 
     context = {
         "program": program,
         "all_modules": all_modules,
-        'all_users': all_users,
+        "all_users": all_users,
+        "all_categories": all_categories,
         "enrolled_user_ids": enrolled_user_ids,
-        "program_modules": program_modules,  
+        "program_modules": program_modules,
         "program_module_ids": program_module_ids,
         "enrolled_users": enrolled_users,
     }
@@ -593,6 +600,8 @@ def createModule(request):
         exercise_ids = request.POST.getlist("exercises")
         video_ids = request.POST.getlist("videos")
         resource_ids = request.POST.getlist("resources")
+        category_ids = request.POST.getlist("categories")
+
 
         if not title:
             return render(request, "Module/add_module.html", {
@@ -600,6 +609,7 @@ def createModule(request):
                 "exercises": Exercise.objects.all(),
                 "videos": VideoResource.objects.all(),
                 "resources": AdditionalResource.objects.all(),
+                "categories": Category.objects.all(),
                 "title": title,
                 "description": description
             })
@@ -624,6 +634,10 @@ def createModule(request):
         if resource_ids:
             resources = AdditionalResource.objects.filter(id__in=resource_ids)
             module.additional_resources.set(resources)
+        
+        if category_ids:  
+            categories = Category.objects.filter(id__in=category_ids)
+            module.categories.set(categories)
 
         return redirect("client_modules")
 
@@ -631,6 +645,7 @@ def createModule(request):
         "exercises": Exercise.objects.all(),
         "videos": VideoResource.objects.all(),
         "resources": AdditionalResource.objects.all(),
+        "categories": Category.objects.all(),
     })
 
 
@@ -653,6 +668,10 @@ def edit_module(request, module_id):
 
     available_video_resources = VideoResource.objects.exclude(
         id__in=module.video_resources.values_list('id', flat=True)
+    )
+
+    available_categories = Category.objects.exclude(
+        id__in=module.categories.values_list('id', flat=True)
     )
 
     if request.method == "POST":
@@ -693,6 +712,7 @@ def edit_module(request, module_id):
         'available_exercises': available_exercises,
         'available_additional_resources': available_additional_resources,
         'available_video_resources': available_video_resources,
+        'available_categories': available_categories,
         'videos': VideoResource.objects.all(),
         'resources': AdditionalResource.objects.all(),
     })
@@ -800,21 +820,45 @@ def video_detail(request, video_id):
     video = get_object_or_404(VideoResource, id=video_id)
     return render(request, "client/video_detail.html", {"video": video})
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import get_object_or_404
+from client.models import Module, VideoResource
+import json
+
+def admin_check(user):
+    return user.is_staff or user.is_superuser
+
 @csrf_exempt
 @login_required
 @user_passes_test(admin_check)
 def remove_video_from_module(request, module_id):
-    data = json.loads(request.body)
-    video_ids = data.get("video_ids", [])
-    
-    try:
-        module = get_object_or_404(Module, id=module_id)
-        for vid in video_ids:
-            module.video_resources.remove(vid)
-        return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)})
+    if request.method != 'POST':
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
+    try:
+        data = json.loads(request.body)
+        video_ids = data.get("video_ids")
+
+        if not video_ids:
+            return JsonResponse({"success": False, "error": "No video IDs provided"}, status=400)
+
+        module = get_object_or_404(Module, id=module_id)
+        
+        for vid in video_ids:
+            try:
+                video = VideoResource.objects.get(id=vid)
+                module.video_resources.remove(video)
+            except VideoResource.DoesNotExist:
+                return JsonResponse({"success": False, "error": f"Video with ID {vid} does not exist."}, status=404)
+                
+        return JsonResponse({"success": True})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ RESOURCES VIEWS ------------------------------------------------------------------
@@ -824,18 +868,47 @@ def remove_video_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            resource_ids = data.get('resource_ids', [])
+    from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required, user_passes_test
+from client.models import Module, AdditionalResource
+import json
 
-            module = Module.objects.get(id=module_id)
-            for resource_id in resource_ids:
-                module.additional_resources.remove(resource_id)
+def admin_check(user):
+    return user.is_staff or user.is_superuser
 
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_resource_from_module(request, module_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        resource_ids = data.get('resource_ids')
+
+        if resource_ids is None: 
+            return JsonResponse({'success': False, 'error': 'No resource_ids provided'}, status=400)
+
+        module = Module.objects.get(id=module_id)
+        
+        for resource_id in resource_ids:
+            try:
+                resource = AdditionalResource.objects.get(id=resource_id)
+                module.additional_resources.remove(resource)
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({'success': False, 'error': f'Resource with ID {resource_id} does not exist.'}, status=404)
+
+        return JsonResponse({'success': True})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON format'}, status=400)
+    except Module.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Module not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 @user_passes_test(admin_check)
 @login_required
@@ -1317,6 +1390,51 @@ def edit_category(request, category_id):
         form = CategoryForm(instance=category)
 
     return render(request, 'client/edit_category.html', {'form': form, 'category': category})
+
+
+@user_passes_test(admin_check)
+@login_required
+def add_category_to_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    data = json.loads(request.body)
+    category_id = data.get('category_id')
+    
+    try:
+        category = Category.objects.get(id=category_id)
+        module.categories.add(category)
+        return JsonResponse({
+            'status': 'success',
+            'category_name': category.name
+        })
+    except Category.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Category not found'
+        }, status=404)
+
+
+@user_passes_test(admin_check)
+@login_required
+def remove_categories_from_module(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    data = json.loads(request.body)
+    category_ids = data.get('category_ids', [])
+    
+    categories = Category.objects.filter(id__in=category_ids)
+    removed_categories = []
+    
+    for category in categories:
+        removed_categories.append({
+            'id': category.id,
+            'name': category.name
+        })
+    
+    module.categories.remove(*categories)
+    
+    return JsonResponse({
+        'status': 'success',
+        'removed_categories': removed_categories
+    })
 
 @csrf_exempt
 @login_required

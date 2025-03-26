@@ -6,100 +6,6 @@ body {
   display: flex;
 }
 
-.sidebar {
-  width: 60px;
-  height: 100vh;
-  background-color: #F24505;
-  color: white;
-  position: fixed;
-  left: 0;
-  top: 0;
-  border-top-right-radius: 15px;
-  border-bottom-right-radius: 15px;
-  overflow: hidden;
-  transition: width 0.3s ease-in-out;
-}
-.sidebar:hover {
-  width: 250px;
-}
-.logo {
-  font-size: 35px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  padding-top: 20px;
-  gap: 10px;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-.sidebar:hover .logo {
-  opacity: 1;
-}
-.nav-links {
-  list-style: none;
-  padding: 0;
-  margin-top: 40px;
-  padding-left: 15px;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-.sidebar:hover .nav-links {
-  opacity: 1;
-}
-.nav-links li {
-  margin: 20px 0;
-}
-.nav-links a {
-  text-decoration: none;
-  color: white;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-  padding: 15px 0;
-}
-.nav-links a.active {
-  font-weight: bolder;
-  color: white;
-  background-color: #F24505;
-}
-.nav-links a:hover {
-  width: 225px;
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-}
-.logout {
-  list-style: none;
-  position: absolute;
-  bottom: 20px;
-  left: 15px;
-  margin-top: 250px;
-  padding-left: 0;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-.sidebar:hover .logout {
-  opacity: 1;
-}
-.logout a {
-  text-decoration: none;
-  color: white;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-}
-.logout a:hover {
-  width: 225px;
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-}
-.icon {
-  font-size: 20px;
-}
-
 .dashboard-container {
   margin-left: 60px; 
   display: flex;
@@ -182,6 +88,7 @@ body {
 .module-card:nth-child(odd) {
     background: #f2f20557;
     border-left: 5px solid #f2f20557;
+    color: #333;
 }
 
 .module-card:nth-child(even) {
@@ -203,7 +110,7 @@ body {
 }
 
 .module-card:nth-child(even) p {
-    color: #eeebeb;
+    color: #333;;
 }
 
 /* Ensure title stays inside the card */
@@ -228,12 +135,17 @@ body {
 }
 
 
-/* Progress Bar */
+/* Progress Bar for modules*/
 .progress-container {
     width: 100%;
     padding: 5px 0;
 }
 
+/* Progress Bar for programs*/
+.progress-line {
+  width: 90%;
+  padding: 5px;
+}
 
 /* View Module Button */
 .view-module-button {
@@ -384,7 +296,7 @@ body {
   transition: color 0.2s ease-in-out;
 }
 .recent-module-item a:hover {
-  color: #cccccc69;
+  color: #a6a4a4;
 }
 .no-modules {
   font-size: 0.85rem;
@@ -492,7 +404,90 @@ body {
         margin-left: 0;
         padding: 10px;
     }
-    .sidebar {
-        display: none; 
-    }
+    .nav-button {
+      margin: 5px;
+      font-size: 11px;
+      padding: 6px 10px;
+  }
+}
+
+
+.module-card {
+  border-radius: 12px;
+  width: 250px;
+  height: 320px;
+  flex-shrink: 0;
+  padding: 15px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* On hover, lift the card and add a subtle shadow */
+.module-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Alternate colors for odd/even cards exactly like all_modules */
+.module-card:nth-child(odd) {
+  background: #73C4FD;            /* light blue */
+  border-left: 5px solid #5ca5ea; 
+}
+
+.module-card:nth-child(even) {
+  background: #0048FF;            /* darker blue */
+  border-left: 5px solid #012EAB; 
+  color: #eeebeb;                 /* lighten text on dark background */
+}
+
+/* Make sure text is visible on odd/even backgrounds */
+.module-card:nth-child(odd) h3,
+.module-card:nth-child(odd) p {
+  color: #333;
+}
+
+.module-card:nth-child(even) h3,
+.module-card:nth-child(even) p {
+  color: #eeebeb;
+}
+
+/* Button styles + hover */
+.view-module-button {
+  display: inline-block;
+  background: white;
+  color: #F24505;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 10px 14px;
+  border-radius: 25px;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  border: 2px solid #F24505;
+  margin-top: auto;
+}
+
+/* Button hover matches all_modules */
+.view-module-button:hover {
+  background: #D43802;
+  color: #ffffff;
+  border-color: #D43802;
+}
+
+/* If you have "locked" logic, you can override locked styling here, e.g. */
+.module-card.locked {
+  background: #e6e6e6;
+  color: #999;
+  pointer-events: none;
+  opacity: 0.8;
+  border-left: 5px solid #999; 
 }
