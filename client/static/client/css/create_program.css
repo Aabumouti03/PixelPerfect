@@ -21,7 +21,7 @@ body {
 
 .form-control:focus {
     border-color:  #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(243, 255, 81, 0.5);
 }
 
 .form-check-input {
@@ -128,7 +128,7 @@ body {
 
 
 .sortable-item:hover {
-    background-color: #00bff4b4;
+    background-color: #f2f205a6;
 }
 
 
@@ -163,7 +163,7 @@ textarea.form-control {
 
 .module-box ul li {
     padding: 10px;
-    border-bottom: 2px solid #80bef5;
+    border-bottom: 2px solid #f2f20557;
 }
 
 .saveProgram {
@@ -171,7 +171,7 @@ textarea.form-control {
 }
 
 .sortable-item:hover {
-    background-color: #80bef5;
+    background-color: #f2f20557;
     transition: background-color 0.3s ease-in-out;
 }
 
@@ -191,8 +191,8 @@ textarea.form-control {
 .filterButton:active,
 .filterButton:hover,
 .filterButton[aria-expanded="true"] {
-    background-color: #80bef5 !important;
-    border-color: #80bef5 !important;
+    background-color: #f2f20557 !important;
+    border-color: #f2f20557 !important;
 }
 
 .category-box{

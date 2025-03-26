@@ -1,45 +1,69 @@
 {% extends 'client/client_base.html' %}
-{% load static %} 
-{% block title %}
-    Programs
-{% endblock %}
+{% load static %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'client/css/programs.css' %}">
 {% endblock %}
 
-
 {% block content %}
-    <body class="container">
-        <h1>Programs</h1>
+<script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+<div class="content">
+    <div class="header">
+        <div class="header-left">
+            <h1>Programs</h1>
+        </div>
+        <div class="header-icons">
+            <form method="get" class="d-flex align-items-center">
+                <input
+                    type="text"
+                    name="q"
+                    class="search-bar"
+                    placeholder="Search programs..."
+                    value="{{ query|default:'' }}"
+                    onkeyup="searchPrograms(event)"
+                >
+            </form>
+        </div>
+    </div>
 
-        <main class="program-grid">
+    <div class="programs-container">
+        <div class="program-grid">
             {% for program in programs %}
-            <div class="program-card">
-                <h2>{{ program.title }}</h2>
-                <p>{{ program.description|truncatewords:20 }}</p>
-            
-                <ul class="module-list">
-                    {% for pm in program.program_modules.all %}
-                        <li>{{ pm.module.title }}</li>
-                    {% empty %}
-                        <li>No modules assigned.</li>
-                    {% endfor %}
-                </ul>                
-            
-                <div class="buttons">
-                    <a href="{% url 'program_detail' program.id %}" class="edit-btn">Edit</a>
-                    <a href="{% url 'delete_program' program.id %}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this program?');">Delete</a>
+                <div class="program-card">
+                    <div class="icons-container">
+                        <a href="{% url 'program_detail' program.id %}" class="edit-button">
+                            <ion-icon name="pencil"></ion-icon>
+                        </a>
+                        <form action="{% url 'delete_program' program.id %}" method="POST" class="delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this program?');">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </button>
+                        </form>
+                    </div>
+                    <h5>{{ program.title }}</h5>
+                    <p>{{ program.description|truncatewords:20 }}</p>
                 </div>
-            </div>
             {% empty %}
-                <p>No programs available.</p>
+                <p style="text-align: center; color: #555;">No programs found.</p>
             {% endfor %}
 
-            <a href="{% url 'create_program' %}" class="program-card add-card">
-                +
+            <a href="{% url 'create_program' %}">
+                <div class="add-program-card">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                </div>
             </a>
-        </main>
-    </body>
-{% endblock %}
+        </div>
+    </div>
+</div>
 
+<script>
+    function searchPrograms(event) {
+        const query = event.target.value.toLowerCase();
+        document.querySelectorAll('.program-card').forEach(program => {
+            const title = program.querySelector('h5')?.innerText.toLowerCase() || "";
+            program.style.display = title.includes(query) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}
