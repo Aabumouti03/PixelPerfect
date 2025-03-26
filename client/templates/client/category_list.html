@@ -1,37 +1,69 @@
 {% extends 'client/client_base.html' %}
-
 {% load static %}
 
+{% block title %}Categories{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'client/css/category_list.css' %}">
+{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'client/css/category_list.css' %}">
-<body class="container">
+<script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
 
-    <div class="top-bar">
-        <h1>Available Categories</h1>
-
-        <div class="export-buttons">
-            <a href="{% url 'create_category' %}" class="custom-btn">
-                Add category
-            </a>
+<div class="content">
+    <div class="header">
+        <div class="header-left">
+            <h1>Categories</h1>
         </div>
-
+        <div class="header-icons">
+            <form method="get" class="d-flex align-items-center">
+                <input
+                    type="text"
+                    name="q"
+                    class="search-bar"
+                    placeholder="Search categories..."
+                    value="{{ query|default:'' }}"
+                    onkeyup="searchCategories(event)"
+                >
+            </form>
+        </div>
     </div>
 
-    <main class="category-grid">
-        {% for category in categories %}
-        <div class="category-card">
-            <h2>{{ category.name }}</h2>
-            <p>{{ category.description|truncatewords:20 }}</p>
-        
-            <div class="buttons">
-                <a href="{% url 'category_detail' category.id %}" class="view-btn">View</a>
-                <a href="{% url 'edit_category' category.id %}" class="view-btn">Edit</a>
-            </div>
-        </div>
-        {% empty %}
-            <p>No categories available.</p>
-        {% endfor %}
-    </main>
-</body>
+    <div class="categories-container">
+        <div class="category-grid">
+            {% for category in categories %}
+                <div class="category-card">
+                    <div class="icons-container">
+                        <a href="{% url 'edit_category' category.id %}" class="edit-button">
+                            <ion-icon name="pencil"></ion-icon>
+                        </a>
+                        <a href="{% url 'category_detail' category.id %}" class="view-button">
+                            <ion-icon name="eye-outline"></ion-icon>
+                        </a>
+                    </div>
+                    <h5>{{ category.name }}</h5>
+                    <p>{{ category.description|default:"No description provided." }}</p>
+                </div>
+            {% empty %}
+                <p style="text-align: center; color: #555;">No categories found.</p>
+            {% endfor %}
 
+            <a href="{% url 'create_category' %}">
+                <div class="add-category-card">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchCategories(event) {
+        const query = event.target.value.toLowerCase();
+        document.querySelectorAll('.category-card').forEach(card => {
+            const title = card.querySelector('h5')?.innerText.toLowerCase() || '';
+            card.style.display = title.includes(query) ? '' : 'none';
+        });
+    }
+</script>
 {% endblock %}

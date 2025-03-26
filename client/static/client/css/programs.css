@@ -1,143 +1,211 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
-h1 {
-    font-size: 24px;
-    color: #000000;
-    margin-bottom: 20px;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Manrope', sans-serif;
 }
 
-.container {
+.content {
+    padding: 40px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
     width: 100%;
-    max-width: 2000px; 
-    margin: auto;
-    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 15px;
+}
+
+.header-left h1 {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.search-bar {
+    width: 250px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: width 0.4s ease;
+}
+
+.search-bar:focus {
+    width: 350px;
+    outline: none;
+    border-color: #F24505;
+}
+
+.programs-container {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 1100px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .program-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    column-gap: 40px; 
-    row-gap: 80px;
-    justify-content: center;
-    align-items: stretch;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    width: 100%;
 }
 
 .program-card {
-    background: #f2f20557;
-    color: 2b2320;
-    border-radius: 10px;
     padding: 20px;
-    min-height: 220px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s ease-in-out;
-    width: 100%;
-    height: 100%;
-    min-width: 100px;
-    max-width: 240px;
-}
-
-.add-card {
-    background: #d8e4f4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 40px;
-    font-weight: bold;
-    color: #ccc;
-    cursor: pointer;
+    border-radius: 10px;
+    color: white;
+    position: relative;
     height: 220px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 15px;
+    padding-left: 15px;
+    transition: transform 0.2s ease-in-out;
+    background-size: cover !important;
+    background-position: center;
+    background-color: #f2f20557;
+    color: #2b2320;
 }
 
-.program-card:hover {
-    transform: translateY(-5px);
-}
-
-.program-card h2 {
-    margin: 0;
+.program-card h5 {
     font-size: 18px;
-    font-weight: bold;
+    margin-bottom: 8px;
+    white-space: normal;
+    overflow: hidden;
+    max-height: 45px;
 }
 
 .program-card p {
     font-size: 14px;
-    margin-top: 5px;
+    text-align: center;
+    overflow: hidden;
+    max-height: 60px;
+    margin: 5px 10px;
+    white-space: normal;
 }
 
-.module-list {
-    margin-top: 10px;
-    padding-left: 20px;
-}
-
-.module-list li {
-    font-size: 12px;
-    line-height: 1.4;
-}
-
-.add-card {
-    background: #cccccc91;
+.icons-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     display: flex;
+    gap: 8px;
+}
+
+.edit-button, .delete-button {
+    background-color: rgba(255, 255, 255, 0.3);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    color:#555;
     justify-content: center;
     align-items: center;
-    font-size: 40px;
-    font-weight: bold;
-    color: #949494;
     cursor: pointer;
-    text-decoration: none;
+    transition: background-color 0.2s;
 }
 
-.add-card:hover {
-    background: #ccc;
+.edit-button:hover,
+.delete-button:hover {
+    background-color: #F24505;
+    color: white;
 }
 
-.buttons {
+.add-program-card {
+    border-radius: 12px;
+    width: 250px;
+    height: 220px;
+    padding: 15px;
     display: flex;
-    gap: 7px; 
-    margin-top: 15px;
-}
-
-.edit-btn {
-    font-size: 14px;
-    padding: 10px 14px;
-    background-color: white;
-    color: #F24505;
-    text-decoration: none;
-    border-radius: 25px;
-    font-weight: bold;
-    border: none;
+    align-items: center;
+    justify-content: center;
+    background-color: #e0e0e0;
+    color: #555;
     cursor: pointer;
+    transition: transform 0.2s;
+    flex-direction: column;
     text-align: center;
-    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    border: 2px solid #F24505;   
-    width: 50%;
-    max-width: 100%;     
 }
 
-.delete-btn {
-    font-size: 14px;
-    padding: 10px 14px;
-    background-color: white;
-    color: #F24505;
-    text-decoration: none;
-    border-radius: 25px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    border: 2px solid #F24505; 
-    width: 50%; 
-    max-width: 100%; 
+.add-program-card:hover {
+    transform: scale(1.05);
 }
 
-.edit-btn:hover {
-    background: #D43802;
-  color: white;
+@media (max-width: 992px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .search-bar {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .programs-container {
+        padding: 20px;
+    }
+
+    .program-card,
+    .add-program-card {
+        height: auto;
+        padding: 20px;
+    }
 }
 
-.delete-btn:hover {
-    background: #D43802;
-  color: white;
+
+@media (max-width: 576px) {
+    .content {
+        padding: 20px;
+    }
+
+    .program-card h5 {
+        font-size: 16px;
+    }
+
+    .program-card p {
+        font-size: 13px;
+    }
+
+    .edit-button,
+    .delete-button {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .icons-container {
+        top: 8px;
+        right: 8px;
+    }
+
+    .add-program-card {
+        width: 100%;
+        height: 150px;
+    }
 }
