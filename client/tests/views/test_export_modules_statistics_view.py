@@ -20,6 +20,7 @@ class ExportModulesStatisticsCSVTest(TestCase):
             is_superuser=True
         )
 
+
         # Create a regular (non-admin) user
         self.regular_user = User.objects.create_user(
             username="user1",
@@ -90,6 +91,10 @@ class ExportModulesStatisticsCSVTest(TestCase):
             ['Avg Completion - Module 1', '75.0'],  # Average completion for Module 1
             ['Avg Completion - Module 2', '85.0'],  # Average completion for Module 2
             ['Avg Completion - Module 3', '0'],  # No progress in Module 3
+            ['Avg Rating - Module 1', '0'],  
+            ['Avg Rating - Module 2', '0'],  
+            ['Avg Rating - Module 3', '0'],
+
         ]
 
         # Check if the generated CSV matches the expected output
