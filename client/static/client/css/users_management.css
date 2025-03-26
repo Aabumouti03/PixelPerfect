@@ -1,3 +1,4 @@
+@import url("navbar.css");
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
 .content {
@@ -101,14 +102,173 @@ h2 {
     background-color: #D43802;
 }
 
+
+.navbar {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px; 
+    background-color: #f44336; 
+    overflow-y: auto; 
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 15px;
+}
+
+.table-responsive table {
+    min-width: 900px;
+}
+
+.rounded-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    background: white;
+    margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+    .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 0;
+    }
+
+    .table-controls input,
+    .table-controls select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .rounded-table th,
+    .rounded-table td {
+        white-space: nowrap;
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .view-btn {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .users-container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 20px;
+        text-align: center;
+    }
+}
+
+.navbar {
+    position: relative;
+    height: auto;
+    width: 100%;
+}
+.content {
+    margin-left: 0;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100vh;
+    background-color: #f44336;
+    overflow-y: auto;
+    z-index: 1000; 
+}
+
+.content {
+    width: calc(100% - 60px);
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        position: fixed;
+        width: 100%;
+        height: auto;
+    }
+
+    .content {
+        margin-left: 60px;
+        margin-top: 60px;
+    }
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 15px;
+}
+
+.table-responsive table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+}
+
+.table-controls input,
+.table-controls select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.rounded-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.rounded-table th,
+.rounded-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.rounded-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.rounded-table tbody tr:hover {
+    background: #e3f2fd;
+}
+
 @media (max-width: 768px) {
     .table-controls {
         flex-direction: column;
         gap: 10px;
     }
 
-    .rounded-table th, .rounded-table td {
-        padding: 10px;
-        font-size: 14px;
+    .table-controls input,
+    .table-controls select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .rounded-table th,
+    .rounded-table td {
+        font-size: 13px;
+    }
+
+    .view-btn {
+        font-size: 12px;
+        padding: 4px 8px;
     }
 }

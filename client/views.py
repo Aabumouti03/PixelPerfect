@@ -1090,6 +1090,14 @@ def export_modules_statistics_csv(request):
     avg_completion_labels, avg_completion_data = get_average_completion_percentage()
     for label, value in zip(avg_completion_labels, avg_completion_data):
         writer.writerow([f"Avg Completion - {label}", value])
+    
+    module_ratings = (
+        Module.objects.annotate(avg_rating=Avg('ratings__rating'))
+        .values('title', 'avg_rating')
+    )
+    for module in module_ratings:
+        rating = module['avg_rating'] if module['avg_rating'] is not None else 0
+        writer.writerow([f"Avg Rating - {module['title']}", rating])
 
     return response
 
