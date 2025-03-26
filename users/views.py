@@ -279,7 +279,6 @@ def dashboard(request):
     }
     return render(request, 'users/dashboard.html', context)
 
-
 @login_required
 def view_program(request, program_id):
     """Display user program details."""
@@ -296,6 +295,9 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
+
+    # Get all categories associated with the program
+    program_categories = program.categories.all()  # This is a queryset of Category objects
 
     user_progress = {
         progress.module.id: progress.completion_percentage
@@ -326,9 +328,11 @@ def view_program(request, program_id):
         'user': user,
         'program': program,
         'program_modules': program_modules_data,
+        'program_categories': program_categories,  # Passing the categories to the template
     }
     
     return render(request, 'users/view_program.html', context)
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ GENERAL SITE VIEWS ---------------------------------------------------------------
