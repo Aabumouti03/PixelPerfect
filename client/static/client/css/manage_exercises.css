@@ -1,153 +1,241 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
-.content {
-    flex-grow: 1;
-    padding-left: 10px;
+
+body {
+    font-family: 'Manrope', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
 }
 
+/* Page Container */
+.content {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Top Header */
 .top-bar {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
 }
 
-.module-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+.top-bar h2 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #000;
 }
 
-.module-card {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    width: 100%;
+/* Add Button */
+.add-btn {
+    padding: 12px 24px;
+    background: #F24505;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
     transition: background 0.3s ease-in-out;
 }
 
+.add-btn:hover {
+    background-color: #D43802;
+}
+
+/* Module List */
+.module-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Module Card */
+.module-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    border: 2px solid #F24505;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* Header Inside Card */
 .module-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    gap: 15px;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+    background: #fff;
+}
+
+/* Title + Number */
+.module-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.exercise-number {
+    font-size: 20px;
+    font-weight: bold;
+    color: #F24505;
+    flex-shrink: 0;
 }
 
 .module-title input {
-    border: none;
-    font-family: 'Manrope';
-    color: #2b2320;
     font-size: 20px;
-    width: 100%;
     font-weight: bold;
+    color: #2b2320;
+    border: none;
     outline: none;
+    background: transparent;
+    width: 100%;
+    padding: 6px;
 }
 
+/* Editable Inputs */
 .edit-input {
+    font-size: 16px;
+    font-family: 'Manrope', sans-serif;
     border: none;
-    font-family: 'Manrope';
     background: transparent;
     outline: none;
-    font-size: 18px;
     width: 100%;
-    min-width: 0;
-    padding: 5px;
+    padding: 6px 10px;
+    border-radius: 8px;
 }
 
 .editing {
-    border-bottom: 2px solid #007bff;
-    background: #f0f8ff;
-    padding: 5px;
+    background-color: #fdf9f3;
+    border-bottom: 2px solid #F24505;
 }
 
-.hidden {
-    display: none;
-}
-
+/* Action Buttons */
 .module-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
-    align-items: center;
+    flex-shrink: 0;
+    justify-content: flex-end;
 }
 
-.buttons {
+.buttons,
+.add-question-btn,
+.remove-questions-btn,
+.delete-selected-btn,
+.toggle-btn {
+    padding: 10px 18px;
+    background-color: #F24505;
+    color: white;
     font-size: 14px;
-  padding: 10px 14px;
-  background-color: #F24505;
-  color: white;
-  text-decoration: none;
-  border-radius: 25px;
-  font-weight: bold;
-  font-family: 'Manrope';
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-  border: 2px solid #ffffff;
+    font-weight: bold;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
 }
 
-.buttons:hover {
-    background: #D43802;
-  color: white;
+.buttons:hover,
+.add-question-btn:hover,
+.remove-questions-btn:hover,
+.delete-selected-btn:hover {
+    background-color: #D43802;
 }
 
 .toggle-btn {
-    background: none;
-    color: #F24505;
-    border: none;
     font-size: 18px;
-    cursor: pointer;
+    background: none;
+    border: none;
+    color: #F24505;
+    padding: 0;
+    margin-left: 5px;
 }
 
+.hidden {
+    display: none !important;
+}
+
+/* Content Section */
 .module-content {
+    padding: 20px;
+    background: #fff;
+    border-top: 1px solid #eee;
     display: none;
-    padding: 15px;
-    background: white;
 }
 
 .module-content.show {
     display: block;
 }
 
-.exercise-questions {
-    padding-left: 20px;
-    list-style: none;
+/* Question Title */
+.module-content h4 {
+    font-size: 18px;
+    color: #000;
+    margin-bottom: 12px;
 }
 
-.numbered-title {
+/* Questions List */
+.exercise-questions {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.exercise-questions li {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-grow: 1;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-left: 4px solid #F24505;
+    background-color: #f9f9f9;
+    border-radius: 8px;
 }
 
-
-.exercise-number {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    flex-shrink: 0;
+/* Checkbox */
+.question-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: #F24505;
+    cursor: pointer;
 }
 
-.add-btn {
-    font-size: 16px;
-  padding: 10px 14px;
-  background-color: #F24505;
-  color: white;
-  text-decoration: none;
-  border-radius: 25px;
-  font-weight: bold;
-  font-family: 'Manrope';
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-  border: 2px solid #ffffff;
-}
+/* Responsive */
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
 
-.add-btn:hover {
-    background: #D43802;
-  color: white;
+    .module-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .module-title {
+        width: 100%;
+    }
+
+    .module-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .buttons,
+    .add-question-btn,
+    .remove-questions-btn,
+    .delete-selected-btn {
+        width: 100%;
+        text-align: center;
+    }
 }

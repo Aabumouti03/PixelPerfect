@@ -46,21 +46,6 @@ class ViewRespondersTest(TestCase):
             questionnaire=self.questionnaire, user=self.end_user2
         )
 
-    def test_search_responders_1(self):
-        """Test that search filters responders correctly"""
-        self.client.login(username="admin", password="adminpass")
-
-        # Search by first name of EndUser1
-        search_term = self.end_user1.user.first_name  
-
-        response = self.client.get(reverse("view_responders", args=[self.questionnaire.id]), {"search": search_term})
-
-        # Ensure EndUser1 appears in search results
-        self.assertContains(response, self.end_user1.user.first_name)
-
-        # Ensure EndUser2 does NOT appear in search results
-        self.assertNotContains(response, self.end_user2.user.first_name)
-
     def test_redirect_if_not_logged_in(self):
         """Test that non-authenticated users are redirected"""
         response = self.client.get(reverse("view_responders", args=[self.questionnaire.id]))

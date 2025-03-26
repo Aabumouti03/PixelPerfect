@@ -208,15 +208,11 @@ body {
     transition: opacity 0.3s ease-in-out, right 0.3s ease-in-out;
 }
 
-
-/* Hide the toggle button when sidebar expands */
 .sidebar:hover .toggle {
     right: -25px; 
     opacity: 0;
 }
 
-
-/* Ensure toggle button is always visible */
 .sidebar:not(:hover) .toggle {
     right: 10px; 
     opacity: 1;

@@ -6,14 +6,12 @@ body {
     background: #ffffff;
 }
 
-/* Full Page Layout */
 .content {
     flex-grow: 1;
     padding: 30px;
     margin-left: 25px;
 }
 
-/* Header Styling */
 .top-bar {
     display: column;
     align-items: center;
@@ -23,7 +21,6 @@ body {
     color: #000000;
 }
 
-/* Table Styling */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -42,7 +39,6 @@ body {
     font-weight: bold;
 }
 
-/* Status Labels */
 .active-status {
     color: green;
     font-weight: bold;
@@ -55,7 +51,6 @@ body {
     font-size: 16px;
 }
 
-/* Button Styling */
 .btn {
     font-family: 'Manrope';
     font-size: 14px;
@@ -72,11 +67,10 @@ body {
   border: 2px solid #ffffff;
 }
 
-/* Button Colors */
 .view-btn {
     background-color: white;
-    color: #3498db;
-    border-color: #3498db;
+    color: #f2f20557;
+    border-color: #f2f20557;
 }
 
 .view-btn:hover {
@@ -84,7 +78,6 @@ body {
     color: #3498db;
 }
 
-/* Grid Layout for Consistency */
 .card-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -111,7 +104,7 @@ body {
         background: #D43802;
         color: white;
 }
-/* Responsive Design */
+
 @media (max-width: 1024px) {
     .card-container {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -129,7 +122,7 @@ body {
         grid-template-columns: repeat(1, 1fr);
     }
 }
-/* Pagination Styles */
+
 .pagination {
     display: flex;
     justify-content: center;
@@ -162,7 +155,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Active Page Styling */
 .active .page-link {
     background-color: #f24505;
     color: white;
@@ -171,7 +163,6 @@ body {
     transform: scale(1.1);
 }
 
-/* Previous & Next Buttons */
 .prev-next {
     font-weight: bold;
     background-color: #f8f8f8;
@@ -183,7 +174,6 @@ body {
     color: white;
 }
 
-/* Search Bar */
 .search-container {
     display: flex;
     justify-content: center;
@@ -224,8 +214,6 @@ body {
     color: white;
 }
 
-
-/* Responsive Design */
 @media (max-width: 768px) {
     .page-link {
         padding: 6px 10px;

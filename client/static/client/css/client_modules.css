@@ -60,7 +60,7 @@
 .search-bar:focus {
     width: 350px;
     outline: none;
-    border-color: #4da6ff;
+    border-color: #F24505;
 }
 
 .modules-container {
@@ -102,15 +102,15 @@
 .module-card:nth-child(6n+1),
 .module-card:nth-child(6n+3),
 .module-card:nth-child(6n+5) {
-    background-color: #0148FD;
-    color: #ffffff;
+    background-color: #f2f20557;
+    color:#2b2320;
 }
 
 .module-card:nth-child(6n+2),
 .module-card:nth-child(6n+4),
 .module-card:nth-child(6n+6) {
-    background-color: #73C4FD;
-    color: #000000;
+    background-color:  #f2f20557;
+    color: #2b2320;
 }
 
 .module-card h5 {
@@ -145,6 +145,7 @@
     width: 30px;
     height: 30px;
     display: flex;
+    color:#555;
     justify-content: center;
     align-items: center;
     cursor: pointer;
@@ -152,11 +153,13 @@
 }
 
 .edit-button:hover {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #F24505;
+    color: white;
 }
 
 .delete-button:hover {
-    background-color: rgba(255, 99, 71, 0.8);
+    background-color: #F24505;
+    color: white;
 }
 
 .add-module-card {
