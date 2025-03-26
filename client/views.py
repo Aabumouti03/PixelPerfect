@@ -783,7 +783,7 @@ def add_video(request):
 
 @csrf_exempt
 @login_required
-@user_passes_test(admin_check) #final version
+@user_passes_test(admin_check)
 def add_video_to_module(request, module_id):
     """Add a video to the specified module."""
     if request.method == "POST":
@@ -1405,9 +1405,14 @@ def edit_category(request, category_id):
 def add_category_to_module(request, module_id):
     """Allows the admin to add a category to a module."""
     module = get_object_or_404(Module, id=module_id)
-    data = json.loads(request.body)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
     category_id = data.get('category_id')
-    
+
     try:
         category = Category.objects.get(id=category_id)
         module.categories.add(category)
@@ -1420,7 +1425,6 @@ def add_category_to_module(request, module_id):
             'status': 'error',
             'message': 'Category not found'
         }, status=404)
-
 
 @user_passes_test(admin_check)
 @login_required
