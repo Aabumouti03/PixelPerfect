@@ -3,13 +3,28 @@
 
 {% block content %}
 <div class="content">
-    <div class="top-bar">
-        <h2>Manage Exercises</h2>
-        <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
-    </div>
     <link rel="stylesheet" href="{% static 'client/css/module_style.css' %}">
     <link rel="stylesheet" href="{% static 'client/css/manage_exercises.css' %}">
 
+    <div class="top-bar">
+        <h2>Manage Exercises</h2>
+        
+        <div class="top-bar-right">
+            <form method="get" class="search-form">
+                <input
+                    type="text"
+                    name="q"
+                    class="search-bar"
+                    placeholder="Search exercises..."
+                    value="{{ query|default:'' }}"
+                    onkeyup="searchExercises(event)"
+                >
+            </form>
+            <button class="add-btn" onclick="addExercise()"> Add Exercise</button>
+        </div>
+    </div>
+    
+    
     <div class="module-list">
         {% for exercise in exercises %}
             <div class="module-card">
@@ -254,6 +269,15 @@
     function removeQuestion(questionId) {
         document.getElementById(questionId).remove();
     }
+
+
+    function searchExercises(event) {
+        const query = event.target.value.toLowerCase();
+        document.querySelectorAll('.module-card').forEach(card => {
+            const title = card.querySelector('.module-title input')?.value.toLowerCase() || '';
+            card.style.display = title.includes(query) ? '' : 'none';
+        });
+    }   
     
 </script>
 

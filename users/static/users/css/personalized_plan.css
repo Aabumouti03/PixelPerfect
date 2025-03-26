@@ -179,3 +179,60 @@ body {
     font-weight: 800;
     margin: 0;
 }
+
+@media screen and (max-width: 480px) {
+    .programs-container,
+    .modules-container {
+      padding: 0 10px;
+      gap: 20px;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .module-card {
+      width: 90vw;
+      height: auto;
+      padding: 20px 16px;
+    }
+  
+    .program-card {
+      width: 90vw;
+      padding: 20px 16px;
+    }
+  
+    .program-modules {
+      flex-direction: column;
+      gap: 16px;
+    }
+  
+    .program-header {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+  
+    .nav-buttons {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+  
+    .nav-buttons a button {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px;
+    }
+  
+    .enroll-button,
+    .view-program-button,
+    .view-module-button {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px 14px;
+    }
+  
+    .program-title {
+      font-size: 18px;
+    }
+  }
+  

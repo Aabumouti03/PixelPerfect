@@ -9,7 +9,7 @@ body {
 
 /* Page Container */
 .content {
-    padding: 30px;
+    padding: 30px 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -20,11 +20,12 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 30px;
 }
 
 .top-bar h2 {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: bold;
     color: #000;
 }
@@ -40,11 +41,48 @@ body {
     border: none;
     cursor: pointer;
     transition: background 0.3s ease-in-out;
+    white-space: nowrap;
 }
 
 .add-btn:hover {
     background-color: #D43802;
 }
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar {
+    width: 250px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: width 0.4s ease;
+}
+
+.search-bar:focus {
+    width: 300px;
+    outline: none;
+    border-color: #F24505;
+}
+
 
 /* Module List */
 .module-list {
@@ -122,7 +160,6 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    flex-shrink: 0;
     justify-content: flex-end;
 }
 
@@ -174,13 +211,6 @@ body {
     display: block;
 }
 
-/* Question Title */
-.module-content h4 {
-    font-size: 18px;
-    color: #000;
-    margin-bottom: 12px;
-}
-
 /* Questions List */
 .exercise-questions {
     list-style: none;
@@ -207,28 +237,26 @@ body {
     cursor: pointer;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* RESPONSIVE DESIGN */
+@media (max-width: 992px) {
     .top-bar {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
+        gap: 10px;
     }
 
     .module-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
     }
 
-    .module-title {
-        width: 100%;
+    .module-title input {
+        font-size: 18px;
     }
 
     .module-actions {
+        justify-content: flex-start;
         width: 100%;
-        flex-direction: column;
-        gap: 10px;
     }
 
     .buttons,
@@ -237,5 +265,37 @@ body {
     .delete-selected-btn {
         width: 100%;
         text-align: center;
+    }
+
+    .search-wrapper {
+        justify-content: center;
+    }
+
+    .search-bar {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .top-bar h2 {
+        font-size: 26px;
+    }
+
+    .edit-input {
+        font-size: 14px;
+    }
+
+    .buttons {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
+
+    .toggle-btn {
+        font-size: 16px;
+    }
+
+    .exercise-questions li {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
