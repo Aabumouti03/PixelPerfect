@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from client.forms import ModuleForm
 from client.models import Category, Module as Program, VideoResource
 from client.statistics import *
+from users.helpers_modules import calculate_program_progress
 from users.models import (
     EndUser,
     QuestionResponse,
