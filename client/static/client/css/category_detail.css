@@ -1,3 +1,4 @@
+@import url('navb');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 .container {
     width: 100%;
@@ -100,3 +101,94 @@ h3 {
 h4 {
     font-size: 18px;
 }
+
+/* --- Responsive Breakpoints --- */
+
+@media (max-width: 1024px) {
+    .category-detail-header h2 {
+        font-size: 24px;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .category-card {
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .content {
+        padding: 20px;
+        margin-left: 35px;
+    }
+
+    .category-detail-header h2 {
+        font-size: 22px;
+    }
+
+    .category-grid {
+        display: grid;
+        gap: 30px 40px;
+        justify-content: center;
+        grid-template-columns: 1fr;
+
+    }
+    
+
+    .category-detail-header p {
+        font-size: 14px;
+    }
+
+    h3 {
+        font-size: 20px;
+    }
+
+    h4 {
+        font-size: 16px;
+    }
+
+    .module-card, .program-card {
+        width: 200px;
+        height: auto;
+    }
+
+
+        .module-row,
+        .program-row {
+            flex-direction: column;
+            align-items: center; /* center the cards */
+            overflow-x: unset;   /* remove horizontal scroll */
+            gap: 30px;
+        }
+    
+        .module-card,
+        .program-card {
+            width: 80%;  /* make the card fill most of the screen */
+            max-width: 400px;
+        }
+    
+    
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+
+    .category-detail-header h2 {
+        margin-left: 0;
+        font-size: 20px;
+    }
+
+    h3, h4 {
+        margin-left: 0;
+    }
+
+    .module-row, .program-row {
+        margin-left: 0;
+    }
+}
+
