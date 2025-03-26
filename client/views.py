@@ -1431,20 +1431,22 @@ def add_category_to_module(request, module_id):
 def remove_categories_from_module(request, module_id):
     """Allows the admin to remove a category from a module."""
     module = get_object_or_404(Module, id=module_id)
-    data = json.loads(request.body)
+    
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
     category_ids = data.get('category_ids', [])
-    
     categories = Category.objects.filter(id__in=category_ids)
-    removed_categories = []
     
-    for category in categories:
-        removed_categories.append({
-            'id': category.id,
-            'name': category.name
-        })
-    
+    removed_categories = [
+        {'id': category.id, 'name': category.name}
+        for category in categories
+    ]
+
     module.categories.remove(*categories)
-    
+
     return JsonResponse({
         'status': 'success',
         'removed_categories': removed_categories
