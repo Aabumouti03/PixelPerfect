@@ -2,95 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<style>
-
-    .resource-container {
-        width: 1000px;
-        margin-left: 130px ;
-        margin-right: 130px ;
-        margin-top: 30px ;
-        margin-bottom: 100px ;
-        padding: 40px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .page-title {
-        font-size: 30px;
-        font-weight: bold;
-        color: #ff6b00;
-        text-align: center;
-        margin-bottom: 30px;
-        text-transform: uppercase;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        width: 100%;
-        padding: 12px;
-        font-size: 15px;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        border-color: #ff6b00;
-        outline: none;
-        box-shadow: 0px 0px 6px rgba(255, 107, 0, 0.3);
-    }
-
-    .upload-btn {
-        width: 100%;
-        padding: 14px;
-        font-size: 16px;
-        font-weight: bold;
-        text-align: center;
-        color: #fff;
-        background: #ff6b00;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-
-    .upload-btn:hover {
-        background: #e25e00;
-        transform: scale(1.03);
-    }
-
-    .back-btn {
-        display: inline-block;
-        margin-top: 30px;
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: bold;
-        text-decoration: none;
-        color: #fff;
-        background: #ff6b00;
-        border-radius: 8px;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .back-btn:hover {
-        background: #e25e00;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'client/css/add_additional_resource.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -154,7 +66,7 @@
         <button type="submit" class="upload-btn">Save Resource</button>
     </form>
 
-    <a href="{{ request.META.HTTP_REFERER }}" class="back-btn"> Back </a>
+    <a href="{{request.GET.next}}" class="back-btn">← Back </a>
     <a href="{% url 'resource_list' %}" class="back-btn">Resource list</a>
 </div>
 {% endblock %}

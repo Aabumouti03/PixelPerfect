@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from client.models import Program, Module, ProgramModule
+from client.models import Program, Module, ProgramModule, Category
 from users.models import EndUser, UserProgramEnrollment
 from django.http import HttpResponseNotFound
 from django.db.models import Max
@@ -223,3 +223,17 @@ class ProgramDetailViewTest(TestCase):
         self.client.login(username='adminuser', password='adminpass')
         response = self.client.get(reverse('program_detail', args=[program_no_users.id]))
         self.assertContains(response, "No users enrolled")
+
+    def test_update_categories(self):
+        category1 = Category.objects.create(name="Category 1")
+        category2 = Category.objects.create(name="Category 2")
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.post(self.url, {'update_categories': 'True', 'categories': [category1.id, category2.id]})
+        self.assertRedirects(response, self.url)
+        self.program.refresh_from_db()
+        self.assertSetEqual(set(self.program.categories.values_list('id', flat=True)), {category1.id, category2.id})
+
+    def test_add_invalid_module(self):
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.post(self.url, {'add_modules': 'True', 'modules_to_add': [999]})
+        self.assertEqual(response.status_code, 404)

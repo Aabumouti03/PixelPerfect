@@ -321,4 +321,15 @@ body {
     background: #D43802;
     color: white;
   }
+
   
+  .program-category {
+    margin-top: 15px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    color: #333;
+    background: #f7f7f7;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}

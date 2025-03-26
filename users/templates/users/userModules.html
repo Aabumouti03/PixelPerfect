@@ -17,8 +17,7 @@
         <a href="{% url 'all_modules' %}" class="view-all-button">View All Modules</a>
         </header>
         <div class="module-list">
-        {% for module in module_data|slice:":3" %}
-
+            {% for module in module_data %}
             <div class="module-card">
                 <h3>{{ module.title }}</h3>
                 <p>{{ module.description }}</p>

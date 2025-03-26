@@ -17,6 +17,7 @@
 
     <form method="post" class="card p-4 shadow-sm">
         {% csrf_token %}
+        {{ form.as_p }}
 
         {% if error %}
             <div class="alert alert-danger">{{ error }}</div>
@@ -33,6 +34,35 @@
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control" rows="4" required></textarea>
         </div>
+
+        <!-- Category Selection -->
+            <div class="mb-4">
+                <label class="form-label">Categories</label>
+                <select id="category-dropdown" class="form-control">
+                    <option value="">Select a category</option>
+                    {% for category in categories %}
+                        <option
+                            value="{{ category.id }}"
+                            data-title="{{ category.name }}" 
+                        >
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <button type="button" class="btn btn-primary w-100 mt-3" onclick="addCategory()">Add</button>
+
+            </div>
+
+            <!-- Selected Categories Preview -->
+            <div class="mb-4">
+                <label class="form-label">Selected Categories</label>
+                <ul class="list-group" id="selected-categories"></ul>
+            </div>
+
+            <!-- Hidden inputs for categories -->
+            <div id="hidden-category-inputs"></div>
+
 
         <!-- Dropdown + Add Exercise -->
         <div class="mb-4">
@@ -148,7 +178,67 @@
 
 </div>
 
-    <script src="{% static 'client/js/add_module.js' %}"></script>
+<script src="{% static 'client/js/add_module.js' %}"></script>
+<script>
+    const selectedCategoryIds = new Set();
+    // Add selected category to preview and hidden inputs
+function addCategory() {
+    const dropdown = document.getElementById('category-dropdown');
+    const categoryId = dropdown.value;
+
+    // Validate selection
+    if (!categoryId) {
+        alert('Please select a category first');
+        return;
+    }
+
+    // Check if already added
+    if (selectedCategoryIds.has(categoryId)) {
+        alert('This category is already added');
+        return;
+    }
+
+    // Get the selected option
+    const selectedOption = dropdown.options[dropdown.selectedIndex];
+    const title = selectedOption.text;
+
+    // Add to preview list
+    const previewList = document.getElementById('selected-categories');
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+    li.id = `category-preview-${categoryId}`;
+    li.innerHTML = `
+        ${title}
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeCategory('${categoryId}')">Remove</button>
+    `;
+    previewList.appendChild(li);
+
+    // Add hidden input
+    const hiddenInputsContainer = document.getElementById('hidden-category-inputs');
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'categories';
+    hiddenInput.value = categoryId;
+    hiddenInput.id = `hidden-category-${categoryId}`;
+    hiddenInputsContainer.appendChild(hiddenInput);
+
+    // Add to selected set
+    selectedCategoryIds.add(categoryId);
+
+    // Reset dropdown
+    dropdown.selectedIndex = 0;
+}
+
+
+function removeCategory(id) {
+    document.getElementById(`category-preview-${id}`)?.remove();
+    document.getElementById(`hidden-category-${id}`)?.remove();
+    
+    selectedCategoryIds.delete(id);
+}
+
+
+</script>
 
 
 </body>

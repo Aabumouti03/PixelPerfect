@@ -1,0 +1,19 @@
+<!-- module_card.html -->
+<div class="module-card">
+  <h3>{{ module.title }}</h3>
+  <p>{{ module.description }}</p>
+
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
+    </div>
+  </div>
+
+  <span class="progress-text">{{ module.progress_value }}% Complete</span>
+
+  <!-- Link to the module overview -->
+  <a href="{% url 'module_overview' module.id %}" class="view-module-button">
+    View Module
+  </a>
+</div>

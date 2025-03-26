@@ -106,7 +106,9 @@ urlpatterns = [
     path('create_category/', clientViews.create_category, name='create_category'),
     path('category_list/', clientViews.category_list, name='category_list'),  
     path('category/<int:category_id>/', clientViews.category_detail, name='category_detail'), 
-    path('categories/<int:category_id>/edit/', clientViews.edit_category, name='edit_category'),   
+    path('categories/<int:category_id>/edit/', clientViews.edit_category, name='edit_category'), 
+    path('modules/<int:module_id>/add_category/', clientViews.add_category_to_module, name='add_category_to_module'),
+    path('modules/<int:module_id>/remove_categories/', clientViews.remove_categories_from_module, name='remove_categories_from_module'),  
 
     # Module urls for the users
     path('userModules/', usersViews.user_modules, name='modules'),

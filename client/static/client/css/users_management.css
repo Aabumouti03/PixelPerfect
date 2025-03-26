@@ -92,16 +92,16 @@ h2 {
     padding: 6px 12px;
     background-color: #F24505;
     color: white;
+    font-weight: bold;
     border: none;
-    border-radius: 12px;
+    border-radius: 20px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background 0.3s, transform 0.2s;
 }
 
 .view-btn:hover {
     background-color: #D43802;
 }
-
 
 .navbar {
     height: 100vh;
@@ -109,7 +109,7 @@ h2 {
     top: 0;
     left: 0;
     width: 60px; 
-    background-color: #f44336; 
+    background-color: #F24505; 
     overflow-y: auto; 
 }
 
@@ -184,7 +184,7 @@ h2 {
     left: 0;
     width: 60px;
     height: 100vh;
-    background-color: #f44336;
+    background-color: #F24505;
     overflow-y: auto;
     z-index: 1000; 
 }

@@ -405,7 +405,7 @@ class Quote(models.Model):
 
         if not Quote.objects.exists():
             for quote_text in quotes:
-                Quote.objects.create(text=quote_text)
+                 Quote.objects.create(text=quote_text["text"]) 
     
 class DailyQuote(models.Model):
     date = models.DateField(unique=True)
