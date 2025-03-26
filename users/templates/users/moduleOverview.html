@@ -15,8 +15,19 @@
     <main class="content">
         <div class="header">
             <div class="header-left">
-                <h1 class="module-name">{{ module.title }}</h1>
+                <div class="module-header">
+                    <h1 class="module-name">{{ module.title }}</h1>
+                    <h2 class="module-categories">
+                        Categories:
+                        {% for category in module.categories.all %}
+                            {{ category.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            No categories listed.
+                        {% endfor %}
+                    </h2>
+                </div>
             </div>
+            
 
             <div class="header-right">
                 <div class="star-container">

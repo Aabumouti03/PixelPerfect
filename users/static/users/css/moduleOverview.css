@@ -397,3 +397,8 @@ canvas#progressChart {
     padding: 10px 20px;
     margin-left: 15px; 
 }
+
+.module-header {
+    display: flex;
+    flex-direction: column;
+}
