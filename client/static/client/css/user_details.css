@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
-/* Main Layout: User Details on Left, Cards on Right */
 .user-detail-container {
     display: flex;
     justify-content: space-between;
@@ -10,7 +9,6 @@
     padding: 20px;
 }
 
-/* General Card Styling for Consistency */
 .card {
     width: 100%;
     padding: 20px;
@@ -23,7 +21,6 @@
     justify-content: space-between;
 }
 
-/* Ensure Titles Are Left-Aligned */
 .card h2 {
     text-align: left;
     margin-bottom: 10px;
@@ -31,19 +28,16 @@
     font-weight: bold;
 }
 
-/* Default smaller height when the card is empty */
 .empty-card {
     min-height: 50px !important;  
     display: flex;
     justify-content: center;
 }
 
-/* Ensure normal height when content is present */
 .card:not(.empty-card) {
     min-height: 150px; 
 }
 
-/* Style for text inside empty cards */
 .empty-card p {
     font-size: 14px;
     color: #777;
@@ -51,7 +45,6 @@
     text-align: center;
 }
 
-/* User Info Box - Now Styled as a Card */
 .user-info-box {
     width: 350px; 
     min-height: 370px;
@@ -59,7 +52,6 @@
     flex-direction: column;
 }
 
-/* Right Section - Ensures Cards are Visible */
 .right-section {
     display: flex;
     flex-direction: column;
@@ -67,7 +59,6 @@
     width: 100%;
 }
 
-/* Program, Modules & Questionnaire Cards */
 .programs-container, 
 .modules-container, 
 .questionnaire-container {
@@ -76,7 +67,6 @@
     min-height: 100px;
 }
 
-/* Module List - Keeps Modules Aligned */
 .module-list {
     display: flex;
     flex-wrap: wrap;
@@ -85,7 +75,6 @@
     padding: 10px;
 }
 
-/* Larger Program Card with Proper Content Fit */
 .program-card {
     width: 100%;
     max-width: 300px; 
@@ -102,7 +91,6 @@
     position: relative; 
 }
 
-/* Bigger Title for Program Card Only */
 .program-card h3 {
     font-size: 1.2rem; 
     font-weight: bold;
@@ -110,7 +98,6 @@
     color: #333; 
 }
 
-/* Fixed Height & Layout for Module Cards */
 .module-card {
     width: 140px;
     height: 140px;
@@ -143,14 +130,12 @@
     color: #e0e0e0;
 }
 
-/* Title Consistency in Module Cards (Kept Smaller) */
 .module-card h3 {
     font-size: 0.85rem; 
     font-weight: bold;
     text-align: center;
 }
 
-/* Different Progress Bar Sizes for Program & Modules */
 .program-card .progress-container {
     width: 100%; 
     height: 12px;
@@ -159,7 +144,6 @@
     margin: 10px 0;
 }
 
-/* Keep Progress Bar Fixed at Bottom */
 .module-card .progress-container {
     width: 80%;
     height: 6px;
@@ -171,7 +155,6 @@
     transform: translateX(-50%);
 }
 
-/* Progress Fill */
 .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #007bff, #0056b3); 
@@ -179,14 +162,12 @@
     transition: width 0.5s ease-in-out;
 }
 
-/* Progress Percentage Text */
 .progress-text {
     font-size: 12px;
     font-weight: bold;
     margin-top: 5px;
 }
 
-/* Top Bar */
 .top-bar {
     display: flex;
     justify-content: space-between;
@@ -215,22 +196,18 @@
   color: white;
 }
 
-/* Hover Arrow Animation */
 .back-button:hover::before {
     transform: translateX(-2px);
 }
 
-/* Initially hide extra modules */
 .hidden-module {
     display: none; 
 }
 
-/* Adjust module container height when expanded */
 .modules-container.expanded {
     height: auto;
 }
 
-/* Style for the View All button */
 .view-all-button {
     position: absolute;
     bottom: 10px; 
@@ -253,14 +230,12 @@
     background-color: #D43802;
 }
 
-/* Style the questionnaire list */
 .questionnaire-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-/* Style individual questionnaire responses */
 .questionnaire-item {
     padding: 10px;
     background: #f8f9fa;
@@ -269,7 +244,6 @@
     font-size: 14px;
 }
 
-/* Style for agreement scale */
 .choice-list {
     display: flex;
     flex-direction: column;
@@ -284,14 +258,12 @@
     margin: 2px 0;
 }
 
-/* Highlight selected choice */
 .selected-choice {
     background: #F24505;
     color: white;
     font-weight: bold;
 }
 
-/* Style for rating scale */
 .rating-scale {
     margin-top: 5px;
     font-size: 14px;
@@ -302,7 +274,6 @@
     color: #000000;
 }
 
-/* Style for Questionnaire Header */
 .questionnaire-header {
     display: flex;
     justify-content: space-between;
@@ -310,12 +281,10 @@
     padding: 10px 0;
 }
 
-/* Hide Answers by Default */
 .hidden {
     display: none;
 }
 
-/* Button Style */
 .view-answers-btn {
     padding: 12px 18px;
     background: #F24505;
@@ -336,35 +305,93 @@
     color: white;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .user-detail-container {
+        flex-direction: column;
+        align-items: stretch; 
+        padding: 10px;
+        gap: 20px; 
+    }
+
+    .user-info-box,
+    .right-section,
+    .programs-container,
+    .modules-container,
+    .questionnaire-container {
+        width: 100%;
+        max-width: none;
+    }
+
+    .card h2 {
+        font-size: 1.2rem;
+    }
+    
+    .program-card h3, .module-card h3 {
+        font-size: 0.95rem;
+    }
+
+    .progress-text {
+        font-size: 10px;
+    }
+
+    .module-card, .program-card {
+        width: 100%;
+        max-width: 250px;
+        height: auto;
+        padding: 15px;
+    }
+
+    .progress-container {
+        height: 8px;
+    }
+    .progress-fill {
+        border-radius: 4px;
+    }
+
+    .back-button, .view-answers-btn, .view-all-button {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .module-list {
         flex-direction: column;
         align-items: center;
     }
 
-    .user-info-box, 
-    .right-section {
-        width: 90%;
-        max-width: none;
-    }
-
-    .module-card, 
-    .program-card {
-        width: 120px;
-        height: 120px;
-    }
-
-    .progress-container {
-        height: 5px;
-    }
-
-    .back-button {
-        font-size: 12px;
-        padding: 5px 10px;
-    }
-
-    .back-button::before {
-        font-size: 12px;
+    .top-bar {
+        margin-bottom: 15px;
     }
 }
+
+@media (max-width: 480px) {
+    .user-info-box, .right-section {
+        width: 100%;
+    }
+
+    .card h2 {
+        font-size: 1rem;
+    }
+
+    .program-card h3, .module-card h3 {
+        font-size: 0.85rem;
+    }
+
+    .progress-text {
+        font-size: 9px;
+    }
+
+    .back-button, .view-answers-btn, .view-all-button {
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+    
+    .progress-container {
+        height: 6px;
+    }
+
+    .module-card, .program-card {
+        max-width: 200px;
+        margin-bottom: 10px;
+    }
+}
+
