@@ -392,13 +392,23 @@ class Command(BaseCommand):
 
                 for module_title, order in modules_to_add:
                     module = Module.objects.filter(title=module_title).first()
-                    if module and not ProgramModule.objects.filter(program=program, module=module).exists():  
-                        ProgramModule.objects.create(program=program, module=module, order=order)  
-                        print(f"✅ Added {module_title} to Program 'Next Step' at order {order}.")
-                    else:
-                        print(f"⚠️ {module_title} already exists in Program 'Next Step'. Skipping.")
 
-                print("✅ Modules, Categories, Sections, Exercises, and Questions seeded successfully!")
+                    if not module:
+                        print(f"❌ Module '{module_title}' not found. Skipping.")
+                        continue
+
+                    if ProgramModule.objects.filter(program=program, order=order).exists():
+                        print(f"⚠️ A module is already assigned to Program '{program.title}' at order {order}. Skipping '{module_title}'.")
+                        continue
+
+                    # Check if this module is already assigned to the program
+                    if ProgramModule.objects.filter(program=program, module=module).exists():
+                        print(f"⚠️ {module_title} already exists in Program '{program.title}'. Skipping.")
+                        continue
+
+                    ProgramModule.objects.create(program=program, module=module, order=order)
+                    print(f"✅ Added {module_title} to Program '{program.title}' at order {order}.")
+
 
     def seed_quotes(self, *args, **kwargs):
         if Quote.objects.exists(): 
