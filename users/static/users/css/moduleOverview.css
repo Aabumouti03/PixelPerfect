@@ -127,6 +127,77 @@ canvas#progressChart {
 }
 
 
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    .content {
+        width: 80% !important;  
+        padding: 15px!important;  
+        margin-left: 30px!important; 
+    }
+
+    .header-left {
+        font-size: 10px!important; 
+        gap: 2px !important;  
+    }
+    .star-container {
+        gap: 3px !important; 
+    }
+    
+    .star-rating {
+        font-size: 15px!important; 
+        gap: 1px !important; 
+    }
+    
+    #rating-value {
+        font-size: 10px;  
+    }
+
+    .star {
+        color: #ddd;
+        transition: color 0.3s;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+    }
+
+    .module-overview {
+        width: 90%;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 14px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+}
+
+
+@media (max-width: 768px) {
+    .collapsible {
+        padding: 20px; /* Reduce padding on smaller screens */
+        font-size: 14px; /* Decrease font size for readability */
+    }
+    
+    .collapsible-content {
+        padding: 0 15px; /* Adjust content padding for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .collapsible {
+        padding: 15px; /* Further reduce padding on very small screens */
+        font-size: 13px; /* Further decrease font size */
+    }
+    
+    .collapsible-content {
+        padding: 0 12px; /* Adjust padding for mobile screens */
+    }
+}
+
 .active,
 .collapsible:hover {
     background-color: #ccc;
