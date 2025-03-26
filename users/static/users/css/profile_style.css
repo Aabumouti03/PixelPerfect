@@ -34,9 +34,9 @@ html, body {
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    width: 60vw;
+    width: 90vw;
     max-width: 850px;
-    min-width: 500px;
+    min-width: unset;
     align-items: flex-start;
     gap: 15px;
     position: static !important; 
@@ -346,28 +346,65 @@ body.navbar-hovered .profile-container {
 
 /* Mobile-Specific Adjustments for Very Small Screens (Phones) */
 @media (max-width: 480px) {
-    .profile-header {
-        font-size: 20px;
+    .profile-container {
+      width: 90vw;
+      min-width: unset;
+      padding: 20px;
     }
-
-    .profile-details label {
-        font-size: 14px;
-    }
-
+  
     .profile-details input,
-    .profile-details select,
     .profile-details textarea {
-        font-size: 14px;
-        width: 90vw!important
+      font-size: 14px;
+      width: 100% !important;
+      height: auto;
+      padding: 12px 14px;
     }
-
-    .btn {
-        font-size: 14px;
-        padding: 10px 14px;
+  
+    .profile-details select {
+      font-size: 13px;
+      width: 100% !important;
+      height: auto;
+      padding: 10px 12px;
     }
-
-    .delete-btn, .cancel-btn {
-        padding: 10px 14px;
-        font-size: 13px;
+  
+    .profile-details option {
+      font-size: 13px;
+      padding: 6px 10px;
     }
-}
+  
+    .profile-info {
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+  
+    .profile-pic {
+      width: 70px;
+      height: 70px;
+    }
+  
+    .profile-header {
+      font-size: 18px;
+      text-align: center;
+    }
+  
+    .btn,
+    .delete-btn,
+    .cancel-btn {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px 16px;
+      text-align: center;
+    }
+  
+    .profile-buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .left-buttons {
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+  

@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <link rel="stylesheet" href="{% static 'client/css/program_detail.css' %}">
 </head>
-<body class="create_category">
+<body>
     {% include 'client/client_base.html' %}
 
     <div class="container mt-5">
@@ -28,7 +28,7 @@
                     <textarea name="description" id="program-description" class="form-control" rows="5" required>{{ program.description }}</textarea>
                 </div>
     
-                <button type="submit" class="btn btn-danger w-100">Save Changes</button>
+                <button type="submit" class="btn btn-primary w-100">Save Changes</button>
             </form>
             
         </div>
@@ -51,7 +51,7 @@
                 {% endfor %}
             </ul>
             <button class="btn btn-outline-danger w-100 mt-3" onclick="openModal('moduleModal')">Add More Modules</button>
-            <button class="btn btn-danger w-100 mt-3" onclick="saveModuleOrder()">Save Module Order</button>
+            <button class="btn btn-primary w-100 mt-3" onclick="saveModuleOrder()">Save Module Order</button>
         </div>
 
 
@@ -74,7 +74,7 @@
                                 <form method="POST" class="d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="remove_user" value="{{ enrollment.user.id }}">
-                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                    <button type="submit" class="btn btn-danger btn-sm ">Remove</button>
                                 </form>
                             </td>
                         </tr>
@@ -85,7 +85,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <button class="btn btn-outline-danger w-100" onclick="openModal('userModal')">Add More Users</button>
+            <button class="btn btn-primary w-100" onclick="openModal('userModal')">Add More Users</button>
         </div>
 
         <a href="{% url 'programs' %}" class="btn btn-secondary w-100 mt-3">Back to Programs</a>

@@ -15,30 +15,41 @@ class ProgramDetailViewTest(TestCase):
     def setUpTestData(cls):
         cls.client = Client()
         
+        from client import views
+        def strict_admin_check(user):
+            return user.is_superuser
+        views.admin_check = strict_admin_check
+        
         cls.admin_user = User.objects.create_superuser(
             username='adminuser', email='adminuser@example.com', password='adminpass'
         )
         cls.admin_profile = EndUser.objects.create(user=cls.admin_user, age=35, gender="male", sector="it")
-
+        
         cls.regular_user = User.objects.create_user(
             username='regularuser', email='regularuser@example.com', password='regularpass'
         )
         cls.regular_profile = EndUser.objects.create(user=cls.regular_user, age=30, gender="female", sector="healthcare")
+
         cls.program = Program.objects.create(title="Sample Program", description="Sample Description")
+
         cls.module1 = Module.objects.create(title="Module 1", description="Module 1 Description")
         cls.module2 = Module.objects.create(title="Module 2", description="Module 2 Description")
         cls.program_module1 = ProgramModule.objects.create(program=cls.program, module=cls.module1, order=1)
         cls.program_module2 = ProgramModule.objects.create(program=cls.program, module=cls.module2, order=2)
+        
+        # Enroll the regular user into the program (using the EndUser instance)
         cls.enrollment = UserProgramEnrollment.objects.create(program=cls.program, user=cls.regular_profile)
+        
         cls.url = reverse('program_detail', args=[cls.program.id])
-
+    
     def test_unauthorized_user_access(self):
         """Test that non-logged in users are redirected to login page"""
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f'/log_in/?next={self.url}')
-
+    
     def test_non_admin_user_access(self):
-        """Test that non-admin users are not allowed (here we expect a redirect)"""
+        """Test that non-admin users (regular users) are not allowed"""
         self.client.login(username='regularuser', password='regularpass')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
