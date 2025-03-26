@@ -2,6 +2,7 @@ from django.test import TestCase
 from users.models import Quote, DailyQuote
 from datetime import date
 from django.utils.timezone import now
+from unittest.mock import patch
 
 class QuoteModelTest(TestCase):
     """Test suite for the Quote model and its methods."""
@@ -48,7 +49,11 @@ class QuoteModelTest(TestCase):
     def test_get_quote_of_the_day_no_quotes_available(self):
         """Test that get_quote_of_the_day() handles the case where no quotes are available."""
         Quote.objects.all().delete()
-        
-        result = Quote.get_quote_of_the_day()
-        
-        self.assertEqual(result, "No quote available today.")
+
+        with patch('users.models.Quote.ensure_default_quotes_exist') as mock_ensure_defaults:
+            mock_ensure_defaults.return_value = None  # Prevent default quotes from being added
+            
+            result = Quote.get_quote_of_the_day()
+            
+            self.assertEqual(result, "No quote available today.")
+
