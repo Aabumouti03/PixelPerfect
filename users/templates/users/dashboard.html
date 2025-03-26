@@ -44,26 +44,27 @@
                 </div>
                 <span class="progress-text">{{ module.progress_value }}% Complete</span>
 
-                {% if module.is_unlocked %}
-                  <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
-                {% else %}
-                  <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
-                {% endif %}
-              </div>
-            {% endwith %}
-          {% endfor %}
-        </div>
-      {% else %}
-        </div> 
-        </header>
-        <div class="module-list">
-          <div class="no-program-title">
-            <h2>No enrolled programs</h2>
+                  {% if module.is_unlocked %}
+                    <a href="{% url 'module_overview' module.id %}" class="view-module-button">View Module</a>
+                  {% else %}
+                    <p class="locked-message">🔒 Complete the previous module to unlock this one.</p>
+                  {% endif %}
+                </div>
+              {% endwith %}
+            {% endfor %}
+
           </div>
-          <div class="no-program-content">
-            <p>It looks like you are not enrolled in a program yet! Why not take our quick questionnaire to find the perfect program tailored just for you?</p>
-            <a href="{% url 'questionnaire' %}" class="start-questionnaire-button">Start questionnaire</a>
-          </div>
+        {% else %}
+          </div> 
+          </header>
+          <div class="module-list">
+            <div class="no-program-title">
+                <h2>No enrolled programs</h2>
+            </div>
+            <div class="no-program-content">
+                <p>It looks like you are not enrolled in a program yet! Why not take our quick questionnaire to find the perfect program tailored just for you?</p>
+                <a href="{% url 'get_started' %}" class="start-questionnaire-button">Get started</a>
+            </div>
         </div>        
       {% endif %}
     </section>

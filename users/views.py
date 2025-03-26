@@ -76,6 +76,7 @@ from .utils import send_verification_email_after_sign_up
 
 @login_required
 def questionnaire(request):
+    """Render the questionnaire page for active questionnaires."""
     active_questionnaire = Questionnaire.objects.filter(is_active=True).first()
 
     if active_questionnaire:
@@ -101,6 +102,7 @@ def questionnaire(request):
 @csrf_protect
 @login_required
 def submit_responses(request):
+    """Process and save user questionnaire responses."""
     if request.method == "POST":
         try:
             
@@ -177,6 +179,7 @@ def submit_responses(request):
 
 @login_required
 def save_notes(request):
+    """Process and save user notes."""
     if request.method == 'POST':
         data = json.loads(request.body)
         content = data.get('content')
@@ -192,6 +195,7 @@ def save_notes(request):
 
 @login_required
 def get_notes(request):
+    """Fetch and display user notes."""
     try:
         # Get the EndUser instance for the logged-in user
         end_user = EndUser.objects.get(user=request.user)
@@ -211,6 +215,7 @@ def get_notes(request):
 
 @login_required
 def dashboard(request):
+    """Render user dashboard page."""
     user = request.user
 
     try:
@@ -274,6 +279,7 @@ def dashboard(request):
 
 @login_required
 def view_program(request, program_id):
+    """Display user program details."""
     user = request.user
 
     try:
@@ -331,11 +337,12 @@ def modules(request):
 
 
 def welcome_page(request):
-    '''A function for displaying a page that welcomes users'''
+    """A function for displaying a page that welcomes users"""
     return render(request, 'users/welcome_page.html')
 
 
 def about(request):
+    """Allows users to get information about the website team"""
     return render(request, 'users/about.html')
 
 def contact_us(request):
@@ -369,6 +376,7 @@ def contact_success(request):
 
 @login_required
 def get_started(request):
+    """Provide the users with option to enroll in modules or programs or start questionnaire."""
     categories = Category.objects.all()
 
     filter_pressed = "filter" in request.GET
@@ -788,6 +796,7 @@ def recommended_modules(request):
 
 @login_required
 def user_modules(request):
+    """Display user enrolled modules."""
     user = request.user
     end_user, created = EndUser.objects.get_or_create(user=user)
     
@@ -873,6 +882,7 @@ def module_overview(request, module_id):
 
 @login_required
 def exercise_detail(request, exercise_id):
+    """Display exercise detials."""
     exercise = get_object_or_404(Exercise, id=exercise_id)
     user, _ = EndUser.objects.get_or_create(user=request.user)
 
@@ -905,6 +915,7 @@ def exercise_detail(request, exercise_id):
 @csrf_exempt  
 @login_required
 def rate_module(request, module_id):
+    """Allows users to rate modules."""
     
     module = get_object_or_404(Module, id=module_id)
 
@@ -934,6 +945,7 @@ def rate_module(request, module_id):
 @login_required
 @csrf_exempt
 def mark_done(request):
+    """Allows users to mark tasks as done"""
     if request.method == "POST":
         data = json.loads(request.body)
         item_id = data.get("id")
@@ -991,6 +1003,7 @@ def mark_done(request):
 
 @login_required
 def unenroll_module(request):
+    """Allows users to remove modules from their enrolled modules."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -1028,6 +1041,7 @@ def unenroll_module(request):
 
 @login_required
 def enroll_module(request):
+    """Allows users to add modules to their enrolled modules."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -1059,6 +1073,7 @@ def enroll_module(request):
 
 @login_required
 def all_modules(request):
+    """Display all available modules."""
     allModules = Module.objects.all()  # Fetch all modules
     user = request.user
 
@@ -1134,10 +1149,11 @@ def journal_view(request, date=None):
 
     return render(request, "users/journal.html", context)
 
+
 @login_required
 def save_journal_entry(request):
     """Handles saving/updating journal entries using JSON."""
-
+    
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
 
@@ -1147,21 +1163,35 @@ def save_journal_entry(request):
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
+    # Extract date from the request
     date_str = data.get("date")
     if not date_str:
         return JsonResponse({"success": False, "error": "Date is required."}, status=400)
 
     try:
-       entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-
-        
+        entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
-    # Save the journal entry
-    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
+    # Fetch or create the journal entry for the given date
+    journal_entry, created = JournalEntry.objects.get_or_create(user=request.user, date=entry_date)
 
-    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+    # Update the journal entry with the submitted data
+    journal_entry.sleep_hours = data.get("sleep_hours")
+    journal_entry.caffeine = data.get("caffeine")
+    journal_entry.hydration = data.get("hydration")
+    journal_entry.stress = data.get("stress")
+    journal_entry.goal_progress = data.get("goal_progress")
+    journal_entry.notes = data.get("notes")
+    journal_entry.connected_with_family = data.get("connected_with_family")
+    journal_entry.expressed_gratitude = data.get("expressed_gratitude")
+    journal_entry.outdoors = data.get("spent_time_outdoors")
+    journal_entry.sunset = data.get("watched_sunset")
+    
+    # Save the entry
+    journal_entry.save()
+
+    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
 
 
 

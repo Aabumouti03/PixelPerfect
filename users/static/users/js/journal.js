@@ -83,15 +83,16 @@ function fetchJournalEntry(date) {
         .catch(error => console.error("❌ Error fetching journal entry:", error));
 }
 
-// Function to save journal entry
 function saveJournalEntry(event) {
     event.preventDefault();  // Prevent default form submission
 
-    let rawDate = document.getElementById("journal-date")?.value;
-    let formattedDate = getFormattedDate(rawDate); 
+    let currentURL = window.location.pathname;
+    let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
+
+    let formattedDate = dateMatch ? dateMatch[1] : null;
 
     if (!formattedDate) {
-        alert("❌ Error: Invalid date selected.");
+        alert("❌ Error: Invalid date. Unable to save entry.");
         return;
     }
 
@@ -102,7 +103,11 @@ function saveJournalEntry(event) {
         hydration: document.getElementById("hydration")?.value || null,
         stress: document.getElementById("stress")?.value || null,
         goal_progress: document.getElementById("goal_progress")?.value || null,
-        notes: document.getElementById("notes")?.value || null
+        notes: document.getElementById("notes")?.value || null,
+        connected_with_family: document.querySelector('input[name="connected_with_family"]:checked')?.value || null,
+        expressed_gratitude: document.querySelector('input[name="expressed_gratitude"]:checked')?.value || null,
+        spent_time_outdoors: document.querySelector('input[name="spent_time_outdoors"]:checked')?.value || null,
+        watched_sunset: document.querySelector('input[name="watched_sunset"]:checked')?.value || null,
     };
 
     console.log("📤 Sending Data to Server:", formData);
@@ -127,6 +132,7 @@ function saveJournalEntry(event) {
     })
     .catch(error => console.error("❌ Network error:", error));
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ Journal.js loaded successfully");

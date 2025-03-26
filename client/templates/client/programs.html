@@ -11,14 +11,7 @@
 
 {% block content %}
     <body class="container">
-        <div class="title-search-container">
-            <h1 class="page-title">Programs</h1>
-        
-            <form method="get" action="" class="search-bar-form">
-                <input type="text" name="q" class="search-bar-input" placeholder="Search programs..." value="{{ query|default:'' }}">
-                <button type="submit" class="search-bar-button">Search</button>
-            </form>
-        </div>
+        <h1>Programs</h1>
 
         <main class="program-grid">
             {% for program in programs %}
