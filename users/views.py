@@ -726,7 +726,9 @@ def recommended_programs(request):
 
     categorized_programs = assess_user_responses_programs(end_user)
 
-    all_programs = [program for program_list in categorized_programs.values() for program in program_list]
+    # all_programs = [program for program_list in categorized_programs.values() for program in program_list]
+    all_programs = Program.objects.all()
+
 
     if request.method == "POST":
         try:
