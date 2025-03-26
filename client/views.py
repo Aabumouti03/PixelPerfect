@@ -150,35 +150,33 @@ def programs(request):
     if query:
         programs = programs.filter(Q(title__icontains=query))
 
-    
-    return render(request, 'client/programs.html', {'programs': programs, 'query': query})
 
     return render(request, 'client/programs.html', {
         'programs': programs,
-        'query': query  # So we can keep the search input filled
+        'query': query 
     })
 
 @login_required
 @user_passes_test(admin_check)
-def program_detail(request, program_id): 
+def program_detail(request, program_id):
     program = get_object_or_404(Program, id=program_id)
     all_modules = Module.objects.all()
-    program_modules = program.program_modules.all()  
-    program_module_ids = list(program_modules.values_list('module_id', flat=True)) 
-
+    program_modules = program.program_modules.all()
+    program_module_ids = list(program_modules.values_list('module_id', flat=True))
     enrolled_users = program.enrolled_users.all()
     enrolled_user_ids = set(enrollment.user_id for enrollment in enrolled_users)
     all_users = EndUser.objects.all()
+    all_categories = Category.objects.all()
 
     if request.method == "POST":
         if "remove_module" in request.POST:
             module_id = request.POST.get("remove_module")
             if not module_id or not module_id.strip():
-                # Return an error message when no module ID is provided.
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -188,11 +186,11 @@ def program_detail(request, program_id):
             try:
                 module_id_int = int(module_id)
             except ValueError:
-                # Return an error message when the module ID is not a valid number.
                 return render(request, "client/program_detail.html", {
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -208,6 +206,7 @@ def program_detail(request, program_id):
                     "program": program,
                     "all_modules": all_modules,
                     "all_users": all_users,
+                    "all_categories": all_categories,
                     "enrolled_user_ids": enrolled_user_ids,
                     "program_modules": program_modules,
                     "program_module_ids": program_module_ids,
@@ -216,22 +215,18 @@ def program_detail(request, program_id):
                 })
             return redirect("program_detail", program_id=program.id)
 
-
         if "add_modules" in request.POST:
             modules_to_add = request.POST.getlist("modules_to_add")
             max_order = program.program_modules.aggregate(Max('order'))['order__max'] or 0
             for index, m_id in enumerate(modules_to_add, start=1):
-                for m_id in modules_to_add:
-                    try:
-                        module_obj = Module.objects.get(id=m_id)  
-                    except Module.DoesNotExist:
-                        return HttpResponseNotFound("Module not found.")
-                    if ProgramModule.objects.filter(program=program, module=module_obj).exists():
-                        url = reverse("program_detail", args=[program.id]) + f"?error_message=Duplicate module added."
-                        return HttpResponseRedirect(url)
-                    
-                    ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
-
+                try:
+                    module_obj = Module.objects.get(id=m_id)
+                except Module.DoesNotExist:
+                    return HttpResponseNotFound("Module not found.")
+                if ProgramModule.objects.filter(program=program, module=module_obj).exists():
+                    url = reverse("program_detail", args=[program.id]) + "?error_message=Duplicate module added."
+                    return HttpResponseRedirect(url)
+                ProgramModule.objects.create(program=program, module=module_obj, order=max_order + index)
             return redirect("program_detail", program_id=program.id)
 
         if "add_users" in request.POST:
@@ -240,7 +235,7 @@ def program_detail(request, program_id):
                 user_obj = get_object_or_404(EndUser, user_id=user_id)
                 UserProgramEnrollment.objects.create(program=program, user=user_obj)
             return redirect("program_detail", program_id=program.id)
-        
+
         if "remove_user" in request.POST:
             user_id = request.POST.get("remove_user")
             enrollment = UserProgramEnrollment.objects.filter(program=program, user_id=user_id).first()
@@ -251,15 +246,27 @@ def program_detail(request, program_id):
         if "update_program" in request.POST:
             program.title = request.POST.get("title", program.title)
             program.description = request.POST.get("description", program.description)
+
+            category_ids = request.POST.getlist("categories")
+            program.categories.set(category_ids)
+
             program.save()
             return redirect("program_detail", program_id=program.id)
+        if "update_categories" in request.POST:
+            category_ids = request.POST.getlist("categories")
+            program.categories.set(category_ids)
+            program.save()
+            return redirect("program_detail", program_id=program.id)
+
+
 
     context = {
         "program": program,
         "all_modules": all_modules,
-        'all_users': all_users,
+        "all_users": all_users,
+        "all_categories": all_categories,
         "enrolled_user_ids": enrolled_user_ids,
-        "program_modules": program_modules,  
+        "program_modules": program_modules,
         "program_module_ids": program_module_ids,
         "enrolled_users": enrolled_users,
     }

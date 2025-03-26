@@ -199,3 +199,20 @@ h2.text-danger {
     cursor: pointer;
     transition: background-color 0.3s ease-in-out;
 }
+
+.assigned-category {
+    border-radius: 20px;
+    margin-bottom: 10px;
+    padding: 12px 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(238, 242, 5, 0.462);
+    font-weight: 500;
+    font-size: 16px;
+    border: 1px solid #f3f3f3;
+    color: #000;
+}
+
+.assigned-category:hover {
+    background-color: #fff;
+    cursor: default;
+}

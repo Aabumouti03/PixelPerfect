@@ -30,12 +30,51 @@
     
                 <button type="submit" class="save_button w-100">Save Changes</button>
             </form>
+
+            <div class="card mt-4">
+                <label for="program-title" class="form-label">3. Select Categories:</label>
             
-        </div>
+                <form method="POST" action="{% url 'program_detail' program.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_categories" value="1">
+            
+                    <div class="mb-3">
+                        <div class="checkbox-list">
+                            {% for category in all_categories %}
+                                <label class="form-check-label">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        name="categories"
+                                        value="{{ category.id }}"
+                                        {% if category in program.categories.all %}checked{% endif %}
+                                    >
+                                    {{ category.name }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+            
+                    <button type="submit" class="save_button w-100 mt-3">Save Categories</button>
+                </form>
+            
+                <div class="mt-4">
+                    <label class="form-label">4. Categories Assigned to This Program:</label>
+                    <ul class="list-group list-group-flush">
+                        {% for category in program.categories.all %}
+                            <li class="list-group-item assigned-category">{{ category.name }}</li>
+                        {% empty %}
+                            <li class="list-group-item assigned-category">No categories assigned.</li>
+                        {% endfor %}
+                    </ul>
+                    
+                </div>
+            </div>
+            
 
         
         <div class="card mt-4">
-            <h1>3. Modules in the program: </h1>
+            <label class="form-label">5. Modules in the program:</label>
             <ul class="list-group" id="sortableModules">
                 {% for program_module in program_modules %}
                     <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ program_module.id }}">
@@ -56,7 +95,7 @@
 
 
         <div class="mt-4">
-            <h2 class="text-danger">Enrolled Users:</h2>
+            <label class="form-label">6. Enrolled users:</label>
             <table class="table table-bordered">
                 <thead>
                     <tr>
