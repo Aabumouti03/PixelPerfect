@@ -20,6 +20,8 @@
 
     <form id="journal-form" method="POST" action="{% url 'save_journal_entry' %}">
         {% csrf_token %}
+        <input type="hidden" id="selected-date" name="selected_date" value="{{ selected_date }}">
+
     
 
 
@@ -58,17 +60,17 @@
         </div>
 
 
-        <!-- Hydration -->
+       <!-- Hydration -->
         <div class="journal-entry">
             <label>How many liters of water?</label>
-            <input type="number" name="hydration" min="0" max="20" value="{{ journal_entry.hydration|default_if_none:'' }}">
+            <input type="number" name="hydration" id="hydration" min="0" max="20" value="{{ journal_entry.hydration|default_if_none:'' }}">
         </div>
 
-
+       
         <!-- Goal Progress -->
         <div class="journal-entry">
             <label>Made progress on an important goal?</label>
-            <select name="goal_progress">
+            <select name="goal_progress" id="goal_progress">
                 <option value="low" {% if journal_entry and journal_entry.goal_progress == "low" %}selected{% endif %}>Low</option>
                 <option value="moderate" {% if journal_entry and journal_entry.goal_progress == "moderate" %}selected{% endif %}>Moderate</option>
                 <option value="high" {% if journal_entry and journal_entry.goal_progress == "high" %}selected{% endif %}>High</option>
@@ -79,9 +81,9 @@
         <div class="journal-entry">
             <label>Spent time outdoors?</label>
             <div class="toggle-group">
-                <input type="radio" id="outdoors_yes" name="spent_time_outdoors" value="yes" {% if journal_entry and journal_entry.spent_time_outdoors == "yes" %}checked{% endif %}>
+                <input type="radio" id="outdoors_yes" name="outdoors" value="yes" {% if journal_entry and journal_entry.outdoors == "yes" %}checked{% endif %}>
                 <label for="outdoors_yes">Yes</label>
-                <input type="radio" id="outdoors_no" name="spent_time_outdoors" value="no" {% if journal_entry and journal_entry.spent_time_outdoors == "no" %}checked{% endif %}>
+                <input type="radio" id="outdoors_no" name="outdoors" value="no" {% if journal_entry and journal_entry.outdoors == "no" %}checked{% endif %}>
                 <label for="outdoors_no">No</label>
             </div>
         </div>
@@ -91,9 +93,9 @@
         <div class="journal-entry">
             <label>Watched the sunset?</label>
             <div class="toggle-group">
-                <input type="radio" id="sunset_yes" name="watched_sunset" value="yes" {% if journal_entry and journal_entry.watched_sunset == "yes" %}checked{% endif %}>
+                <input type="radio" id="sunset_yes" name="sunset" value="yes" {% if journal_entry and journal_entry.sunset == "yes" %}checked{% endif %}>
                 <label for="sunset_yes">Yes</label>
-                <input type="radio" id="sunset_no" name="watched_sunset" value="no" {% if journal_entry and journal_entry.watched_sunset == "no" %}checked{% endif %}>
+                <input type="radio" id="sunset_no" name="sunset" value="no" {% if journal_entry and journal_entry.sunset == "no" %}checked{% endif %}>
                 <label for="sunset_no">No</label>
             </div>
         </div>
@@ -112,8 +114,9 @@
         <!-- Sleep Hours -->
         <div class="journal-entry">
             <label for="sleep_hours">How many hours did you sleep?</label>
-            <input type="number" name="sleep_hours" value="{{ journal_entry.sleep_hours|default_if_none:'' }}">
+            <input type="number" name="sleep_hours" id="sleep_hours" min="0" max="24" value="{{ journal_entry.sleep_hours|default_if_none:'' }}">
         </div>
+
 
         
         <!-- Notes -->

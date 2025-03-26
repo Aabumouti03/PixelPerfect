@@ -33,7 +33,8 @@ class SaveJournalEntryTest(TestCase):
 
         response = self.client.post(self.url, json.dumps(payload), content_type="application/json")
         self.assertEqual(response.status_code, 201)
-        self.assertJSONEqual(response.content, {"success": True, "message": "Journal entry saved."})
+        self.assertJSONEqual(response.content, {"success": True, "message": "Journal entry saved successfully."})
+
 
         journal_entry = JournalEntry.objects.get(user=self.user)
         self.assertEqual(journal_entry.sleep_hours, 7)
