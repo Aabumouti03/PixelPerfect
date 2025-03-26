@@ -379,11 +379,18 @@ class Command(BaseCommand):
                                 )
                                 
                                 exercise.questions.add(question)
+
                 program, created = Program.objects.get_or_create(
                     title="Next Step",
                     defaults={"description": "Figuring your next steps."}
                 )
-                
+
+                if created or program.categories.count() == 0:
+                    career_category = categories.get("Career Development")
+                    if career_category and not program.categories.filter(id=career_category.id).exists():
+                        program.categories.add(career_category)
+                        print(f"✅ Assigned category '{career_category.name}' to Program: {program.title}")
+
                 modules_to_add = [
                     ("Exploring opportunities", 1),
                     ("Exploring your work identity", 2),
