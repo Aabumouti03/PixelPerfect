@@ -65,3 +65,25 @@ class ProgramsViewTest(TestCase):
         self.assertTemplateUsed(response, 'client/programs.html')
         self.assertEqual(len(response.context['programs']), 0)
 
+    def test_search_query_filters_programs(self):
+        Program.objects.create(title='Another Program', description='Other')
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.get(self.url, {'q': 'Program 1'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Program 1')
+        self.assertNotContains(response, 'Another Program')
+
+    def test_search_query_is_case_insensitive(self):
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.get(self.url, {'q': 'pRoGrAm 1'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Program 1')
+
+    def test_query_context_is_set(self):
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.get(self.url, {'q': 'test search'})
+        
+        self.assertIn('query', response.context)
+        self.assertEqual(response.context['query'], 'test search')

@@ -60,3 +60,26 @@ class ManageExercisesViewTest(TestCase):
         self.assertTemplateUsed(response, 'Module/manage_exercises.html')
         
         self.assertEqual(list(response.context['exercises']), list(Exercise.objects.all()))
+
+    def test_search_query_filters_exercises(self):
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.get(self.url, {'q': 'django'})
+        
+        self.assertEqual(response.status_code, 200)
+        exercises = response.context['exercises']
+        
+        self.assertEqual(len(exercises), 1)
+        self.assertEqual(exercises[0].title, 'Django Basics')
+
+    def test_query_is_passed_to_template(self):
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.get(self.url, {'q': 'python'})
+        
+        self.assertEqual(response.context['query'], 'python')
+
+    def test_search_query_is_case_insensitive(self):
+        self.client.login(username='adminuser', password='adminpass')
+        response = self.client.get(self.url, {'q': 'DJANGO'})
+        
+        exercises = response.context['exercises']
+        self.assertTrue(any('django' in ex.title.lower() for ex in exercises))
