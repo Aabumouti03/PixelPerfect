@@ -104,3 +104,28 @@ class UserStatisticsViewTest(TestCase):
         self.assertIn("gender_distribution", json_data)
         self.assertIn("ethnicity_distribution", json_data)
         self.assertIn("sector_distribution", json_data)
+    
+    def test_statistics_with_no_users_or_enrollments(self):
+        EndUser.objects.exclude(user=self.admin_user).delete()
+        UserProgramEnrollment.objects.all().delete()
+
+        self.client.login(username="admin_user", password="adminpassword")
+        response = self.client.get(self.url)
+        stats_data = json.loads(response.context["stats"])
+
+        expected_stats = {
+            "total_users": 1,
+            "active_users": 1,
+            "inactive_users": 0,
+            "programs_enrolled": 0,
+            "gender_distribution": {"male": 1},
+            "ethnicity_distribution": {"asian": 1},
+            "sector_distribution": {"it": 1},
+        }
+
+        self.assertEqual(stats_data, expected_stats)
+
+    def test_redirect_for_unauthenticated_user(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/log_in", response.url)

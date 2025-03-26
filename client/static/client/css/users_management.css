@@ -1,7 +1,6 @@
 @import url("navbar.css");
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 
-/* Make the content fit the full viewport */
 .content {
     width: 100%;
     min-height: 100vh; 
@@ -13,7 +12,6 @@
     padding: 20px;
 }
 
-/* Users Container should stretch */
 .users-container {
     width: 95%;
     max-width: 1200px;
@@ -23,7 +21,6 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Adjust Title */
 h2 {
     text-align: center;
     margin-bottom: 20px;
@@ -31,7 +28,6 @@ h2 {
     color: #000000;
 }
 
-/* Improve Search & Filter Layout */
 .table-controls {
     display: flex;
     justify-content: space-between; 
@@ -43,7 +39,6 @@ h2 {
     padding: 10px;
 }
 
-/* Style input fields and select dropdown */
 .table-controls input,
 .table-controls select {
     flex: 1;
@@ -56,7 +51,6 @@ h2 {
     transition: 0.3s ease;
 }
 
-/* Table should be wider */
 .rounded-table {
     width: 100%;
     border-collapse: collapse;
@@ -67,10 +61,9 @@ h2 {
     margin-top: 15px;
 }
 
-/* Table Headers */
 .rounded-table th {
-    background: #007bff;
-    color: white;
+    background: #f2f20557;
+    color: #2b2320;
     padding: 14px;
     cursor: pointer;
     font-size: 16px;
@@ -78,7 +71,6 @@ h2 {
     text-align: center;
 }
 
-/* Make sure table columns are centered */
 .rounded-table td {
     padding: 12px;
     text-align: center;
@@ -86,18 +78,15 @@ h2 {
     color: #444;
 }
 
-/* Alternate Row Colors */
 .rounded-table tbody tr:nth-child(even) {
     background: #f8f9fa;
 }
 
-/* Hover Effect */
 .rounded-table tbody tr:hover {
     background: #e3f2fd;
     transition: 0.3s ease;
 }
 
-/* View Button Style */
 .view-btn {
     font-family: 'Manrope';
     padding: 6px 12px;
@@ -109,21 +98,19 @@ h2 {
     transition: background-color 0.2s;
 }
 
-/* View Button Hover Effect */
 .view-btn:hover {
     background-color: #D43802;
 }
 
 
-/* If your navbar is vertical and should stay full height */
 .navbar {
-    height: 100vh; /* Full height of viewport */
-    position: fixed; /* Stick to left */
+    height: 100vh;
+    position: fixed;
     top: 0;
     left: 0;
-    width: 60px; /* or whatever width you use */
-    background-color: #f44336; /* or your color */
-    overflow-y: auto; /* scrollable if content grows */
+    width: 60px; 
+    background-color: #f44336; 
+    overflow-y: auto; 
 }
 
 .table-responsive {
@@ -145,7 +132,6 @@ h2 {
     margin-top: 15px;
 }
 
-/* On small screens, force table to scroll, and prevent squishing */
 @media (max-width: 768px) {
     .table-controls {
         flex-direction: column;
@@ -184,7 +170,7 @@ h2 {
 }
 
 .navbar {
-    position: relative; /* instead of fixed */
+    position: relative;
     height: auto;
     width: 100%;
 }
@@ -200,7 +186,7 @@ h2 {
     height: 100vh;
     background-color: #f44336;
     overflow-y: auto;
-    z-index: 1000; /* ensures it's on top */
+    z-index: 1000; 
 }
 
 .content {
@@ -217,11 +203,10 @@ h2 {
 
     .content {
         margin-left: 60px;
-        margin-top: 60px; /* if navbar is now horizontal on top */
+        margin-top: 60px;
     }
 }
 
-/* Responsive scroll wrapper */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -229,7 +214,6 @@ h2 {
     margin-top: 15px;
 }
 
-/* Table must be wider than screen to trigger scroll */
 .table-responsive table {
     width: 100%;
     min-width: 900px;
@@ -243,7 +227,6 @@ h2 {
     box-sizing: border-box;
 }
 
-/* Rounded table styling */
 .rounded-table {
     background: white;
     border-radius: 10px;
@@ -251,26 +234,22 @@ h2 {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Table header and cells */
 .rounded-table th,
 .rounded-table td {
     padding: 12px;
     text-align: center;
     font-size: 14px;
-    white-space: nowrap; /* Prevent wrapping on small screens */
+    white-space: nowrap;
 }
 
-/* Alternate row color */
 .rounded-table tbody tr:nth-child(even) {
     background: #f8f9fa;
 }
 
-/* Hover */
 .rounded-table tbody tr:hover {
     background: #e3f2fd;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .table-controls {
         flex-direction: column;

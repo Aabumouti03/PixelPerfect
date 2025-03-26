@@ -29,7 +29,7 @@ body.edit_module {
 
 .form-control:focus {
     border-color:  #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(226, 255, 81, 0.569);
 }
 
 .form-check-input {
@@ -122,11 +122,11 @@ body.edit_module {
 }
 
 .save-pill {
-    background-color: #018749;
+    background-color: #F24505;
 }
 
 .save-pill:hover {
-    background-color: #00693E;
+    background-color: #D43802;
 }
 
 .add-pill {

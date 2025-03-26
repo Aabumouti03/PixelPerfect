@@ -30,7 +30,7 @@ body.add_module {
 
 .form-control:focus {
     border-color:  #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(241, 255, 81, 0.682);
 }
 
 .form-check-input {

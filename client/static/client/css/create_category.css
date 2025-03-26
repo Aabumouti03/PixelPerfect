@@ -21,7 +21,7 @@ body {
 
 .form-control:focus {
     border-color: #F24505;
-    box-shadow: 0 0 5px rgba(81, 182, 255, 0.5);
+    box-shadow: 0 0 5px rgba(232, 255, 81, 0.76);
 }
 
 .form-check-input {
@@ -122,7 +122,7 @@ body {
 }
 
 .sortable-item:hover {
-    background-color: #00bff4b4;
+    background-color: #f4f000b4;
 }
 
 .sortable-ghost {
@@ -156,5 +156,5 @@ textarea.form-control {
 
 .module-box ul li {
     padding: 10px;
-    border-bottom: 2px solid #80bef5;
+    border-bottom: 2px solid #eff580;
 }

@@ -18,7 +18,7 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    color: #000000;
+    color: #2b2320;
 }
 
 .card-container {
@@ -46,7 +46,7 @@ body {
 
 .count {
     font-size: 30px;
-    color: #0048FF;
+    color: #2b2320;
     margin-bottom:px ;
 }
 
@@ -57,9 +57,19 @@ body {
 }
 
 
-.card.sales { background: #0048FF; }
-.card.orders { background: #F24505; }
-.card.visitors { background: #CEE7F2; }
+.card.sales { 
+    background: #f2f20557;
+    color: #2b2320;
+}
+
+.card.orders { 
+    background: #F24505;
+    color: white;
+}
+.card.visitors { 
+    background: #f2f20557;
+    color: #2b2320;
+}
 
 
 .card, .chart-box {

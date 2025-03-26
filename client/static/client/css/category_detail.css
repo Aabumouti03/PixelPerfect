@@ -23,7 +23,7 @@
 .category-detail-header p {
     font-size: 16px;
     margin-top: 10px;
-    color: #555;
+    color: #2b2320;
 }
 
 .category-grid {
@@ -36,8 +36,8 @@
 }
 
 .category-card {
-    background: #3A88F6;
-    color: white;
+    background: #f2f20557;
+    color: #2b2320;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -61,8 +61,8 @@
 }
 
 .module-card, .program-card {
-    background: #3A88F6;
-    color: white;
+    background: #f2f20557;
+    color: #2b2320;
     border-radius: 10px;
     padding: 20px;
 
@@ -78,7 +78,7 @@
 
 .view-btn {
     background: white;
-    color: #3A88F6;
+    color: #F24505;
     padding: 4px 6px;
     border-radius: 5px;
     text-align: center;
@@ -93,7 +93,7 @@
 
 h3 {
     font-size: 22px;
-    color: #333;
+    color: #2b2320;
     margin-left: 20px;
 }
 

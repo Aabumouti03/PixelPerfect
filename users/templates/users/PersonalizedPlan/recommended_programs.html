@@ -4,6 +4,8 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
 <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="programs-url" content="{% url 'recommended_programs' %}">
 
 <h1>Your Personalized Learning Journey</h1>
 <p>Select a program that best fits your goals! You can only enroll in one program at a time.</p>
@@ -47,63 +49,9 @@
     <p>No programs available at the moment.</p>
 {% endif %}
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".enroll-button").forEach(button => {
-            const isEnrolled = button.getAttribute("data-enrolled") === "true";
-            if (isEnrolled) {
-                button.textContent = "Enrolled";
-                button.classList.add("enrolled");
-            } else {
-                button.textContent = "Enroll";
-                button.classList.remove("enrolled");
-            }
-
-            button.addEventListener("click", function () {
-                const programId = this.getAttribute("data-program-id");
-                const isEnrolled = this.getAttribute("data-enrolled") === "true";
-                const action = isEnrolled ? "unenroll" : "enroll";
-
-                document.querySelectorAll(".enroll-button").forEach(b => {
-                    if (b !== this && b.getAttribute("data-enrolled") === "true") {
-                        b.textContent = "Enroll";
-                        b.setAttribute("data-enrolled", "false");
-                        b.classList.remove("enrolled");
-                    }
-                });
-
-                if (isEnrolled) {
-                    this.textContent = "Enroll";
-                    this.setAttribute("data-enrolled", "false");
-                    this.classList.remove("enrolled");
-                } else {
-                    this.textContent = "Enrolled";
-                    this.setAttribute("data-enrolled", "true");
-                    this.classList.add("enrolled");
-                }
-
-                fetch("{% url 'recommended_programs' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({
-                        program_id: programId,
-                        action: action
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        console.log("Enrollment updated successfully");
-                    } else {
-                        console.error("Error updating enrollment");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            });
-        });
-    });
-</script>
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'users/js/recommended_programs.js' %}"></script>
+{% endblock %}
+

@@ -4,7 +4,8 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'users/css/personalized_plan.css' %}">
 <link rel="stylesheet" href="{% static 'users/css/dashboard.css' %}">
-
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="modules-url" content="{% url 'recommended_modules' %}">
 
 <h1>Your Recommended Modules</h1>
 <p>Pick the modules that match your interests! You can enroll in as many as you like.</p>
@@ -39,53 +40,8 @@
 {% endif %}
 
 
+{% endblock %}
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".enroll-button").forEach(button => {
-            button.addEventListener("click", function () {
-                const moduleId = this.getAttribute("data-module-id");
-                const isEnrolled = this.getAttribute("data-enrolled") === "true";
-                const action = isEnrolled ? "unenroll" : "enroll";
-
-                // Toggle the UI immediately
-                if (isEnrolled) {
-                    this.textContent = "Enroll";
-                    this.setAttribute("data-enrolled", "false");
-                    this.classList.remove("enrolled");
-                } else {
-                    this.textContent = "Enrolled";
-                    this.setAttribute("data-enrolled", "true");
-                    this.classList.add("enrolled");
-                }
-
-                // Send request to update enrollment status
-                fetch("{% url 'recommended_modules' %}", {  // Use the existing view URL
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({
-                        module_id: moduleId,
-                        action: action
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        console.log("Enrollment updated successfully");
-                    } else {
-                        console.error("Error updating enrollment");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            });
-        });
-    });
-</script>
-
-
-
-
+{% block extra_js %}
+<script src="{% static 'users/js/recommended_modules.js' %}"></script>
 {% endblock %}
