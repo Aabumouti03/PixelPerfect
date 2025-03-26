@@ -42,7 +42,6 @@ function getFormattedDate(dateString) {
     return date.toISOString().split("T")[0];  // Convert to YYYY-MM-DD
 }
 
-// Function to fetch journal entry for a specific date
 function fetchJournalEntry(date) {
     if (!date || typeof date !== "string" || date.trim() === "") {
         console.error("❌ Invalid date passed to fetchJournalEntry!");
@@ -62,19 +61,40 @@ function fetchJournalEntry(date) {
             if (data.success && data.data) {
                 console.log("✅ Data retrieved:", data.data);
 
-                // Populate form fields with saved data
-                getElement("sleep_hours").value = data.data.sleep_hours || "";
-                getElement("hydration").value = data.data.hydration || "";
-                getElement("stress").value = data.data.stress || "";
-                getElement("goal_progress").value = data.data.goal_progress || "low";
-                getElement("notes").value = data.data.notes || "";
+                const fieldsToFill = [
+                    { id: "sleep_hours", value: data.data.sleep_hours },
+                    { id: "hydration", value: data.data.hydration },
+                    { id: "stress", value: data.data.stress },
+                    { id: "goal_progress", value: data.data.goal_progress || "low" },
+                    { id: "notes", value: data.data.notes }
+                ];
 
-                // Ensure radio buttons are selected properly
-                ["connected_with_family", "expressed_gratitude", "caffeine", "outdoors", "sunset"].forEach(field => {
-                    if (data.data[field]) {
-                        document.querySelector(`[name="${field}"][value="${data.data[field]}"]`)?.setAttribute("checked", true);
+                // Populate text, number, and textarea fields
+                fieldsToFill.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (element) {
+                        element.value = field.value || "";
                     }
                 });
+
+                // Handle radio buttons properly
+                const radioFields = {
+                    "connected_with_family": data.data.connected_with_family,
+                    "expressed_gratitude": data.data.expressed_gratitude,
+                    "caffeine": data.data.caffeine,
+                    "spent_time_outdoors": data.data.outdoors,
+                    "watched_sunset": data.data.sunset,
+                };
+
+                Object.keys(radioFields).forEach(fieldName => {
+                    if (radioFields[fieldName] !== null && radioFields[fieldName] !== undefined) {
+                        const radioButton = document.querySelector(`[name="${fieldName}"][value="${radioFields[fieldName]}"]`);
+                        if (radioButton) {
+                            radioButton.checked = true;
+                        }
+                    }
+                });
+
             } else {
                 console.warn("❌ No previous journal entry found for this date.");
                 clearJournalForm();
@@ -83,12 +103,12 @@ function fetchJournalEntry(date) {
         .catch(error => console.error("❌ Error fetching journal entry:", error));
 }
 
+
 function saveJournalEntry(event) {
     event.preventDefault();  // Prevent default form submission
 
     let currentURL = window.location.pathname;
     let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
-
     let formattedDate = dateMatch ? dateMatch[1] : null;
 
     if (!formattedDate) {
@@ -133,22 +153,24 @@ function saveJournalEntry(event) {
     .catch(error => console.error("❌ Network error:", error));
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ Journal.js loaded successfully");
 
-    // Extract the date from the URL and handle missing date cases
+    // Extract the date from the URL or the context variable if available
     let currentURL = window.location.pathname;
     let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
+    let journalDate = dateMatch ? dateMatch[1] : document.getElementById("selected-date")?.value;
 
-    let journalDate = dateMatch ? dateMatch[1] : new Date().toISOString().split("T")[0];
+    if (!journalDate) {
+        journalDate = new Date().toISOString().split("T")[0];  // Use today's date as a fallback
+    }
 
-    console.log("📅 Extracted Date from URL:", journalDate);
+    console.log("📅 Extracted Date:", journalDate);
 
     if (journalDate) {
-        fetchJournalEntry(journalDate);  
+        fetchJournalEntry(journalDate);
     } else {
-        console.error("❌ No valid date found in URL!");
+        console.error("❌ No valid date found!");
     }
 
     const form = document.getElementById("journal-form");

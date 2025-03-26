@@ -1102,7 +1102,6 @@ def welcome_view(request):
 #------------------------------------------------------ JOURNAL VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
-
 @login_required
 def journal_view(request, date=None):
     """Loads the journal page and fetches saved data for a specific date."""
@@ -1134,8 +1133,8 @@ def journal_view(request, date=None):
                     "notes": journal_entry.notes,
                     "connected_with_family": journal_entry.connected_with_family,
                     "expressed_gratitude": journal_entry.expressed_gratitude,
-                    "outdoors": journal_entry.outdoors,
-                    "sunset": journal_entry.sunset,
+                    "spent_time_outdoors": journal_entry.spent_time_outdoors,
+                    "watched_sunset": journal_entry.watched_sunset,
                 }
             })
         return JsonResponse({"success": False, "error": "No entry found."}, status=404)
@@ -1153,7 +1152,6 @@ def journal_view(request, date=None):
     }
 
     return render(request, "users/journal.html", context)
-
 
 @login_required
 def save_journal_entry(request):
@@ -1182,22 +1180,21 @@ def save_journal_entry(request):
     journal_entry, created = JournalEntry.objects.get_or_create(user=request.user, date=entry_date)
 
     # Update the journal entry with the submitted data
-    journal_entry.sleep_hours = data.get("sleep_hours")
-    journal_entry.caffeine = data.get("caffeine")
-    journal_entry.hydration = data.get("hydration")
-    journal_entry.stress = data.get("stress")
-    journal_entry.goal_progress = data.get("goal_progress")
-    journal_entry.notes = data.get("notes")
-    journal_entry.connected_with_family = data.get("connected_with_family")
-    journal_entry.expressed_gratitude = data.get("expressed_gratitude")
-    journal_entry.outdoors = data.get("spent_time_outdoors")
-    journal_entry.sunset = data.get("watched_sunset")
-    
+    journal_entry.sleep_hours = data.get("sleep_hours") or None
+    journal_entry.caffeine = data.get("caffeine") or None
+    journal_entry.hydration = data.get("hydration") or None
+    journal_entry.stress = data.get("stress") or None
+    journal_entry.goal_progress = data.get("goal_progress") or None
+    journal_entry.notes = data.get("notes") or None
+    journal_entry.connected_with_family = data.get("connected_with_family") or None
+    journal_entry.expressed_gratitude = data.get("expressed_gratitude") or None
+    journal_entry.outdoors = data.get("spent_time_outdoors") or None
+    journal_entry.sunset = data.get("watched_sunset") or None
+
     # Save the entry
     journal_entry.save()
 
     return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
-
 
 
 @login_required

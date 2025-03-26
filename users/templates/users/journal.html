@@ -20,6 +20,8 @@
 
     <form id="journal-form" method="POST" action="{% url 'save_journal_entry' %}">
         {% csrf_token %}
+        <input type="hidden" id="selected-date" name="selected_date" value="{{ selected_date }}">
+
     
 
 
