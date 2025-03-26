@@ -82,12 +82,13 @@ body {
     cursor: pointer;
 }
 
-.color1 { background-color: #CEE7F2; }
-.color2 { background-color: #44778d; }
-.color3 { background-color: #a7d4e8; }
+.color1 { background-color: #f2f20557; }
+.color2 { background-color: #81C784; }
+.color3 { background-color: #35b008bf; }
 .color4 { background-color: #F24505; }
-.color5 { background-color: #3498DB; }
-.color6 { background-color: #CEE7F2; }
+.color5 { background-color: #FFD700; }
+.color6 { background-color: #f2f20557; }
+.color6 { background-color: #F24505; }
 
 
 @media (max-width: 1024px) {
