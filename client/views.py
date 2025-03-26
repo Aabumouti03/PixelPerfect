@@ -800,21 +800,45 @@ def video_detail(request, video_id):
     video = get_object_or_404(VideoResource, id=video_id)
     return render(request, "client/video_detail.html", {"video": video})
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import get_object_or_404
+from client.models import Module, VideoResource
+import json
+
+def admin_check(user):
+    return user.is_staff or user.is_superuser
+
 @csrf_exempt
 @login_required
 @user_passes_test(admin_check)
 def remove_video_from_module(request, module_id):
-    data = json.loads(request.body)
-    video_ids = data.get("video_ids", [])
-    
-    try:
-        module = get_object_or_404(Module, id=module_id)
-        for vid in video_ids:
-            module.video_resources.remove(vid)
-        return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)})
+    if request.method != 'POST':
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
+    try:
+        data = json.loads(request.body)
+        video_ids = data.get("video_ids")
+
+        if not video_ids:
+            return JsonResponse({"success": False, "error": "No video IDs provided"}, status=400)
+
+        module = get_object_or_404(Module, id=module_id)
+        
+        for vid in video_ids:
+            try:
+                video = VideoResource.objects.get(id=vid)
+                module.video_resources.remove(video)
+            except VideoResource.DoesNotExist:
+                return JsonResponse({"success": False, "error": f"Video with ID {vid} does not exist."}, status=404)
+                
+        return JsonResponse({"success": True})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ RESOURCES VIEWS ------------------------------------------------------------------
@@ -824,18 +848,47 @@ def remove_video_from_module(request, module_id):
 @login_required
 @user_passes_test(admin_check)
 def remove_resource_from_module(request, module_id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            resource_ids = data.get('resource_ids', [])
+    from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required, user_passes_test
+from client.models import Module, AdditionalResource
+import json
 
-            module = Module.objects.get(id=module_id)
-            for resource_id in resource_ids:
-                module.additional_resources.remove(resource_id)
+def admin_check(user):
+    return user.is_staff or user.is_superuser
 
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+@csrf_exempt
+@login_required
+@user_passes_test(admin_check)
+def remove_resource_from_module(request, module_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        resource_ids = data.get('resource_ids')
+
+        if resource_ids is None: 
+            return JsonResponse({'success': False, 'error': 'No resource_ids provided'}, status=400)
+
+        module = Module.objects.get(id=module_id)
+        
+        for resource_id in resource_ids:
+            try:
+                resource = AdditionalResource.objects.get(id=resource_id)
+                module.additional_resources.remove(resource)
+            except AdditionalResource.DoesNotExist:
+                return JsonResponse({'success': False, 'error': f'Resource with ID {resource_id} does not exist.'}, status=404)
+
+        return JsonResponse({'success': True})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON format'}, status=400)
+    except Module.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Module not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 @user_passes_test(admin_check)
 @login_required

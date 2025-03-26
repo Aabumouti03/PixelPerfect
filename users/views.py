@@ -37,7 +37,7 @@ from client.models import (
 
 
 )
-from users.helpers_modules import calculate_progress
+from users.helpers_modules import calculate_progress, calculate_program_progress
 from users.models import (
     EndUser,
     JournalEntry,
@@ -233,7 +233,7 @@ def dashboard(request):
         for progress in UserModuleProgress.objects.filter(user=end_user)
     }
 
-    previous_module_completed = True  # The first module is always accessible
+    previous_module_completed = True
     unlocked_modules = set()
 
     for program_module in program_modules:
@@ -241,26 +241,28 @@ def dashboard(request):
         module.progress_value = user_progress.get(module.id, 0)
 
         if previous_module_completed:
-            module.is_unlocked = True  # Unlock if it's the first or previous is completed
-            unlocked_modules.add(module.id)  # Store unlocked module IDs
+            module.is_unlocked = True
+            unlocked_modules.add(module.id)
         else:
-            module.is_unlocked = False  # Keep locked
+            module.is_unlocked = False
 
-        previous_module_completed = module.progress_value == 100  # Update for next iteration
+        previous_module_completed = module.progress_value == 100
 
-    # Get modules outside the program that the user is enrolled in (standalone modules are always unlocked)
+    program_progress_value = 0 
+
+    if program:
+        program_progress_value = calculate_program_progress(end_user, program)
+
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
     outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
-    # Get recently accessed modules **EXCLUDING LOCKED ONES**
     recent_enrollments = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:3]
 
-    # Ensure only unlocked modules appear in recently accessed
     recent_modules = [
         enrollment.module for enrollment in recent_enrollments
         if enrollment.module.id and (
-            enrollment.module.id in unlocked_modules or  # Module is unlocked in a program
-            enrollment.module in outside_modules  # Standalone modules are always unlocked
+            enrollment.module.id in unlocked_modules or
+            enrollment.module in outside_modules
         )
     ]
 
@@ -270,9 +272,10 @@ def dashboard(request):
         'user': request.user,
         'program': program,
         'program_modules': program_modules,
-        'outside_modules': outside_modules,  # Only enrolled modules outside the program
-        'recent_modules': recent_modules,  # Excludes locked modules
-        "quote_of_the_day": quote_of_the_day
+        'outside_modules': outside_modules, 
+        'recent_modules': recent_modules,
+        "quote_of_the_day": quote_of_the_day,
+        'program_progress_value': program_progress_value,
     }
     return render(request, 'users/dashboard.html', context)
 

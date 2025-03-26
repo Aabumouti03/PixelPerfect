@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from client.models import Questionnaire, ExerciseQuestion  # We keep these imports if these models exist
+from client.models import Questionnaire, ExerciseQuestion
 from users.models import (
     Admin,
     EndUser,
@@ -38,7 +38,6 @@ class UserModelTest(TestCase):
 
     def test_user_str_method(self):
         user = User.objects.create_user(username='jane', password='pass', first_name='Jane', last_name='Doe')
-        # Typically, AbstractUser's __str__ is the username
         self.assertEqual(str(user), 'jane')
         
 
@@ -55,7 +54,7 @@ class EndUserModelTest(TestCase):
             last_time_to_work='1_month',
             sector='it',
         )
-        self.assertEqual(str(end_user), 'User: End User')  # checks __str__ method
+        self.assertEqual(str(end_user), 'User: End User')
         self.assertEqual(end_user.age, 25)
         self.assertEqual(end_user.gender, 'male')
 
@@ -69,7 +68,7 @@ class UserProgramEnrollmentTest(TestCase):
         program = Program.objects.create(title='Test Program', description='Description')
 
         enrollment = UserProgramEnrollment.objects.create(user=end_user, program=program)
-        self.assertIn(enrollment, program.enrolled_users.all())  # program.enrolled_users returns UserProgramEnrollment
+        self.assertIn(enrollment, program.enrolled_users.all())
         self.assertEqual(str(enrollment), f"{end_user.user.username} enrolled in {program.title}")
         
 
