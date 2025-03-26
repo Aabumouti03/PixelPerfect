@@ -134,12 +134,17 @@ body {
 }
 
 
-/* Progress Bar */
+/* Progress Bar for modules*/
 .progress-container {
     width: 100%;
     padding: 5px 0;
 }
 
+/* Progress Bar for programs*/
+.progress-line {
+  width: 90%;
+  padding: 5px;
+}
 
 /* View Module Button */
 .view-module-button {
