@@ -230,69 +230,69 @@ class Command(BaseCommand):
             
             self.seed_data()
             self.seed_users()
-            self.seed_quotes()
+            # self.seed_quotes()
             self.seed_questionnaire()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
 
     def seed_users(self):
         """Creates 5 EndUsers with random attributes and 1 Admin."""
-        existing_users = User.objects.filter(username__startswith="EndUser").count()
-        start_index = existing_users + 1
+        # existing_users = User.objects.filter(username__startswith="EndUser").count()
+        # start_index = existing_users + 1
 
-        for i in range(start_index, start_index + 5):
-            username = f"EndUser{i}"
-            email = f"enduser{i}@example.com"
+        # for i in range(start_index, start_index + 5):
+        #     username = f"EndUser{i}"
+        #     email = f"enduser{i}@example.com"
 
-            user, created = User.objects.get_or_create(username=username, defaults={
-                "email": email,
-                "is_staff": False,
-                "is_superuser": False,
-                "email_verified": True,
-            })
+        #     user, created = User.objects.get_or_create(username=username, defaults={
+        #         "email": email,
+        #         "is_staff": False,
+        #         "is_superuser": False,
+        #         "email_verified": True,
+        #     })
 
-            if created:
-                user.set_password(PASSWORD)
-                user.save()
+        #     if created:
+        #         user.set_password(PASSWORD)
+        #         user.save()
 
-                random_gender = random.choice(GENDER_OPTIONS)
-                random_last_time_to_work = random.choice(TIME_DURATION_CHOICES)
-                random_sector = random.choice(SECTOR_CHOICES)
-                random_age = random.randint(18, 60)
+        #         random_gender = random.choice(GENDER_OPTIONS)
+        #         random_last_time_to_work = random.choice(TIME_DURATION_CHOICES)
+        #         random_sector = random.choice(SECTOR_CHOICES)
+        #         random_age = random.randint(18, 60)
 
-                enduser = EndUser.objects.create(
-                    user=user,
-                    age=random_age,
-                    gender=random_gender,
-                    last_time_to_work=random_last_time_to_work,
-                    sector=random_sector
-                )
+        #         enduser = EndUser.objects.create(
+        #             user=user,
+        #             age=random_age,
+        #             gender=random_gender,
+        #             last_time_to_work=random_last_time_to_work,
+        #             sector=random_sector
+        #         )
 
-                # Randomly assign 0 or more modules
-                all_modules = list(Module.objects.all())
-                num_modules = random.randint(0, len(all_modules))
-                selected_modules = random.sample(all_modules, num_modules)
+        #         # Randomly assign 0 or more modules
+        #         all_modules = list(Module.objects.all())
+        #         num_modules = random.randint(0, len(all_modules))
+        #         selected_modules = random.sample(all_modules, num_modules)
                 
-                for module in selected_modules:
-                    UserModuleEnrollment.objects.create(
-                        user=enduser,
-                        module=module
-                    )
+        #         for module in selected_modules:
+        #             UserModuleEnrollment.objects.create(
+        #                 user=enduser,
+        #                 module=module
+        #             )
 
-                # Randomly assign 0 or 1 program
-                program_enrolled = False
-                if random.choice([True, False]) and Program.objects.exists():
-                    program = random.choice(Program.objects.all())
-                    UserProgramEnrollment.objects.create(
-                        user=enduser,
-                        program=program
-                    )
-                    program_enrolled = True
+        #         # Randomly assign 0 or 1 program
+        #         program_enrolled = False
+        #         if random.choice([True, False]) and Program.objects.exists():
+        #             program = random.choice(Program.objects.all())
+        #             UserProgramEnrollment.objects.create(
+        #                 user=enduser,
+        #                 program=program
+        #             )
+        #             program_enrolled = True
                     
 
-                print(f" Created EndUser: {user.username} | Gender: {random_gender} | Work Gap: {random_last_time_to_work} | Sector: {random_sector}")
-                print(f" - Enrolled in {num_modules} modules")
-                print(f" - Program enrollment: {'Yes' if program_enrolled else 'No'}")
+        #         print(f" Created EndUser: {user.username} | Gender: {random_gender} | Work Gap: {random_last_time_to_work} | Sector: {random_sector}")
+        #         print(f" - Enrolled in {num_modules} modules")
+        #         print(f" - Program enrollment: {'Yes' if program_enrolled else 'No'}")
                 
 
         if not Admin.objects.exists():  
