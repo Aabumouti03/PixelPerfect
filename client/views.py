@@ -1244,13 +1244,17 @@ def user_detail_view(request, user_id):
 @login_required 
 @user_passes_test(admin_check) 
 def category_list(request):
+    query = request.GET.get('q', '')
     categories = Category.objects.all()
 
-    context = {
+    if query:
+        categories = categories.filter(Q(name__icontains=query))
+
+    return render(request, 'client/category_list.html', {
         'categories': categories,
-    }
-    
-    return render(request, 'client/category_list.html', context)
+        'query': query,
+    })
+
 
 @login_required 
 @user_passes_test(admin_check) 
