@@ -48,6 +48,9 @@ from .models import (
     Questionnaire,
     Section,
 )
+from django.http import JsonResponse
+from client.models import Module, VideoResource
+import json
 
 
 def admin_check(user):
@@ -605,6 +608,55 @@ def add_question(request, questionnaire_id):
 #------------------------------------------------------ MODULES VIEWS --------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
+
+@login_required
+def module_overview(request, module_id):
+    """View for a module."""
+    module = get_object_or_404(Module, id=module_id)
+    return render(request, "Module/edit_module.html", {"module": module})
+
+@login_required
+@user_passes_test(admin_check)
+def client_modules(request):
+    """View to display all client modules."""
+    modules = Module.objects.all().values("id", "title", "description") 
+    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
+    
+    modules_list = []
+    for index, module in enumerate(modules):
+        module_data = {
+            "id": module["id"],
+            "title": module["title"],
+            "description": module["description"],  
+            "color_class": module_colors[index % len(module_colors)]
+        }
+        modules_list.append(module_data)
+
+    return render(request, "client/client_modules.html", {"modules": modules_list})
+
+@login_required
+@user_passes_test(admin_check)
+def delete_module(request, module_id):
+    """View to delete a module."""
+    module = get_object_or_404(Module, id=module_id)
+    module.delete()
+    return redirect("client_modules")
+
+@login_required
+@user_passes_test(admin_check, login_url=None)
+def add_button(request):
+    """View to add media to a module."""
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        
+        if title and description:  
+            new_module = Module.objects.create(title=title, description=description)
+            new_module.save()
+            return redirect("client_modules") 
+    return render(request, "Module/add_module.html")
+
+
 @user_passes_test(admin_check)
 @login_required
 def createModule(request):
@@ -834,15 +886,6 @@ def video_detail(request, video_id):
     video = get_object_or_404(VideoResource, id=video_id)
     return render(request, "client/video_detail.html", {"video": video})
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import get_object_or_404
-from client.models import Module, VideoResource
-import json
-
-def admin_check(user):
-    return user.is_staff or user.is_superuser
 
 @csrf_exempt
 @login_required
@@ -1002,7 +1045,6 @@ def add_resource_to_module(request, module_id):
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
-
 
 
 @csrf_exempt
@@ -1851,53 +1893,3 @@ def add_Equestion(request):
         return redirect('add_exercise')
 
     return render(request, 'Module/add_question.html', {'form': form})
-
-
-
-# Client Modules Views
-@login_required
-def module_overview(request, module_id):
-    """View for a module."""
-    module = get_object_or_404(Module, id=module_id)
-    return render(request, "client/edit_module.html", {"module": module})
-
-@login_required
-@user_passes_test(admin_check)
-def client_modules(request):
-    """View to display all client modules."""
-    modules = Module.objects.all().values("id", "title", "description") 
-    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
-    
-    modules_list = []
-    for index, module in enumerate(modules):
-        module_data = {
-            "id": module["id"],
-            "title": module["title"],
-            "description": module["description"],  
-            "color_class": module_colors[index % len(module_colors)]
-        }
-        modules_list.append(module_data)
-
-    return render(request, "client/client_modules.html", {"modules": modules_list})
-
-@login_required
-@user_passes_test(admin_check)
-def delete_module(request, module_id):
-    """View to delete a module."""
-    module = get_object_or_404(Module, id=module_id)
-    module.delete()
-    return redirect("client_modules")
-
-@login_required
-@user_passes_test(admin_check, login_url=None)
-def add_button(request):
-    """View to add media to a module."""
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        
-        if title and description:  
-            new_module = Module.objects.create(title=title, description=description)
-            new_module.save()
-            return redirect("client_modules") 
-    return render(request, "Module/add_module.html")
