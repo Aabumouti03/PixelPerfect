@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from client.models import Module
+from client.models import Module, Exercise, Section, VideoResource, AdditionalResource, Category
 from client.forms import ModuleForm  # Adjust import if ModuleForm lives elsewhere
 
 User = get_user_model()
@@ -126,3 +126,80 @@ class ClientModulesTest(TestCase):
         response = self.client.get(self.client_modules_url)
         self.assertEqual(response.status_code, 302)
         self.assertIn('/log_in/', response.url)
+
+    # Test: Module creation with exercises → auto-creates section
+    def test_create_module_with_exercises(self):
+        ex1 = Exercise.objects.create(title="Exercise 1")
+        ex2 = Exercise.objects.create(title="Exercise 2")
+        
+        response = self.client.post(self.add_module_url, {
+            "title": "Module with Exercises",
+            "description": "Auto-section test",
+            "exercises": [ex1.id, ex2.id]
+        })
+
+        self.assertEqual(response.status_code, 302)
+        module = Module.objects.get(title="Module with Exercises")
+        self.assertEqual(module.sections.count(), 1)
+        section = module.sections.first()
+        self.assertEqual(section.exercises.count(), 2)
+
+    # Test: Module creation with video resources
+    def test_create_module_with_videos(self):
+        v1 = VideoResource.objects.create(title="Video 1", youtube_url="https://youtu.be/v1")
+        v2 = VideoResource.objects.create(title="Video 2", youtube_url="https://youtu.be/v2")
+
+        response = self.client.post(self.add_module_url, {
+            "title": "Module with Videos",
+            "description": "Videos attached",
+            "videos": [v1.id, v2.id]
+        })
+
+        self.assertEqual(response.status_code, 302)
+        module = Module.objects.get(title="Module with Videos")
+        self.assertEqual(module.video_resources.count(), 2)
+
+    # Test: Module creation with additional resources
+    def test_create_module_with_resources(self):
+        r1 = AdditionalResource.objects.create(title="Res 1", resource_type="book")
+        r2 = AdditionalResource.objects.create(title="Res 2", resource_type="podcast")
+
+        response = self.client.post(self.add_module_url, {
+            "title": "Module with Resources",
+            "description": "Extra learning",
+            "resources": [r1.id, r2.id]
+        })
+
+        self.assertEqual(response.status_code, 302)
+        module = Module.objects.get(title="Module with Resources")
+        self.assertEqual(module.additional_resources.count(), 2)
+
+    # Test: Module creation with categories
+    def test_create_module_with_categories(self):
+        c1 = Category.objects.create(name="IT")
+        c2 = Category.objects.create(name="Education")
+
+        response = self.client.post(self.add_module_url, {
+            "title": "Module with Categories",
+            "description": "Categorized module",
+            "categories": [c1.id, c2.id]
+        })
+
+        self.assertEqual(response.status_code, 302)
+        module = Module.objects.get(title="Module with Categories")
+        self.assertEqual(module.categories.count(), 2)
+
+    def test_create_module_get_request_renders_form(self):
+        """
+        GET request to createModule should render the add_module.html
+        with all necessary context variables.
+        """
+        response = self.client.get(self.add_module_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "Module/add_module.html")
+
+        self.assertIn("exercises", response.context)
+        self.assertIn("videos", response.context)
+        self.assertIn("resources", response.context)
+        self.assertIn("categories", response.context)
