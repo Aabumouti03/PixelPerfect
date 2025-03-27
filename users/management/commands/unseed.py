@@ -27,7 +27,7 @@ class Command(BaseCommand):
             Question.objects.all().delete()
             Quote.objects.all().delete()
 
-            EndUser.objects.all().delete()
+            #EndUser.objects.all().delete()
             # Admin.objects.all().delete()
 
         self.stdout.write(self.style.SUCCESS("✅ All seeded data deleted successfully."))
