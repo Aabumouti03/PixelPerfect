@@ -1088,16 +1088,35 @@ def enroll_module(request):
 @login_required
 def all_modules(request):
     """Display all available modules."""
-    allModules = Module.objects.all()  # Fetch all modules
+    allModules = Module.objects.all()  
     user = request.user
-
-    # Get the current user's enrolled modules
+    end_user = None
     try:
         end_user = EndUser.objects.get(user=user)
         enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module__title', flat=True)
     except EndUser.DoesNotExist:
         enrolled_modules = []
 
+    progress_dict = {}
+    if end_user:
+        user_progress_qs = UserModuleProgress.objects.filter(
+            user=end_user, 
+            module__in=allModules
+        )
+
+        progress_dict = {
+            up.module_id: up.completion_percentage 
+            for up in user_progress_qs
+        }
+    
+    enrolled_modules = []
+    if end_user:
+        enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)\
+            .values_list('module__title', flat=True)
+
+    for module in allModules:
+        module.progress_value = progress_dict.get(module.id, 0)
+    
     return render(request, 'users/all_modules.html', {
         'all_modules': allModules,
         'enrolled_modules': list(enrolled_modules)  # Convert QuerySet to list
