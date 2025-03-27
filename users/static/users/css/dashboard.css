@@ -88,29 +88,29 @@ body {
 .module-card:nth-child(odd) {
     background: #f2f20557 !important;
     border-left: 5px solid #f2f20557 !important;
-    color: #333;
+    color: #333 !important; 
 }
 
 .module-card:nth-child(even) {
     background: #f2f20557 !important;
     border-left: 5px solid #f2f20557 !important; 
-    color: #333;
+    color: #333 !important; 
 }
 
 .module-card:nth-child(odd) h3 {
-    color: #333;
+    color: #333 !important; 
 }
 
 .module-card:nth-child(even) h3 {
-  color: #333;
+  color: #333 !important; 
 }
 
 .module-card:nth-child(odd) p {
-    color: #333;
+    color: #333 !important; 
 }
 
 .module-card:nth-child(even) p {
-    color: #333;;
+    color: #333 !important; 
 }
 
 /* Ensure title stays inside the card */
