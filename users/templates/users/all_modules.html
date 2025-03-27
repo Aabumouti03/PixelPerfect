@@ -27,12 +27,12 @@
         <!-- Enroll/Unenroll Button (Ionicon) -->
         <div class="action-button" onclick="toggleModule(this, '{{ module.title|escapejs }}')">
           {% if module.title in enrolled_modules %}
-            <ion-icon name="remove-outline">-</ion-icon>
+            <ion-icon name="remove-circle-outline"></ion-icon>
           {% else %}
-            <ion-icon name="add-outline">+</ion-icon>
+            <ion-icon name="add-circle-outline"></ion-icon>
           {% endif %}
         </div>
-
+        
         <h3>{{ module.title }}</h3>
         <p>{{ module.description }}</p>
 
