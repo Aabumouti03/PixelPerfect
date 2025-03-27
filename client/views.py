@@ -980,6 +980,55 @@ def get_sections(request):
 #------------------------------------------------------ MODULES VIEWS --------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
+
+@login_required
+def module_overview(request, module_id):
+    """View for a module."""
+    module = get_object_or_404(Module, id=module_id)
+    return render(request, "Module/edit_module.html", {"module": module})
+
+@login_required
+@user_passes_test(admin_check)
+def client_modules(request):
+    """View to display all client modules."""
+    modules = Module.objects.all().values("id", "title", "description") 
+    module_colors = ["color1", "color2", "color3", "color4", "color5", "color6"]
+    
+    modules_list = []
+    for index, module in enumerate(modules):
+        module_data = {
+            "id": module["id"],
+            "title": module["title"],
+            "description": module["description"],  
+            "color_class": module_colors[index % len(module_colors)]
+        }
+        modules_list.append(module_data)
+
+    return render(request, "client/client_modules.html", {"modules": modules_list})
+
+@login_required
+@user_passes_test(admin_check)
+def delete_module(request, module_id):
+    """View to delete a module."""
+    module = get_object_or_404(Module, id=module_id)
+    module.delete()
+    return redirect("client_modules")
+
+@login_required
+@user_passes_test(admin_check, login_url=None)
+def add_button(request):
+    """View to add media to a module."""
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        
+        if title and description:  
+            new_module = Module.objects.create(title=title, description=description)
+            new_module.save()
+            return redirect("client_modules") 
+    return render(request, "Module/add_module.html")
+
+
 @user_passes_test(admin_check)
 @login_required
 def createModule(request):
