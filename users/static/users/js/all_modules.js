@@ -41,40 +41,42 @@ document.addEventListener("DOMContentLoaded", function() {
   /* TOGGLE ENROLL/UNENROLL LOGIC
      Triggered when the user clicks the Ionicon button (add/remove outline).
      Sends a POST request to enroll or unenroll the module. */
-  function toggleModule(button, moduleTitle) {
-    moduleTitle = moduleTitle.trim();
-  
-    let icon = button.querySelector("ion-icon");
-    let isEnrolled = icon.getAttribute("name") === "remove-outline";
-    let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
-  
-    console.log("Clicked module:", `"${moduleTitle}"`,
-                "Enrolled?", isEnrolled,
-                "API URL:", url);
-  
-    let requestData = JSON.stringify({ title: moduleTitle });
-  
-    fetch(url, {
-      method: "POST",
-      body: requestData,
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken()
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Server response:", data);
-      if (data.success) {
-        // Toggle the Ionicon name to show add/remove
-        icon.setAttribute("name", isEnrolled ? "add-outline" : "remove-outline");
-      } else {
-        console.error("Action failed:", data.error);
-        alert("Failed: " + data.error);
-      }
-    })
-    .catch(error => console.error("Error:", error));
-  }
+     function toggleModule(button, moduleTitle) {
+      moduleTitle = moduleTitle.trim();
+    
+      let icon = button.querySelector("i");
+      let isEnrolled = icon.classList.contains("fa-minus");
+      let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
+    
+      console.log("Clicked module:", `"${moduleTitle}"`,
+                  "Enrolled?", isEnrolled,
+                  "API URL:", url);
+    
+      let requestData = JSON.stringify({ title: moduleTitle });
+    
+      fetch(url, {
+        method: "POST",
+        body: requestData,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Server response:", data);
+        if (data.success) {
+          // Toggle Font Awesome classes instead of ion-icon names
+          icon.classList.remove(isEnrolled ? "fa-minus" : "fa-plus");
+          icon.classList.add(isEnrolled ? "fa-plus" : "fa-minus");
+        } else {
+          console.error("Action failed:", data.error);
+          alert("Failed: " + data.error);
+        }
+      })
+      .catch(error => console.error("Error:", error));
+    }
+    
   
   /* CSRF TOKEN HELPER
      Retrieves the 'csrftoken' from cookies so we can make secure POST requests. */
