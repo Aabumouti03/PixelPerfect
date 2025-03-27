@@ -48,6 +48,9 @@ from .models import (
     Questionnaire,
     Section,
 )
+from django.http import JsonResponse
+from client.models import Module, VideoResource
+import json
 
 
 def admin_check(user):
@@ -1268,15 +1271,6 @@ def video_detail(request, video_id):
     video = get_object_or_404(VideoResource, id=video_id)
     return render(request, "client/video_detail.html", {"video": video})
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import get_object_or_404
-from client.models import Module, VideoResource
-import json
-
-def admin_check(user):
-    return user.is_staff or user.is_superuser
 
 @csrf_exempt
 @login_required
@@ -1436,7 +1430,6 @@ def add_resource_to_module(request, module_id):
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
-
 
 
 @csrf_exempt
