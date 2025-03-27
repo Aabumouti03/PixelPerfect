@@ -149,7 +149,9 @@
                         data: completionTimeData,
                         borderColor: "#ff4500",
                         backgroundColor: "#f2f20557",
-                        fill: true
+                        fill: true,
+                        pointRadius: 6, // Increase this value to make the dots bigger
+                        pointHoverRadius: 8, // Optional: Increase hover radius to make the dots larger on hover
                     }]
                 },
                 options: {
@@ -161,6 +163,7 @@
                                 autoSkip: false,
                                 maxRotation: 30,
                                 minRotation: 30,
+                            
                             }
                         },
                         y: {
