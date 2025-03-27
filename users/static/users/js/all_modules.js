@@ -8,57 +8,83 @@
 // -----------------------------------------------------------
 
 // Once the DOM is ready, let's log each module's initial icon
-function searchModules(event) {
-  const query = event.target.value.toLowerCase();
-  const modules = document.querySelectorAll('.module-card');
-
-  modules.forEach(module => {
-    const title = module.querySelector('h3')?.innerText.toLowerCase() || '';
-    module.style.display = title.includes(query) ? '' : 'none';
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.module-card').forEach(card => {
+      let icon = card.querySelector("ion-icon");
+      let title = card.querySelector("h3") ? card.querySelector("h3").innerText : "No Title";
+      console.log("Module:", title, "Initial Icon:", icon.getAttribute("name"));
+    });
   });
-}
-
-/* TOGGLE ENROLL/UNENROLL LOGIC
-   Triggered when the user clicks the button (Add/Remove text).
-   Sends a POST request to enroll or unenroll the module. */
-function toggleModule(button, moduleTitle) {
-  moduleTitle = moduleTitle.trim();
-
-  let actionText = button.querySelector("span");
-  let isEnrolled = button.dataset.enrolled === "true";
-  let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
-
-  fetch(url, {
-    method: "POST",
-    body: JSON.stringify({ title: moduleTitle }),
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken()
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Toggle the enrollment state
-      button.dataset.enrolled = (!isEnrolled).toString();
-      // Update the button text
-      actionText.innerText = isEnrolled ? "Add" : "Remove";
-    } else {
-      alert("Failed: " + data.error);
-    }
-  })
-  .catch(error => console.error("Error:", error));
-}
-
-/* CSRF TOKEN HELPER
-   Retrieves the 'csrftoken' from cookies so we can make secure POST requests. */
-function getCSRFToken() {
-  let cookies = document.cookie.split(';');
-  for (let i = 0; i < cookies.length; i++) {
-    let cookie = cookies[i].trim();
-    if (cookie.startsWith("csrftoken=")) {
-      return cookie.split("=")[1];
-    }
+  
+  /* SEARCH MODULES BY TITLE
+     Called whenever the user types in the search bar. 
+     Filters .module-card elements by matching the <h3> text. */
+     function searchModules(event) {
+        console.log("searchModules triggered!");
+        const query = event.target.value.toLowerCase();
+        const modules = document.querySelectorAll('.module-card');
+        let count = 0;
+      
+        modules.forEach(module => {
+          const title = module.querySelector('h3')?.innerText.toLowerCase() || '';
+          
+          if (title.includes(query)) {
+            module.style.display = '';
+            count++;
+          } else {
+            module.style.display = 'none';
+          }
+        });
+      
+      }
+  
+  /* TOGGLE ENROLL/UNENROLL LOGIC
+     Triggered when the user clicks the Ionicon button (add/remove outline).
+     Sends a POST request to enroll or unenroll the module. */
+  function toggleModule(button, moduleTitle) {
+    moduleTitle = moduleTitle.trim();
+  
+    let icon = button.querySelector("ion-icon");
+    let isEnrolled = icon.getAttribute("name") === "remove-outline";
+    let url = isEnrolled ? "/unenroll-module/" : "/enroll-module/";
+  
+    console.log("Clicked module:", `"${moduleTitle}"`,
+                "Enrolled?", isEnrolled,
+                "API URL:", url);
+  
+    let requestData = JSON.stringify({ title: moduleTitle });
+  
+    fetch(url, {
+      method: "POST",
+      body: requestData,
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken()
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Server response:", data);
+      if (data.success) {
+        // Toggle the Ionicon name to show add/remove
+        icon.setAttribute("name", isEnrolled ? "add-outline" : "remove-outline");
+      } else {
+        console.error("Action failed:", data.error);
+        alert("Failed: " + data.error);
+      }
+    })
+    .catch(error => console.error("Error:", error));
   }
-  return "";
-}
+  
+  /* CSRF TOKEN HELPER
+     Retrieves the 'csrftoken' from cookies so we can make secure POST requests. */
+  function getCSRFToken() {
+    let cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      let cookie = cookies[i].trim();
+      if (cookie.startsWith("csrftoken=")) {
+        return cookie.split("=")[1];
+      }
+    }
+    return "";
+  }

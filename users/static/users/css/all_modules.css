@@ -1,123 +1,193 @@
-/* all_modules.css - Updated for Text-Based Buttons */
+/* all_modules.css */
 
-/* Action Button (Add/Remove Text) */
-.action-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #b6a98f;
-  border-radius: 50%;
-  width: 70px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  border: none;
-  outline: none;
-}
-
-/* Hover effect for the button */
-.action-button:hover {
-  background-color: #8b7d65;
-}
-
-/* Module List */
-.module-list {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  text-align: center;
-}
-
-/* Module Card */
-.module-card {
-  border-radius: 12px;
-  width: 250px;
-  height: 320px;
-  padding: 15px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  background: #ffffff;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-/* Hover effect for the card */
-.module-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Module Card Title */
-.module-card h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-/* Progress Container */
-.progress-container {
-  width: 100%;
-  padding: 5px 0;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 10px;
-  background-color: #ddd;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 5px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #F24505;
-  transition: width 0.5s ease-in-out;
-}
-
-.progress-text {
-  font-size: 12px;
-  font-weight: bold;
-  text-align: right;
-}
-
-/* View Module Button */
-.view-module-button {
-  display: inline-block;
-  background: white;
-  color: #F24505;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 10px 14px;
-  border-radius: 25px;
-  text-decoration: none;
-  cursor: pointer;
-  text-align: center;
-  border: 2px solid #F24505;
-  margin-top: auto;
-}
-
-/* Hover effect for the button */
-.view-module-button:hover {
-  background: #D43802;
-  color: #ffffff;
-  border-color: #D43802;
-}
-
-/* Media Query for smaller screens */
-@media (max-width: 800px) {
-  .module-list {
-    justify-content: center;
+/* Container & Header */
+.modules-container {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(126, 138, 172, 0.832);
+    backdrop-filter: blur(10px);
+    margin: 40px auto;
+    max-width: 1200px;
   }
+  
+  .modules-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Title left, search bar right */
+    margin-bottom: 20px;
+  }
+  
+  .modules-header h2 {
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  /* Search Bar */
+  .search-bar {
+    width: 250px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: width 0.4s ease;
+  }
+  
+  .search-bar:focus {
+    width: 350px;
+    outline: none;
+    border-color: #4da6ff;
+  }
+  
+  /* Module List */
+  .module-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    text-align: center;
+  }
+  
+  /* Module Card */
+  .module-card {
+    border-radius: 12px;
+    width: 250px;
+    height: 320px;
+    flex-shrink: 0;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    align-items: center;
+    background: #ffffff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* For hover effect */
+  }
+  
+  /* Hover effect for the card */
+  .module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Alternate colors for odd/even cards */
+.module-card:nth-child(odd) {
+    background: #f2f20557 !important;
+    border-left: 5px solid #f2f20557 !important;
 }
+
+.module-card:nth-child(even) {
+    background: #f2f20557 !important;
+    border-left: 5px solid #f2f20557 !important;
+    color: #333;
+}
+
+  
+.module-card h3 {
+  color: black !important;
+}
+
+.module-card:not(.locked) .progress-text {
+  color: black !important;
+}
+
+  
+  /* Title */
+  .module-card h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    white-space: normal;
+    overflow: hidden;
+    max-height: 45px;
+  }
+  
+  /* Description */
+  .module-card p {
+    font-size: 14px;
+    text-align: center;
+    overflow: hidden;
+    max-height: 60px;
+    margin: 5px 10px;
+    white-space: normal; 
+  }
+  
+  /* Progress Container */
+  .progress-container {
+    width: 100%;
+    padding: 5px 0;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: #F24505;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  .progress-text {
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: right;
+  }
+  
+  /* View Module Button */
+  .view-module-button {
+    display: inline-block;
+    background: white;
+    color: #F24505;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 10px 14px;
+    border-radius: 25px;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border: 2px solid #F24505;
+    margin-top: auto;
+  }
+  
+  /* Hover effect for the button */
+  .view-module-button:hover {
+    background: #D43802;
+    color: #ffffff;
+    border-color: #D43802;
+  }
+  
+  /* Ionicon Toggle (Action Button) */
+  .action-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #b6a98f	;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .action-button ion-icon {
+    font-size: 18px;
+    color: white !important;
+  }
+  
+  /* Media Query for smaller screens */
+  @media (max-width: 800px) {
+    .module-list {
+      justify-content: center;
+    }
+  }
