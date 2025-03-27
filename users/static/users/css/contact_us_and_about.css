@@ -45,7 +45,8 @@
 }
 
 .contact_inputs {
-    width: 600px;
+    width: 100%;
+    max-width: 600px;
     height: 50px;
     border: none;
     outline: none;
@@ -64,7 +65,7 @@ textarea.contact_inputs {
     border-radius: 25px;
     resize: both;
     box-sizing: border-box; 
-    min-width: 600px;
+    min-width: 100%;
     max-width: 100%;
 }
 
@@ -94,7 +95,8 @@ textarea.contact_inputs {
     transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
     border: 2px solid #F24505;
     margin-top: auto;
-    width:600px;
+    width: 100%;
+    max-width: 600px;
 }
 
 .contact_left button:hover {
@@ -135,6 +137,7 @@ textarea.contact_inputs {
     .contact_body input, 
     .contact_body textarea{
         width: 100%;
+        max-width: 600px;
     }
 
     .contact_left button {
@@ -144,7 +147,13 @@ textarea.contact_inputs {
     .contact_right img {
         max-width: 80%;
     }
+
+    .contact_left_title h2{
+        text-align: center;
+        padding-left: 10px;
+    }
 }
+
 
 /* ---------------- ABOUT PAGE ---------------- */
 .about_body {
@@ -271,6 +280,10 @@ textarea.contact_inputs {
         flex-direction: column;
         text-align: center;
         padding: 30px;
+    }
+
+    .about_body{
+        margin-top: 30px;
     }
 
     .about_text {
