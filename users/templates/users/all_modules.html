@@ -6,8 +6,7 @@
 <link rel="stylesheet" href="{% static 'css/all_modules.css' %}">
 
 <!-- Ionicons + Google Fonts (if needed) -->
-<script type="module" src="https://unpkg.com/ionicons@6.0.3/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@6.0.3/dist/ionicons/ionicons.js"></script>
+<script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <section class="modules-container">
@@ -28,12 +27,11 @@
         <!-- Enroll/Unenroll Button (Ionicon) -->
         <div class="action-button" onclick="toggleModule(this, '{{ module.title|escapejs }}')">
           {% if module.title in enrolled_modules %}
-            <ion-icon name="remove-circle-outline"></ion-icon>
+            <ion-icon name="remove-outline"></ion-icon>
           {% else %}
-            <ion-icon name="add-circle-outline"></ion-icon>
+            <ion-icon name="add-outline"></ion-icon>
           {% endif %}
         </div>
-        
 
         <h3>{{ module.title }}</h3>
         <p>{{ module.description }}</p>
