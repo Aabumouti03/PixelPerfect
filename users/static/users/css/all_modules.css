@@ -182,7 +182,7 @@
   
   .action-button ion-icon {
     font-size: 18px;
-    color: white;
+    color: white !important;
   }
   
   /* Media Query for smaller screens */
