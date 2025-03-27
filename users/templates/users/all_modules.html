@@ -5,8 +5,7 @@
 <!-- Link to the external CSS file -->
 <link rel="stylesheet" href="{% static 'css/all_modules.css' %}">
 
-<!-- Ionicons + Google Fonts (if needed) -->
-<script src="https://unpkg.com/ionicons@latest/dist/ionicons.js"></script>
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <section class="modules-container">
@@ -24,13 +23,11 @@
   <div class="module-list">
     {% for module in all_modules %}
       <div class="module-card">
-        <!-- Enroll/Unenroll Button (Ionicon) -->
-        <div class="action-button" onclick="toggleModule(this, '{{ module.title|escapejs }}')">
-          {% if module.title in enrolled_modules %}
-            <ion-icon name="remove-outline"></ion-icon>
-          {% else %}
-            <ion-icon name="add-outline"></ion-icon>
-          {% endif %}
+        <!-- Enroll/Unenroll Button (Text-based, NO ion-icon) -->
+        <div class="action-button" 
+             data-enrolled="{{ module.title in enrolled_modules }}" 
+             onclick="toggleModule(this, '{{ module.title|escapejs }}')">
+          <span>{% if module.title in enrolled_modules %}Remove{% else %}Add{% endif %}</span>
         </div>
 
         <h3>{{ module.title }}</h3>
