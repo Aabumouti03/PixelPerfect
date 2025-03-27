@@ -230,7 +230,6 @@ class Command(BaseCommand):
             
             self.seed_data()
             self.seed_users()
-            # self.seed_quotes()
             self.seed_questionnaire()
 
         self.stdout.write(self.style.SUCCESS("✅ Database seeding complete!"))
@@ -295,20 +294,23 @@ class Command(BaseCommand):
         #         print(f" - Program enrollment: {'Yes' if program_enrolled else 'No'}")
                 
 
-        if not Admin.objects.exists():  
-            admin, created = User.objects.get_or_create(username=ADMIN["username"], defaults={
-                "email": ADMIN["email"],
-                "is_staff": ADMIN["is_staff"],
-                "is_superuser": ADMIN["is_superuser"],
-                "email_verified": True,
-            })
-            if created:
-                admin.set_password(PASSWORD)
-                admin.save()
-                Admin.objects.create(user=admin)
-                print(f"✅ Created Admin: {admin.username}")
-        else:
-            print("⚠️ Admin already exists. Skipping creation.")
+        def seed_users(self):
+            try:
+                admin = User.objects.get(username=ADMIN["username"])
+                print(f"⚠️ Admin '{admin.username}' already exists. Skipping creation.")
+            except User.DoesNotExist:
+                admin = User.objects.create_user(
+            username=ADMIN["username"],
+            email=ADMIN["email"],
+            password=PASSWORD,
+            is_staff=True,
+            is_superuser=True,
+            email_verified=True
+            )
+            Admin.objects.create(user=admin)
+            print(f"✅ Created Admin: {admin.username}")
+
+
 
 
     def seed_data(self):
