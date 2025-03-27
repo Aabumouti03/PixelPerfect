@@ -1,33 +1,70 @@
+import django
+import os
 from django.core.management.base import BaseCommand
-from django.db import connection
-from client.models import Module, Program, ProgramModule, Category, Section, Exercise, ExerciseQuestion, Questionnaire, Question
-from users.models import UserModuleEnrollment, UserProgramEnrollment, Quote, Admin, EndUser
+from django.db import transaction, connection
+from django.core.management.base import BaseCommand
+from django.db import transaction, connection
+from client.models import Program, Module, Section, Exercise, ExerciseQuestion, AdditionalResource
+from users.models import EndUser, User, UserProgramEnrollment, UserModuleEnrollment, UserProgramProgress, UserModuleProgress, UserResponse, Quote
 
 class Command(BaseCommand):
-    help = "Deletes all seeded data"
-
+    help = "Deletes all seeded data except Admins and their users"
+# 
     def handle(self, *args, **kwargs):
         self.stdout.write("⚠️ Deleting all seeded data...")
 
-        # 🚫 DO NOT use PRAGMA — it's for SQLite only
-        # cursor.execute("PRAGMA foreign_keys = OFF;")
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = OFF;")
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = OFF;")
 
-        with connection.cursor() as cursor:
-            # 🚀 Delete in correct order to prevent foreign key conflicts
-            UserModuleEnrollment.objects.all().delete()
-            UserProgramEnrollment.objects.all().delete()
-            ProgramModule.objects.all().delete()
-            Module.objects.all().delete()
-            Program.objects.all().delete()
-            Category.objects.all().delete()
-            Section.objects.all().delete()
-            Exercise.objects.all().delete()
-            ExerciseQuestion.objects.all().delete()
-            Questionnaire.objects.all().delete()
-            Question.objects.all().delete()
-            Quote.objects.all().delete()
+            models_to_delete = [
+                UserResponse,
+                ExerciseQuestion,
+                Exercise,
+                Section,
+                AdditionalResource,
+                Module,
+                Program,
+                UserProgramProgress,
+                UserModuleProgress,
+                UserProgramEnrollment,
+                UserModuleEnrollment,
+                Quote,
+            ]
 
-            #EndUser.objects.all().delete()
-            # Admin.objects.all().delete()
+            for model in models_to_delete:
+                try:
+                    deleted_count, _ = model.objects.all().delete()
+                    self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_count} objects from {model.__name__}"))
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f"⚠️ Skipping {model.__name__}: {e}"))
 
-        self.stdout.write(self.style.SUCCESS("✅ All seeded data deleted successfully."))
+            end_users = EndUser.objects.all()
+            deleted_endusers = end_users.count()
+
+            for enduser in end_users:
+                user = enduser.user
+                enduser.delete()
+                user.delete()
+
+            self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_endusers} EndUsers and their User accounts."))
+
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = ON;")
+            end_users = EndUser.objects.all()
+            deleted_endusers = end_users.count()
+
+            for enduser in end_users:
+                user = enduser.user
+                enduser.delete()
+                user.delete()
+
+            self.stdout.write(self.style.SUCCESS(f"✅ Deleted {deleted_endusers} EndUsers and their User accounts."))
+
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = ON;")
+
+        self.stdout.write(self.style.SUCCESS("✅ Unseeding complete! Admins and their related users are preserved."))
