@@ -41,55 +41,55 @@ function getFormattedDate(dateString) {
     
     return date.toISOString().split("T")[0];  // Convert to YYYY-MM-DD
 }
-
-// Function to fetch journal entry for a specific date
 function fetchJournalEntry(date) {
-    if (!date || typeof date !== "string" || date.trim() === "") {
-        console.error("❌ Invalid date passed to fetchJournalEntry!");
-        return;
-    }
-
-    console.log(`📥 Fetching journal entry for: ${date}`);
+    if (!date) return;
 
     fetch(`/journal/${date}/`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            if (data.success && data.data) {
+            if (data.success) {
                 console.log("✅ Data retrieved:", data.data);
 
-                // Populate form fields with saved data
-                getElement("sleep_hours").value = data.data.sleep_hours || "";
-                getElement("hydration").value = data.data.hydration || "";
-                getElement("stress").value = data.data.stress || "";
-                getElement("goal_progress").value = data.data.goal_progress || "low";
-                getElement("notes").value = data.data.notes || "";
+                const fields = data.data;
 
-                // Ensure radio buttons are selected properly
-                ["connected_with_family", "expressed_gratitude", "caffeine", "outdoors", "sunset"].forEach(field => {
-                    if (data.data[field]) {
-                        document.querySelector(`[name="${field}"][value="${data.data[field]}"]`)?.setAttribute("checked", true);
+                if (fields.sleep_hours) document.getElementById("sleep_hours").value = fields.sleep_hours;
+                if (fields.hydration) document.getElementById("hydration").value = fields.hydration;
+                if (fields.goal_progress) document.getElementById("goal_progress").value = fields.goal_progress;
+                if (fields.notes) document.getElementById("notes").value = fields.notes;
+                if (fields.stress) document.getElementById("stress").value = fields.stress;
+
+                const radios = [
+                    "connected_with_family",
+                    "expressed_gratitude",
+                    "caffeine",
+                    "outdoors",
+                    "sunset"
+                ];
+                
+                radios.forEach(name => {
+                    const value = fields[name];
+                    if (value) {
+                        document.querySelector(`input[name="${name}"][value="${value}"]`).checked = true;
                     }
                 });
-            } else {
-                console.warn("❌ No previous journal entry found for this date.");
-                clearJournalForm();
             }
         })
-        .catch(error => console.error("❌ Error fetching journal entry:", error));
+        .catch(error => console.error("❌ Fetch error: ", error));
 }
+
 
 function saveJournalEntry(event) {
     event.preventDefault();  // Prevent default form submission
 
-    let currentURL = window.location.pathname;
-    let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
+    // Attempt to get the date from the hidden input first
+    let formattedDate = document.getElementById("selected-date")?.value;
 
-    let formattedDate = dateMatch ? dateMatch[1] : null;
+    // Fallback to URL extraction if the above doesn't work
+    if (!formattedDate) {
+        let currentURL = window.location.pathname;
+        let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
+        formattedDate = dateMatch ? dateMatch[1] : null;
+    }
 
     if (!formattedDate) {
         alert("❌ Error: Invalid date. Unable to save entry.");
@@ -106,8 +106,8 @@ function saveJournalEntry(event) {
         notes: document.getElementById("notes")?.value || null,
         connected_with_family: document.querySelector('input[name="connected_with_family"]:checked')?.value || null,
         expressed_gratitude: document.querySelector('input[name="expressed_gratitude"]:checked')?.value || null,
-        spent_time_outdoors: document.querySelector('input[name="spent_time_outdoors"]:checked')?.value || null,
-        watched_sunset: document.querySelector('input[name="watched_sunset"]:checked')?.value || null,
+        outdoors: document.querySelector('input[name="outdoors"]:checked')?.value || null,
+        sunset: document.querySelector('input[name="sunset"]:checked')?.value || null,
     };
 
     console.log("📤 Sending Data to Server:", formData);
@@ -137,18 +137,21 @@ function saveJournalEntry(event) {
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ Journal.js loaded successfully");
 
-    // Extract the date from the URL and handle missing date cases
+    // Extract the date from the URL or the context variable if available
     let currentURL = window.location.pathname;
     let dateMatch = currentURL.match(/\/journal\/(\d{4}-\d{2}-\d{2})\/?/);
+    let journalDate = dateMatch ? dateMatch[1] : document.getElementById("selected-date")?.value;
 
-    let journalDate = dateMatch ? dateMatch[1] : new Date().toISOString().split("T")[0];
+    if (!journalDate) {
+        journalDate = new Date().toISOString().split("T")[0];  // Use today's date as a fallback
+    }
 
-    console.log("📅 Extracted Date from URL:", journalDate);
+    console.log("📅 Extracted Date:", journalDate);
 
     if (journalDate) {
-        fetchJournalEntry(journalDate);  
+        fetchJournalEntry(journalDate);
     } else {
-        console.error("❌ No valid date found in URL!");
+        console.error("❌ No valid date found!");
     }
 
     const form = document.getElementById("journal-form");

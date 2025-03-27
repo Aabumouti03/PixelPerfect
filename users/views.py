@@ -279,7 +279,6 @@ def dashboard(request):
     }
     return render(request, 'users/dashboard.html', context)
 
-
 @login_required
 def view_program(request, program_id):
     """Display user program details."""
@@ -296,6 +295,9 @@ def view_program(request, program_id):
         return render(request, 'users/program_not_found.html')
 
     program = user_program_enrollment.program
+
+    # Get all categories associated with the program
+    program_categories = program.categories.all()  # This is a queryset of Category objects
 
     user_progress = {
         progress.module.id: progress.completion_percentage
@@ -326,9 +328,11 @@ def view_program(request, program_id):
         'user': user,
         'program': program,
         'program_modules': program_modules_data,
+        'program_categories': program_categories,  # Passing the categories to the template
     }
     
     return render(request, 'users/view_program.html', context)
+
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------ GENERAL SITE VIEWS ---------------------------------------------------------------
@@ -722,7 +726,9 @@ def recommended_programs(request):
 
     categorized_programs = assess_user_responses_programs(end_user)
 
-    all_programs = [program for program_list in categorized_programs.values() for program in program_list]
+    # all_programs = [program for program_list in categorized_programs.values() for program in program_list]
+    all_programs = Program.objects.all()
+
 
     if request.method == "POST":
         try:
@@ -1096,25 +1102,19 @@ def welcome_view(request):
 #------------------------------------------------------ JOURNAL VIEWS -------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
-
 @login_required
 def journal_view(request, date=None):
-    """Loads the journal page and fetches saved data for a specific date."""
     user = request.user
-
-    # Validate & Parse Date
     if date is None:
         selected_date = now().date()
     else:
         try:
             selected_date = datetime.strptime(date, "%Y-%m-%d").date()
         except (ValueError, TypeError):
-            selected_date = now().date()  # Default to today if invalid
+            selected_date = now().date()
 
-    # Fetch Journal Entry for the Selected Date
     journal_entry = JournalEntry.objects.filter(user=user, date=selected_date).first()
 
-    # Handle AJAX Requests (Return JSON)
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         if journal_entry:
             return JsonResponse({
@@ -1129,40 +1129,33 @@ def journal_view(request, date=None):
                     "connected_with_family": journal_entry.connected_with_family,
                     "expressed_gratitude": journal_entry.expressed_gratitude,
                     "outdoors": journal_entry.outdoors,
-                    "sunset": journal_entry.sunset,
+                    "sunset": journal_entry.sunset
                 }
             })
         return JsonResponse({"success": False, "error": "No entry found."}, status=404)
 
-    # Compute Previous & Next Day
     previous_day = (selected_date - timedelta(days=1)).strftime("%Y-%m-%d")
     next_day = (selected_date + timedelta(days=1)).strftime("%Y-%m-%d")
 
-    # Render HTML for Standard Page Load
     context = {
         "selected_date": selected_date.strftime("%Y-%m-%d"),
         "journal_entry": journal_entry,
         "previous_day": previous_day,
         "next_day": next_day,
     }
-
     return render(request, "users/journal.html", context)
 
 
 @login_required
 def save_journal_entry(request):
-    """Handles saving/updating journal entries using JSON."""
-    
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
 
     try:
         data = json.loads(request.body)
-    
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON format."}, status=400)
 
-    # Extract date from the request
     date_str = data.get("date")
     if not date_str:
         return JsonResponse({"success": False, "error": "Date is required."}, status=400)
@@ -1172,10 +1165,13 @@ def save_journal_entry(request):
     except ValueError:
         return JsonResponse({"success": False, "error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
-    # Fetch or create the journal entry for the given date
     journal_entry, created = JournalEntry.objects.get_or_create(user=request.user, date=entry_date)
 
-    # Update the journal entry with the submitted data
+    try:
+        journal_entry.sleep_hours = int(data.get("sleep_hours")) if data.get("sleep_hours") is not None else None
+    except ValueError:
+        journal_entry.sleep_hours = None  # Set to None if the value is invalid
+
     journal_entry.sleep_hours = data.get("sleep_hours")
     journal_entry.caffeine = data.get("caffeine")
     journal_entry.hydration = data.get("hydration")
@@ -1184,15 +1180,11 @@ def save_journal_entry(request):
     journal_entry.notes = data.get("notes")
     journal_entry.connected_with_family = data.get("connected_with_family")
     journal_entry.expressed_gratitude = data.get("expressed_gratitude")
-    journal_entry.outdoors = data.get("spent_time_outdoors")
-    journal_entry.sunset = data.get("watched_sunset")
-    
-    # Save the entry
+    journal_entry.outdoors = data.get("outdoors")
+    journal_entry.sunset = data.get("sunset")
     journal_entry.save()
 
-    return JsonResponse({"success": True, "message": "Journal entry saved."}, status=201)
-
-
+    return JsonResponse({"success": True, "message": "Journal entry saved successfully."}, status=201)
 
 @login_required
 def user_responses_main(request):

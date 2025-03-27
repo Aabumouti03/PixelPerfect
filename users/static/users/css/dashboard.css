@@ -86,14 +86,14 @@ body {
 
 /* Alternate colors for adjacent cards */
 .module-card:nth-child(odd) {
-    background: #f2f20557;
-    border-left: 5px solid #f2f20557;
+    background: #f2f20557 !important;
+    border-left: 5px solid #f2f20557 !important;
     color: #333;
 }
 
 .module-card:nth-child(even) {
-    background: #f2f20557;
-    border-left: 5px solid #f2f20557; 
+    background: #f2f20557 !important;
+    border-left: 5px solid #f2f20557 !important; 
     color: #333;
 }
 
@@ -116,7 +116,7 @@ body {
 /* Ensure title stays inside the card */
 .module-card h3 {
     font-size: 18px;
-    color: #333;
+    color: black;
     margin-bottom: 8px;
     white-space: normal;
     overflow: hidden;
@@ -126,7 +126,7 @@ body {
 /* Module Description */
 .module-card p {
     font-size: 14px;
-    color: #666;
+    color: black;
     text-align: center;
     overflow: hidden;
     max-height: 60px;
@@ -196,11 +196,11 @@ body {
 }
 
 .module-card.locked {
-    background: #e6e6e6;
+    background: #e6e6e6 !important;
     color: #999;
     pointer-events: none;
     opacity: 0.8;
-    border-left: 5px solid #999; 
+    border-left: 5px solid #999 !important; 
 }
 .module-card.locked h3 {
   color: #555;
@@ -457,6 +457,16 @@ body {
 .module-card:nth-child(even) h3,
 .module-card:nth-child(even) p {
   color: #eeebeb;
+}
+
+/* Force unlocked modules to have black title & description */
+.module-card:not(.locked) h3,
+.module-card:not(.locked) p {
+  color: black !important;
+}
+/* Ensure progress percentage in unlocked modules is black */
+.module-card:not(.locked) .progress-text {
+  color: black !important;
 }
 
 /* Button styles + hover */

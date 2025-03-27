@@ -1,4 +1,5 @@
-  
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
+ 
 .resource-container {
     width: 1000px;
     margin-left: 130px;
@@ -14,14 +15,14 @@
 .page-title {
     font-size: 30px;
     font-weight: bold;
-    color: #F24505;
+    color: #2b2320;
     text-align: center;
     margin-bottom: 30px;
     text-transform: uppercase;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .form-group label {
@@ -53,20 +54,25 @@
 
 .upload-btn {
     width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    color: #fff;
+    padding: 10px 14px;
     background: #F24505;
-    border: none;
-    border-radius: 8px;
+    color: white;
+    border-radius: 20px;
+    font-size: 16px;
+    font-family: Manrope;
+    font-weight: bold;
     cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
 }
 
 .upload-btn:hover {
-    background: #F24505;
-    transform: scale(1.03);
+    background: #D43802;
 }
 
 .back-btn {
@@ -78,12 +84,12 @@
     text-decoration: none;
     color: #fff;
     background: #F24505;
-    border-radius: 8px;
-    transition: all 0.3s ease-in-out;
+    border-radius: 20px;
+    transition: background 0.3s;
 }
 
 .back-btn:hover {
-    background: #F24505;
+    background: #D43802;
 }
 
 

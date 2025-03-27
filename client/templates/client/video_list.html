@@ -2,66 +2,33 @@
 {% load static %}
 
 {% block extra_css %}
-<style>
-    /* Your existing styles for delete, add video, etc. */
-    .delete-btn {
-        color: #ff0000;
-        font-size: 16px;
-        font-weight: bold;
-        padding: 5px 10px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
-
-    .delete-btn:hover {
-        color: #ff6b00;
-    }
-
-    /* Optional: Additional styling for the Back button */
-    .back-btn {
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: bold;
-        text-decoration: none;
-        color: #fff;
-        background: #ff6b00;
-        border-radius: 8px;
-        display: inline-block;
-        text-align: center;
-    }
-
-    .back-btn:hover {
-        background: #e65c00;
-    }
-</style>
+    <link rel="stylesheet" href="{% static 'client/css/video_list.css' %}">
 {% endblock %}
 
 {% block content %}
-<h2 class="page-title">Video List</h2>
+<div class="main-container">
+    <h2 class="page-title">Video List</h2>
 
-<div class="video-container">
-    <a href="{% url 'add_video' %}" class="add-video-btn">➕ Add New Video</a>
+    <div class="video-container">
+        <a href="{% url 'add_video' %}" class="add-video-btn">+ Add New Video</a>
 
-    {% if videos %}
-        <ul class="video-list">
-            {% for video in videos %}
-                <li>
-                    <a href="{% url 'video_detail' video.id %}">▶ {{ video.title }}</a>
-                    <form action="{% url 'delete_video' video.id %}" method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-btn">Delete</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No videos available. Add a new one!</p>
-    {% endif %}
+        {% if videos %}
+            <ul class="video-list">
+                {% for video in videos %}
+                    <li>
+                        <a href="{% url 'video_detail' video.id %}">▶ {{ video.title }}</a>
+                        <form action="{% url 'delete_video' video.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No videos available. Add a new one!</p>
+        {% endif %}
 
-    <!-- Using JavaScript to go back to the previous page -->
-    <a href="javascript:history.back()" class="back-btn">⬅ Back</a>
+        <a href="javascript:history.back()" class="back-btn">← Back</a>
+    </div>
 </div>
 {% endblock %}
-

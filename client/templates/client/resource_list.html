@@ -2,65 +2,33 @@
 {% load static %}
 
 {% block extra_css %}
-<style>
-    /* Your existing styles for delete, add resource, etc. */
-    .delete-btn {
-        color: #ff0000; /* Red for delete */
-        font-size: 16px;
-        font-weight: bold;
-        padding: 5px 10px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
-
-    .delete-btn:hover {
-        color: #ff6b00;
-    }
-
-    .add-resource-btn {
-        display: block;
-        width: fit-content;
-        margin: 20px auto;
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: bold;
-        text-decoration: none;
-        color: #fff;
-        background: #ff6b00;
-        border-radius: 8px;
-    }
-
-    .add-resource-btn:hover {
-        background: #ff6b00;
-    }
-
-</style>
+    <link rel="stylesheet" href="{% static 'client/css/resource_list.css' %}">
 {% endblock %}
 
 {% block content %}
-<h2 class="page-title">Resource List</h2>
+<div class="main-container">
+    <h2 class="page-title">Resource List</h2>
 
-<div class="resource-container">
-    <a href="{% url 'add_additional_resource' %}" class="add-resource-btn">➕ Add New Resource</a>
+    <div class="resource-container">
+        <a href="{% url 'add_additional_resource' %}" class="add-resource-btn">+ Add New Resource</a>
 
-    {% if resources %}
-        <ul class="resource-list">
-            {% for resource in resources %}
-                <li>
-                    <a href="{{ resource.url }}" target="_blank">{{ resource.title }}</a>
-                    <form action="{% url 'delete_resource' resource.id %}" method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-btn">🗑️ Delete</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No resources available. Add a new one!</p>
-    {% endif %}
+        {% if resources %}
+            <ul class="resource-list">
+                {% for resource in resources %}
+                    <li>
+                        <a href="{{ resource.url }}" target="_blank">{{ resource.title }}</a>
+                        <form action="{% url 'delete_resource' resource.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">🗑️ Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No resources available. Add a new one!</p>
+        {% endif %}
 
-    <a href="javascript:history.back()" class="back-btn">⬅ Back</a>
+        <a href="javascript:history.back()" class="back-btn">← Back</a>
+    </div>
 </div>
 {% endblock %}
