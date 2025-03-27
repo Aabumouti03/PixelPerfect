@@ -212,7 +212,6 @@ def get_notes(request):
 #------------------------------------------------------ DASHBOARD VIEWS ------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
-
 @login_required
 def dashboard(request):
     """Render user dashboard page."""
@@ -223,11 +222,14 @@ def dashboard(request):
     except EndUser.DoesNotExist:
         end_user = EndUser.objects.create(user=user)
 
+   
     user_program_enrollment = UserProgramEnrollment.objects.filter(user=end_user).first()
     program = user_program_enrollment.program if user_program_enrollment else None
 
+    
     program_modules = program.program_modules.all().order_by("order") if program else []
 
+    
     user_progress = {
         progress.module.id: progress.completion_percentage
         for progress in UserModuleProgress.objects.filter(user=end_user)
@@ -236,6 +238,7 @@ def dashboard(request):
     previous_module_completed = True
     unlocked_modules = set()
 
+   
     for program_module in program_modules:
         module = program_module.module
         module.progress_value = user_progress.get(module.id, 0)
@@ -248,14 +251,18 @@ def dashboard(request):
 
         previous_module_completed = module.progress_value == 100
 
-    program_progress_value = 0 
+    
+    program_progress_value = calculate_program_progress(end_user, program) if program else 0 
 
-    if program:
-        program_progress_value = calculate_program_progress(end_user, program)
-
+    
     enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module', flat=True)
     outside_modules = Module.objects.filter(id__in=enrolled_modules).exclude(id__in=[pm.module.id for pm in program_modules])
 
+    
+    for module in outside_modules:
+        module.progress_value = user_progress.get(module.id, 0)  
+
+    
     recent_enrollments = UserModuleEnrollment.objects.filter(user=end_user).order_by('-last_accessed')[:3]
 
     recent_modules = [
@@ -266,18 +273,20 @@ def dashboard(request):
         )
     ]
 
+    
     quote_of_the_day = Quote.get_quote_of_the_day()
     
     context = {
         'user': request.user,
         'program': program,
         'program_modules': program_modules,
-        'outside_modules': outside_modules, 
+        'outside_modules': outside_modules,  
         'recent_modules': recent_modules,
-        "quote_of_the_day": quote_of_the_day,
+        'quote_of_the_day': quote_of_the_day,
         'program_progress_value': program_progress_value,
     }
     return render(request, 'users/dashboard.html', context)
+
 
 @login_required
 def view_program(request, program_id):
@@ -296,8 +305,8 @@ def view_program(request, program_id):
 
     program = user_program_enrollment.program
 
-    # Get all categories associated with the program
-    program_categories = program.categories.all()  # This is a queryset of Category objects
+   
+    program_categories = program.categories.all()  
 
     user_progress = {
         progress.module.id: progress.completion_percentage
@@ -309,8 +318,8 @@ def view_program(request, program_id):
 
     for index, program_module in enumerate(program.program_modules.all().order_by('order')):
         module = program_module.module
-        progress_value = user_progress.get(module.id, 0)  # Get progress percentage or default to 0%
-        is_locked = not previous_completed  # Lock module if previous is not completed
+        progress_value = user_progress.get(module.id, 0)  
+        is_locked = not previous_completed  
 
         program_modules_data.append({
             "id": module.id,
@@ -321,14 +330,14 @@ def view_program(request, program_id):
             "locked": is_locked,
         })
 
-        # Update the previous_completed status
+        
         previous_completed = (progress_value == 100)
 
     context = {
         'user': user,
         'program': program,
         'program_modules': program_modules_data,
-        'program_categories': program_categories,  # Passing the categories to the template
+        'program_categories': program_categories,  
     }
     
     return render(request, 'users/view_program.html', context)
@@ -1079,16 +1088,35 @@ def enroll_module(request):
 @login_required
 def all_modules(request):
     """Display all available modules."""
-    allModules = Module.objects.all()  # Fetch all modules
+    allModules = Module.objects.all()  
     user = request.user
-
-    # Get the current user's enrolled modules
+    end_user = None
     try:
         end_user = EndUser.objects.get(user=user)
         enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user).values_list('module__title', flat=True)
     except EndUser.DoesNotExist:
         enrolled_modules = []
 
+    progress_dict = {}
+    if end_user:
+        user_progress_qs = UserModuleProgress.objects.filter(
+            user=end_user, 
+            module__in=allModules
+        )
+
+        progress_dict = {
+            up.module_id: up.completion_percentage 
+            for up in user_progress_qs
+        }
+    
+    enrolled_modules = []
+    if end_user:
+        enrolled_modules = UserModuleEnrollment.objects.filter(user=end_user)\
+            .values_list('module__title', flat=True)
+
+    for module in allModules:
+        module.progress_value = progress_dict.get(module.id, 0)
+    
     return render(request, 'users/all_modules.html', {
         'all_modules': allModules,
         'enrolled_modules': list(enrolled_modules)  # Convert QuerySet to list

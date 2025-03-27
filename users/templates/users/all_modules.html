@@ -38,7 +38,7 @@
 
         <div class="progress-container">
           <div class="progress-bar">
-            <div class="progress-fill" style="width: {{ module.progress_value|default_if_none:'0' }}%;"></div>
+            <div class="progress-fill" style="width: {{ module.progress_value }}%;"></div>
           </div>
         </div>
         <span class="progress-text">{{ module.progress_value|default_if_none:'0' }}% Complete</span>
