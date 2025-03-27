@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         console.log("Server response:", data);
         if (data.success) {
-          // 🔁 Toggle Font Awesome classes instead of ion-icon names
+          // Toggle Font Awesome classes instead of ion-icon names
           icon.classList.remove(isEnrolled ? "fa-minus" : "fa-plus");
           icon.classList.add(isEnrolled ? "fa-plus" : "fa-minus");
         } else {
